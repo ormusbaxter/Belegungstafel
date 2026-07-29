@@ -62,6 +62,7 @@ html[data-theme="dark"] {
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 body {
   margin: 0;
@@ -193,6 +194,7 @@ textarea:focus-visible {
   color: var(--ink-soft);
 }
 .savestate.error { color: var(--danger); font-weight: 600; }
+button.undo { margin-left: 10px; padding: 1px 9px; font-size: 11px; border-radius: 5px; }
 
 /* ---------------- Tabelle ---------------- */
 .tablewrap {
@@ -285,7 +287,7 @@ tr.st-gesperrt td select { opacity: .75; }
 tr.name-state td.col-name input { font-style: italic; font-weight: 600; color: var(--ink-soft); }
 
 /* Isolation / Therapielimitierung */
-tr.has-iso td.col-isolation select { color: var(--iso); font-weight: 700; }
+td.col-isolation .chip { background: var(--iso); color: #fff; font-weight: 600; }
 tr.has-iso td.col-bed .bedlabel::after {
   content: "ISO";
   margin-left: 5px;
@@ -298,6 +300,29 @@ tr.has-iso td.col-bed .bedlabel::after {
   vertical-align: middle;
 }
 tr.has-limit td.col-limitierung select { color: var(--limit); font-weight: 600; }
+tr.has-verdacht td.col-bed .bedlabel::after { content: "ISO?"; }
+
+/* Kennzeichen in Mehrfachauswahl-Zellen */
+.flagbadge {
+  padding: 0 5px;
+  border: 1px solid var(--iso);
+  border-radius: 9px;
+  color: var(--iso);
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.datebadge {
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--line-soft);
+  color: var(--ink-soft);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.datebadge::before { content: "→ "; }
+.datebadge.due { background: var(--iso); color: #fff; font-weight: 700; }
 
 /* Felder */
 td input[type="text"],
@@ -330,7 +355,12 @@ td input:focus::placeholder, td textarea:focus::placeholder { opacity: .6; }
 td.col-name input { font-weight: 600; }
 
 /* Bettplatz */
-.bedcell { position: relative; display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; overflow: hidden; }
+.bedcell { position: relative; display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; overflow: hidden; cursor: grab; }
+.bedcell:active { cursor: grabbing; }
+
+/* Ziehen und Ablegen */
+tr.dragging { opacity: .45; }
+tbody tr.dragover td { box-shadow: inset 0 2px 0 var(--accent), inset 0 -2px 0 var(--accent); }
 .bedlabel {
   font-size: 17px;
   font-weight: 700;
@@ -446,6 +476,18 @@ td.col-physio .chip { background: #2f7d32; color: #fff; }
 .opt:hover { background: var(--line-soft); }
 .opt input { accent-color: var(--accent); }
 .opt.custom span { font-style: italic; }
+.dlgflag { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 13.5px; cursor: pointer; }
+.dlgflag input { accent-color: var(--iso); width: 16px; height: 16px; }
+.dlgdate { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; font-size: 13.5px; }
+.dlgdate input[type="date"] {
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--ink);
+  font: inherit;
+}
+.dlgdate button { padding: 4px 9px; font-size: 12px; }
 .customrow { display: flex; gap: 8px; margin-top: 10px; }
 .customrow input {
   flex: 1;
@@ -509,6 +551,8 @@ td.col-physio .chip { background: #2f7d32; color: #fff; }
   .bedlabel { font-size: 11px; }
   .bedtime { display: none; }
   .chip { background: none !important; color: #000 !important; padding: 0; }
+  .flagbadge, .datebadge { background: none !important; color: #000 !important; padding: 0; border: none; }
+  .datebadge.due { font-weight: 700; }
   .chip:not(:last-child)::after { content: ","; }
   .legend { border: none; padding: 6px 0 0; margin: 6px 0 0; }
   .dlg { display: none !important; }

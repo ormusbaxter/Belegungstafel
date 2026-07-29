@@ -40,7 +40,7 @@ const COLUMNS = [
     /* Freitext; die Auswahlliste (Datenquelle Spalte J) ist optional und
        beschreibt den Bettplatz, wenn kein Patientenname eingetragen ist. */
     key: 'name', label: 'Patientenname', head: 'Patienten\u00ADname', type: 'datalist',
-    width: 155, placeholder: 'Name, Vorname',
+    width: 148, placeholder: 'Name, Vorname',
     options: ['Notbett', 'gesperrt', 'Reinigung', 'NA', 'OP', 'CV']
   },
   {
@@ -64,8 +64,10 @@ const COLUMNS = [
     options: ['CiCa', '(CiCa)']
   },
   {
-    /* Datenquelle Spalte O */
-    key: 'isolation', label: 'Isolation', type: 'select', width: 110,
+    /* Datenquelle Spalte O – mehrere Gründe kombinierbar, zusätzlich das
+       Kennzeichen „Verdacht auf“. */
+    key: 'isolation', label: 'Isolation', type: 'multi', width: 130,
+    flag: { key: 'isolationVerdacht', label: 'Verdacht auf', badge: 'V. a.' },
     options: ['3MRGN', '4MRGN', 'C. diff.', 'CoViD', 'div. MRE', 'Herpes Zoster', 'Influenza A',
               'Influenza A+B', 'Influenza B', 'Kittelpflege', 'Kontakt CoViD', 'Kontakt Influenza',
               'MRSA', 'Noro', 'Rota', 'RSV', 'sonstiges', 'TBC', 'Umkehriso', 'unkl. Durchfälle',
@@ -123,16 +125,17 @@ const COLUMNS = [
     key: 'devices', label: 'Devices', type: 'select', width: 78,
     options: ['ZVK', 'BDK', 'ZVK/BDK', 'keins']
   },
-  { key: 'norton', label: 'Norton / Stammblatt', type: 'checks', width: 92,
+  { key: 'norton', label: 'Norton / Stammblatt', type: 'checks', width: 86,
     options: ['Norton', 'Stammblatt'] },
   {
     /* Keine Vorgabe in der Datenquelle – Liste bei Bedarf hier anpassen. */
-    key: 'abstriche', label: 'Abstriche', type: 'multi', width: 112,
+    key: 'abstriche', label: 'Abstriche', type: 'multi', width: 125,
+    date: { key: 'abstricheDatum', label: 'Nächstes Screening' },
     options: ['MRSA-Screening', 'Nasen-/Rachenabstrich', 'Rektalabstrich', 'Wundabstrich',
               'Trachealsekret', 'Leistenabstrich', 'Blutkulturen', 'Urinkultur',
               'ausstehend', 'negativ', 'positiv']
   },
-  { key: 'sonstiges', label: 'Sonstiges', type: 'longtext', width: 130, placeholder: 'Bemerkungen …' }
+  { key: 'sonstiges', label: 'Sonstiges', type: 'longtext', width: 110, placeholder: 'Bemerkungen …' }
 ];
 
 /* Flache Werteliste einer Spalte – berücksichtigt Gruppen und Datalist-Einträge. */
@@ -175,7 +178,7 @@ const LEGEND = [
   ['st-verlegung', '<<< V – Verlegung'],
   ['st-abwesend', 'NA / OP / CV im Feld Patientenname'],
   ['st-gesperrt', 'gesperrt / Reinigung im Feld Patientenname'],
-  ['lg-iso', 'Isolation eingetragen – ISO-Kennzeichnung am Bettplatz'],
+  ['lg-iso', 'Isolation eingetragen – Kennzeichen ISO am Bettplatz, bei Verdacht ISO?'],
   ['lg-limit', 'Therapielimitierung hinterlegt']
 ];
 
@@ -194,6 +197,8 @@ function emptyBed() {
     if (col.type === 'multi' || col.type === 'checks') row[col.key] = [];
     else if (col.type === 'bool') row[col.key] = false;
     else row[col.key] = '';
+    if (col.flag) row[col.flag.key] = false;
+    if (col.date) row[col.date.key] = '';
   }
   row._updated = null;
   return row;
@@ -233,6 +238,14 @@ function merge(target, source) {
       target[col.key] = String(val);
     }
   }
+  for (const col of COLUMNS) {
+    if (col.flag && source[col.flag.key] !== undefined) {
+      target[col.flag.key] = Boolean(source[col.flag.key]);
+    }
+    if (col.date && typeof source[col.date.key] === 'string') {
+      target[col.date.key] = source[col.date.key];
+    }
+  }
   if (typeof source._updated === 'string') target._updated = source._updated;
 }
 
@@ -251,6 +264,7 @@ function save() {
 }
 
 function touch(bedId) {
+  pendingUndo = null;
   state.beds[bedId]._updated = new Date().toISOString();
   const cell = document.querySelector(`td[data-bed="${bedId}"][data-key="bed"] .bedtime`);
   if (cell) cell.textContent = timeStr(new Date());
@@ -275,8 +289,14 @@ const isSet = v => Array.isArray(v) ? v.length > 0
 
 function setSaveState(msg, isError) {
   const node = $('#saveState');
-  node.textContent = msg;
+  node.replaceChildren(document.createTextNode(msg));
   node.classList.toggle('error', Boolean(isError));
+  if (pendingUndo) {
+    const btn = el('button', 'undo', 'Rückgängig');
+    btn.type = 'button';
+    btn.addEventListener('click', () => pendingUndo && pendingUndo());
+    node.appendChild(btn);
+  }
 }
 
 /* ------------------------------------------------------------------ *
@@ -338,10 +358,24 @@ function buildField(bed, col, data) {
 
     case 'bed': {
       const box = el('div', 'bedcell');
+      box.draggable = true;
+      box.title = 'Ziehen, um den Patienten auf einen anderen Bettplatz zu verschieben';
+      box.addEventListener('dragstart', event => {
+        dragSource = bed.id;
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', bed.id);
+        box.closest('tr').classList.add('dragging');
+      });
+      box.addEventListener('dragend', () => {
+        dragSource = null;
+        document.querySelectorAll('.dragging, .dragover')
+          .forEach(node => node.classList.remove('dragging', 'dragover'));
+      });
       box.appendChild(el('span', 'bedlabel', bed.label));
       box.appendChild(el('span', 'bedtime', data._updated ? timeStr(new Date(data._updated)) : ''));
       const btn = el('button', 'clearbed', '×');
       btn.type = 'button';
+      btn.draggable = false;
       btn.title = 'Bettplatz ' + bed.label + ' räumen (alle Einträge löschen)';
       btn.addEventListener('click', () => clearBed(bed));
       box.appendChild(btn);
@@ -443,7 +477,7 @@ function buildField(bed, col, data) {
       const btn = el('button', 'multicell');
       btn.type = 'button';
       btn.setAttribute('aria-label', col.label + ' – Bett ' + bed.label + ' bearbeiten');
-      renderChips(btn, data[col.key]);
+      renderChips(btn, col, data);
       btn.addEventListener('click', () => openMulti(bed, col));
       return btn;
     }
@@ -451,13 +485,40 @@ function buildField(bed, col, data) {
   return el('span');
 }
 
-function renderChips(btn, values) {
+function renderChips(btn, col, data) {
+  const values = data[col.key];
   btn.replaceChildren();
-  if (!values.length) {
-    btn.appendChild(el('span', 'chipempty', ''));
-    return;
+  if (col.flag && data[col.flag.key]) {
+    const badge = el('span', 'flagbadge', col.flag.badge);
+    badge.title = col.flag.label;
+    btn.appendChild(badge);
   }
   for (const val of values) btn.appendChild(el('span', 'chip', val));
+  if (col.date && data[col.date.key]) {
+    const due = el('span', 'datebadge', shortDate(data[col.date.key]));
+    due.title = col.date.label + ': ' + fullDate(data[col.date.key]);
+    if (data[col.date.key] <= isoToday()) due.classList.add('due');
+    btn.appendChild(due);
+  }
+}
+
+/* Datumshilfen – Speicherung als ISO-Wert (JJJJ-MM-TT) des Datumsfeldes */
+function isoToday() {
+  const d = new Date();
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+}
+function shortDate(iso) {
+  const [y, m, d] = iso.split('-');
+  return d + '.' + m + '.';
+}
+function fullDate(iso) {
+  const [y, m, d] = iso.split('-');
+  return d + '.' + m + '.' + y;
+}
+function addDays(iso, days) {
+  const base = iso ? new Date(iso + 'T12:00:00') : new Date();
+  base.setDate(base.getDate() + days);
+  return base.getFullYear() + '-' + pad(base.getMonth() + 1) + '-' + pad(base.getDate());
 }
 
 /* Zeilenfarbe, Isolations- und Limitierungskennzeichnung */
@@ -467,11 +528,13 @@ function applyRowState(tr, data) {
   tr.classList.toggle('name-state', data.name in NAME_CLASS);
   tr.classList.toggle('has-iso', isSet(data.isolation));
   tr.classList.toggle('has-limit', isSet(data.limitierung));
+  tr.classList.toggle('has-verdacht', Boolean(data.isolationVerdacht));
 }
 
 function clearBed(bed) {
   const data = state.beds[bed.id];
-  const hasContent = COLUMNS.some(c => c.type !== 'bed' && isSet(data[c.key]));
+  const hasContent = COLUMNS.some(c => c.type !== 'bed' &&
+    (isSet(data[c.key]) || (c.flag && data[c.flag.key]) || (c.date && data[c.date.key])));
   if (hasContent && !confirm('Bettplatz ' + bed.label + ' vollständig leeren?')) return;
   state.beds[bed.id] = emptyBed();
   const tr = document.querySelector(`tr[data-bed="${bed.id}"]`);
@@ -479,6 +542,87 @@ function clearBed(bed) {
   save();
   renderStats();
   applyFilter();
+}
+
+/* ------------------------------------------------------------------ *
+ * Patienten zwischen Bettplätzen verschieben (Ziehen und Ablegen)
+ * ------------------------------------------------------------------ */
+let dragSource = null;
+let pendingUndo = null;
+
+function bedById(id) {
+  return BEDS.find(b => b.id === id);
+}
+
+function redrawBed(id) {
+  const tr = document.querySelector(`tr[data-bed="${id}"]`);
+  tr.replaceWith(buildRow(bedById(id)));
+}
+
+/* Tauscht den Inhalt zweier Bettplätze; ein leeres Zielbett entspricht
+   damit einem einfachen Verschieben. */
+function moveBed(fromId, toId) {
+  if (fromId === toId) return;
+  const before = {
+    fromId, toId,
+    from: JSON.parse(JSON.stringify(state.beds[fromId])),
+    to: JSON.parse(JSON.stringify(state.beds[toId]))
+  };
+  const moved = state.beds[fromId];
+  state.beds[fromId] = state.beds[toId];
+  state.beds[toId] = moved;
+  const now = new Date().toISOString();
+  state.beds[fromId]._updated = now;
+  state.beds[toId]._updated = now;
+
+  redrawBed(fromId);
+  redrawBed(toId);
+  renderStats();
+  applyFilter();
+
+  const label = before.from.name || 'Bettplatz ' + bedById(fromId).label;
+  const target = bedById(toId).label;
+  pendingUndo = () => {
+    state.beds[before.fromId] = before.from;
+    state.beds[before.toId] = before.to;
+    redrawBed(before.fromId);
+    redrawBed(before.toId);
+    pendingUndo = null;
+    renderStats();
+    applyFilter();
+    save();
+    setSaveState('Verschieben rückgängig gemacht');
+  };
+  save();
+  setSaveState(label + ' → Bett ' + target + ' verschoben');
+}
+
+function initDragDrop() {
+  const tbody = $('#tbody');
+  tbody.addEventListener('dragover', event => {
+    if (!dragSource) return;
+    const tr = event.target.closest('tr');
+    if (!tr || tr.dataset.bed === dragSource) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    for (const node of tbody.querySelectorAll('.dragover')) node.classList.remove('dragover');
+    tr.classList.add('dragover');
+  });
+  tbody.addEventListener('dragleave', event => {
+    const tr = event.target.closest('tr');
+    if (tr && !tr.contains(event.relatedTarget)) tr.classList.remove('dragover');
+  });
+  tbody.addEventListener('drop', event => {
+    const tr = event.target.closest('tr');
+    if (!dragSource || !tr) return;
+    event.preventDefault();
+    const from = dragSource;
+    dragSource = null;
+    for (const node of tbody.querySelectorAll('.dragover, .dragging')) {
+      node.classList.remove('dragover', 'dragging');
+    }
+    moveBed(from, tr.dataset.bed);
+  });
 }
 
 /* ------------------------------------------------------------------ *
@@ -492,6 +636,21 @@ function openMulti(bed, col) {
   $('#multiTitle').textContent = col.label;
   $('#multiSub').textContent = 'Bettplatz ' + bed.label + (data.name ? ' · ' + data.name : '');
   $('#multiCustom').value = '';
+
+  const flagRow = $('#multiFlagRow');
+  flagRow.hidden = !col.flag;
+  if (col.flag) {
+    $('#multiFlagLabel').textContent = col.flag.label;
+    $('#multiFlag').checked = data[col.flag.key];
+  }
+
+  const dateRow = $('#multiDateRow');
+  dateRow.hidden = !col.date;
+  if (col.date) {
+    $('#multiDateLabel').textContent = col.date.label;
+    $('#multiDate').value = data[col.date.key];
+  }
+
   renderMultiOpts();
   $('#multiDlg').showModal();
 }
@@ -530,11 +689,15 @@ function addCustom() {
 
 function commitMulti() {
   const { bed, col, selected } = multiCtx;
+  const data = state.beds[bed.id];
   const known = col.options.filter(o => selected.has(o));
   const extra = [...selected].filter(v => !col.options.includes(v));
-  state.beds[bed.id][col.key] = [...known, ...extra];
+  data[col.key] = [...known, ...extra];
+  if (col.flag) data[col.flag.key] = $('#multiFlag').checked;
+  if (col.date) data[col.date.key] = $('#multiDate').value;
   const btn = document.querySelector(`td[data-bed="${bed.id}"][data-key="${col.key}"] .multicell`);
-  renderChips(btn, state.beds[bed.id][col.key]);
+  renderChips(btn, col, data);
+  applyRowState(btn.closest('tr'), data);
   touch(bed.id);
   renderStats();
   applyFilter();
@@ -554,7 +717,8 @@ function renderStats() {
     ['INV', beds.filter(b => INVASIV.has(b.beatmung)).length],
     ['Kreislauf', beds.filter(b => isSet(b.kreislauf)).length],
     ['Dialyse', beds.filter(b => isSet(b.dialyse)).length],
-    ['Isolation', beds.filter(b => isSet(b.isolation)).length]
+    ['Isolation', beds.filter(b => isSet(b.isolation)).length],
+    ['Screening fällig', beds.filter(b => b.abstricheDatum && b.abstricheDatum <= isoToday()).length]
   ];
   const box = $('#stats');
   box.replaceChildren();
@@ -569,7 +733,12 @@ function renderStats() {
 function rowText(data) {
   return COLUMNS
     .filter(c => c.type !== 'bed')
-    .map(c => Array.isArray(data[c.key]) ? data[c.key].join(' ') : String(data[c.key]))
+    .map(c => {
+      const val = Array.isArray(data[c.key]) ? data[c.key].join(' ') : String(data[c.key]);
+      const flag = c.flag && data[c.flag.key] ? ' ' + c.flag.badge + ' ' + c.flag.label : '';
+      const date = c.date && data[c.date.key] ? ' ' + fullDate(data[c.date.key]) : '';
+      return val + flag + date;
+    })
     .join(' ')
     .toLowerCase();
 }
@@ -632,9 +801,13 @@ function exportCsv() {
     const data = state.beds[bed.id];
     return COLUMNS.map(col => {
       if (col.type === 'bed') return esc(bed.label);
-      const val = data[col.key];
-      if (Array.isArray(val)) return esc(val.join('; '));
-      if (typeof val === 'boolean') return esc(val ? 'ja' : 'nein');
+      let val = data[col.key];
+      if (Array.isArray(val)) val = val.join('; ');
+      else if (typeof val === 'boolean') val = val ? 'ja' : 'nein';
+      if (col.flag && data[col.flag.key]) val = col.flag.badge + ' ' + val;
+      if (col.date && data[col.date.key]) {
+        val = (val ? val + ' – ' : '') + col.date.label + ': ' + fullDate(data[col.date.key]);
+      }
       return esc(val);
     }).join(';');
   });
@@ -709,6 +882,7 @@ function init() {
   renderStats();
   renderLegend();
   applyFilter();
+  initDragDrop();
   tickClock();
   setInterval(tickClock, 1000);
 
@@ -736,6 +910,10 @@ function init() {
   $('#multiCancel').addEventListener('click', () => $('#multiDlg').close());
   $('#multiClear').addEventListener('click', () => { multiCtx.selected.clear(); renderMultiOpts(); });
   $('#multiAdd').addEventListener('click', addCustom);
+  $('#multiDate7').addEventListener('click', () => {
+    $('#multiDate').value = addDays($('#multiDate').value, 7);
+  });
+  $('#multiDateOff').addEventListener('click', () => { $('#multiDate').value = ''; });
   $('#multiCustom').addEventListener('keydown', event => {
     if (event.key === 'Enter') { event.preventDefault(); addCustom(); }
   });

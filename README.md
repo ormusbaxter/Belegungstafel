@@ -45,7 +45,7 @@ Excel-Belegungstafel und sind wörtlich übernommen:
 | Intervention | I | Angio, Broncho, CT, Endo, ggf. OP, HKL, MRT, OP, PTR, RÖ, TEE, VAC, ext. Dial. |
 | Therapielimitierung | M | DNR, DNI, DND, DNR/DNI, DNR/DND, DNR/I/D |
 | Devices | N | ZVK, BDK, ZVK/BDK, keins |
-| Isolation | O | 3MRGN … VRE (25 Einträge) |
+| Isolation | O | 3MRGN … VRE (25 Einträge), mehrere Gründe kombinierbar |
 | privat | P | Ankreuzfeld, entspricht dem Wert `ja` |
 | Physiotherapie | Q | Mobi, AT, Mobi+AT, passiv, Rücksprache, keine KG |
 
@@ -63,9 +63,9 @@ Spalte der Tafel zugeordnet.
 
 | Typ | Spalten | Bedienung |
 |---|---|---|
-| Auswahlliste | Anwesenheitsstatus, Fachdisziplin, Beatmungsform, Kreislaufunterstützung, Dialyse, Isolation, TTM, Intervention, Therapielimitierung, Postform, Physiotherapie, Devices | Klick auf die Zelle, Wert wählen; leerer Eintrag setzt zurück |
+| Auswahlliste | Anwesenheitsstatus, Fachdisziplin, Beatmungsform, Kreislaufunterstützung, Dialyse, TTM, Intervention, Therapielimitierung, Postform, Physiotherapie, Devices | Klick auf die Zelle, Wert wählen; leerer Eintrag setzt zurück |
 | Freitext mit Vorschlägen | Patientenname, Telefon | tippen oder Vorschlag wählen |
-| Mehrfachauswahl | Abstriche | Klick öffnet Dialog, freie Einträge möglich |
+| Mehrfachauswahl | Isolation, Abstriche | Klick öffnet Dialog, freie Einträge möglich |
 | Ankreuzfeld | privat, Norton / Stammblatt | direkt anklicken |
 | Freitext | Pflegekraft, Sonstiges | direkt tippen |
 
@@ -75,7 +75,14 @@ Spalte der Tafel zugeordnet.
 - **Farbkodierung** der Zeilen nach Anwesenheitsstatus (Aufnahme, belegt, NVK, außerhalb der
   Station, Verlegung, gesperrt), `ISO`-Kennzeichnung bei eingetragener Isolation,
   farbliche Hervorhebung einer hinterlegten Therapielimitierung
-- **Kennzahlen** im Kopf: belegt, frei, gesperrt, NVK, INV, Kreislauf, Dialyse, Isolation
+- **Kennzahlen** im Kopf: belegt, frei, gesperrt, NVK, INV, Kreislauf, Dialyse, Isolation, fällige Screenings
+- **Isolation**: mehrere Gründe je Bettplatz kombinierbar, zusätzlich das Kennzeichen
+  „Verdacht auf“ (Anzeige `V. a.` in der Zelle, `ISO?` statt `ISO` am Bettplatz)
+- **Abstriche**: Datum des nächsten Screenings mit Schaltfläche „+ 7 Tage“; ein fälliges
+  oder überfälliges Datum wird rot hervorgehoben und in den Kennzahlen gezählt
+- **Verschieben per Ziehen und Ablegen**: Bettplatz-Zelle greifen und auf einen anderen
+  Bettplatz ziehen. Ist das Ziel belegt, tauschen beide Plätze ihre Einträge; der
+  letzte Vorgang lässt sich über „Rückgängig“ in der Statuszeile zurücknehmen
 - **Suche** über alle Felder und Filter „nur belegte Betten“
 - **Bettplatz räumen** über das `×` in der Bettspalte, „Tafel leeren“ für die gesamte Station
 - **Export/Import** als JSON (vollständige Tafel) sowie CSV-Export für Excel
