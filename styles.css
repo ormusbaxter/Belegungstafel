@@ -288,6 +288,12 @@ tr.name-state td.col-name input { font-style: italic; font-weight: 600; color: v
 
 /* Isolation / Therapielimitierung */
 td.col-isolation .chip { background: var(--iso); color: #fff; font-weight: 600; }
+td.col-isolation .chip-verdacht {
+  background: transparent;
+  border: 1px dashed var(--iso);
+  color: var(--iso);
+  font-weight: 600;
+}
 tr.has-iso td.col-bed .bedlabel::after {
   content: "ISO";
   margin-left: 5px;
@@ -303,15 +309,6 @@ tr.has-limit td.col-limitierung select { color: var(--limit); font-weight: 600; 
 tr.has-verdacht td.col-bed .bedlabel::after { content: "ISO?"; }
 
 /* Kennzeichen in Mehrfachauswahl-Zellen */
-.flagbadge {
-  padding: 0 5px;
-  border: 1px solid var(--iso);
-  border-radius: 9px;
-  color: var(--iso);
-  font-size: 10px;
-  font-weight: 700;
-  white-space: nowrap;
-}
 .datebadge {
   padding: 0 5px;
   border-radius: 9px;
@@ -446,6 +443,7 @@ td.col-physio .chip { background: #2f7d32; color: #fff; }
 .swatch.st-verlegung { background: var(--st-verlegung-bar); }
 .swatch.st-gesperrt { background: var(--st-gesperrt-bar); }
 .swatch.lg-iso { background: var(--iso); border-color: var(--iso); }
+.swatch.lg-verdacht { background: transparent; border: 1px dashed var(--iso); }
 .swatch.lg-limit { background: var(--limit); border-color: var(--limit); }
 .hint { margin: 10px 0 0; font-size: 11.5px; color: var(--ink-soft); }
 
@@ -475,9 +473,25 @@ td.col-physio .chip { background: #2f7d32; color: #fff; }
 .opt { display: flex; align-items: center; gap: 6px; padding: 3px 4px; border-radius: 5px; cursor: pointer; }
 .opt:hover { background: var(--line-soft); }
 .opt input { accent-color: var(--accent); }
-.opt.custom span { font-style: italic; }
-.dlgflag { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 13.5px; cursor: pointer; }
-.dlgflag input { accent-color: var(--iso); width: 16px; height: 16px; }
+.opt.custom > span { font-style: italic; }
+
+/* Keimliste: je Eintrag bestätigt oder Verdacht */
+.opts.germs { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+.opt.germ { gap: 7px; }
+.germname { flex: 1; }
+.opt.germ .va {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border: 1px dashed var(--line);
+  border-radius: 9px;
+  font-size: 11px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.opt.germ .va.on { border-color: var(--iso); color: var(--iso); font-weight: 700; }
+.opt.germ .va input { accent-color: var(--iso); margin: 0; width: 12px; height: 12px; }
 .dlgdate { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; font-size: 13.5px; }
 .dlgdate input[type="date"] {
   padding: 5px 8px;
@@ -551,7 +565,8 @@ td.col-physio .chip { background: #2f7d32; color: #fff; }
   .bedlabel { font-size: 11px; }
   .bedtime { display: none; }
   .chip { background: none !important; color: #000 !important; padding: 0; }
-  .flagbadge, .datebadge { background: none !important; color: #000 !important; padding: 0; border: none; }
+  .datebadge { background: none !important; color: #000 !important; padding: 0; border: none; }
+  .chip-verdacht { border: none !important; }
   .datebadge.due { font-weight: 700; }
   .chip:not(:last-child)::after { content: ","; }
   .legend { border: none; padding: 6px 0 0; margin: 6px 0 0; }

@@ -45,9 +45,13 @@ Excel-Belegungstafel und sind wörtlich übernommen:
 | Intervention | I | Angio, Broncho, CT, Endo, ggf. OP, HKL, MRT, OP, PTR, RÖ, TEE, VAC, ext. Dial. |
 | Therapielimitierung | M | DNR, DNI, DND, DNR/DNI, DNR/DND, DNR/I/D |
 | Devices | N | ZVK, BDK, ZVK/BDK, keins |
-| Isolation | O | 3MRGN … VRE (25 Einträge), mehrere Gründe kombinierbar |
+| Isolation | O | 3MRGN … VRE, mehrere Einträge kombinierbar, je Eintrag bestätigt oder Verdacht |
 | privat | P | Ankreuzfeld, entspricht dem Wert `ja` |
 | Physiotherapie | Q | Mobi, AT, Mobi+AT, passiv, Rücksprache, keine KG |
+
+Die vier Werte `V. a. CoViD`, `V.a. C. diff.`, `V.a. Noro` und `V.a. Rota` der Datenquelle
+entfallen, da der Verdacht nun je Eintrag gekennzeichnet wird. Ältere Stände werden beim
+Einlesen automatisch übernommen: `V. a. …` wird als Verdacht erkannt.
 
 Ein Eintrag aus Spalte J im Feld Patientenname (z. B. `gesperrt` oder `OP`) beschreibt
 den Bettplatz statt eines Patienten: Er wird kursiv dargestellt und färbt die Zeile ein.
@@ -65,7 +69,8 @@ Spalte der Tafel zugeordnet.
 |---|---|---|
 | Auswahlliste | Anwesenheitsstatus, Fachdisziplin, Beatmungsform, Kreislaufunterstützung, Dialyse, TTM, Intervention, Therapielimitierung, Postform, Physiotherapie, Devices | Klick auf die Zelle, Wert wählen; leerer Eintrag setzt zurück |
 | Freitext mit Vorschlägen | Patientenname, Telefon | tippen oder Vorschlag wählen |
-| Mehrfachauswahl | Isolation, Abstriche | Klick öffnet Dialog, freie Einträge möglich |
+| Mehrfachauswahl | Abstriche | Klick öffnet Dialog, freie Einträge möglich |
+| Keimliste | Isolation | Klick öffnet Dialog; Häkchen = bestätigt, zusätzlich „V. a.“ = Verdacht |
 | Ankreuzfeld | privat, Norton / Stammblatt | direkt anklicken |
 | Freitext | Pflegekraft, Sonstiges | direkt tippen |
 
@@ -76,8 +81,11 @@ Spalte der Tafel zugeordnet.
   Station, Verlegung, gesperrt), `ISO`-Kennzeichnung bei eingetragener Isolation,
   farbliche Hervorhebung einer hinterlegten Therapielimitierung
 - **Kennzahlen** im Kopf: belegt, frei, gesperrt, NVK, INV, Kreislauf, Dialyse, Isolation, fällige Screenings
-- **Isolation**: mehrere Gründe je Bettplatz kombinierbar, zusätzlich das Kennzeichen
-  „Verdacht auf“ (Anzeige `V. a.` in der Zelle, `ISO?` statt `ISO` am Bettplatz)
+- **Isolation**: beliebig viele Einträge je Bettplatz, jeder einzeln als bestätigt oder als
+  Verdacht geführt (z. B. MRSA bestätigt und Verdacht auf VRE). Bestätigte Keime erscheinen
+  als gefüllte, Verdachtsfälle als gestrichelte Marke mit vorangestelltem `V. a.`.
+  Am Bettplatz steht `ISO`, sobald ein Keim bestätigt ist, und `ISO?`, solange nur
+  Verdachtsfälle eingetragen sind
 - **Abstriche**: Datum des nächsten Screenings mit Schaltfläche „+ 7 Tage“; ein fälliges
   oder überfälliges Datum wird rot hervorgehoben und in den Kennzahlen gezählt
 - **Verschieben per Ziehen und Ablegen**: Bettplatz-Zelle greifen und auf einen anderen

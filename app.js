@@ -25,7 +25,8 @@ const BEDS = [
 
 /* ------------------------------------------------------------------ *
  * Spalten
- * Feldtypen: status | bed | text | tel | select | multi | checks | bool | longtext
+ * Feldtypen: status | bed | text | tel | datalist | select | multi | germs |
+ *            checks | bool | longtext
  * Sämtliche Auswahllisten sind hier zentral hinterlegt und können ohne
  * weitere Codeänderung an die Gepflogenheiten der Station angepasst werden.
  * ------------------------------------------------------------------ */
@@ -64,14 +65,15 @@ const COLUMNS = [
     options: ['CiCa', '(CiCa)']
   },
   {
-    /* Datenquelle Spalte O – mehrere Gründe kombinierbar, zusätzlich das
-       Kennzeichen „Verdacht auf“. */
-    key: 'isolation', label: 'Isolation', type: 'multi', width: 130,
-    flag: { key: 'isolationVerdacht', label: 'Verdacht auf', badge: 'V. a.' },
+    /* Datenquelle Spalte O. Jeder Eintrag wird einzeln als bestätigt oder als
+       Verdacht geführt, Kombinationen sind dadurch möglich (z. B. MRSA
+       bestätigt und Verdacht auf VRE). Die vier „V. a. …“-Werte der
+       Datenquelle entfallen, sie werden über das Kennzeichen abgebildet. */
+    key: 'isolation', label: 'Isolation', type: 'germs', width: 130,
     options: ['3MRGN', '4MRGN', 'C. diff.', 'CoViD', 'div. MRE', 'Herpes Zoster', 'Influenza A',
               'Influenza A+B', 'Influenza B', 'Kittelpflege', 'Kontakt CoViD', 'Kontakt Influenza',
               'MRSA', 'Noro', 'Rota', 'RSV', 'sonstiges', 'TBC', 'Umkehriso', 'unkl. Durchfälle',
-              'V. a. CoViD', 'V.a. C. diff.', 'V.a. Noro', 'V.a. Rota', 'VRE']
+              'VRE']
   },
   {
     /* Datenquelle Spalte F */
@@ -138,6 +140,23 @@ const COLUMNS = [
   { key: 'sonstiges', label: 'Sonstiges', type: 'longtext', width: 110, placeholder: 'Bemerkungen …' }
 ];
 
+/* Ein Isolationseintrag ist { v: Bezeichnung, s: 'bestaetigt' | 'verdacht' }.
+   Ältere Stände (reine Zeichenketten, ggf. mit dem früheren Kennzeichen für die
+   gesamte Zelle) werden beim Einlesen übernommen. */
+function toGerm(entry, source) {
+  if (entry && typeof entry === 'object' && entry.v) {
+    return { v: String(entry.v), s: entry.s === 'verdacht' ? 'verdacht' : 'bestaetigt' };
+  }
+  if (typeof entry !== 'string' || !entry.trim()) return null;
+  const match = entry.match(/^V\.\s?a\.\s*(.+)$/i);
+  if (match) return { v: match[1], s: 'verdacht' };
+  return { v: entry, s: source && source.isolationVerdacht ? 'verdacht' : 'bestaetigt' };
+}
+
+function germLabel(entry) {
+  return (entry.s === 'verdacht' ? 'V. a. ' : '') + entry.v;
+}
+
 /* Flache Werteliste einer Spalte – berücksichtigt Gruppen und Datalist-Einträge. */
 function optionList(col) {
   if (col.groups) return col.groups.flatMap(g => g.options);
@@ -178,7 +197,8 @@ const LEGEND = [
   ['st-verlegung', '<<< V – Verlegung'],
   ['st-abwesend', 'NA / OP / CV im Feld Patientenname'],
   ['st-gesperrt', 'gesperrt / Reinigung im Feld Patientenname'],
-  ['lg-iso', 'Isolation eingetragen – Kennzeichen ISO am Bettplatz, bei Verdacht ISO?'],
+  ['lg-iso', 'bestätigter Keim – Kennzeichen ISO am Bettplatz'],
+  ['lg-verdacht', 'nur Verdachtsfälle – Kennzeichen ISO? am Bettplatz'],
   ['lg-limit', 'Therapielimitierung hinterlegt']
 ];
 
@@ -194,10 +214,9 @@ function emptyBed() {
   const row = {};
   for (const col of COLUMNS) {
     if (col.type === 'bed') continue;
-    if (col.type === 'multi' || col.type === 'checks') row[col.key] = [];
+    if (col.type === 'multi' || col.type === 'checks' || col.type === 'germs') row[col.key] = [];
     else if (col.type === 'bool') row[col.key] = false;
     else row[col.key] = '';
-    if (col.flag) row[col.flag.key] = false;
     if (col.date) row[col.date.key] = '';
   }
   row._updated = null;
@@ -230,7 +249,9 @@ function merge(target, source) {
     if (col.type === 'bed') continue;
     const val = source[col.key];
     if (val === undefined || val === null) continue;
-    if (col.type === 'multi' || col.type === 'checks') {
+    if (col.type === 'germs') {
+      target[col.key] = Array.isArray(val) ? val.map(entry => toGerm(entry, source)).filter(Boolean) : [];
+    } else if (col.type === 'multi' || col.type === 'checks') {
       target[col.key] = Array.isArray(val) ? val.map(String) : [];
     } else if (col.type === 'bool') {
       target[col.key] = Boolean(val);
@@ -239,9 +260,6 @@ function merge(target, source) {
     }
   }
   for (const col of COLUMNS) {
-    if (col.flag && source[col.flag.key] !== undefined) {
-      target[col.flag.key] = Boolean(source[col.flag.key]);
-    }
     if (col.date && typeof source[col.date.key] === 'string') {
       target[col.date.key] = source[col.date.key];
     }
@@ -473,7 +491,8 @@ function buildField(bed, col, data) {
       return box;
     }
 
-    case 'multi': {
+    case 'multi':
+    case 'germs': {
       const btn = el('button', 'multicell');
       btn.type = 'button';
       btn.setAttribute('aria-label', col.label + ' – Bett ' + bed.label + ' bearbeiten');
@@ -488,12 +507,15 @@ function buildField(bed, col, data) {
 function renderChips(btn, col, data) {
   const values = data[col.key];
   btn.replaceChildren();
-  if (col.flag && data[col.flag.key]) {
-    const badge = el('span', 'flagbadge', col.flag.badge);
-    badge.title = col.flag.label;
-    btn.appendChild(badge);
+  if (col.type === 'germs') {
+    for (const entry of values) {
+      const chip = el('span', 'chip' + (entry.s === 'verdacht' ? ' chip-verdacht' : ''), germLabel(entry));
+      chip.title = entry.v + (entry.s === 'verdacht' ? ' – Verdacht' : ' – bestätigt');
+      btn.appendChild(chip);
+    }
+  } else {
+    for (const val of values) btn.appendChild(el('span', 'chip', val));
   }
-  for (const val of values) btn.appendChild(el('span', 'chip', val));
   if (col.date && data[col.date.key]) {
     const due = el('span', 'datebadge', shortDate(data[col.date.key]));
     due.title = col.date.label + ': ' + fullDate(data[col.date.key]);
@@ -528,13 +550,14 @@ function applyRowState(tr, data) {
   tr.classList.toggle('name-state', data.name in NAME_CLASS);
   tr.classList.toggle('has-iso', isSet(data.isolation));
   tr.classList.toggle('has-limit', isSet(data.limitierung));
-  tr.classList.toggle('has-verdacht', Boolean(data.isolationVerdacht));
+  tr.classList.toggle('has-verdacht',
+    data.isolation.length > 0 && data.isolation.every(entry => entry.s === 'verdacht'));
 }
 
 function clearBed(bed) {
   const data = state.beds[bed.id];
   const hasContent = COLUMNS.some(c => c.type !== 'bed' &&
-    (isSet(data[c.key]) || (c.flag && data[c.flag.key]) || (c.date && data[c.date.key])));
+    (isSet(data[c.key]) || (c.date && data[c.date.key])));
   if (hasContent && !confirm('Bettplatz ' + bed.label + ' vollständig leeren?')) return;
   state.beds[bed.id] = emptyBed();
   const tr = document.querySelector(`tr[data-bed="${bed.id}"]`);
@@ -632,17 +655,15 @@ let multiCtx = null;
 
 function openMulti(bed, col) {
   const data = state.beds[bed.id];
-  multiCtx = { bed, col, selected: new Set(data[col.key]) };
+  multiCtx = {
+    bed, col,
+    selected: col.type === 'germs' ? new Set() : new Set(data[col.key]),
+    germs: col.type === 'germs' ? new Map(data[col.key].map(e => [e.v, e.s])) : null
+  };
   $('#multiTitle').textContent = col.label;
-  $('#multiSub').textContent = 'Bettplatz ' + bed.label + (data.name ? ' · ' + data.name : '');
+  $('#multiSub').textContent = 'Bettplatz ' + bed.label + (data.name ? ' · ' + data.name : '') +
+    (col.type === 'germs' ? ' — Häkchen = bestätigt, zusätzlich „V. a.“ = Verdacht' : '');
   $('#multiCustom').value = '';
-
-  const flagRow = $('#multiFlagRow');
-  flagRow.hidden = !col.flag;
-  if (col.flag) {
-    $('#multiFlagLabel').textContent = col.flag.label;
-    $('#multiFlag').checked = data[col.flag.key];
-  }
 
   const dateRow = $('#multiDateRow');
   dateRow.hidden = !col.date;
@@ -656,12 +677,47 @@ function openMulti(bed, col) {
 }
 
 function renderMultiOpts() {
-  const { col, selected } = multiCtx;
+  const { col, selected, germs } = multiCtx;
   const known = new Set(col.options);
-  const extra = [...selected].filter(v => !known.has(v));
+  const chosen = germs ? [...germs.keys()] : [...selected];
+  const extra = chosen.filter(v => !known.has(v));
   const box = $('#multiOpts');
   box.replaceChildren();
 
+  if (germs) {
+    box.classList.add('germs');
+    for (const opt of [...col.options, ...extra]) {
+      const row = el('label', 'opt germ');
+      if (!known.has(opt)) row.classList.add('custom');
+      const cb = el('input');
+      cb.type = 'checkbox';
+      cb.checked = germs.has(opt);
+      cb.addEventListener('change', () => {
+        cb.checked ? germs.set(opt, 'bestaetigt') : germs.delete(opt);
+        renderMultiOpts();
+      });
+      row.appendChild(cb);
+      row.appendChild(el('span', 'germname', opt));
+
+      const va = el('label', 'va' + (germs.get(opt) === 'verdacht' ? ' on' : ''));
+      va.title = 'Verdacht auf ' + opt;
+      const vaBox = el('input');
+      vaBox.type = 'checkbox';
+      vaBox.checked = germs.get(opt) === 'verdacht';
+      vaBox.addEventListener('click', event => event.stopPropagation());
+      vaBox.addEventListener('change', () => {
+        germs.set(opt, vaBox.checked ? 'verdacht' : 'bestaetigt');
+        renderMultiOpts();
+      });
+      va.appendChild(vaBox);
+      va.appendChild(el('span', null, 'V. a.'));
+      row.appendChild(va);
+      box.appendChild(row);
+    }
+    return;
+  }
+
+  box.classList.remove('germs');
   for (const opt of [...col.options, ...extra]) {
     const label = el('label', 'opt');
     const cb = el('input');
@@ -681,19 +737,25 @@ function addCustom() {
   const input = $('#multiCustom');
   const val = input.value.trim();
   if (!val) return;
-  multiCtx.selected.add(val);
+  if (multiCtx.germs) multiCtx.germs.set(val, 'bestaetigt');
+  else multiCtx.selected.add(val);
   input.value = '';
   renderMultiOpts();
   input.focus();
 }
 
 function commitMulti() {
-  const { bed, col, selected } = multiCtx;
+  const { bed, col, selected, germs } = multiCtx;
   const data = state.beds[bed.id];
-  const known = col.options.filter(o => selected.has(o));
-  const extra = [...selected].filter(v => !col.options.includes(v));
-  data[col.key] = [...known, ...extra];
-  if (col.flag) data[col.flag.key] = $('#multiFlag').checked;
+  if (germs) {
+    const names = [...col.options.filter(o => germs.has(o)),
+                   ...[...germs.keys()].filter(v => !col.options.includes(v))];
+    data[col.key] = names.map(v => ({ v, s: germs.get(v) }));
+  } else {
+    const known = col.options.filter(o => selected.has(o));
+    const extra = [...selected].filter(v => !col.options.includes(v));
+    data[col.key] = [...known, ...extra];
+  }
   if (col.date) data[col.date.key] = $('#multiDate').value;
   const btn = document.querySelector(`td[data-bed="${bed.id}"][data-key="${col.key}"] .multicell`);
   renderChips(btn, col, data);
@@ -734,10 +796,11 @@ function rowText(data) {
   return COLUMNS
     .filter(c => c.type !== 'bed')
     .map(c => {
-      const val = Array.isArray(data[c.key]) ? data[c.key].join(' ') : String(data[c.key]);
-      const flag = c.flag && data[c.flag.key] ? ' ' + c.flag.badge + ' ' + c.flag.label : '';
+      const val = c.type === 'germs' ? data[c.key].map(germLabel).join(' ')
+        : Array.isArray(data[c.key]) ? data[c.key].join(' ')
+        : String(data[c.key]);
       const date = c.date && data[c.date.key] ? ' ' + fullDate(data[c.date.key]) : '';
-      return val + flag + date;
+      return val + date;
     })
     .join(' ')
     .toLowerCase();
@@ -802,9 +865,9 @@ function exportCsv() {
     return COLUMNS.map(col => {
       if (col.type === 'bed') return esc(bed.label);
       let val = data[col.key];
-      if (Array.isArray(val)) val = val.join('; ');
+      if (col.type === 'germs') val = val.map(germLabel).join('; ');
+      else if (Array.isArray(val)) val = val.join('; ');
       else if (typeof val === 'boolean') val = val ? 'ja' : 'nein';
-      if (col.flag && data[col.flag.key]) val = col.flag.badge + ' ' + val;
       if (col.date && data[col.date.key]) {
         val = (val ? val + ' – ' : '') + col.date.label + ': ' + fullDate(data[col.date.key]);
       }
@@ -908,7 +971,11 @@ function init() {
 
   $('#multiOk').addEventListener('click', commitMulti);
   $('#multiCancel').addEventListener('click', () => $('#multiDlg').close());
-  $('#multiClear').addEventListener('click', () => { multiCtx.selected.clear(); renderMultiOpts(); });
+  $('#multiClear').addEventListener('click', () => {
+    multiCtx.selected.clear();
+    if (multiCtx.germs) multiCtx.germs.clear();
+    renderMultiOpts();
+  });
   $('#multiAdd').addEventListener('click', addCustom);
   $('#multiDate7').addEventListener('click', () => {
     $('#multiDate').value = addDays($('#multiDate').value, 7);
