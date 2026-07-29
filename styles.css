@@ -14,14 +14,18 @@
 
   --st-frei: #f2f4f7;
   --st-frei-bar: #9aa5b1;
-  --st-geplant: #fff6df;
-  --st-geplant-bar: #d99a00;
-  --st-anwesend: #ffffff;
-  --st-anwesend-bar: #2f7d32;
+  --st-aufnahme: #fff6df;
+  --st-aufnahme-bar: #d99a00;
+  --st-belegt: #ffffff;
+  --st-belegt-bar: #2f7d32;
+  --st-nvk: #eaf7ee;
+  --st-nvk-bar: #57a05a;
   --st-abwesend: #eaf3ff;
   --st-abwesend-bar: #1e5f9e;
-  --st-weg: #f4eef5;
-  --st-weg-bar: #6b5b8a;
+  --st-verlegung: #f4eef5;
+  --st-verlegung-bar: #6b5b8a;
+  --st-gesperrt: #e6e9ee;
+  --st-gesperrt-bar: #5a6672;
   --iso: #c62828;
   --limit: #6a1b9a;
 
@@ -41,14 +45,18 @@ html[data-theme="dark"] {
 
   --st-frei: #1a222b;
   --st-frei-bar: #55636f;
-  --st-geplant: #2e2716;
-  --st-geplant-bar: #d9a520;
-  --st-anwesend: #171e26;
-  --st-anwesend-bar: #4caf50;
+  --st-aufnahme: #2e2716;
+  --st-aufnahme-bar: #d9a520;
+  --st-belegt: #171e26;
+  --st-belegt-bar: #4caf50;
+  --st-nvk: #17281c;
+  --st-nvk-bar: #6fbf73;
   --st-abwesend: #14283c;
   --st-abwesend-bar: #4a9eff;
-  --st-weg: #251f2d;
-  --st-weg-bar: #a58ad0;
+  --st-verlegung: #251f2d;
+  --st-verlegung-bar: #a58ad0;
+  --st-gesperrt: #141a20;
+  --st-gesperrt-bar: #7b8794;
   --iso: #ff6b6b;
   --limit: #c792ea;
 }
@@ -218,39 +226,42 @@ thead th {
   background: var(--panel-2);
   border-bottom: 2px solid var(--line);
   border-right: 1px solid var(--line-soft);
-  padding: 8px 7px;
+  padding: 6px 4px;
   text-align: left;
-  font-size: 11.5px;
+  font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: .4px;
+  letter-spacing: .2px;
   color: var(--ink-soft);
   white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 tbody td {
   border-bottom: 1px solid var(--line-soft);
   border-right: 1px solid var(--line-soft);
-  padding: 2px 5px;
+  padding: 2px 3px;
   vertical-align: middle;
   height: var(--row-h);
   background: inherit;
 }
-tbody tr { background: var(--st-anwesend); }
+tbody tr { background: var(--panel); }
 tbody tr:hover td { box-shadow: inset 0 0 0 9999px rgba(30, 95, 158, .045); }
 
-/* Erste beide Spalten fixiert (Breiten aus COLUMNS: 150 / 92) */
+/* Erste beide Spalten fixiert (Breiten aus COLUMNS: 105 / 78) */
 th.col-status, td.col-status { position: sticky; left: 0; z-index: 15; }
-th.col-bed,    td.col-bed    { position: sticky; left: 150px; z-index: 15; border-right: 2px solid var(--line); }
+th.col-bed,    td.col-bed    { position: sticky; left: 105px; z-index: 15; border-right: 2px solid var(--line); }
 thead th.col-status, thead th.col-bed { z-index: 25; }
 /* Statusfarben */
-tr.st-frei     { background: var(--st-frei); }
-tr.st-geplant  { background: var(--st-geplant); }
-tr.st-anwesend { background: var(--st-anwesend); }
-tr.st-abwesend { background: var(--st-abwesend); }
-tr.st-weg      { background: var(--st-weg); }
+tr.st-frei      { background: var(--st-frei); }
+tr.st-aufnahme  { background: var(--st-aufnahme); }
+tr.st-belegt    { background: var(--st-belegt); }
+tr.st-nvk       { background: var(--st-nvk); }
+tr.st-abwesend  { background: var(--st-abwesend); }
+tr.st-verlegung { background: var(--st-verlegung); }
+tr.st-gesperrt  { background: var(--st-gesperrt); }
 
 /* Farbbalken am Zeilenanfang */
-td.col-status { padding-left: 11px; }
+td.col-status { padding-left: 9px; }
 td.col-status::after {
   content: "";
   position: absolute;
@@ -258,14 +269,20 @@ td.col-status::after {
   width: 5px;
   background: var(--st-frei-bar);
 }
-tr.st-geplant  td.col-status::after { background: var(--st-geplant-bar); }
-tr.st-anwesend td.col-status::after { background: var(--st-anwesend-bar); }
-tr.st-abwesend td.col-status::after { background: var(--st-abwesend-bar); }
-tr.st-weg      td.col-status::after { background: var(--st-weg-bar); }
+tr.st-aufnahme  td.col-status::after { background: var(--st-aufnahme-bar); }
+tr.st-belegt    td.col-status::after { background: var(--st-belegt-bar); }
+tr.st-nvk       td.col-status::after { background: var(--st-nvk-bar); }
+tr.st-abwesend  td.col-status::after { background: var(--st-abwesend-bar); }
+tr.st-verlegung td.col-status::after { background: var(--st-verlegung-bar); }
+tr.st-gesperrt  td.col-status::after { background: var(--st-gesperrt-bar); }
 
 tr.st-frei td input,
 tr.st-frei td textarea,
-tr.st-frei td select { opacity: .75; }
+tr.st-frei td select,
+tr.st-gesperrt td input,
+tr.st-gesperrt td textarea,
+tr.st-gesperrt td select { opacity: .75; }
+tr.st-gesperrt td.col-status select { font-style: italic; }
 
 /* Isolation / Therapielimitierung */
 tr.has-iso td.col-isolation select { color: var(--iso); font-weight: 700; }
@@ -306,7 +323,7 @@ td input:focus, td select:focus, td textarea:focus {
   background: var(--panel);
 }
 td textarea { resize: vertical; min-height: 30px; line-height: 1.25; }
-td select { appearance: none; cursor: pointer; padding-right: 14px; }
+td select { appearance: none; cursor: pointer; padding-right: 2px; text-overflow: ellipsis; }
 /* Platzhalter erst beim Bearbeiten zeigen – die Tafel bleibt sonst unruhig */
 td input::placeholder, td textarea::placeholder { color: var(--ink-soft); opacity: 0; }
 td input:focus::placeholder, td textarea:focus::placeholder { opacity: .6; }
@@ -348,6 +365,7 @@ tr:hover .bedtime { display: none; }
 
 /* Ja/Nein und Mehrfach-Checkboxen */
 .boolcell { display: flex; align-items: center; gap: 4px; justify-content: center; font-size: 12px; color: var(--ink-soft); }
+.boolcell input:not(:checked) + span { visibility: hidden; }
 .checkscell { display: flex; flex-direction: column; gap: 0; }
 .checkscell label { display: flex; align-items: center; gap: 4px; font-size: 11px; line-height: 1.25; cursor: pointer; }
 .checkscell input { width: 12px; height: 12px; }
@@ -390,11 +408,13 @@ td.col-physio .chip { background: #2f7d32; color: #fff; }
 .legend ul { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 0; padding: 0; list-style: none; font-size: 12.5px; }
 .legend li { display: flex; align-items: center; gap: 7px; }
 .swatch { width: 18px; height: 12px; border: 1px solid var(--line); border-radius: 3px; display: inline-block; }
-.swatch.st-frei { background: var(--st-frei); }
-.swatch.st-geplant { background: var(--st-geplant); }
-.swatch.st-anwesend { background: var(--st-anwesend); }
-.swatch.st-abwesend { background: var(--st-abwesend); }
-.swatch.st-weg { background: var(--st-weg); }
+.swatch.st-frei { background: var(--st-frei-bar); }
+.swatch.st-aufnahme { background: var(--st-aufnahme-bar); }
+.swatch.st-belegt { background: var(--st-belegt-bar); }
+.swatch.st-nvk { background: var(--st-nvk-bar); }
+.swatch.st-abwesend { background: var(--st-abwesend-bar); }
+.swatch.st-verlegung { background: var(--st-verlegung-bar); }
+.swatch.st-gesperrt { background: var(--st-gesperrt-bar); }
 .swatch.lg-iso { background: var(--iso); border-color: var(--iso); }
 .swatch.lg-limit { background: var(--limit); border-color: var(--limit); }
 .hint { margin: 10px 0 0; font-size: 11.5px; color: var(--ink-soft); }

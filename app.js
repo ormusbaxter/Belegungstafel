@@ -31,111 +31,144 @@ const BEDS = [
  * ------------------------------------------------------------------ */
 const COLUMNS = [
   {
-    key: 'status', label: 'Anwesenheitsstatus', type: 'status', width: 150,
-    options: ['Frei', 'Aufnahme geplant', 'Anwesend', 'Im OP', 'Diagnostik', 'Transport',
-              'Verlegung geplant', 'Verlegt', 'Entlassen', 'Verstorben']
+    /* Datenquelle Spalte A (Belegung) und J (Bettplatz / Aufenthaltsort) */
+    key: 'status', label: 'Anwesenheitsstatus', head: 'Anwesenheits\u00ADstatus', type: 'status', width: 105,
+    groups: [
+      { label: 'Belegung', options: ['A >>>', '\u25cf', 'NVK', 'NVK 1', 'NVK 2', 'NVK 3', '<<< V'] },
+      { label: 'Bettplatz / Aufenthaltsort', options: ['Notbett', 'gesperrt', 'Reinigung', 'NA', 'OP', 'CV'] }
+    ]
   },
-  { key: 'bed', label: 'Bettplatz', type: 'bed', width: 100 },
-  { key: 'name', label: 'Patientenname', type: 'text', width: 170, placeholder: 'Name, Vorname' },
+  { key: 'bed', label: 'Bettplatz', type: 'bed', width: 78 },
+  { key: 'name', label: 'Patientenname', head: 'Patienten\u00ADname', type: 'text', width: 155, placeholder: 'Name, Vorname' },
   {
-    key: 'disziplin', label: 'Fachdisziplin', type: 'select', width: 140,
-    options: ['Innere Medizin', 'Kardiologie', 'Gastroenterologie', 'Pneumologie', 'Nephrologie',
-              'Neurologie', 'Neurochirurgie', 'Allgemeinchirurgie', 'Viszeralchirurgie',
-              'Unfallchirurgie', 'Gefäßchirurgie', 'Herzchirurgie', 'Thoraxchirurgie',
-              'Urologie', 'Gynäkologie', 'HNO', 'MKG', 'Anästhesie', 'Sonstige']
-  },
-  {
-    key: 'beatmung', label: 'Beatmungsform', type: 'select', width: 150,
-    options: ['Spontanatmung / Raumluft', 'O₂-Brille', 'O₂-Maske', 'High-Flow (HFNC)',
-              'CPAP', 'NIV / BiPAP', 'ASB (assistiert)', 'BIPAP (invasiv)', 'IPPV (kontrolliert)',
-              'Tracheostoma – Spontanatmung', 'Tracheostoma – beatmet', 'ECMO / ECLS']
+    /* Datenquelle Spalte B */
+    key: 'disziplin', label: 'Fachdisziplin', head: 'Fach\u00ADdisziplin', type: 'select', width: 62,
+    options: ['ACH', 'DIAB', 'GAST', 'GCH', 'INF', 'INT', 'KARD', 'ONKO', 'RAD', 'TCH', 'UCH', 'X']
   },
   {
-    key: 'kreislauf', label: 'Kreislaufunterstützung', type: 'multi', width: 175,
-    options: ['Noradrenalin', 'Adrenalin', 'Dobutamin', 'Vasopressin', 'Milrinon',
-              'Levosimendan', 'IABP', 'Impella', 'ECMO / ECLS', 'Schrittmacher']
+    /* Datenquelle Spalte C */
+    key: 'beatmung', label: 'Beatmungsform', head: 'Beatmungs\u00ADform', type: 'select', width: 78,
+    options: ['INV', 'NIV', 'HFNC', 'NIV/HF', '(INV)', '(NIV)', '(HFNC)', '(NIV/HF)', 'MIRUS']
   },
   {
-    key: 'dialyse', label: 'Dialyse', type: 'select', width: 130,
-    options: ['keine', 'CVVH', 'CVVHD', 'CVVHDF', 'SLEDD', 'Intermittierend (HD)',
-              'Peritonealdialyse', 'Citrat-Antikoagulation', 'Pause / Antikoagulation']
+    /* Datenquelle Spalte D */
+    key: 'kreislauf', label: 'Kreislaufunterstützung', head: 'Kreislauf\u00ADunter\u00ADstützung', type: 'select', width: 85,
+    options: ['ECMO', 'ECOS', 'ECPELLA', 'ILA', 'IMPELLA', 'pass. SM', 'PiCCO']
   },
   {
-    key: 'isolation', label: 'Isolation', type: 'select', width: 150,
-    options: ['keine', 'Kontaktisolation', 'Tröpfchenisolation', 'Aerogene Isolation',
-              'Protektive Umkehrisolation', 'MRSA', 'VRE', '3MRGN', '4MRGN',
-              'C. difficile', 'Noro-/Rotavirus', 'Influenza', 'SARS-CoV-2', 'Tuberkulose',
-              'Verdacht – Ergebnis ausstehend']
+    /* Datenquelle Spalte E */
+    key: 'dialyse', label: 'Dialyse', type: 'select', width: 62,
+    options: ['CiCa', '(CiCa)']
   },
   {
-    key: 'ttm', label: 'TTM', type: 'select', width: 130,
-    options: ['nein', '33 °C', '34 °C', '36 °C', 'Fieberkontrolle', 'Wiedererwärmung', 'beendet']
-  },
-  { key: 'intervention', label: 'Intervention', type: 'text', width: 175, placeholder: 'geplant / erfolgt' },
-  {
-    key: 'limitierung', label: 'Therapielimitierung', type: 'select', width: 160,
-    options: ['keine', 'DNR', 'DNI', 'DNR / DNI', 'keine Reanimation, keine Dialyse',
-              'keine Eskalation', 'Therapiezieländerung', 'Best Supportive Care / palliativ',
-              'Patientenverfügung liegt vor', 'Betreuung / Vollmacht klären']
-  },
-  { key: 'telefon', label: 'Telefon', type: 'tel', width: 135, placeholder: 'Angehörige / Kontakt' },
-  { key: 'pflege', label: 'Pflegekraft', type: 'text', width: 130, placeholder: 'Kürzel / Name' },
-  {
-    /* Vom Auftraggeber als „Postform“ benannt – hinterlegt sind die üblichen Kostformen.
-       Liste bzw. Beschriftung bei Bedarf hier anpassen. */
-    key: 'postform', label: 'Postform', type: 'select', width: 145,
-    options: ['nüchtern', 'Vollkost', 'leichte Vollkost', 'Diabeteskost', 'passiert / weich',
-              'Flüssigkost', 'Trinknahrung', 'enteral (Magensonde)', 'enteral (PEG)',
-              'parenteral', 'enteral + parenteral', 'Schluckkost n. Logopädie']
-  },
-  { key: 'privat', label: 'privat', type: 'bool', width: 70 },
-  {
-    key: 'physio', label: 'Physiotherapie', type: 'multi', width: 160,
-    options: ['nicht verordnet', 'verordnet', 'Atemtherapie', 'Sekretmanagement', 'Mobilisation Bett',
-              'Mobilisation Bettkante', 'Mobilisation Stuhl', 'Gehtraining', 'Lagerung',
-              'täglich', 'Mo–Fr', 'Ergotherapie', 'Logopädie', 'heute erfolgt']
+    /* Datenquelle Spalte O */
+    key: 'isolation', label: 'Isolation', type: 'select', width: 110,
+    options: ['3MRGN', '4MRGN', 'C. diff.', 'CoViD', 'div. MRE', 'Herpes Zoster', 'Influenza A',
+              'Influenza A+B', 'Influenza B', 'Kittelpflege', 'Kontakt CoViD', 'Kontakt Influenza',
+              'MRSA', 'Noro', 'Rota', 'RSV', 'sonstiges', 'TBC', 'Umkehriso', 'unkl. Durchfälle',
+              'V. a. CoViD', 'V.a. C. diff.', 'V.a. Noro', 'V.a. Rota', 'VRE']
   },
   {
-    key: 'devices', label: 'Devices', type: 'multi', width: 190,
-    options: ['PVK', 'ZVK', 'Shaldon', 'Arterie', 'Port', 'PICC', 'Blasenkatheter', 'Suprapubischer Katheter',
-              'Magensonde', 'PEG', 'Thoraxdrainage', 'Wunddrainage', 'Endotrachealtubus',
-              'Trachealkanüle', 'ICP-Sonde', 'EVD', 'PiCCO', 'Schrittmacherkabel', 'Wundvakuum (VAC)']
+    /* Datenquelle Spalte F */
+    key: 'ttm', label: 'TTM', type: 'select', width: 48,
+    options: ['\u2744', '\u263c']
   },
-  { key: 'norton', label: 'Norton / Stammblatt', type: 'checks', width: 145,
+  {
+    /* Datenquelle Spalte I */
+    key: 'intervention', label: 'Intervention', head: 'Inter\u00ADvention', type: 'select', width: 78,
+    options: ['Angio', 'Broncho', 'CT', 'Endo', 'ggf. OP', 'HKL', 'MRT', 'OP', 'PTR', 'RÖ',
+              'TEE', 'VAC', 'ext. Dial.']
+  },
+  {
+    /* Datenquelle Spalte M */
+    key: 'limitierung', label: 'Therapielimitierung', head: 'Therapie\u00ADlimitierung', type: 'select', width: 82,
+    options: ['DNR', 'DNI', 'DND', 'DNR/DNI', 'DNR/DND', 'DNR/I/D']
+  },
+  {
+    /* Datenquelle Spalte H – Vorschlagsliste, freie Eingabe bleibt möglich.
+       Die Beschriftung nennt die zugehörige Intervention aus Spalte I. */
+    key: 'telefon', label: 'Telefon', type: 'datalist', width: 62, placeholder: 'Nummer',
+    options: [
+      { value: '4149', label: 'Angio' },
+      { value: '4117', label: 'Broncho' },
+      { value: '4719', label: 'CT' },
+      { value: '4880', label: 'Endo' },
+      { value: '4881', label: 'Endo' },
+      { value: '4882', label: 'ggf. OP' },
+      { value: '4883', label: 'HKL' },
+      { value: '4212', label: 'MRT' }
+    ]
+  },
+  { key: 'pflege', label: 'Pflegekraft', head: 'Pflege\u00ADkraft', type: 'text', width: 72, placeholder: 'Kürzel' },
+  {
+    /* Datenquelle Spalte G (Kostform) */
+    key: 'postform', label: 'Postform', type: 'select', width: 92,
+    options: ['VK', '%', 'nüchtern', 'Tee/H2O', 'flüssig', 'Joghurt', 'passiert', 'proteinreich',
+              'diabet. Kost', 'laktosefrei', 'vegetarisch', 'vegan', 'leichte Kost', 'Wunschkost',
+              'VK o.S.', 'pass o. S.', 'prot. o. S.', 'diab. o. S.', 'lakt. o. S.', 'leicht o. S.',
+              'Schluck 1', 'Schluck 2', 'Weiche Kost', 'glutenfrei', 'Pankreas', 'Schonkost']
+  },
+  /* Datenquelle Spalte P */
+  { key: 'privat', label: 'privat', type: 'bool', width: 48 },
+  {
+    /* Datenquelle Spalte Q */
+    key: 'physio', label: 'Physiotherapie', head: 'Physio\u00ADtherapie', type: 'select', width: 82,
+    options: ['Mobi', 'AT', 'Mobi+AT', 'passiv', 'Rücksprache', 'keine KG']
+  },
+  {
+    /* Datenquelle Spalte N */
+    key: 'devices', label: 'Devices', type: 'select', width: 78,
+    options: ['ZVK', 'BDK', 'ZVK/BDK', 'keins']
+  },
+  { key: 'norton', label: 'Norton / Stammblatt', type: 'checks', width: 92,
     options: ['Norton', 'Stammblatt'] },
   {
-    key: 'abstriche', label: 'Abstriche', type: 'multi', width: 175,
+    /* Keine Vorgabe in der Datenquelle – Liste bei Bedarf hier anpassen. */
+    key: 'abstriche', label: 'Abstriche', type: 'multi', width: 112,
     options: ['MRSA-Screening', 'Nasen-/Rachenabstrich', 'Rektalabstrich', 'Wundabstrich',
               'Trachealsekret', 'Leistenabstrich', 'Blutkulturen', 'Urinkultur',
               'ausstehend', 'negativ', 'positiv']
   },
-  { key: 'sonstiges', label: 'Sonstiges', type: 'longtext', width: 220, placeholder: 'Bemerkungen …' }
+  { key: 'sonstiges', label: 'Sonstiges', type: 'longtext', width: 130, placeholder: 'Bemerkungen …' }
 ];
+
+/* Flache Werteliste einer Spalte – berücksichtigt Gruppen und Datalist-Einträge. */
+function optionList(col) {
+  if (col.groups) return col.groups.flatMap(g => g.options);
+  if (!col.options) return [];
+  return col.options.map(o => (typeof o === 'string' ? o : o.value));
+}
 
 /* Status → Farbklasse und Belegungslogik */
 const STATUS_CLASS = {
-  'Frei': 'st-frei',
-  'Aufnahme geplant': 'st-geplant',
-  'Anwesend': 'st-anwesend',
-  'Im OP': 'st-abwesend',
-  'Diagnostik': 'st-abwesend',
-  'Transport': 'st-abwesend',
-  'Verlegung geplant': 'st-geplant',
-  'Verlegt': 'st-weg',
-  'Entlassen': 'st-weg',
-  'Verstorben': 'st-weg'
+  'A >>>': 'st-aufnahme',
+  '\u25cf': 'st-belegt',
+  'NVK': 'st-nvk',
+  'NVK 1': 'st-nvk',
+  'NVK 2': 'st-nvk',
+  'NVK 3': 'st-nvk',
+  '<<< V': 'st-verlegung',
+  'Notbett': 'st-belegt',
+  'gesperrt': 'st-gesperrt',
+  'Reinigung': 'st-gesperrt',
+  'NA': 'st-abwesend',
+  'OP': 'st-abwesend',
+  'CV': 'st-abwesend'
 };
-const OCCUPIED = new Set(['Anwesend', 'Im OP', 'Diagnostik', 'Transport', 'Verlegung geplant']);
-const INVASIV = new Set(['ASB (assistiert)', 'BIPAP (invasiv)', 'IPPV (kontrolliert)',
-                         'Tracheostoma – beatmet', 'ECMO / ECLS']);
+const OCCUPIED = new Set(['\u25cf', 'NVK', 'NVK 1', 'NVK 2', 'NVK 3', '<<< V',
+                          'Notbett', 'NA', 'OP', 'CV']);
+const BLOCKED = new Set(['gesperrt', 'Reinigung']);
+const INVASIV = new Set(['INV']);
 
 const LEGEND = [
-  ['st-frei', 'Bett frei'],
-  ['st-geplant', 'Aufnahme / Verlegung geplant'],
-  ['st-anwesend', 'Patient anwesend'],
-  ['st-abwesend', 'vorübergehend abwesend (OP, Diagnostik, Transport)'],
-  ['st-weg', 'verlegt / entlassen / verstorben'],
-  ['lg-iso', 'Isolation aktiv – Kennzeichnung am Zeilenanfang'],
+  ['st-frei', 'Bett frei (kein Status gesetzt)'],
+  ['st-aufnahme', 'A >>> – Aufnahme angekündigt'],
+  ['st-belegt', '\u25cf / Notbett – belegt'],
+  ['st-nvk', 'NVK, NVK 1–3'],
+  ['st-abwesend', 'NA / OP / CV – Patient außerhalb der Station'],
+  ['st-verlegung', '<<< V – Verlegung'],
+  ['st-gesperrt', 'gesperrt / Reinigung'],
+  ['lg-iso', 'Isolation eingetragen – ISO-Kennzeichnung am Bettplatz'],
   ['lg-limit', 'Therapielimitierung hinterlegt']
 ];
 
@@ -153,7 +186,6 @@ function emptyBed() {
     if (col.type === 'bed') continue;
     if (col.type === 'multi' || col.type === 'checks') row[col.key] = [];
     else if (col.type === 'bool') row[col.key] = false;
-    else if (col.type === 'status') row[col.key] = 'Frei';
     else row[col.key] = '';
   }
   row._updated = null;
@@ -232,7 +264,7 @@ const el = (tag, cls, text) => {
 };
 const isSet = v => Array.isArray(v) ? v.length > 0
   : typeof v === 'boolean' ? v
-  : Boolean(v) && !['keine', 'nein', 'Frei', 'nicht verordnet'].includes(v);
+  : Boolean(v) && !['keins', 'keine KG'].includes(v);
 
 function setSaveState(msg, isError) {
   const node = $('#saveState');
@@ -246,13 +278,30 @@ function setSaveState(msg, isError) {
 function buildHead() {
   const tr = el('tr');
   for (const col of COLUMNS) {
-    const th = el('th', 'col-' + col.key, col.label);
+    const th = el('th', 'col-' + col.key, col.head || col.label);
+    th.title = col.label;
     th.style.width = col.width + 'px';
     th.style.minWidth = col.width + 'px';
     th.scope = 'col';
     tr.appendChild(th);
   }
   $('#thead').replaceChildren(tr);
+}
+
+/* Vorschlagslisten für Freitextfelder (z. B. Telefonnummern) */
+function buildDatalists() {
+  for (const col of COLUMNS) {
+    if (col.type !== 'datalist') continue;
+    const dl = el('datalist');
+    dl.id = 'dl-' + col.key;
+    for (const opt of col.options) {
+      const option = el('option');
+      option.value = typeof opt === 'string' ? opt : opt.value;
+      if (typeof opt === 'object' && opt.label) option.label = opt.label;
+      dl.appendChild(option);
+    }
+    document.body.appendChild(dl);
+  }
 }
 
 function buildBody() {
@@ -296,8 +345,17 @@ function buildField(bed, col, data) {
     case 'select': {
       const sel = el('select');
       sel.setAttribute('aria-label', col.label + ' – Bett ' + bed.label);
-      if (col.type === 'select') sel.appendChild(new Option('–', ''));
-      for (const opt of col.options) sel.appendChild(new Option(opt, opt));
+      sel.appendChild(new Option('', ''));
+      if (col.groups) {
+        for (const group of col.groups) {
+          const optgroup = el('optgroup');
+          optgroup.label = group.label;
+          for (const opt of group.options) optgroup.appendChild(new Option(opt, opt));
+          sel.appendChild(optgroup);
+        }
+      } else {
+        for (const opt of col.options) sel.appendChild(new Option(opt, opt));
+      }
       sel.value = data[col.key];
       sel.addEventListener('change', () => {
         data[col.key] = sel.value;
@@ -310,9 +368,11 @@ function buildField(bed, col, data) {
     }
 
     case 'text':
-    case 'tel': {
+    case 'tel':
+    case 'datalist': {
       const input = el('input');
-      input.type = col.type === 'tel' ? 'tel' : 'text';
+      input.type = col.type === 'text' ? 'text' : 'tel';
+      if (col.type === 'datalist') input.setAttribute('list', 'dl-' + col.key);
       input.placeholder = col.placeholder || '';
       input.value = data[col.key];
       input.setAttribute('aria-label', col.label + ' – Bett ' + bed.label);
@@ -380,7 +440,7 @@ function buildField(bed, col, data) {
 function renderChips(btn, values) {
   btn.replaceChildren();
   if (!values.length) {
-    btn.appendChild(el('span', 'chipempty', '–'));
+    btn.appendChild(el('span', 'chipempty', ''));
     return;
   }
   for (const val of values) btn.appendChild(el('span', 'chip', val));
@@ -388,7 +448,7 @@ function renderChips(btn, values) {
 
 /* Zeilenfarbe, Isolations- und Limitierungskennzeichnung */
 function applyRowState(tr, data) {
-  for (const cls of Object.values(STATUS_CLASS)) tr.classList.remove(cls);
+  for (const cls of [...tr.classList]) if (cls.startsWith('st-')) tr.classList.remove(cls);
   tr.classList.add(STATUS_CLASS[data.status] || 'st-frei');
   tr.classList.toggle('has-iso', isSet(data.isolation));
   tr.classList.toggle('has-limit', isSet(data.limitierung));
@@ -473,9 +533,11 @@ function renderStats() {
   const beds = BEDS.map(b => state.beds[b.id]);
   const items = [
     ['Belegt', beds.filter(b => OCCUPIED.has(b.status)).length + ' / ' + BEDS.length],
-    ['Frei', beds.filter(b => b.status === 'Frei').length],
-    ['Invasiv beatmet', beds.filter(b => INVASIV.has(b.beatmung)).length],
-    ['Katecholamine', beds.filter(b => b.kreislauf.length > 0).length],
+    ['Frei', beds.filter(b => b.status === '').length],
+    ['Gesperrt', beds.filter(b => BLOCKED.has(b.status)).length],
+    ['NVK', beds.filter(b => b.status.startsWith('NVK')).length],
+    ['INV', beds.filter(b => INVASIV.has(b.beatmung)).length],
+    ['Kreislauf', beds.filter(b => isSet(b.kreislauf)).length],
     ['Dialyse', beds.filter(b => isSet(b.dialyse)).length],
     ['Isolation', beds.filter(b => isSet(b.isolation)).length]
   ];
@@ -627,6 +689,7 @@ function toggleTheme() {
 function init() {
   initTheme();
   buildHead();
+  buildDatalists();
   buildBody();
   renderStats();
   renderLegend();

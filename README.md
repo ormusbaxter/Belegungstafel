@@ -26,21 +26,52 @@ Kreislaufunterstützung · Dialyse · Isolation · TTM · Intervention · Therap
 Telefon · Pflegekraft · Postform · privat · Physiotherapie · Devices ·
 Norton / Stammblatt · Abstriche · Sonstiges
 
-Feldtypen:
+### Herkunft der Auswahlwerte
+
+Die Auswahllisten stammen aus dem Tabellenblatt „Datenquelle“ der bisherigen
+Excel-Belegungstafel und sind wörtlich übernommen:
+
+| Spalte der Tafel | Datenquelle | Werte |
+|---|---|---|
+| Anwesenheitsstatus | A + J | `A >>>`, `●`, `NVK`, `NVK 1–3`, `<<< V` (Gruppe „Belegung“); `Notbett`, `gesperrt`, `Reinigung`, `NA`, `OP`, `CV` (Gruppe „Bettplatz / Aufenthaltsort“) |
+| Fachdisziplin | B | ACH, DIAB, GAST, GCH, INF, INT, KARD, ONKO, RAD, TCH, UCH, X |
+| Beatmungsform | C | INV, NIV, HFNC, NIV/HF, (INV), (NIV), (HFNC), (NIV/HF), MIRUS |
+| Kreislaufunterstützung | D | ECMO, ECOS, ECPELLA, ILA, IMPELLA, pass. SM, PiCCO |
+| Dialyse | E | CiCa, (CiCa) |
+| TTM | F | ❄, ☼ |
+| Postform | G | VK, %, nüchtern, Tee/H2O … Schonkost (26 Kostformen) |
+| Telefon | H | Vorschlagsliste 4149 … 4212, freie Eingabe möglich |
+| Intervention | I | Angio, Broncho, CT, Endo, ggf. OP, HKL, MRT, OP, PTR, RÖ, TEE, VAC, ext. Dial. |
+| Therapielimitierung | M | DNR, DNI, DND, DNR/DNI, DNR/DND, DNR/I/D |
+| Devices | N | ZVK, BDK, ZVK/BDK, keins |
+| Isolation | O | 3MRGN … VRE (25 Einträge) |
+| privat | P | Ankreuzfeld, entspricht dem Wert `ja` |
+| Physiotherapie | Q | Mobi, AT, Mobi+AT, passiv, Rücksprache, keine KG |
+
+Ohne Vorgabe in der Datenquelle und daher frei bzw. mit eigener Liste belegt:
+Patientenname, Pflegekraft, Sonstiges (Freitext), Norton / Stammblatt (zwei
+Ankreuzfelder) und Abstriche (Mehrfachauswahl).
+
+Die Spalten **K** (1, 2, 3) und **L** (N, S, V) der Datenquelle sind noch keiner
+Spalte der Tafel zugeordnet.
+
+### Bedienung der Felder
 
 | Typ | Spalten | Bedienung |
 |---|---|---|
-| Auswahlliste | Anwesenheitsstatus, Fachdisziplin, Beatmungsform, Dialyse, Isolation, TTM, Therapielimitierung, Postform | Klick auf die Zelle, Wert wählen |
-| Mehrfachauswahl | Kreislaufunterstützung, Physiotherapie, Devices, Abstriche | Klick öffnet Dialog, freie Einträge möglich |
+| Auswahlliste | Anwesenheitsstatus, Fachdisziplin, Beatmungsform, Kreislaufunterstützung, Dialyse, Isolation, TTM, Intervention, Therapielimitierung, Postform, Physiotherapie, Devices | Klick auf die Zelle, Wert wählen; leerer Eintrag setzt zurück |
+| Freitext mit Vorschlägen | Telefon | tippen oder Vorschlag wählen |
+| Mehrfachauswahl | Abstriche | Klick öffnet Dialog, freie Einträge möglich |
 | Ankreuzfeld | privat, Norton / Stammblatt | direkt anklicken |
-| Freitext | Patientenname, Intervention, Telefon, Pflegekraft, Sonstiges | direkt tippen |
+| Freitext | Patientenname, Pflegekraft, Sonstiges | direkt tippen |
 
 ## Funktionen
 
 - **Autospeicherung** in den `localStorage` des Browsers; Uhrzeit der letzten Änderung je Bettplatz
-- **Farbkodierung** der Zeilen nach Anwesenheitsstatus, `ISO`-Kennzeichnung bei aktiver Isolation,
+- **Farbkodierung** der Zeilen nach Anwesenheitsstatus (Aufnahme, belegt, NVK, außerhalb der
+  Station, Verlegung, gesperrt), `ISO`-Kennzeichnung bei eingetragener Isolation,
   farbliche Hervorhebung einer hinterlegten Therapielimitierung
-- **Kennzahlen** im Kopf: belegt, frei, invasiv beatmet, Katecholamine, Dialyse, Isolation
+- **Kennzahlen** im Kopf: belegt, frei, gesperrt, NVK, INV, Kreislauf, Dialyse, Isolation
 - **Suche** über alle Felder und Filter „nur belegte Betten“
 - **Bettplatz räumen** über das `×` in der Bettspalte, „Tafel leeren“ für die gesamte Station
 - **Export/Import** als JSON (vollständige Tafel) sowie CSV-Export für Excel
@@ -55,9 +86,8 @@ Auswahllisten lassen sich dort durch Ergänzen der `options`-Arrays an die Gepfl
 der Station anpassen; neue Spalten werden allein durch einen weiteren Eintrag in `COLUMNS`
 angelegt.
 
-Die Spalte **„Postform“** ist mit den üblichen Kostformen (nüchtern, Vollkost, enteral,
-parenteral …) vorbelegt. Ist eine andere Bedeutung gemeint, genügt es, `options` bzw.
-`label` dieses Eintrags zu ändern.
+Alle 20 Spalten passen auf einem 1920 px breiten Bildschirm ohne Querscrollen nebeneinander;
+auf schmaleren Geräten bleiben Anwesenheitsstatus und Bettplatz beim Scrollen stehen.
 
 ## Datenschutz
 
