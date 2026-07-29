@@ -31,15 +31,18 @@ const BEDS = [
  * ------------------------------------------------------------------ */
 const COLUMNS = [
   {
-    /* Datenquelle Spalte A (Belegung) und J (Bettplatz / Aufenthaltsort) */
+    /* Datenquelle Spalte A */
     key: 'status', label: 'Anwesenheitsstatus', head: 'Anwesenheits\u00ADstatus', type: 'status', width: 105,
-    groups: [
-      { label: 'Belegung', options: ['A >>>', '\u25cf', 'NVK', 'NVK 1', 'NVK 2', 'NVK 3', '<<< V'] },
-      { label: 'Bettplatz / Aufenthaltsort', options: ['Notbett', 'gesperrt', 'Reinigung', 'NA', 'OP', 'CV'] }
-    ]
+    options: ['A >>>', '\u25cf', 'NVK', 'NVK 1', 'NVK 2', 'NVK 3', '<<< V']
   },
   { key: 'bed', label: 'Bettplatz', type: 'bed', width: 78 },
-  { key: 'name', label: 'Patientenname', head: 'Patienten\u00ADname', type: 'text', width: 155, placeholder: 'Name, Vorname' },
+  {
+    /* Freitext; die Auswahlliste (Datenquelle Spalte J) ist optional und
+       beschreibt den Bettplatz, wenn kein Patientenname eingetragen ist. */
+    key: 'name', label: 'Patientenname', head: 'Patienten\u00ADname', type: 'datalist',
+    width: 155, placeholder: 'Name, Vorname',
+    options: ['Notbett', 'gesperrt', 'Reinigung', 'NA', 'OP', 'CV']
+  },
   {
     /* Datenquelle Spalte B */
     key: 'disziplin', label: 'Fachdisziplin', head: 'Fach\u00ADdisziplin', type: 'select', width: 62,
@@ -87,7 +90,7 @@ const COLUMNS = [
   {
     /* Datenquelle Spalte H – Vorschlagsliste, freie Eingabe bleibt möglich.
        Die Beschriftung nennt die zugehörige Intervention aus Spalte I. */
-    key: 'telefon', label: 'Telefon', type: 'datalist', width: 62, placeholder: 'Nummer',
+    key: 'telefon', label: 'Telefon', type: 'datalist', inputType: 'tel', width: 62, placeholder: 'Nummer',
     options: [
       { value: '4149', label: 'Angio' },
       { value: '4117', label: 'Broncho' },
@@ -139,7 +142,7 @@ function optionList(col) {
   return col.options.map(o => (typeof o === 'string' ? o : o.value));
 }
 
-/* Status → Farbklasse und Belegungslogik */
+/* Status (Spalte A) → Farbklasse und Belegungslogik */
 const STATUS_CLASS = {
   'A >>>': 'st-aufnahme',
   '\u25cf': 'st-belegt',
@@ -147,7 +150,13 @@ const STATUS_CLASS = {
   'NVK 1': 'st-nvk',
   'NVK 2': 'st-nvk',
   'NVK 3': 'st-nvk',
-  '<<< V': 'st-verlegung',
+  '<<< V': 'st-verlegung'
+};
+const OCCUPIED = new Set(['\u25cf', 'NVK', 'NVK 1', 'NVK 2', 'NVK 3', '<<< V']);
+
+/* Einträge aus Spalte J im Feld Patientenname beschreiben den Bettplatz
+   und färben die Zeile entsprechend ein. */
+const NAME_CLASS = {
   'Notbett': 'st-belegt',
   'gesperrt': 'st-gesperrt',
   'Reinigung': 'st-gesperrt',
@@ -155,8 +164,6 @@ const STATUS_CLASS = {
   'OP': 'st-abwesend',
   'CV': 'st-abwesend'
 };
-const OCCUPIED = new Set(['\u25cf', 'NVK', 'NVK 1', 'NVK 2', 'NVK 3', '<<< V',
-                          'Notbett', 'NA', 'OP', 'CV']);
 const BLOCKED = new Set(['gesperrt', 'Reinigung']);
 const INVASIV = new Set(['INV']);
 
@@ -165,9 +172,9 @@ const LEGEND = [
   ['st-aufnahme', 'A >>> – Aufnahme angekündigt'],
   ['st-belegt', '\u25cf / Notbett – belegt'],
   ['st-nvk', 'NVK, NVK 1–3'],
-  ['st-abwesend', 'NA / OP / CV – Patient außerhalb der Station'],
   ['st-verlegung', '<<< V – Verlegung'],
-  ['st-gesperrt', 'gesperrt / Reinigung'],
+  ['st-abwesend', 'NA / OP / CV im Feld Patientenname'],
+  ['st-gesperrt', 'gesperrt / Reinigung im Feld Patientenname'],
   ['lg-iso', 'Isolation eingetragen – ISO-Kennzeichnung am Bettplatz'],
   ['lg-limit', 'Therapielimitierung hinterlegt']
 ];
@@ -371,12 +378,19 @@ function buildField(bed, col, data) {
     case 'tel':
     case 'datalist': {
       const input = el('input');
-      input.type = col.type === 'text' ? 'text' : 'tel';
+      input.type = col.inputType || 'text';
       if (col.type === 'datalist') input.setAttribute('list', 'dl-' + col.key);
       input.placeholder = col.placeholder || '';
       input.value = data[col.key];
       input.setAttribute('aria-label', col.label + ' – Bett ' + bed.label);
-      input.addEventListener('input', () => { data[col.key] = input.value; touch(bed.id); });
+      input.addEventListener('input', () => {
+        data[col.key] = input.value;
+        if (col.key === 'name') {
+          applyRowState(input.closest('tr'), data);
+          renderStats();
+        }
+        touch(bed.id);
+      });
       input.addEventListener('change', applyFilter);
       return input;
     }
@@ -449,7 +463,8 @@ function renderChips(btn, values) {
 /* Zeilenfarbe, Isolations- und Limitierungskennzeichnung */
 function applyRowState(tr, data) {
   for (const cls of [...tr.classList]) if (cls.startsWith('st-')) tr.classList.remove(cls);
-  tr.classList.add(STATUS_CLASS[data.status] || 'st-frei');
+  tr.classList.add(NAME_CLASS[data.name] || STATUS_CLASS[data.status] || 'st-frei');
+  tr.classList.toggle('name-state', data.name in NAME_CLASS);
   tr.classList.toggle('has-iso', isSet(data.isolation));
   tr.classList.toggle('has-limit', isSet(data.limitierung));
 }
@@ -533,8 +548,8 @@ function renderStats() {
   const beds = BEDS.map(b => state.beds[b.id]);
   const items = [
     ['Belegt', beds.filter(b => OCCUPIED.has(b.status)).length + ' / ' + BEDS.length],
-    ['Frei', beds.filter(b => b.status === '').length],
-    ['Gesperrt', beds.filter(b => BLOCKED.has(b.status)).length],
+    ['Frei', beds.filter(b => b.status === '' && !(b.name in NAME_CLASS)).length],
+    ['Gesperrt', beds.filter(b => BLOCKED.has(b.name)).length],
     ['NVK', beds.filter(b => b.status.startsWith('NVK')).length],
     ['INV', beds.filter(b => INVASIV.has(b.beatmung)).length],
     ['Kreislauf', beds.filter(b => isSet(b.kreislauf)).length],

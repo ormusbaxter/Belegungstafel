@@ -33,7 +33,8 @@ Excel-Belegungstafel und sind wörtlich übernommen:
 
 | Spalte der Tafel | Datenquelle | Werte |
 |---|---|---|
-| Anwesenheitsstatus | A + J | `A >>>`, `●`, `NVK`, `NVK 1–3`, `<<< V` (Gruppe „Belegung“); `Notbett`, `gesperrt`, `Reinigung`, `NA`, `OP`, `CV` (Gruppe „Bettplatz / Aufenthaltsort“) |
+| Anwesenheitsstatus | A | `A >>>`, `●`, `NVK`, `NVK 1`, `NVK 2`, `NVK 3`, `<<< V` |
+| Patientenname | J | Freitext mit optionaler Auswahl: `Notbett`, `gesperrt`, `Reinigung`, `NA`, `OP`, `CV` |
 | Fachdisziplin | B | ACH, DIAB, GAST, GCH, INF, INT, KARD, ONKO, RAD, TCH, UCH, X |
 | Beatmungsform | C | INV, NIV, HFNC, NIV/HF, (INV), (NIV), (HFNC), (NIV/HF), MIRUS |
 | Kreislaufunterstützung | D | ECMO, ECOS, ECPELLA, ILA, IMPELLA, pass. SM, PiCCO |
@@ -48,9 +49,12 @@ Excel-Belegungstafel und sind wörtlich übernommen:
 | privat | P | Ankreuzfeld, entspricht dem Wert `ja` |
 | Physiotherapie | Q | Mobi, AT, Mobi+AT, passiv, Rücksprache, keine KG |
 
+Ein Eintrag aus Spalte J im Feld Patientenname (z. B. `gesperrt` oder `OP`) beschreibt
+den Bettplatz statt eines Patienten: Er wird kursiv dargestellt und färbt die Zeile ein.
+
 Ohne Vorgabe in der Datenquelle und daher frei bzw. mit eigener Liste belegt:
-Patientenname, Pflegekraft, Sonstiges (Freitext), Norton / Stammblatt (zwei
-Ankreuzfelder) und Abstriche (Mehrfachauswahl).
+Pflegekraft, Sonstiges (Freitext), Norton / Stammblatt (zwei Ankreuzfelder)
+und Abstriche (Mehrfachauswahl).
 
 Die Spalten **K** (1, 2, 3) und **L** (N, S, V) der Datenquelle sind noch keiner
 Spalte der Tafel zugeordnet.
@@ -60,10 +64,10 @@ Spalte der Tafel zugeordnet.
 | Typ | Spalten | Bedienung |
 |---|---|---|
 | Auswahlliste | Anwesenheitsstatus, Fachdisziplin, Beatmungsform, Kreislaufunterstützung, Dialyse, Isolation, TTM, Intervention, Therapielimitierung, Postform, Physiotherapie, Devices | Klick auf die Zelle, Wert wählen; leerer Eintrag setzt zurück |
-| Freitext mit Vorschlägen | Telefon | tippen oder Vorschlag wählen |
+| Freitext mit Vorschlägen | Patientenname, Telefon | tippen oder Vorschlag wählen |
 | Mehrfachauswahl | Abstriche | Klick öffnet Dialog, freie Einträge möglich |
 | Ankreuzfeld | privat, Norton / Stammblatt | direkt anklicken |
-| Freitext | Patientenname, Pflegekraft, Sonstiges | direkt tippen |
+| Freitext | Pflegekraft, Sonstiges | direkt tippen |
 
 ## Funktionen
 

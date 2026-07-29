@@ -282,7 +282,7 @@ tr.st-frei td select,
 tr.st-gesperrt td input,
 tr.st-gesperrt td textarea,
 tr.st-gesperrt td select { opacity: .75; }
-tr.st-gesperrt td.col-status select { font-style: italic; }
+tr.name-state td.col-name input { font-style: italic; font-weight: 600; color: var(--ink-soft); }
 
 /* Isolation / Therapielimitierung */
 tr.has-iso td.col-isolation select { color: var(--iso); font-weight: 700; }
