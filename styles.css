@@ -1,0 +1,496 @@
+/* Belegungstafel Intensivstation – Layout und Farbgebung */
+
+:root {
+  --bg: #eef1f5;
+  --panel: #ffffff;
+  --panel-2: #f7f9fc;
+  --ink: #12181f;
+  --ink-soft: #5a6672;
+  --line: #cfd7e0;
+  --line-soft: #e3e9f0;
+  --accent: #1e5f9e;
+  --accent-ink: #ffffff;
+  --danger: #b3261e;
+
+  --st-frei: #f2f4f7;
+  --st-frei-bar: #9aa5b1;
+  --st-geplant: #fff6df;
+  --st-geplant-bar: #d99a00;
+  --st-anwesend: #ffffff;
+  --st-anwesend-bar: #2f7d32;
+  --st-abwesend: #eaf3ff;
+  --st-abwesend-bar: #1e5f9e;
+  --st-weg: #f4eef5;
+  --st-weg-bar: #6b5b8a;
+  --iso: #c62828;
+  --limit: #6a1b9a;
+
+  --row-h: 42px;
+}
+
+html[data-theme="dark"] {
+  --bg: #0f1419;
+  --panel: #171e26;
+  --panel-2: #1d262f;
+  --ink: #e7edf3;
+  --ink-soft: #93a1b0;
+  --line: #2c3742;
+  --line-soft: #232d37;
+  --accent: #4a9eff;
+  --accent-ink: #06131f;
+
+  --st-frei: #1a222b;
+  --st-frei-bar: #55636f;
+  --st-geplant: #2e2716;
+  --st-geplant-bar: #d9a520;
+  --st-anwesend: #171e26;
+  --st-anwesend-bar: #4caf50;
+  --st-abwesend: #14283c;
+  --st-abwesend-bar: #4a9eff;
+  --st-weg: #251f2d;
+  --st-weg-bar: #a58ad0;
+  --iso: #ff6b6b;
+  --limit: #c792ea;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0 0 32px;
+  background: var(--bg);
+  color: var(--ink);
+  font: 14px/1.35 "Segoe UI", Roboto, system-ui, sans-serif;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+/* ---------------- Kopfbereich ---------------- */
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: .2px;
+}
+.brand h1 span {
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+.clock {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 74px;
+  padding: 5px 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+}
+.statval {
+  font-size: 17px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.statlabel {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.tools {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.tools .search input {
+  width: 230px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--ink);
+  font: inherit;
+}
+.chk {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+button {
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+button:hover { background: var(--line-soft); }
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+button.danger { color: var(--danger); border-color: var(--danger); }
+html[data-theme="dark"] button.danger { color: var(--iso); border-color: var(--iso); }
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.savestate {
+  margin: 6px 18px 0;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+.savestate.error { color: var(--danger); font-weight: 600; }
+
+/* ---------------- Tabelle ---------------- */
+.tablewrap {
+  margin: 8px 18px 0;
+  overflow: auto;
+  max-height: calc(100vh - 190px);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.tablewrap.empty::after {
+  content: "Keine Bettplätze entsprechen dem Filter.";
+  display: block;
+  padding: 24px;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  width: max-content;
+  min-width: 100%;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--panel-2);
+  border-bottom: 2px solid var(--line);
+  border-right: 1px solid var(--line-soft);
+  padding: 8px 7px;
+  text-align: left;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--ink-soft);
+  white-space: normal;
+}
+
+tbody td {
+  border-bottom: 1px solid var(--line-soft);
+  border-right: 1px solid var(--line-soft);
+  padding: 2px 5px;
+  vertical-align: middle;
+  height: var(--row-h);
+  background: inherit;
+}
+tbody tr { background: var(--st-anwesend); }
+tbody tr:hover td { box-shadow: inset 0 0 0 9999px rgba(30, 95, 158, .045); }
+
+/* Erste beide Spalten fixiert (Breiten aus COLUMNS: 150 / 92) */
+th.col-status, td.col-status { position: sticky; left: 0; z-index: 15; }
+th.col-bed,    td.col-bed    { position: sticky; left: 150px; z-index: 15; border-right: 2px solid var(--line); }
+thead th.col-status, thead th.col-bed { z-index: 25; }
+/* Statusfarben */
+tr.st-frei     { background: var(--st-frei); }
+tr.st-geplant  { background: var(--st-geplant); }
+tr.st-anwesend { background: var(--st-anwesend); }
+tr.st-abwesend { background: var(--st-abwesend); }
+tr.st-weg      { background: var(--st-weg); }
+
+/* Farbbalken am Zeilenanfang */
+td.col-status { padding-left: 11px; }
+td.col-status::after {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 5px;
+  background: var(--st-frei-bar);
+}
+tr.st-geplant  td.col-status::after { background: var(--st-geplant-bar); }
+tr.st-anwesend td.col-status::after { background: var(--st-anwesend-bar); }
+tr.st-abwesend td.col-status::after { background: var(--st-abwesend-bar); }
+tr.st-weg      td.col-status::after { background: var(--st-weg-bar); }
+
+tr.st-frei td input,
+tr.st-frei td textarea,
+tr.st-frei td select { opacity: .75; }
+
+/* Isolation / Therapielimitierung */
+tr.has-iso td.col-isolation select { color: var(--iso); font-weight: 700; }
+tr.has-iso td.col-bed .bedlabel::after {
+  content: "ISO";
+  margin-left: 5px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: var(--iso);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+tr.has-limit td.col-limitierung select { color: var(--limit); font-weight: 600; }
+
+/* Felder */
+td input[type="text"],
+td input[type="tel"],
+td select,
+td textarea {
+  width: 100%;
+  padding: 4px 5px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+}
+td input:hover, td select:hover, td textarea:hover,
+td .multicell:hover {
+  border-color: var(--line);
+  background: var(--panel);
+}
+td input:focus, td select:focus, td textarea:focus {
+  border-color: var(--accent);
+  background: var(--panel);
+}
+td textarea { resize: vertical; min-height: 30px; line-height: 1.25; }
+td select { appearance: none; cursor: pointer; padding-right: 14px; }
+/* Platzhalter erst beim Bearbeiten zeigen – die Tafel bleibt sonst unruhig */
+td input::placeholder, td textarea::placeholder { color: var(--ink-soft); opacity: 0; }
+td input:focus::placeholder, td textarea:focus::placeholder { opacity: .6; }
+td.col-name input { font-weight: 600; }
+
+/* Bettplatz */
+.bedcell { position: relative; display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; overflow: hidden; }
+.bedlabel {
+  font-size: 17px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .5px;
+  white-space: nowrap;
+}
+.bedtime {
+  font-size: 10px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;
+}
+.clearbed {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0;
+  width: 20px; height: 20px;
+  line-height: 1;
+  border-radius: 50%;
+  border-color: transparent;
+  background: transparent;
+  color: var(--ink-soft);
+  opacity: 0;
+  transition: opacity .12s;
+}
+tr:hover .clearbed, .clearbed:focus-visible { opacity: 1; }
+tr:hover .bedtime { display: none; }
+.clearbed:hover { background: var(--danger); border-color: var(--danger); color: #fff; }
+
+/* Ja/Nein und Mehrfach-Checkboxen */
+.boolcell { display: flex; align-items: center; gap: 4px; justify-content: center; font-size: 12px; color: var(--ink-soft); }
+.checkscell { display: flex; flex-direction: column; gap: 0; }
+.checkscell label { display: flex; align-items: center; gap: 4px; font-size: 11px; line-height: 1.25; cursor: pointer; }
+.checkscell input { width: 12px; height: 12px; }
+.checkscell input, .boolcell input { accent-color: var(--accent); margin: 0; }
+
+/* Mehrfachauswahl-Zelle */
+.multicell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  width: 100%;
+  min-height: 30px;
+  padding: 3px 4px;
+  text-align: left;
+  border-color: transparent;
+  background: transparent;
+}
+.chip {
+  padding: 1px 6px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.chipempty { color: var(--ink-soft); }
+td.col-kreislauf .chip { background: #b3261e; color: #fff; }
+td.col-abstriche .chip { background: #6a4c93; color: #fff; }
+td.col-physio .chip { background: #2f7d32; color: #fff; }
+
+/* ---------------- Legende ---------------- */
+.legend {
+  margin: 14px 18px 0;
+  padding: 12px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.legend h2 { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: var(--ink-soft); }
+.legend ul { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 0; padding: 0; list-style: none; font-size: 12.5px; }
+.legend li { display: flex; align-items: center; gap: 7px; }
+.swatch { width: 18px; height: 12px; border: 1px solid var(--line); border-radius: 3px; display: inline-block; }
+.swatch.st-frei { background: var(--st-frei); }
+.swatch.st-geplant { background: var(--st-geplant); }
+.swatch.st-anwesend { background: var(--st-anwesend); }
+.swatch.st-abwesend { background: var(--st-abwesend); }
+.swatch.st-weg { background: var(--st-weg); }
+.swatch.lg-iso { background: var(--iso); border-color: var(--iso); }
+.swatch.lg-limit { background: var(--limit); border-color: var(--limit); }
+.hint { margin: 10px 0 0; font-size: 11.5px; color: var(--ink-soft); }
+
+/* ---------------- Dialoge ---------------- */
+.dlg {
+  width: min(560px, 92vw);
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--ink);
+}
+.dlg::backdrop { background: rgba(10, 16, 22, .5); }
+.dlg h2 { margin: 0; font-size: 17px; }
+.dlgsub { margin: 3px 0 12px; font-size: 12.5px; color: var(--ink-soft); }
+.opts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 3px 12px;
+  max-height: 48vh;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+.opt { display: flex; align-items: center; gap: 6px; padding: 3px 4px; border-radius: 5px; cursor: pointer; }
+.opt:hover { background: var(--line-soft); }
+.opt input { accent-color: var(--accent); }
+.opt.custom span { font-style: italic; }
+.customrow { display: flex; gap: 8px; margin-top: 10px; }
+.customrow input {
+  flex: 1;
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--ink);
+  font: inherit;
+}
+.dlgmenu { display: flex; gap: 8px; align-items: center; margin: 14px 0 0; padding: 0; flex-wrap: wrap; }
+.dlgmenu .spacer { flex: 1; }
+
+/* ---------------- Druck ---------------- */
+@media print {
+  @page { size: A3 landscape; margin: 8mm; }
+
+  body { background: #fff; color: #000; font-size: 9px; padding: 0; }
+  .topbar { position: static; border: none; padding: 0 0 6px; background: none; }
+  .tools, .clearbed, .savestate, .hint, .chk { display: none !important; }
+  .brand h1 { font-size: 14px; }
+  .stats { gap: 4px; }
+  .stat { padding: 2px 6px; min-width: 0; }
+
+  .tablewrap {
+    margin: 0;
+    max-height: none;
+    overflow: visible;
+    border: none;
+    border-radius: 0;
+  }
+  table { width: 100%; table-layout: auto; }
+  thead th {
+    position: static;
+    font-size: 7.5px;
+    padding: 3px 2px;
+    border: 1px solid #666;
+    color: #000;
+    background: #eee;
+  }
+  th.col-status, th.col-bed, td.col-bed { position: static; }
+  td.col-status { position: relative; }
+  tbody td {
+    height: auto;
+    padding: 2px;
+    border: 1px solid #999;
+    font-size: 8.5px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  tbody tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  td input, td select, td textarea, td .multicell {
+    border: none !important;
+    background: none !important;
+    padding: 0 !important;
+    font-size: 8.5px;
+    color: #000;
+    overflow: visible;
+  }
+  td textarea { min-height: 0; height: auto; resize: none; }
+  .bedlabel { font-size: 11px; }
+  .bedtime { display: none; }
+  .chip { background: none !important; color: #000 !important; padding: 0; }
+  .chip:not(:last-child)::after { content: ","; }
+  .legend { border: none; padding: 6px 0 0; margin: 6px 0 0; }
+  .dlg { display: none !important; }
+  :focus, :focus-visible { outline: none !important; }
+}

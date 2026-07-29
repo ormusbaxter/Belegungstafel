@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Belegungstafel Intensivstation</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <h1>Belegungstafel <span>Intensivstation</span></h1>
+    <p class="clock" id="clock">–</p>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="tools">
+    <label class="search">
+      <span class="sr-only">Suchen</span>
+      <input type="search" id="search" placeholder="Suchen (Name, Diagnose, Pflegekraft …)">
+    </label>
+    <label class="chk"><input type="checkbox" id="onlyOccupied"> nur belegte Betten</label>
+    <button type="button" id="btnPrint">Drucken</button>
+    <button type="button" id="btnExport">Export</button>
+    <button type="button" id="btnImport">Import</button>
+    <button type="button" id="btnTheme" title="Hell / Dunkel">◐</button>
+    <button type="button" id="btnClearAll" class="danger">Tafel leeren</button>
+    <input type="file" id="fileInput" accept="application/json" hidden>
+  </div>
+</header>
+
+<p class="savestate" id="saveState">Bereit</p>
+
+<main class="tablewrap" id="tablewrap">
+  <table id="board">
+    <thead id="thead"></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</main>
+
+<section class="legend">
+  <h2>Legende</h2>
+  <ul id="legend"></ul>
+  <p class="hint">
+    Eingaben werden automatisch lokal im Browser gespeichert (localStorage) – es werden keine Daten
+    an einen Server übertragen. Für den Datenaustausch zwischen Geräten bitte Export/Import verwenden.
+  </p>
+</section>
+
+<!-- Mehrfachauswahl -->
+<dialog id="multiDlg" class="dlg">
+  <h2 id="multiTitle">Auswahl</h2>
+  <p class="dlgsub" id="multiSub"></p>
+  <div class="opts" id="multiOpts"></div>
+  <div class="customrow">
+    <input type="text" id="multiCustom" placeholder="Eigener Eintrag …">
+    <button type="button" id="multiAdd">Hinzufügen</button>
+  </div>
+  <menu class="dlgmenu">
+    <button type="button" id="multiClear" class="danger">Alle entfernen</button>
+    <span class="spacer"></span>
+    <button type="button" id="multiCancel">Abbrechen</button>
+    <button type="button" id="multiOk" class="primary">Übernehmen</button>
+  </menu>
+</dialog>
+
+<!-- Export -->
+<dialog id="exportDlg" class="dlg">
+  <h2>Export</h2>
+  <p class="dlgsub">Format wählen. Die Datei wird lokal heruntergeladen.</p>
+  <menu class="dlgmenu">
+    <button type="button" id="expJson" class="primary">JSON (mit Import wieder einlesbar)</button>
+    <button type="button" id="expCsv">CSV (Excel)</button>
+    <span class="spacer"></span>
+    <button type="button" id="expCancel">Schließen</button>
+  </menu>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>
