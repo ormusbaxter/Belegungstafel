@@ -7,7 +7,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '1.0.0';
+const VERSION = '1.0.1';
 const COPYRIGHT = '\u00A9 2026 Oliver Becker';
 
 /* ------------------------------------------------------------------ *
@@ -216,9 +216,13 @@ const STATUS_CLASS = {
   'NVK 3': 'st-nvk',
   '<<< V': 'st-verlegung'
 };
-/* Jeder gesetzte Anwesenheitsstatus zählt als belegt – so wirken auch
-   selbst vergebene oder umbenannte Werte ohne weitere Anpassung. */
-const isOccupied = data => data.status !== '';
+/* Belegt ist ein Bettplatz, sobald ein Anwesenheitsstatus oder eine
+   Fachdisziplin eingetragen ist – so wirken auch selbst vergebene oder
+   umbenannte Werte ohne weitere Anpassung. Ein als gesperrt oder in
+   Reinigung gekennzeichneter Platz zählt dagegen nie. */
+const BLOCKING_NAMES = new Set(['gesperrt', 'Reinigung']);
+const isOccupied = data => !BLOCKING_NAMES.has(data.name) &&
+  (data.status !== '' || data.disziplin !== '');
 
 /* Einträge aus Spalte J im Feld Patientenname beschreiben den Bettplatz
    und färben die Zeile entsprechend ein. */
@@ -954,7 +958,7 @@ function addDays(iso, days) {
 function applyRowState(tr, data) {
   for (const cls of [...tr.classList]) if (cls.startsWith('st-')) tr.classList.remove(cls);
   tr.classList.add(NAME_CLASS[data.name] || STATUS_CLASS[data.status] ||
-    (data.status ? 'st-belegt' : 'st-frei'));
+    (isOccupied(data) ? 'st-belegt' : 'st-frei'));
   tr.classList.toggle('name-state', data.name in NAME_CLASS);
   tr.classList.toggle('has-iso', isSet(data.isolation));
   tr.classList.toggle('has-limit', isSet(data.limitierung));

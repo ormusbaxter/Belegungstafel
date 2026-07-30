@@ -139,14 +139,16 @@
 
     <section>
       <h3>Wann ein Bett als belegt zählt</h3>
-      <p>Die Kennzahl <b>belegte Betten</b> im Kopf zählt jeden Bettplatz, bei dem in der ersten
-        Spalte ein <b>Anwesenheitsstatus</b> gesetzt ist – gleich welcher. Angekündigte Aufnahmen
-        und anstehende Verlegungen zählen also mit.</p>
+      <p>Die Kennzahl <b>belegte Betten</b> im Kopf zählt jeden Bettplatz, bei dem ein
+        <b>Anwesenheitsstatus</b> – gleich welcher – <b>oder</b> eine <b>Fachdisziplin</b>
+        eingetragen ist. Angekündigte Aufnahmen und anstehende Verlegungen zählen also mit,
+        ebenso ein Patient, bei dem zunächst nur die Fachrichtung feststeht.</p>
       <ul>
-        <li>Leerer Status = freier Bettplatz, zählt nicht.</li>
+        <li>Weder Status noch Fachdisziplin = freier Bettplatz, zählt nicht.</li>
         <li>Ein Eintrag wie <b>gesperrt</b> oder <b>Reinigung</b> im Feld Patientenname
           beschreibt den Bettplatz statt eines Patienten: Er wird kursiv dargestellt, färbt die
-          Zeile grau und zählt nicht als belegt.</li>
+          Zeile grau und zählt nie als belegt – auch dann nicht, wenn noch ein Status oder eine
+          Fachdisziplin eingetragen ist.</li>
         <li><b>Screening fällig</b> zählt die Bettplätze, deren Screening-Datum erreicht oder
           überschritten ist.</li>
       </ul>

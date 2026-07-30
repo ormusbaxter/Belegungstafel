@@ -88,7 +88,9 @@ Spalte der Tafel zugeordnet.
   Station, Verlegung, gesperrt), `ISO`-Kennzeichnung bei eingetragener Isolation,
   farbliche Hervorhebung einer hinterlegten Therapielimitierung
 - **Kopfbereich**: belegte Betten (x / 13; belegt ist jeder Bettplatz mit gesetztem
-  Anwesenheitsstatus, unabhängig davon, welche Werte in den Einstellungen hinterlegt sind), maximale Bettenzahl als Eingabefeld mit
+  Anwesenheitsstatus **oder** eingetragener Fachdisziplin, unabhängig davon, welche Werte in
+  den Einstellungen hinterlegt sind; `gesperrt` oder `Reinigung` im Feld Patientenname zählt
+  nie), maximale Bettenzahl als Eingabefeld mit
   festem Zusatz „+ 1“ für das Notbett, Meldestatus als farbiges Auswahlfeld
   (grün / gelb / rot) und Anzahl der fälligen Screenings; darunter Schichtleitung,
   Blutzuständigkeit und Notfallequipment mit jeweils zugehöriger Telefonnummer.
