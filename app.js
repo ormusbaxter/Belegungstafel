@@ -7,7 +7,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '1.2.0';
+const VERSION = '1.2.1';
 const COPYRIGHT = '\u00A9 2026 Oliver Becker';
 
 /* ------------------------------------------------------------------ *
@@ -1929,10 +1929,13 @@ function tickClock() {
     d.getFullYear() + ' · ' + timeStr(d) + ':' + pad(d.getSeconds()) + ' Uhr';
 }
 
-/* Liegt eine Datei logo.png neben index.html, ersetzt sie den Platzhalter. */
+/* Liegt eine Datei logo.png neben index.html, ersetzt sie den Platzhalter.
+   Das Bild kann bereits geladen sein, bevor der Listener greift. */
 function initLogo() {
   const img = $('#logoImg');
-  img.addEventListener('load', () => $('#logo').classList.add('has-image'));
+  const zeigen = () => $('#logo').classList.add('has-image');
+  if (img.complete && img.naturalWidth > 0) zeigen();
+  img.addEventListener('load', zeigen);
 }
 
 function initTheme() {

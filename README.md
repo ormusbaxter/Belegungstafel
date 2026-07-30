@@ -82,7 +82,9 @@ Spalte der Tafel zugeordnet.
 
 - **Firmenlogo**: Der quadratische Platzhalter links im Seitenkopf zeigt eine Datei
   `logo.png`, sobald sie neben `index.html` liegt; ohne Datei bleibt der Platzhalter stehen
-  und wird nicht mitgedruckt
+  und wird nicht mitgedruckt. Mitgeliefert wird ein schlichtes Kreuzzeichen (`logo.png`,
+  512 × 512 px mit Transparenz); die Quelle dazu liegt als `logo.svg` daneben – dort lassen
+  sich Farbwert (`#E9450C`) und Strichstärke ändern, anschließend neu als PNG ausgeben
 - **Autospeicherung** in den `localStorage` des Browsers
 - **Farbkodierung** der Zeilen nach Anwesenheitsstatus (Aufnahme, belegt, NVK, außerhalb der
   Station, Verlegung, gesperrt), `ISO`-Kennzeichnung bei eingetragener Isolation,

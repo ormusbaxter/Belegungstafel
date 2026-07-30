@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="512" height="512">
+  <defs>
+    <mask id="mv">
+      <rect width="120" height="120" fill="#fff"/>
+      <rect x="36" y="70" width="14" height="14" fill="#000"/>
+      <rect x="70" y="36" width="14" height="14" fill="#000"/>
+    </mask>
+    <mask id="mh">
+      <rect width="120" height="120" fill="#fff"/>
+      <rect x="36" y="36" width="14" height="14" fill="#000"/>
+      <rect x="70" y="70" width="14" height="14" fill="#000"/>
+    </mask>
+  </defs>
+  <g fill="none" stroke="#E9450C" stroke-width="8">
+    <rect x="43" y="20" width="34" height="80" rx="17" mask="url(#mv)"/>
+    <rect x="20" y="43" width="80" height="34" rx="17" mask="url(#mh)"/>
+  </g>
+</svg>
