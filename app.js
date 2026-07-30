@@ -657,13 +657,20 @@ function autoSizeColumns() {
   const statusValues = [...optionList(COL_BY_KEY.status), ' '];
   const status = widestText(statusValues, getComputedStyle(select).font);
   setColumnWidth(document.querySelector('#thead th.col-status'),
-    Math.max(46, Math.ceil(status) + 26));
+    Math.max(46, Math.ceil(status) + 30));
 
   /* Platz für das Kennzeichen ISO nur, wenn eine Isolation eingetragen ist. */
   const iso = BEDS.some(bed => state.beds[bed.id] && state.beds[bed.id].isolation.length) ? 32 : 0;
   const beds = widestText(BEDS.map(bed => bed.label), getComputedStyle(label).font);
   setColumnWidth(document.querySelector('#thead th.col-bed'),
     Math.max(52, Math.ceil(beds) + 34 + iso));
+
+  const nameField = document.querySelector('#tbody td.col-name input');
+  if (!nameField) return;
+  const names = BEDS.map(bed => (state.beds[bed.id] || {}).name || '');
+  const name = widestText(names, getComputedStyle(nameField).font);
+  setColumnWidth(document.querySelector('#thead th.col-name'),
+    Math.min(300, Math.max(96, Math.ceil(name) + 34)));
 }
 
 /* Der Versatz der fixierten Bettplatz-Spalte richtet sich nach der
@@ -774,6 +781,13 @@ function buildField(bed, col, data) {
         }
         touch(bed.id);
       });
+      /* Die Namensspalte richtet sich nach dem längsten Eintrag; die Breite
+         wird erst beim Verlassen des Feldes angepasst, damit es beim Tippen
+         nicht springt. */
+      if (col.key === 'name') {
+        input.addEventListener('change', () => { autoSizeColumns(); measureSticky(); });
+        input.addEventListener('blur', () => { autoSizeColumns(); measureSticky(); });
+      }
       if (col.type !== 'datalist') return input;
 
       /* Eigene Klappliste: Sie zeigt immer alle hinterlegten Einträge, auch

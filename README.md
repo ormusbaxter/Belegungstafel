@@ -157,9 +157,12 @@ Liste im Einstellungsdialog erscheinen, genügt ein Eintrag in `OPTION_CATEGORIE
 Alle 20 Spalten passen auf einem 1920 px breiten Bildschirm ohne Querscrollen nebeneinander;
 auf schmaleren Geräten bleiben Anwesenheitsstatus und Bettplatz beim Scrollen stehen.
 
-Die beiden ersten Spalten richten sich in der Breite nach ihrem Inhalt: gemessen werden der
-längste Statuswert und die längste Bettbezeichnung, Platz für das Kennzeichen `ISO` kommt nur
-hinzu, wenn eine Isolation eingetragen ist. Die Spalte „Sonstiges“ hat keine feste Breite und
+Spaltenköpfe und Zellinhalte sind mittig ausgerichtet.
+
+Die drei ersten Spalten richten sich in der Breite nach ihrem Inhalt: gemessen werden der
+längste Statuswert, die längste Bettbezeichnung und der längste eingetragene Patientenname
+(mindestens 96, höchstens 300 px, aktualisiert beim Verlassen des Feldes). Platz für das
+Kennzeichen `ISO` kommt nur hinzu, wenn eine Isolation eingetragen ist. Die Spalte „Sonstiges“ hat keine feste Breite und
 nimmt den verbleibenden Platz auf, sodass alle übrigen Spalten genau ihre Vorgabe behalten.
 
 ## Datenschutz
