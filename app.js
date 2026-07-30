@@ -7,7 +7,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '1.4.1';
+const VERSION = '1.5.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -351,6 +351,12 @@ function slideItem(props) {
            on: true, seconds: null, ...props };
 }
 
+/* Größe der Darstellung in Prozent – muss vor dem ersten Lesen der
+   Einstellungen bereitstehen. */
+const ZOOM_MIN = 25;
+const ZOOM_MAX = 300;
+const clampZoom = value => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(value) || 100));
+
 const SETTINGS_KEY = 'belegungstafel.einstellungen';
 
 let settings = loadSettings();
@@ -365,7 +371,8 @@ function loadSettings() {
     /* Ein Stil je Spalte, nicht je Eintrag */
     styles: Object.fromEntries(OPTION_CATEGORIES.filter(c => c.kind === 'text').map(c => [c.key, {}])),
     privacy: { on: true, seconds: 120 },
-    screensaver: copy(DEFAULT_SAVER)
+    screensaver: copy(DEFAULT_SAVER),
+    zoom: 100
   };
   let stored = null;
   try {
@@ -419,6 +426,8 @@ function mergeSettings(target, source) {
     const seconds = parseInt(source.privacy.seconds, 10);
     if (Number.isFinite(seconds)) target.privacy.seconds = Math.min(3600, Math.max(5, seconds));
   }
+  const zoom = parseInt(source.zoom, 10);
+  if (Number.isFinite(zoom)) target.zoom = clampZoom(zoom);
   mergeSaver(target.screensaver, source.screensaver);
 }
 
@@ -490,6 +499,27 @@ function applySettings() {
   }
   privacyDelay = settings.privacy.on ? settings.privacy.seconds : 0;
   saverDelay = settings.screensaver.on ? settings.screensaver.seconds : 0;
+  applyZoom(settings.zoom);
+}
+
+/* Vergrößerung der Tafel. Der Wert steuert die CSS-Eigenschaft zoom von
+   Kopfbereich, Tabelle und Textfeldern; Dialoge, Hilfe und Bildschirmschoner
+   bleiben unverändert, ebenso der Ausdruck. */
+let zoomFactor = 1;
+
+function applyZoom(percent) {
+  zoomFactor = clampZoom(percent) / 100;
+  document.documentElement.style.setProperty('--zoom', String(zoomFactor));
+  updateStickyHeader();
+}
+
+/* Bei starker Vergrößerung würde der mitlaufende Kopfbereich fast den ganzen
+   Schirm verdecken; ab zwei Fünfteln der Höhe scrollt er deshalb mit weg. */
+function updateStickyHeader() {
+  const bar = document.querySelector('.topbar');
+  if (!bar) return;
+  const hoch = bar.offsetHeight * zoomFactor > window.innerHeight * 0.4;
+  document.body.classList.toggle('flatheader', hoch);
 }
 
 const NOTE_FIELDS = [
@@ -698,12 +728,18 @@ function openCombo(input, col) {
   });
 
   document.body.appendChild(list);
+  /* Gemessen wird sichtbar auf dem Schirm, gesetzt wird im eigenen Maßstab
+     der Liste – deshalb die Umrechnung über den Zoom. */
   const rect = input.getBoundingClientRect();
-  const height = list.getBoundingClientRect().height;
+  const own = list.getBoundingClientRect();
   const below = window.innerHeight - rect.bottom;
-  list.style.left = Math.round(Math.min(rect.left, window.innerWidth - list.offsetWidth - 8)) + 'px';
-  list.style.top = Math.round(below < height && rect.top > height ? rect.top - height - 2 : rect.bottom + 2) + 'px';
-  list.style.minWidth = Math.round(rect.width) + 'px';
+  const left = Math.min(rect.left, window.innerWidth - own.width - 8);
+  const top = below < own.height && rect.top > own.height
+    ? rect.top - own.height - 2
+    : rect.bottom + 2;
+  list.style.left = Math.round(left / zoomFactor) + 'px';
+  list.style.top = Math.round(top / zoomFactor) + 'px';
+  list.style.minWidth = Math.round(rect.width / zoomFactor) + 'px';
   comboOpen = { list, input };
 }
 
@@ -818,8 +854,9 @@ function autoSizeText({ key, min, max, extra }) {
 function measureSticky() {
   const th = document.querySelector('#thead th.col-status');
   if (!th) return;
-  const width = Math.round(th.getBoundingClientRect().width);
-  document.documentElement.style.setProperty('--sticky-left', width + 'px');
+  /* offsetWidth statt getBoundingClientRect: der Wert bleibt vom Zoom der
+     Tabelle unberührt und passt damit zur Angabe in left. */
+  document.documentElement.style.setProperty('--sticky-left', th.offsetWidth + 'px');
 }
 
 function buildBody() {
@@ -1348,6 +1385,43 @@ function renderGeneralPane(pane) {
     saverTime.field.disabled = !on;
   }));
   pane.appendChild(saverTime);
+
+  pane.appendChild(el('h3', null, '3. Größe der Darstellung'));
+  pane.appendChild(el('p', 'panehint',
+    'Vergrößert oder verkleinert die ganze Tafel – Kopfbereich, Tabelle und die Textfelder ' +
+    'darunter – passend zu Monitor und Auflösung. Die Änderung ist sofort im Hintergrund zu ' +
+    'sehen und gilt erst mit „Übernehmen“ dauerhaft. Dialoge, Hilfe, Bildschirmschoner und ' +
+    'der Ausdruck bleiben unverändert.'));
+
+  const row = el('div', 'setrow zoomrow');
+  row.appendChild(el('span', null, 'Zoom'));
+  const slider = el('input', 'zoomslider');
+  slider.type = 'range';
+  slider.min = String(ZOOM_MIN);
+  slider.max = String(ZOOM_MAX);
+  slider.step = '5';
+  slider.value = String(draft.zoom);
+  slider.setAttribute('aria-label', 'Größe der Darstellung in Prozent');
+  const value = el('span', 'zoomvalue', draft.zoom + ' %');
+  slider.addEventListener('input', () => {
+    draft.zoom = clampZoom(parseInt(slider.value, 10));
+    value.textContent = draft.zoom + ' %';
+    applyZoom(draft.zoom);
+  });
+  row.appendChild(slider);
+  row.appendChild(value);
+
+  const back = el('button', 'entrybtn zoomreset', '100 %');
+  back.type = 'button';
+  back.title = 'auf 100 % zurücksetzen';
+  back.addEventListener('click', () => {
+    draft.zoom = 100;
+    slider.value = '100';
+    value.textContent = '100 %';
+    applyZoom(100);
+  });
+  row.appendChild(back);
+  pane.appendChild(row);
 }
 
 /* Beschriftung der Spaltenköpfe */
@@ -1631,6 +1705,7 @@ function commitSettings() {
       : draft.options[cat.key].map(e => e.trim()).filter(Boolean);
   }
   draft.privacy.seconds = Math.min(3600, Math.max(5, draft.privacy.seconds || 120));
+  draft.zoom = clampZoom(draft.zoom);
 
   /* Bildschirmschoner: Zeiten begrenzen, leere Einträge verwerfen */
   const saver = draft.screensaver;
@@ -1694,6 +1769,9 @@ function initSettings() {
   });
   $('#settingsSave').addEventListener('click', commitSettings);
   $('#settingsCancel').addEventListener('click', () => $('#settingsDlg').close());
+  /* Wird der Dialog ohne „Übernehmen“ geschlossen, gilt wieder die
+     gespeicherte Größe – die Vorschau des Schiebereglers verfällt. */
+  $('#settingsDlg').addEventListener('close', () => applyZoom(settings.zoom));
   $('#settingsReset').addEventListener('click', resetCategory);
 }
 
@@ -2572,6 +2650,7 @@ function init() {
   });
   window.addEventListener('resize', () => {
     measureSticky();
+    updateStickyHeader();
     if (saverOn) fitSlide();
   });
   window.addEventListener('beforeunload', writeNow);

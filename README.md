@@ -139,8 +139,9 @@ Spalte der Tafel zugeordnet.
   das Ergebnis sofort. Die Angaben gelten in der Tabelle für das Auswahlfeld der Spalte und
   für alle Marken der Mehrfachauswahl und bleiben im Ausdruck erhalten.
   Unter „Allgemein“ als Punkt 1 der Sichtschutz und als Punkt 2 der Bildschirmschoner –
-  jeweils mit Ein/Aus und Zeit in Sekunden –, unter „Bildschirmschoner“ die Inhalte der
-  Diaschau, unter „Daten“ Export, Import und „Tafel leeren“.
+  jeweils mit Ein/Aus und Zeit in Sekunden – sowie als Punkt 3 die Größe der Darstellung,
+  unter „Bildschirmschoner“ die Inhalte der Diaschau, unter „Daten“ Export, Import und
+  „Tafel leeren“.
   Ein Wert, der in einem Bettplatz steht, bleibt erhalten, auch wenn er später aus der
   Liste entfernt wird
 - **Sichtschutz**: Nach der eingestellten Zeit ohne Eingabe (Voreinstellung 120 Sekunden)
@@ -168,6 +169,14 @@ Spalte der Tafel zugeordnet.
   über `slides/slides.json`, über die Verzeichnisübersicht des Webservers oder durch eine
   Eingabe von Hand („Ordner einlesen“ bzw. „+ Datei von Hand“ in den Einstellungen);
   Einzelheiten stehen in `slides/LIESMICH.txt`
+- **Größe der Darstellung**: Schieberegler in den Einstellungen unter „Allgemein“ (Punkt 3),
+  **25 % bis 300 %** in Schritten von 5 %, passend zu Monitor und Auflösung. Er wirkt über die
+  CSS-Eigenschaft `zoom` auf Kopfbereich, Stationszeile, Tabelle und die Textfelder darunter;
+  Dialoge, Hilfe, Bildschirmschoner und der Ausdruck bleiben unverändert. Die Größe wird beim
+  Schieben sofort angezeigt, gilt aber erst mit „Übernehmen“ dauerhaft; „Abbrechen“ stellt den
+  gespeicherten Wert wieder her. Die sichtbare Höhe der Tabelle rechnet den Zoom mit ein, und
+  ab einem Kopfbereich von mehr als zwei Fünfteln der Bildschirmhöhe läuft dieser nicht mehr
+  mit, damit die Tabelle nutzbar bleibt
 - **Bedienleiste** oben rechts: „Datenschutz“, „Diaschau“ und „Drucken“ mit Symbol sowie die
   Hell-/Dunkel-Umschaltung. Export, Import und „Tafel leeren“ stehen in den Einstellungen
   unter „Daten“

@@ -35,6 +35,9 @@
   --pfeil-ab: #8e1c1c;
 
   --row-h: 42px;
+
+  /* Größe der Tafel, über die Einstellungen zwischen 0.25 und 3 */
+  --zoom: 1;
 }
 
 html[data-theme="dark"] {
@@ -73,6 +76,12 @@ html[data-theme="dark"] {
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
+
+/* Die Tafel selbst folgt dem eingestellten Zoom; Dialoge, Hilfe,
+   Bildschirmschoner und der Ausdruck bleiben davon unberührt. */
+.topbar, .stationbar, .savestate, .tablewrap, .notes { zoom: var(--zoom); }
+/* Sehr großer Kopfbereich läuft nicht mit, sonst bliebe kein Platz mehr. */
+body.flatheader .topbar { position: static; }
 .printcol { display: none; }
 
 body {
@@ -316,7 +325,11 @@ button.undo { margin-left: 10px; padding: 1px 9px; font-size: 11px; border-radiu
 .tablewrap {
   margin: 8px 18px 0;
   overflow: auto;
-  max-height: calc(100vh - 300px);
+  /* Sichtbare Höhe abzüglich Kopfbereich und Textfeldern; beide wachsen mit
+     dem Zoom, deshalb wird die Bildschirmhöhe durch den Zoom geteilt. Bei
+     starker Vergrößerung bleibt eine Mindesthöhe stehen – dann scrollt die
+     Seite statt die Tabelle zu verschwinden. */
+  max-height: max(220px, calc(100vh / var(--zoom) - 300px));
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -532,9 +545,12 @@ tr:hover .clearbed, .clearbed:focus-visible { opacity: 1; }
 }
 .combobtn:hover { background: var(--line-soft); color: var(--accent); opacity: 1; }
 
+/* Die Liste hängt am Seitenkörper, nicht in der Tabelle; sie folgt dem Zoom
+   selbst, ihre Position rechnet openCombo() entsprechend um. */
 .combolist {
   position: fixed;
   z-index: 70;
+  zoom: var(--zoom);
   max-height: 260px;
   overflow: auto;
   padding: 4px;
@@ -736,6 +752,24 @@ tr:hover .clearbed, .clearbed:focus-visible { opacity: 1; }
 }
 .setrow .unit { color: var(--ink-soft); font-size: 12.5px; }
 .settingspane h3 ~ h3 { margin-top: 20px; }
+
+/* Schieberegler für die Größe der Darstellung */
+.zoomrow { gap: 12px; }
+.zoomslider {
+  flex: 1;
+  min-width: 160px;
+  height: 22px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.zoomvalue {
+  width: 58px;
+  flex: none;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.zoomreset { width: auto; padding: 0 8px; font-size: 12px; }
 
 /* Inhalte des Bildschirmschoners */
 .slidebar { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 4px; }
@@ -1108,6 +1142,9 @@ body.saver-on { overflow: hidden; }
 
 @media print {
   @page { size: A4 landscape; margin: 7mm; }
+
+  /* Der Bildschirmzoom gilt nicht für das Blatt */
+  .topbar, .stationbar, .savestate, .tablewrap, .notes { zoom: 1 !important; }
 
   html, body {
     background: #fff;
