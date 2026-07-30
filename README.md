@@ -123,7 +123,8 @@ Spalte der Tafel zugeordnet.
   Farbauswahl erfolgt über 16 feste Farbkästchen plus „Standard“; eine Beispielmarke zeigt
   das Ergebnis sofort. Die Angaben gelten in der Tabelle für das Auswahlfeld der Spalte und
   für alle Marken der Mehrfachauswahl und bleiben im Ausdruck erhalten.
-  Unter „Allgemein“ der Sichtschutz mit Ein/Aus und Zeit in Sekunden.
+  Unter „Allgemein“ der Sichtschutz mit Ein/Aus und Zeit in Sekunden, unter „Daten“
+  Export, Import und „Tafel leeren“.
   Ein Wert, der in einem Bettplatz steht, bleibt erhalten, auch wenn er später aus der
   Liste entfernt wird
 - **Sichtschutz**: Nach der eingestellten Zeit ohne Eingabe (Voreinstellung 120 Sekunden)
@@ -133,11 +134,13 @@ Spalte der Tafel zugeordnet.
   „Abdunkeln“ schaltet sofort um und bleibt dann bis zu einem Klick oder Tastendruck
   bestehen. Bettplatz, Anwesenheitsstatus und die Kennzahlen bleiben lesbar, der Ausdruck
   wird nie unkenntlich gemacht
-- **Suche** über alle Felder und Filter „nur belegte Betten“
-- **Bettplatz räumen** über das `×` in der Bettspalte, „Tafel leeren“ für die gesamte Station
-- **Export/Import** als JSON (vollständige Tafel) sowie CSV-Export für Excel
+- **Bedienleiste** oben rechts: „Abdunkeln“ und „Drucken“ mit Symbol sowie die
+  Hell-/Dunkel-Umschaltung. Export, Import und „Tafel leeren“ stehen in den Einstellungen
+  unter „Daten“
+- **Bettplatz räumen** über das `×` in der Bettspalte
+- **Export/Import** als JSON (Belegung, Angaben zur Schicht und Einstellungen) sowie
+  CSV-Export für Excel
 - **Druckansicht** (A3 quer) mit ausgeblendeter Bedienleiste
-- **Hell-/Dunkelansicht** über die Schaltfläche ◐
 - Änderungen werden zwischen mehreren Browser-Tabs desselben Rechners abgeglichen
 
 ## Anpassung

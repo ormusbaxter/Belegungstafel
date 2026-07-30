@@ -678,7 +678,6 @@ function buildField(bed, col, data) {
         applyRowState(sel.closest('tr'), data);
         touch(bed.id);
         renderStats();
-        applyFilter();
       });
       return sel;
     }
@@ -699,7 +698,6 @@ function buildField(bed, col, data) {
         }
         touch(bed.id);
       });
-      input.addEventListener('change', applyFilter);
       if (col.type !== 'datalist') return input;
 
       /* Eigene Klappliste: Sie zeigt immer alle hinterlegten Einträge, auch
@@ -733,7 +731,6 @@ function buildField(bed, col, data) {
       ta.value = data[col.key];
       ta.setAttribute('aria-label', col.label + ' – Bett ' + bed.label);
       ta.addEventListener('input', () => { data[col.key] = ta.value; touch(bed.id); });
-      ta.addEventListener('change', applyFilter);
       return ta;
     }
 
@@ -862,7 +859,6 @@ function clearBed(bed) {
   tr.replaceWith(buildRow(bed));
   save();
   renderStats();
-  applyFilter();
 }
 
 /* ------------------------------------------------------------------ *
@@ -882,20 +878,22 @@ function openSettings() {
 function renderTabs() {
   const box = $('#settingsTabs');
   box.replaceChildren();
-  const tabs = [{ key: 'allgemein', label: 'Allgemein' }, ...OPTION_CATEGORIES];
+  const tabs = [{ key: 'allgemein', label: 'Allgemein' }, ...OPTION_CATEGORIES,
+                { key: 'daten', label: 'Daten' }];
   for (const tab of tabs) {
     const btn = el('button', 'tab' + (tab.key === activeTab ? ' active' : ''), tab.label);
     btn.type = 'button';
     btn.addEventListener('click', () => { activeTab = tab.key; renderTabs(); renderPane(); });
     box.appendChild(btn);
   }
-  $('#settingsReset').hidden = activeTab === 'allgemein';
+  $('#settingsReset').hidden = activeTab === 'allgemein' || activeTab === 'daten';
 }
 
 function renderPane() {
   const pane = $('#settingsPane');
   pane.replaceChildren();
   if (activeTab === 'allgemein') return renderGeneralPane(pane);
+  if (activeTab === 'daten') return renderDataPane(pane);
 
   const cat = OPTION_CATEGORIES.find(c => c.key === activeTab);
   pane.appendChild(el('h3', null, cat.label));
@@ -1074,6 +1072,40 @@ function renderGeneralPane(pane) {
   });
 }
 
+function renderDataPane(pane) {
+  pane.appendChild(el('h3', null, 'Daten'));
+  pane.appendChild(el('p', 'panehint',
+    'Export und Import umfassen die Belegung, die Angaben zur Schicht und die Einstellungen. ' +
+    'Die Schaltflächen schließen die Einstellungen; noch nicht übernommene Änderungen an den ' +
+    'Listen gehen dabei verloren.'));
+
+  const actions = el('div', 'dataactions');
+  const add = (label, hint, onClick, danger) => {
+    const row = el('div', 'dataaction');
+    const btn = el('button', danger ? 'danger' : '', label);
+    btn.type = 'button';
+    btn.addEventListener('click', onClick);
+    row.appendChild(btn);
+    row.appendChild(el('span', 'panehint', hint));
+    actions.appendChild(row);
+  };
+
+  add('Export …', 'als JSON zum Wiedereinlesen oder als CSV für Excel', () => {
+    $('#settingsDlg').close();
+    $('#exportDlg').showModal();
+  });
+  add('Import …', 'eine zuvor exportierte JSON-Datei einlesen', () => {
+    $('#settingsDlg').close();
+    $('#fileInput').click();
+  });
+  add('Tafel leeren', 'alle Bettplätze zurücksetzen; Angaben zur Schicht bleiben stehen', () => {
+    $('#settingsDlg').close();
+    clearAll();
+  }, true);
+
+  pane.appendChild(actions);
+}
+
 function commitSettings() {
   /* Leere Einträge fallen weg, damit keine leeren Auswahlwerte entstehen. */
   for (const cat of OPTION_CATEGORIES) {
@@ -1090,7 +1122,6 @@ function commitSettings() {
   buildBody();
   renderPhones();
   renderStats();
-  applyFilter();
   manualLock = false;
   setPrivacy(false);
   restartPrivacyTimer();
@@ -1263,7 +1294,6 @@ function moveBed(fromId, toId) {
   redrawBed(fromId);
   redrawBed(toId);
   renderStats();
-  applyFilter();
 
   const label = before.from.name || 'Bettplatz ' + bedById(fromId).label;
   const target = bedById(toId).label;
@@ -1274,7 +1304,6 @@ function moveBed(fromId, toId) {
     redrawBed(before.toId);
     pendingUndo = null;
     renderStats();
-    applyFilter();
     save();
     setSaveState('Verschieben rückgängig gemacht');
   };
@@ -1428,7 +1457,6 @@ function commitMulti() {
   applyRowState(btn.closest('tr'), data);
   touch(bed.id);
   renderStats();
-  applyFilter();
   $('#multiDlg').close();
 }
 
@@ -1518,34 +1546,6 @@ function initLegend() {
   window.addEventListener('afterprint', () => {
     if (box.dataset.vorher !== undefined) box.open = box.dataset.vorher === 'true';
   });
-}
-
-function rowText(data) {
-  return COLUMNS
-    .filter(c => c.type !== 'bed')
-    .map(c => {
-      if (c.type === 'germs') return data[c.key].map(germLabel).join(' ');
-      if (c.type === 'date') return data[c.key] ? fullDate(data[c.key]) : '';
-      return Array.isArray(data[c.key]) ? data[c.key].join(' ') : String(data[c.key]);
-    })
-    .join(' ')
-    .toLowerCase();
-}
-
-function applyFilter() {
-  const term = $('#search').value.trim().toLowerCase();
-  const onlyOcc = $('#onlyOccupied').checked;
-  let visible = 0;
-  for (const bed of BEDS) {
-    const data = state.beds[bed.id];
-    const tr = document.querySelector(`tr[data-bed="${bed.id}"]`);
-    const matches = !term || rowText(data).includes(term) || bed.label.toLowerCase().includes(term);
-    const occOk = !onlyOcc || OCCUPIED.has(data.status);
-    const show = matches && occOk;
-    tr.hidden = !show;
-    if (show) visible++;
-  }
-  $('#tablewrap').classList.toggle('empty', visible === 0);
 }
 
 function renderLegend() {
@@ -1643,7 +1643,6 @@ function importJson(file) {
     buildBody();
     renderStation();
     renderStats();
-    applyFilter();
     save();
     setSaveState('Daten importiert');
   };
@@ -1656,7 +1655,6 @@ function clearAll() {
   for (const bed of BEDS) state.beds[bed.id] = emptyBed();
   buildBody();
   renderStats();
-  applyFilter();
   save();
 }
 
@@ -1698,7 +1696,6 @@ function init() {
   renderStats();
   renderLegend();
   initLegend();
-  applyFilter();
   initDragDrop();
   initKeyboardNav();
   initPrivacy();
@@ -1723,18 +1720,13 @@ function init() {
     $('#meldeCard').dataset.melde = event.target.value;
     save();
   });
-  $('#search').addEventListener('input', applyFilter);
-  $('#onlyOccupied').addEventListener('change', applyFilter);
   $('#btnPrint').addEventListener('click', () => window.print());
   $('#btnTheme').addEventListener('click', toggleTheme);
-  $('#btnClearAll').addEventListener('click', clearAll);
 
-  $('#btnExport').addEventListener('click', () => $('#exportDlg').showModal());
   $('#expJson').addEventListener('click', () => { exportJson(); $('#exportDlg').close(); });
   $('#expCsv').addEventListener('click', () => { exportCsv(); $('#exportDlg').close(); });
   $('#expCancel').addEventListener('click', () => $('#exportDlg').close());
 
-  $('#btnImport').addEventListener('click', () => $('#fileInput').click());
   $('#fileInput').addEventListener('change', event => {
     const file = event.target.files[0];
     if (file) importJson(file);
@@ -1770,7 +1762,6 @@ function init() {
     buildBody();
     renderStation();
     renderStats();
-    applyFilter();
     setSaveState('Aktualisiert (Änderung in anderem Fenster)');
   });
 }

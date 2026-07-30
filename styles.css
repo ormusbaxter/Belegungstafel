@@ -260,15 +260,6 @@ body {
   align-items: center;
   flex-wrap: wrap;
 }
-.tools .search input {
-  width: 230px;
-  padding: 6px 10px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--panel-2);
-  color: var(--ink);
-  font: inherit;
-}
 .chk {
   display: flex;
   align-items: center;
@@ -288,6 +279,10 @@ button {
   cursor: pointer;
 }
 button:hover { background: var(--line-soft); }
+.iconbtn { display: inline-flex; align-items: center; gap: 6px; }
+.iconbtn svg { flex: none; opacity: .75; }
+.iconbtn:hover svg { opacity: 1; }
+
 button.primary {
   background: var(--accent);
   border-color: var(--accent);
@@ -320,13 +315,6 @@ button.undo { margin-left: 10px; padding: 1px 9px; font-size: 11px; border-radiu
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 10px;
-}
-.tablewrap.empty::after {
-  content: "Keine Bettplätze entsprechen dem Filter.";
-  display: block;
-  padding: 24px;
-  text-align: center;
-  color: var(--ink-soft);
 }
 
 table {
@@ -713,6 +701,11 @@ td.col-physio .chip { background: #2f7d32; color: #fff; }
   background-image: linear-gradient(45deg, transparent 44%, var(--danger) 44%,
                     var(--danger) 56%, transparent 56%);
 }
+.dataactions { display: flex; flex-direction: column; gap: 12px; }
+.dataaction { display: flex; align-items: baseline; gap: 12px; }
+.dataaction button { min-width: 130px; }
+.dataaction .panehint { margin: 0; }
+
 .setrow { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 13.5px; }
 .setrow input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; }
 .setrow input[type="number"] {
