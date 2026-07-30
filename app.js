@@ -202,6 +202,14 @@ const LEGEND = [
   ['lg-limit', 'Therapielimitierung hinterlegt']
 ];
 
+/* Stationsweite Angaben über der Tafel */
+const STATION_FIELDS = [
+  { key: 'schichtleitung', label: 'Schichtleitung', placeholder: 'Name / Kürzel' },
+  { key: 'blut', label: 'Blutzuständigkeit', placeholder: 'Name / Kürzel' },
+  { key: 'notfall', label: 'Notfallequipment', placeholder: 'Name / Kürzel' }
+];
+const STATION_KEYS = ['meldestatus', ...STATION_FIELDS.flatMap(f => [f.key, f.key + 'Tel'])];
+
 const STORAGE_KEY = 'belegungstafel.intensiv.v1';
 const THEME_KEY = 'belegungstafel.theme';
 
@@ -225,8 +233,19 @@ function emptyBed() {
 
 let state = load();
 
+function emptyStation() {
+  return Object.fromEntries(STATION_KEYS.map(key => [key, '']));
+}
+
+function mergeStation(target, source) {
+  if (!source || typeof source !== 'object') return;
+  for (const key of STATION_KEYS) {
+    if (typeof source[key] === 'string') target[key] = source[key];
+  }
+}
+
 function load() {
-  const fresh = { version: 1, beds: {}, saved: null };
+  const fresh = { version: 1, beds: {}, station: emptyStation(), saved: null };
   for (const bed of BEDS) fresh.beds[bed.id] = emptyBed();
   let stored = null;
   try {
@@ -236,6 +255,7 @@ function load() {
   }
   if (stored && stored.beds) {
     for (const bed of BEDS) merge(fresh.beds[bed.id], stored.beds[bed.id]);
+    mergeStation(fresh.station, stored.station);
     fresh.saved = stored.saved || null;
   }
   return fresh;
@@ -771,24 +791,43 @@ function commitMulti() {
  * ------------------------------------------------------------------ */
 function renderStats() {
   const beds = BEDS.map(b => state.beds[b.id]);
-  const items = [
-    ['Belegt', beds.filter(b => OCCUPIED.has(b.status)).length + ' / ' + BEDS.length],
-    ['Frei', beds.filter(b => b.status === '' && !(b.name in NAME_CLASS)).length],
-    ['Gesperrt', beds.filter(b => BLOCKED.has(b.name)).length],
-    ['NVK', beds.filter(b => b.status.startsWith('NVK')).length],
-    ['INV', beds.filter(b => INVASIV.has(b.beatmung)).length],
-    ['Kreislauf', beds.filter(b => isSet(b.kreislauf)).length],
-    ['Dialyse', beds.filter(b => isSet(b.dialyse)).length],
-    ['Isolation', beds.filter(b => isSet(b.isolation)).length],
-    ['Screening fällig', beds.filter(b => b.abstricheDatum && b.abstricheDatum <= isoToday()).length]
-  ];
-  const box = $('#stats');
+  $('#statBelegt').textContent =
+    beds.filter(b => OCCUPIED.has(b.status)).length + ' / ' + BEDS.length;
+  $('#statScreening').textContent =
+    beds.filter(b => b.abstricheDatum && b.abstricheDatum <= isoToday()).length;
+}
+
+/* Meldestatus und die Angaben zur Schicht */
+function renderStation() {
+  const melde = $('#meldestatus');
+  melde.value = state.station.meldestatus;
+  $('#meldeCard').dataset.melde = state.station.meldestatus;
+
+  const box = $('#stationbar');
   box.replaceChildren();
-  for (const [label, value] of items) {
-    const card = el('div', 'stat');
-    card.appendChild(el('span', 'statval', String(value)));
-    card.appendChild(el('span', 'statlabel', label));
-    box.appendChild(card);
+  for (const field of STATION_FIELDS) {
+    const group = el('div', 'stationfield');
+    group.appendChild(el('span', 'stationlabel', field.label));
+
+    const name = el('input');
+    name.type = 'text';
+    name.className = 'sf-name';
+    name.placeholder = field.placeholder;
+    name.value = state.station[field.key];
+    name.setAttribute('aria-label', field.label);
+    name.addEventListener('input', () => { state.station[field.key] = name.value; save(); });
+
+    const tel = el('input');
+    tel.type = 'tel';
+    tel.className = 'sf-tel';
+    tel.placeholder = 'Telefon';
+    tel.value = state.station[field.key + 'Tel'];
+    tel.setAttribute('aria-label', field.label + ' – Telefon');
+    tel.addEventListener('input', () => { state.station[field.key + 'Tel'] = tel.value; save(); });
+
+    group.appendChild(name);
+    group.appendChild(tel);
+    box.appendChild(group);
   }
 }
 
@@ -859,6 +898,11 @@ function exportJson() {
 
 function exportCsv() {
   const esc = v => '"' + String(v).replace(/"/g, '""') + '"';
+  const info = [
+    ['Belegungstafel Intensivstation', fullDate(isoToday()) + ' ' + timeStr(new Date())],
+    ['Meldestatus', state.station.meldestatus],
+    ...STATION_FIELDS.map(f => [f.label, state.station[f.key], state.station[f.key + 'Tel']])
+  ].map(row => row.map(esc).join(';'));
   const head = COLUMNS.map(c => esc(c.label)).join(';');
   const lines = BEDS.map(bed => {
     const data = state.beds[bed.id];
@@ -875,7 +919,8 @@ function exportCsv() {
     }).join(';');
   });
   /* BOM, damit Excel die Umlaute korrekt anzeigt */
-  download('belegungstafel-' + stamp() + '.csv', '﻿' + [head, ...lines].join('\r\n'), 'text/csv');
+  download('belegungstafel-' + stamp() + '.csv',
+    '﻿' + [...info, '', head, ...lines].join('\r\n'), 'text/csv');
 }
 
 function importJson(file) {
@@ -897,7 +942,10 @@ function importJson(file) {
       state.beds[bed.id] = emptyBed();
       merge(state.beds[bed.id], parsed.beds[bed.id]);
     }
+    state.station = emptyStation();
+    mergeStation(state.station, parsed.station);
     buildBody();
+    renderStation();
     renderStats();
     applyFilter();
     save();
@@ -942,6 +990,7 @@ function init() {
   buildHead();
   buildDatalists();
   buildBody();
+  renderStation();
   renderStats();
   renderLegend();
   applyFilter();
@@ -951,6 +1000,11 @@ function init() {
 
   if (state.saved) setSaveState('Zuletzt gespeichert um ' + timeStr(new Date(state.saved)));
 
+  $('#meldestatus').addEventListener('change', event => {
+    state.station.meldestatus = event.target.value;
+    $('#meldeCard').dataset.melde = event.target.value;
+    save();
+  });
   $('#search').addEventListener('input', applyFilter);
   $('#onlyOccupied').addEventListener('change', applyFilter);
   $('#btnPrint').addEventListener('click', () => window.print());
@@ -990,6 +1044,7 @@ function init() {
     if (event.key !== STORAGE_KEY) return;
     state = load();
     buildBody();
+    renderStation();
     renderStats();
     applyFilter();
     setSaveState('Aktualisiert (Änderung in anderem Fenster)');

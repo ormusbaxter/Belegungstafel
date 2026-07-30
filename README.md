@@ -80,7 +80,11 @@ Spalte der Tafel zugeordnet.
 - **Farbkodierung** der Zeilen nach Anwesenheitsstatus (Aufnahme, belegt, NVK, außerhalb der
   Station, Verlegung, gesperrt), `ISO`-Kennzeichnung bei eingetragener Isolation,
   farbliche Hervorhebung einer hinterlegten Therapielimitierung
-- **Kennzahlen** im Kopf: belegt, frei, gesperrt, NVK, INV, Kreislauf, Dialyse, Isolation, fällige Screenings
+- **Kopfbereich**: belegte Betten (x / 13), Meldestatus als farbiges Auswahlfeld
+  (grün / gelb / rot) und Anzahl der fälligen Screenings; darunter Schichtleitung,
+  Blutzuständigkeit und Notfallequipment mit jeweils zugehöriger Telefonnummer.
+  Diese Angaben gelten für die gesamte Station, werden mitgespeichert, mit exportiert
+  und mitgedruckt; „Tafel leeren“ lässt sie stehen
 - **Isolation**: beliebig viele Einträge je Bettplatz, jeder einzeln als bestätigt oder als
   Verdacht geführt (z. B. MRSA bestätigt und Verdacht auf VRE). Bestätigte Keime erscheinen
   als gefüllte, Verdachtsfälle als gestrichelte Marke mit vorangestelltem `V. a.`.

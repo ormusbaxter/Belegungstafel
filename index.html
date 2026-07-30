@@ -14,7 +14,25 @@
     <p class="clock" id="clock">–</p>
   </div>
 
-  <div class="stats" id="stats"></div>
+  <div class="stats">
+    <div class="stat">
+      <span class="statval" id="statBelegt">0 / 13</span>
+      <span class="statlabel">belegte Betten</span>
+    </div>
+    <div class="stat stat-melde" id="meldeCard">
+      <select id="meldestatus" aria-label="Meldestatus">
+        <option value="">–</option>
+        <option value="grün">grün</option>
+        <option value="gelb">gelb</option>
+        <option value="rot">rot</option>
+      </select>
+      <span class="statlabel">Meldestatus</span>
+    </div>
+    <div class="stat">
+      <span class="statval" id="statScreening">0</span>
+      <span class="statlabel">Screening fällig</span>
+    </div>
+  </div>
 
   <div class="tools">
     <label class="search">
@@ -30,6 +48,8 @@
     <input type="file" id="fileInput" accept="application/json" hidden>
   </div>
 </header>
+
+<section class="stationbar" id="stationbar"></section>
 
 <p class="savestate" id="saveState">Bereit</p>
 
