@@ -133,10 +133,10 @@ Spalte der Tafel zugeordnet.
   werden die patientenbezogenen Spalten – Patientenname bis
   einschließlich Therapielimitierung – sowie die beiden Textfelder unter der Tafel
   unkenntlich gemacht. Jede Mausbewegung oder Taste hebt das auf; die Schaltfläche
-  „Abdunkeln“ schaltet sofort um und bleibt dann bis zu einem Klick oder Tastendruck
+  „Datenschutz“ schaltet sofort um und bleibt dann bis zu einem Klick oder Tastendruck
   bestehen. Bettplatz, Anwesenheitsstatus und die Kennzahlen bleiben lesbar, der Ausdruck
   wird nie unkenntlich gemacht
-- **Bedienleiste** oben rechts: „Abdunkeln“ und „Drucken“ mit Symbol sowie die
+- **Bedienleiste** oben rechts: „Datenschutz“ und „Drucken“ mit Symbol sowie die
   Hell-/Dunkel-Umschaltung. Export, Import und „Tafel leeren“ stehen in den Einstellungen
   unter „Daten“
 - **Bettplatz räumen** über das `×` in der Bettspalte
