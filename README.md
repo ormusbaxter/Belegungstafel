@@ -87,8 +87,8 @@ Spalte der Tafel zugeordnet.
 - **Farbkodierung** der Zeilen nach Anwesenheitsstatus (Aufnahme, belegt, NVK, außerhalb der
   Station, Verlegung, gesperrt), `ISO`-Kennzeichnung bei eingetragener Isolation,
   farbliche Hervorhebung einer hinterlegten Therapielimitierung
-- **Kopfbereich**: belegte Betten (x / 13; als belegt zählen `A >>>`, `●`, `NVK`, `NVK 1–3`
-  und `<<< V`), maximale Bettenzahl als Eingabefeld mit
+- **Kopfbereich**: belegte Betten (x / 13; belegt ist jeder Bettplatz mit gesetztem
+  Anwesenheitsstatus, unabhängig davon, welche Werte in den Einstellungen hinterlegt sind), maximale Bettenzahl als Eingabefeld mit
   festem Zusatz „+ 1“ für das Notbett, Meldestatus als farbiges Auswahlfeld
   (grün / gelb / rot) und Anzahl der fälligen Screenings; darunter Schichtleitung,
   Blutzuständigkeit und Notfallequipment mit jeweils zugehöriger Telefonnummer.

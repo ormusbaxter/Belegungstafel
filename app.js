@@ -210,8 +210,9 @@ const STATUS_CLASS = {
   'NVK 3': 'st-nvk',
   '<<< V': 'st-verlegung'
 };
-/* Angekündigte Aufnahme und anstehende Verlegung gelten als belegt. */
-const OCCUPIED = new Set(['A >>>', '\u25cf', 'NVK', 'NVK 1', 'NVK 2', 'NVK 3', '<<< V']);
+/* Jeder gesetzte Anwesenheitsstatus zählt als belegt – so wirken auch
+   selbst vergebene oder umbenannte Werte ohne weitere Anpassung. */
+const isOccupied = data => data.status !== '';
 
 /* Einträge aus Spalte J im Feld Patientenname beschreiben den Bettplatz
    und färben die Zeile entsprechend ein. */
@@ -223,7 +224,6 @@ const NAME_CLASS = {
   'OP': 'st-abwesend',
   'CV': 'st-abwesend'
 };
-const BLOCKED = new Set(['gesperrt', 'Reinigung']);
 
 const LEGEND = [
   ['st-frei', 'Bett frei (kein Status gesetzt)'],
@@ -950,7 +950,8 @@ function addDays(iso, days) {
 /* Zeilenfarbe, Isolations- und Limitierungskennzeichnung */
 function applyRowState(tr, data) {
   for (const cls of [...tr.classList]) if (cls.startsWith('st-')) tr.classList.remove(cls);
-  tr.classList.add(NAME_CLASS[data.name] || STATUS_CLASS[data.status] || 'st-frei');
+  tr.classList.add(NAME_CLASS[data.name] || STATUS_CLASS[data.status] ||
+    (data.status ? 'st-belegt' : 'st-frei'));
   tr.classList.toggle('name-state', data.name in NAME_CLASS);
   tr.classList.toggle('has-iso', isSet(data.isolation));
   tr.classList.toggle('has-limit', isSet(data.limitierung));
@@ -1668,7 +1669,7 @@ function commitMulti() {
 function renderStats() {
   const beds = BEDS.map(b => state.beds[b.id]);
   $('#statBelegt').textContent =
-    beds.filter(b => OCCUPIED.has(b.status)).length + ' / ' + BEDS.length;
+    beds.filter(isOccupied).length + ' / ' + BEDS.length;
   $('#statScreening').textContent =
     beds.filter(b => b.abstriche && b.abstriche <= isoToday()).length;
 }
