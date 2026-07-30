@@ -145,6 +145,25 @@ body {
 }
 .stat { min-width: 110px; }
 
+/* Maximale Bettenzahl */
+.stat-max .statval { display: flex; align-items: baseline; gap: 4px; }
+.stat-max input {
+  width: 42px;
+  padding: 0 2px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--panel);
+  color: inherit;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  text-align: center;
+  appearance: textfield;
+}
+.stat-max input::-webkit-outer-spin-button,
+.stat-max input::-webkit-inner-spin-button { appearance: none; margin: 0; }
+.plusone { font-size: 15px; font-weight: 700; color: var(--ink-soft); }
+
 /* Meldestatus */
 .stat-melde { padding: 3px 8px 5px; }
 .stat-melde select {
@@ -613,6 +632,8 @@ td.col-physio .chip { background: #2f7d32; color: #fff; }
     color: #000;
     width: auto;
   }
+  .stat-max input { border: none; padding: 0; font-size: 11px; width: auto; }
+  .plusone { font-size: 10px; }
   .stat-melde select { border: none; font-size: 10px; padding: 0; appearance: none; text-align: center; }
   .stat-melde[data-melde] { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .brand h1 { font-size: 14px; }

@@ -208,7 +208,8 @@ const STATION_FIELDS = [
   { key: 'blut', label: 'Blutzuständigkeit', placeholder: 'Name / Kürzel' },
   { key: 'notfall', label: 'Notfallequipment', placeholder: 'Name / Kürzel' }
 ];
-const STATION_KEYS = ['meldestatus', ...STATION_FIELDS.flatMap(f => [f.key, f.key + 'Tel'])];
+const STATION_KEYS = ['maxBetten', 'meldestatus',
+                      ...STATION_FIELDS.flatMap(f => [f.key, f.key + 'Tel'])];
 
 const STORAGE_KEY = 'belegungstafel.intensiv.v1';
 const THEME_KEY = 'belegungstafel.theme';
@@ -797,8 +798,20 @@ function renderStats() {
     beds.filter(b => b.abstricheDatum && b.abstricheDatum <= isoToday()).length;
 }
 
+/* Maximale Bettenzahl: x regulär betreibbare Plätze zuzüglich Notbett */
+function updateMaxTitle() {
+  const value = parseInt(state.station.maxBetten, 10);
+  $('#maxCard').title = Number.isFinite(value)
+    ? 'Maximal ' + value + ' Bettplätze zuzüglich Notbett, insgesamt ' + (value + 1)
+    : 'Maximale Bettenzahl zuzüglich Notbett';
+}
+
 /* Meldestatus und die Angaben zur Schicht */
 function renderStation() {
+  const max = $('#maxBetten');
+  max.value = state.station.maxBetten;
+  updateMaxTitle();
+
   const melde = $('#meldestatus');
   melde.value = state.station.meldestatus;
   $('#meldeCard').dataset.melde = state.station.meldestatus;
@@ -900,6 +913,7 @@ function exportCsv() {
   const esc = v => '"' + String(v).replace(/"/g, '""') + '"';
   const info = [
     ['Belegungstafel Intensivstation', fullDate(isoToday()) + ' ' + timeStr(new Date())],
+    ['Maximale Bettenzahl', state.station.maxBetten ? state.station.maxBetten + ' + 1 (Notbett)' : ''],
     ['Meldestatus', state.station.meldestatus],
     ...STATION_FIELDS.map(f => [f.label, state.station[f.key], state.station[f.key + 'Tel']])
   ].map(row => row.map(esc).join(';'));
@@ -1000,6 +1014,11 @@ function init() {
 
   if (state.saved) setSaveState('Zuletzt gespeichert um ' + timeStr(new Date(state.saved)));
 
+  $('#maxBetten').addEventListener('input', event => {
+    state.station.maxBetten = event.target.value;
+    updateMaxTitle();
+    save();
+  });
   $('#meldestatus').addEventListener('change', event => {
     state.station.meldestatus = event.target.value;
     $('#meldeCard').dataset.melde = event.target.value;
