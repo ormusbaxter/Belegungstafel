@@ -1032,6 +1032,8 @@ html[data-theme="dark"] .helpbody .warn { color: var(--iso); }
   color: #e7edf3;
   cursor: none;
 }
+/* Die Bühne gibt die volle Fläche frei; jedes Dia passt sich ihr an,
+   damit nichts abgeschnitten wird und nichts gescrollt werden muss. */
 .saverstage {
   position: relative;
   flex: 1;
@@ -1039,7 +1041,7 @@ html[data-theme="dark"] .helpbody .warn { color: var(--iso); }
   align-items: center;
   justify-content: center;
   min-height: 0;
-  padding: 24px;
+  overflow: hidden;
 }
 /* Fängt die Maus ab, damit eine Bewegung über einem PDF die Schau beendet. */
 .saverveil { position: absolute; inset: 0; z-index: 5; }
@@ -1047,32 +1049,39 @@ html[data-theme="dark"] .helpbody .warn { color: var(--iso); }
 .slide { max-width: 100%; max-height: 100%; }
 /* Bilder füllen die Fläche, ohne verzerrt zu werden */
 .slide-img { width: 100%; height: 100%; object-fit: contain; }
+/* Vor dem Auslesen des Seitenverhältnisses füllt der Rahmen die Fläche;
+   danach setzt fitSlide() die genauen Maße der Seite. */
 .slide-pdf {
   width: 100%;
   height: 100%;
   border: 0;
   background: #fff;
-  border-radius: 6px;
 }
 .slide-text {
   width: min(1250px, 88vw);
-  padding: 48px 56px;
+  max-height: calc(100% - 32px);
+  overflow: hidden;
+  padding: 44px 52px;
   border: 1px solid #2c3742;
   border-radius: 16px;
   background: #171e26;
   text-align: center;
+  /* Grundmaß der Karte; zu langer Text wird davon ausgehend verkleinert. */
+  font-size: clamp(17px, 2.2vw, 30px);
 }
 .slide-text h2 {
-  margin: 0 0 18px;
-  font-size: clamp(28px, 5vw, 56px);
+  margin: 0 0 .6em;
+  font-size: 1.85em;
   line-height: 1.15;
   color: #fff;
 }
 .slide-text p {
   margin: 0;
-  font-size: clamp(17px, 2.4vw, 30px);
+  font-size: 1em;
   line-height: 1.45;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  hyphens: auto;
   color: #cbd5e1;
 }
 .slide-missing h2 { color: #e46b6b; }

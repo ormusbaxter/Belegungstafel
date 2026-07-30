@@ -158,6 +158,11 @@ Spalte der Tafel zugeordnet.
   beendet ihn wieder. Solange ein Dialog geöffnet ist, startet er nicht. Jeder Eintrag lässt
   sich einzeln an- und abschalten, in der Reihenfolge verschieben und mit einer eigenen
   Anzeigedauer versehen; ohne eigene Angabe gilt die zentrale Vorgabe (10 Sekunden).
+  Jeder Inhalt wird vollständig eingepasst und muss nie gescrollt werden: Bilder füllen die
+  Fläche formatfüllend ohne Beschnitt, PDF-Seiten werden über `view=Fit` und das aus
+  `/MediaBox` gelesene Seitenverhältnis auf die Bühnengröße gerechnet, zu lange Hinweistexte
+  werden schrittweise verkleinert, bis sie ganz sichtbar sind. Von mehrseitigen PDF erscheint
+  die erste Seite.
   Patientendaten werden nie angezeigt, unten stehen Uhrzeit, Datum und die Position in der
   Schau. Da ein Browser kein Verzeichnis auslesen darf, erfährt die Tafel die Dateinamen
   über `slides/slides.json`, über die Verzeichnisübersicht des Webservers oder durch eine

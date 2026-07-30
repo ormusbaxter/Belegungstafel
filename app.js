@@ -7,7 +7,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '1.4.0';
+const VERSION = '1.4.1';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -1829,6 +1829,7 @@ function showSlide(index) {
 
   const stage = $('#saverStage');
   stage.replaceChildren(item ? slideNode(item) : emptySlideNode());
+  fitSlide();
   $('#saverCount').textContent = count > 1 ? slideIndex + 1 + ' / ' + count : '';
 
   /* Bei nur einem Eintrag gibt es nichts weiterzuschalten. */
@@ -1845,9 +1846,13 @@ function slideNode(item) {
 
   const src = SLIDE_DIR + encodeURIComponent(item.file);
   if (/\.pdf$/i.test(item.file)) {
+    /* „view=Fit“ zeigt die ganze Seite statt sie auf die Breite zu ziehen;
+       zusätzlich erhält der Rahmen das Seitenverhältnis der ersten Seite,
+       damit die Seite die Fläche ohne Ränder und ohne Blättern ausfüllt. */
     const frame = el('iframe', 'slide slide-pdf');
-    frame.src = src + '#toolbar=0&navpanes=0&scrollbar=0&view=Fit';
+    frame.src = src + '#page=1&view=Fit&toolbar=0&navpanes=0&scrollbar=0&statusbar=0';
     frame.title = item.file;
+    applyPdfRatio(frame, src);
     return frame;
   }
 
@@ -1856,6 +1861,72 @@ function slideNode(item) {
   img.alt = item.file;
   img.addEventListener('error', () => img.replaceWith(missingSlideNode(item.file)));
   return img;
+}
+
+/* ---- Einpassen der Inhalte: nichts abschneiden, nichts scrollen ---- */
+
+/* Seitenverhältnis der ersten PDF-Seite, je Datei nur einmal gelesen */
+const pdfRatios = new Map();
+
+async function applyPdfRatio(frame, src) {
+  let ratio = pdfRatios.get(src);
+  if (ratio === undefined) {
+    ratio = await pdfAspect(src);
+    pdfRatios.set(src, ratio);
+  }
+  if (!ratio) return;
+  frame.dataset.ratio = String(ratio);
+  /* Hängt der Rahmen noch nicht in der Bühne, passt showSlide() ihn gleich
+     selbst ein; ein spät gelesenes Verhältnis wird hier nachgezogen. */
+  if (frame.isConnected) fitSlide();
+}
+
+/* Liest /MediaBox und /Rotate aus der PDF-Datei. Steckt die Seitenangabe in
+   einem komprimierten Objektstrom, bleibt es beim vollflächigen Rahmen. */
+async function pdfAspect(src) {
+  try {
+    const res = await fetch(src, { cache: 'force-cache' });
+    if (!res.ok) return 0;
+    const text = new TextDecoder('latin1').decode(await res.arrayBuffer());
+    const box = text.match(/\/MediaBox\s*\[\s*(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)/);
+    if (!box) return 0;
+    let width = Math.abs(parseFloat(box[3]) - parseFloat(box[1]));
+    let height = Math.abs(parseFloat(box[4]) - parseFloat(box[2]));
+    const turn = text.match(/\/Rotate\s+(-?\d+)/);
+    if (turn && Math.abs(parseInt(turn[1], 10) / 90) % 2 === 1) [width, height] = [height, width];
+    return width > 0 && height > 0 ? width / height : 0;
+  } catch (err) {
+    return 0;
+  }
+}
+
+/* Passt das aktuelle Dia in die Fläche ein: PDF auf das Seitenverhältnis,
+   Textkarten so weit verkleinert, bis der ganze Text sichtbar ist. */
+function fitSlide() {
+  const stage = $('#saverStage');
+  const slide = stage.firstElementChild;
+  if (!slide) return;
+
+  const frame = slide.classList.contains('slide-pdf') && slide.dataset.ratio
+    ? slide : null;
+  if (frame) {
+    const ratio = parseFloat(frame.dataset.ratio);
+    const height = Math.min(stage.clientWidth / ratio, stage.clientHeight);
+    frame.style.height = Math.floor(height) + 'px';
+    frame.style.width = Math.floor(height * ratio) + 'px';
+    return;
+  }
+
+  if (!slide.classList.contains('slide-text')) return;
+  slide.style.fontSize = '';
+  const start = parseFloat(getComputedStyle(slide).fontSize);
+  let size = start;
+  /* Die Karte ist auf die Bühnenhöhe begrenzt; ragt der Inhalt darüber
+     hinaus, wird schrittweise verkleinert. */
+  for (let step = 0; step < 40 && slide.scrollHeight > slide.clientHeight + 1 && size > 11; step++) {
+    size *= 0.93;
+    slide.style.fontSize = size + 'px';
+  }
 }
 
 function missingSlideNode(file) {
@@ -2499,7 +2570,10 @@ function init() {
     wake();
     setPrintRowHeight();
   });
-  window.addEventListener('resize', measureSticky);
+  window.addEventListener('resize', () => {
+    measureSticky();
+    if (saverOn) fitSlide();
+  });
   window.addEventListener('beforeunload', writeNow);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') writeNow();
