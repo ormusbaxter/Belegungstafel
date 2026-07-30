@@ -7,7 +7,7 @@
 /* ------------------------------------------------------------------ *
  * Bettplätze
  * ------------------------------------------------------------------ */
-const BEDS = [
+const DEFAULT_BEDS = [
   { id: '0a', label: '0 a' },
   { id: '0b', label: '0 b' },
   { id: '1a', label: '1 a' },
@@ -23,6 +23,9 @@ const BEDS = [
   { id: '8',  label: '8'   }
 ];
 
+/* Wird beim Laden aus den Einstellungen übernommen. */
+let BEDS = DEFAULT_BEDS.map(bed => ({ ...bed }));
+
 /* ------------------------------------------------------------------ *
  * Spalten
  * Feldtypen: status | bed | text | tel | datalist | select | multi | germs |
@@ -34,10 +37,10 @@ const COLUMNS = [
   {
     /* Datenquelle Spalte A */
     /* Ohne Kopftext, damit die Spalte nur so breit sein muss wie ihre Werte. */
-    key: 'status', label: 'Anwesenheitsstatus', head: '', type: 'status', width: 62,
+    key: 'status', label: 'Anwesenheitsstatus', head: '', type: 'status', width: 58,
     options: ['A >>>', '\u25cf', 'NVK', 'NVK 1', 'NVK 2', 'NVK 3', '<<< V']
   },
-  { key: 'bed', label: 'Bettplatz', type: 'bed', width: 78 },
+  { key: 'bed', label: 'Bettplatz', type: 'bed', width: 68 },
   {
     /* Freitext; die Auswahlliste (Datenquelle Spalte J) ist optional und
        beschreibt den Bettplatz, wenn kein Patientenname eingetragen ist. */
@@ -145,7 +148,9 @@ const COLUMNS = [
     key: 'abstriche', label: 'Abstriche', type: 'date', width: 100,
     dateLabel: 'Nächstes Screening', legacy: 'abstricheDatum'
   },
-  { key: 'sonstiges', label: 'Sonstiges', type: 'longtext', width: 122, placeholder: 'Bemerkungen …' }
+  /* Ohne feste Breite: Diese Spalte nimmt den verbleibenden Platz auf, alle
+     anderen behalten dadurch genau die angegebene Breite. */
+  { key: 'sonstiges', label: 'Sonstiges', type: 'longtext', placeholder: 'Bemerkungen …' }
 ];
 
 /* Ein Isolationseintrag ist { v: Bezeichnung, s: 'bestaetigt' | 'verdacht' }.
@@ -253,6 +258,7 @@ let PHONES = [
 
 /* In den Einstellungen bearbeitbare Listen */
 const OPTION_CATEGORIES = [
+  { key: 'status',       label: 'Anwesenheitsstatus',     kind: 'text' },
   { key: 'disziplin',    label: 'Fachdisziplinen',        kind: 'text' },
   { key: 'beatmung',     label: 'Beatmungsformen',        kind: 'text' },
   { key: 'kreislauf',    label: 'Kreislaufunterstützung', kind: 'text' },
@@ -269,6 +275,10 @@ const OPTION_CATEGORIES = [
 ];
 
 const copy = value => JSON.parse(JSON.stringify(value));
+
+/* Ausgelieferte Spaltenköpfe – Grundlage für das Zurücksetzen */
+const DEFAULT_HEADS = Object.fromEntries(COLUMNS.map(col =>
+  [col.key, { label: col.label, head: 'head' in col ? col.head : col.label }]));
 
 const DEFAULT_OPTIONS = Object.fromEntries(OPTION_CATEGORIES.map(cat =>
   [cat.key, copy(cat.key === 'phones' ? PHONES : COL_BY_KEY[cat.key].options)]));
@@ -294,10 +304,13 @@ const PALETTE = [
 const SETTINGS_KEY = 'belegungstafel.einstellungen';
 
 let settings = loadSettings();
+BEDS = settings.beds;
 
 function loadSettings() {
   const fresh = {
     version: 2,
+    beds: copy(DEFAULT_BEDS),
+    headers: {},
     options: copy(DEFAULT_OPTIONS),
     /* Ein Stil je Spalte, nicht je Eintrag */
     styles: Object.fromEntries(OPTION_CATEGORIES.filter(c => c.kind === 'text').map(c => [c.key, {}])),
@@ -336,6 +349,18 @@ function mergeSettings(target, source) {
     if (BORDER_STYLES.some(([id]) => id && id === style.border)) clean.border = style.border;
     target.styles[cat.key] = clean;
   }
+  if (Array.isArray(source.beds)) {
+    const beds = source.beds
+      .filter(bed => bed && String(bed.label || '').trim())
+      .map(bed => ({ id: String(bed.id || newBedId()), label: String(bed.label).trim() }));
+    if (beds.length) target.beds = beds;
+  }
+  if (source.headers && typeof source.headers === 'object') {
+    for (const col of COLUMNS) {
+      const text = source.headers[col.key];
+      if (typeof text === 'string') target.headers[col.key] = text;
+    }
+  }
   if (source.privacy && typeof source.privacy === 'object') {
     target.privacy.on = source.privacy.on !== false;
     const seconds = parseInt(source.privacy.seconds, 10);
@@ -352,7 +377,25 @@ function saveSettings() {
 }
 
 /* Überträgt die Einstellungen auf Spalten, Rufnummern und Sichtschutz. */
+function newBedId() {
+  return 'bett' + Math.random().toString(36).slice(2, 8);
+}
+
+/* Legt fehlende Bettplätze an und entfernt entfallene. */
+function syncBeds() {
+  for (const bed of BEDS) if (!state.beds[bed.id]) state.beds[bed.id] = emptyBed();
+  for (const id of Object.keys(state.beds)) {
+    if (!BEDS.some(bed => bed.id === id)) delete state.beds[id];
+  }
+}
+
 function applySettings() {
+  BEDS = settings.beds;
+  for (const col of COLUMNS) {
+    const custom = settings.headers[col.key];
+    col.label = custom !== undefined && custom.trim() ? custom : DEFAULT_HEADS[col.key].label;
+    col.head = custom !== undefined ? custom : DEFAULT_HEADS[col.key].head;
+  }
   for (const cat of OPTION_CATEGORIES) {
     if (cat.key === 'phones') PHONES = settings.options.phones;
     else COL_BY_KEY[cat.key].options = settings.options[cat.key];
@@ -591,6 +634,38 @@ function initCombo() {
   document.addEventListener('scroll', closeCombo, true);
 }
 
+/* Breite der beiden ersten Spalten aus ihrem Inhalt bestimmen: Sie sollen nur
+   so breit sein wie der längste Statuswert bzw. die längste Bettbezeichnung. */
+const measureCanvas = document.createElement('canvas').getContext('2d');
+
+function widestText(texts, font) {
+  measureCanvas.font = font;
+  return texts.reduce((max, text) => Math.max(max, measureCanvas.measureText(text).width), 0);
+}
+
+function setColumnWidth(th, width) {
+  if (!th) return;
+  th.style.width = width + 'px';
+  th.style.minWidth = width + 'px';
+}
+
+function autoSizeColumns() {
+  const select = document.querySelector('#tbody td.col-status select');
+  const label = document.querySelector('#tbody .bedlabel');
+  if (!select || !label) return;
+
+  const statusValues = [...optionList(COL_BY_KEY.status), ' '];
+  const status = widestText(statusValues, getComputedStyle(select).font);
+  setColumnWidth(document.querySelector('#thead th.col-status'),
+    Math.max(46, Math.ceil(status) + 26));
+
+  /* Platz für das Kennzeichen ISO nur, wenn eine Isolation eingetragen ist. */
+  const iso = BEDS.some(bed => state.beds[bed.id] && state.beds[bed.id].isolation.length) ? 32 : 0;
+  const beds = widestText(BEDS.map(bed => bed.label), getComputedStyle(label).font);
+  setColumnWidth(document.querySelector('#thead th.col-bed'),
+    Math.max(52, Math.ceil(beds) + 34 + iso));
+}
+
 /* Der Versatz der fixierten Bettplatz-Spalte richtet sich nach der
    tatsächlichen Breite der Statusspalte. */
 function measureSticky() {
@@ -604,6 +679,7 @@ function buildBody() {
   const frag = document.createDocumentFragment();
   for (const bed of BEDS) frag.appendChild(buildRow(bed));
   $('#tbody').replaceChildren(frag);
+  autoSizeColumns();
   measureSticky();
 }
 
@@ -878,8 +954,13 @@ function openSettings() {
 function renderTabs() {
   const box = $('#settingsTabs');
   box.replaceChildren();
-  const tabs = [{ key: 'allgemein', label: 'Allgemein' }, ...OPTION_CATEGORIES,
-                { key: 'daten', label: 'Daten' }];
+  const tabs = [
+    { key: 'allgemein', label: 'Allgemein' },
+    { key: 'header', label: 'Spaltenköpfe' },
+    { key: 'betten', label: 'Bettplätze' },
+    ...OPTION_CATEGORIES,
+    { key: 'daten', label: 'Daten' }
+  ];
   for (const tab of tabs) {
     const btn = el('button', 'tab' + (tab.key === activeTab ? ' active' : ''), tab.label);
     btn.type = 'button';
@@ -894,6 +975,8 @@ function renderPane() {
   pane.replaceChildren();
   if (activeTab === 'allgemein') return renderGeneralPane(pane);
   if (activeTab === 'daten') return renderDataPane(pane);
+  if (activeTab === 'header') return renderHeaderPane(pane);
+  if (activeTab === 'betten') return renderBedPane(pane);
 
   const cat = OPTION_CATEGORIES.find(c => c.key === activeTab);
   pane.appendChild(el('h3', null, cat.label));
@@ -1072,6 +1155,79 @@ function renderGeneralPane(pane) {
   });
 }
 
+/* Beschriftung der Spaltenköpfe */
+function renderHeaderPane(pane) {
+  pane.appendChild(el('h3', null, 'Spaltenköpfe'));
+  pane.appendChild(el('p', 'panehint',
+    'Beschriftung der Tabellenköpfe. Ein leeres Feld lässt den Kopf frei; ' +
+    'ein Bindestrich am Zeilenende ist nicht nötig, lange Wörter werden automatisch getrennt.'));
+
+  const list = el('div', 'entrylist');
+  for (const col of COLUMNS) {
+    const row = el('div', 'entry entry-header');
+    row.appendChild(el('span', 'headname', DEFAULT_HEADS[col.key].label));
+    const value = draft.headers[col.key] !== undefined
+      ? draft.headers[col.key]
+      : DEFAULT_HEADS[col.key].head;
+    row.appendChild(entryInput(value.replace(/\u00AD/g, ''), DEFAULT_HEADS[col.key].label, '',
+      text => { draft.headers[col.key] = text; }));
+    list.appendChild(row);
+  }
+  pane.appendChild(list);
+}
+
+/* Bettplätze */
+function renderBedPane(pane) {
+  pane.appendChild(el('h3', null, 'Bettplätze'));
+  pane.appendChild(el('p', 'panehint',
+    'Bezeichnung, Reihenfolge und Anzahl der Bettplätze. Ein umbenannter Bettplatz behält ' +
+    'seine Einträge; ein entfernter Bettplatz wird mit seinen Einträgen gelöscht.'));
+
+  const list = el('div', 'entrylist');
+  pane.appendChild(list);
+  renderBedEntries(list);
+
+  const add = el('button', 'addentry', '+ Bettplatz hinzufügen');
+  add.type = 'button';
+  add.addEventListener('click', () => {
+    draft.beds.push({ id: newBedId(), label: '' });
+    renderBedEntries(list);
+    const inputs = list.querySelectorAll('input');
+    if (inputs.length) inputs[inputs.length - 1].focus();
+  });
+  pane.appendChild(add);
+}
+
+function renderBedEntries(list) {
+  const beds = draft.beds;
+  list.replaceChildren();
+
+  beds.forEach((bed, index) => {
+    const row = el('div', 'entry');
+    row.appendChild(entryInput(bed.label, 'Bezeichnung', '', value => { bed.label = value; }));
+    row.appendChild(moveButton('↑', 'nach oben', () => {
+      if (index === 0) return;
+      [beds[index - 1], beds[index]] = [beds[index], beds[index - 1]];
+      renderBedEntries(list);
+    }));
+    row.appendChild(moveButton('↓', 'nach unten', () => {
+      if (index === beds.length - 1) return;
+      [beds[index + 1], beds[index]] = [beds[index], beds[index + 1]];
+      renderBedEntries(list);
+    }));
+    const remove = moveButton('×', 'entfernen', () => {
+      const data = state.beds[bed.id];
+      const belegt = data && COLUMNS.some(c => c.type !== 'bed' && isSet(data[c.key]));
+      if (belegt && !confirm('Bettplatz ' + bed.label + ' enthält Einträge. Wirklich entfernen?')) return;
+      beds.splice(index, 1);
+      renderBedEntries(list);
+    });
+    remove.classList.add('remove');
+    row.appendChild(remove);
+    list.appendChild(row);
+  });
+}
+
 function renderDataPane(pane) {
   pane.appendChild(el('h3', null, 'Daten'));
   pane.appendChild(el('p', 'panehint',
@@ -1116,9 +1272,15 @@ function commitSettings() {
   }
   draft.privacy.seconds = Math.min(3600, Math.max(5, draft.privacy.seconds || 120));
 
+  draft.beds = draft.beds.filter(bed => bed.label.trim())
+    .map(bed => ({ id: bed.id, label: bed.label.trim() }));
+  if (!draft.beds.length) draft.beds = copy(DEFAULT_BEDS);
+
   settings = draft;
   saveSettings();
   applySettings();
+  syncBeds();
+  buildHead();
   buildBody();
   renderPhones();
   renderStats();
@@ -1130,9 +1292,13 @@ function commitSettings() {
 }
 
 function resetCategory() {
-  if (activeTab === 'allgemein') return;
-  draft.options[activeTab] = copy(DEFAULT_OPTIONS[activeTab]);
-  if (draft.styles[activeTab]) draft.styles[activeTab] = {};
+  if (activeTab === 'allgemein' || activeTab === 'daten') return;
+  if (activeTab === 'header') draft.headers = {};
+  else if (activeTab === 'betten') draft.beds = copy(DEFAULT_BEDS);
+  else {
+    draft.options[activeTab] = copy(DEFAULT_OPTIONS[activeTab]);
+    if (draft.styles[activeTab]) draft.styles[activeTab] = {};
+  }
   renderPane();
 }
 
@@ -1455,6 +1621,10 @@ function commitMulti() {
   const btn = document.querySelector(`td[data-bed="${bed.id}"][data-key="${col.key}"] .multicell`);
   renderChips(btn, col, data);
   applyRowState(btn.closest('tr'), data);
+  if (col.key === 'isolation') {
+    autoSizeColumns();
+    measureSticky();
+  }
   touch(bed.id);
   renderStats();
   $('#multiDlg').close();
@@ -1637,6 +1807,8 @@ function importJson(file) {
       mergeSettings(settings, parsed.settings);
       saveSettings();
       applySettings();
+      syncBeds();
+      buildHead();
       renderPhones();
       restartPrivacyTimer();
     }

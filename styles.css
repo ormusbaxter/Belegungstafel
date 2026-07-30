@@ -321,8 +321,8 @@ table {
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
-  width: max-content;
-  min-width: 100%;
+  width: 100%;
+  min-width: max-content;
 }
 
 thead th {
@@ -632,6 +632,8 @@ td.col-physio .chip { background: #2f7d32; color: #fff; }
 .entrylist { display: flex; flex-direction: column; gap: 4px; }
 .entry { display: grid; grid-template-columns: 1fr auto auto auto; gap: 4px; align-items: center; }
 .entry-phone { grid-template-columns: 78px 1fr auto auto auto; }
+.entry-header { grid-template-columns: 150px 1fr; }
+.headname { font-size: 12.5px; color: var(--ink-soft); }
 .entry input {
   padding: 5px 8px;
   border: 1px solid var(--line);

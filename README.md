@@ -113,8 +113,9 @@ Spalte der Tafel zugeordnet.
 - **Verschieben per Ziehen und Ablegen**: Bettplatz-Zelle greifen und auf einen anderen
   Bettplatz ziehen. Ist das Ziel belegt, tauschen beide Plätze ihre Einträge; der
   letzte Vorgang lässt sich über „Rückgängig“ in der Statuszeile zurücknehmen
-- **Einstellungen** über das Zahnrad unten rechts: Bearbeiten der Auswahllisten für
-  Fachdisziplinen, Beatmungsformen, Kreislaufunterstützung, Dialyse, Isolation,
+- **Einstellungen** über das Zahnrad unten rechts: Beschriftung der Spaltenköpfe,
+  Bezeichnung, Reihenfolge und Anzahl der **Bettplätze** sowie Bearbeiten der Auswahllisten
+  für Anwesenheitsstatus, Fachdisziplinen, Beatmungsformen, Kreislaufunterstützung, Dialyse, Isolation,
   Interventionen, Therapielimitierung, Kostformen, Physiotherapie, der Telefonvorschläge
   der Tabelle und der Rufnummernliste unter der Tafel – Einträge lassen sich hinzufügen,
   umbenennen, sortieren und entfernen, jede Kategorie einzeln auf die Voreinstellung
@@ -154,9 +155,12 @@ Neue Spalten werden allein durch einen weiteren Eintrag in `COLUMNS` angelegt; s
 Liste im Einstellungsdialog erscheinen, genügt ein Eintrag in `OPTION_CATEGORIES`.
 
 Alle 20 Spalten passen auf einem 1920 px breiten Bildschirm ohne Querscrollen nebeneinander;
-auf schmaleren Geräten bleiben Anwesenheitsstatus und Bettplatz beim Scrollen stehen. Die
-Statusspalte trägt keine Überschrift und ist nur so breit wie ihre Werte; der Versatz der
-fixierten Bettplatz-Spalte wird aus der gemessenen Breite abgeleitet.
+auf schmaleren Geräten bleiben Anwesenheitsstatus und Bettplatz beim Scrollen stehen.
+
+Die beiden ersten Spalten richten sich in der Breite nach ihrem Inhalt: gemessen werden der
+längste Statuswert und die längste Bettbezeichnung, Platz für das Kennzeichen `ISO` kommt nur
+hinzu, wenn eine Isolation eingetragen ist. Die Spalte „Sonstiges“ hat keine feste Breite und
+nimmt den verbleibenden Platz auf, sodass alle übrigen Spalten genau ihre Vorgabe behalten.
 
 ## Datenschutz
 
