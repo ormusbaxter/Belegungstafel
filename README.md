@@ -13,6 +13,7 @@ beliebigen Webserver bereitstellen.
 index.html    Grundgerüst und Dialoge
 styles.css    Layout, Farbkodierung, Druckansicht
 app.js        Spalten- und Bettenkonfiguration, Datenhaltung, Bedienlogik
+slides/       Inhalte für den Bildschirmschoner (PDF, PNG, JPEG) mit Liste slides.json
 ```
 
 ## Bettplätze
@@ -119,8 +120,8 @@ Spalte der Tafel zugeordnet.
   und exportiert
 - **Hilfe** über den runden Fragezeichen-Knopf unten rechts, oberhalb des Zahnrads: eine
   Kurzanleitung für die Bedienung der Tafel – Eingabe der Felder, Zählung der belegten Betten,
-  Verschieben per Ziehen und Ablegen, Kennzeichen und Zeilenfarben, Datenschutz sowie
-  Speichern, Drucken und Austausch. Am Fuß stehen Fassung und Urheberhinweis
+  Verschieben per Ziehen und Ablegen, Kennzeichen und Zeilenfarben, Datenschutz,
+  Bildschirmschoner sowie Speichern, Drucken und Austausch. Am Fuß stehen Fassung und Urheberhinweis
 - **Verschieben per Ziehen und Ablegen**: Bettplatz-Zelle greifen und auf einen anderen
   Bettplatz ziehen. Ist das Ziel belegt, tauschen beide Plätze ihre Einträge; der
   letzte Vorgang lässt sich über „Rückgängig“ in der Statuszeile zurücknehmen
@@ -137,8 +138,9 @@ Spalte der Tafel zugeordnet.
   Farbauswahl erfolgt über 16 feste Farbkästchen plus „Standard“; eine Beispielmarke zeigt
   das Ergebnis sofort. Die Angaben gelten in der Tabelle für das Auswahlfeld der Spalte und
   für alle Marken der Mehrfachauswahl und bleiben im Ausdruck erhalten.
-  Unter „Allgemein“ der Sichtschutz mit Ein/Aus und Zeit in Sekunden, unter „Daten“
-  Export, Import und „Tafel leeren“.
+  Unter „Allgemein“ als Punkt 1 der Sichtschutz und als Punkt 2 der Bildschirmschoner –
+  jeweils mit Ein/Aus und Zeit in Sekunden –, unter „Bildschirmschoner“ die Inhalte der
+  Diaschau, unter „Daten“ Export, Import und „Tafel leeren“.
   Ein Wert, der in einem Bettplatz steht, bleibt erhalten, auch wenn er später aus der
   Liste entfernt wird
 - **Sichtschutz**: Nach der eingestellten Zeit ohne Eingabe (Voreinstellung 120 Sekunden)
@@ -148,7 +150,20 @@ Spalte der Tafel zugeordnet.
   „Datenschutz“ schaltet sofort um und bleibt dann bis zu einem Klick oder Tastendruck
   bestehen. Bettplatz, Anwesenheitsstatus und die Kennzahlen bleiben lesbar, der Ausdruck
   wird nie unkenntlich gemacht
-- **Bedienleiste** oben rechts: „Datenschutz“ und „Drucken“ mit Symbol sowie die
+- **Bildschirmschoner (Diaschau)**: zeigt bildschirmfüllend die freigegebenen Inhalte
+  nacheinander – Dateien aus dem Ordner `slides` (PDF, PNG, JPEG) und in den Einstellungen
+  angelegte Hinweise aus Überschrift und Infotext. Der Start erfolgt über die Schaltfläche
+  „Diaschau“ im Seitenkopf oder, wenn der Bildschirmschoner eingeschaltet ist, nach der
+  eingestellten Zeit ohne Eingabe (mindestens 10 Sekunden); jede Mausbewegung oder Taste
+  beendet ihn wieder. Solange ein Dialog geöffnet ist, startet er nicht. Jeder Eintrag lässt
+  sich einzeln an- und abschalten, in der Reihenfolge verschieben und mit einer eigenen
+  Anzeigedauer versehen; ohne eigene Angabe gilt die zentrale Vorgabe (10 Sekunden).
+  Patientendaten werden nie angezeigt, unten stehen Uhrzeit, Datum und die Position in der
+  Schau. Da ein Browser kein Verzeichnis auslesen darf, erfährt die Tafel die Dateinamen
+  über `slides/slides.json`, über die Verzeichnisübersicht des Webservers oder durch eine
+  Eingabe von Hand („Ordner einlesen“ bzw. „+ Datei von Hand“ in den Einstellungen);
+  Einzelheiten stehen in `slides/LIESMICH.txt`
+- **Bedienleiste** oben rechts: „Datenschutz“, „Diaschau“ und „Drucken“ mit Symbol sowie die
   Hell-/Dunkel-Umschaltung. Export, Import und „Tafel leeren“ stehen in den Einstellungen
   unter „Daten“
 - **Bettplatz räumen** über das `×` in der Bettspalte

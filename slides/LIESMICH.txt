@@ -1,0 +1,44 @@
+Ordner "slides" – Inhalte für den Bildschirmschoner der Belegungstafel
+=====================================================================
+
+In diesen Ordner gehören die Dateien, die der Bildschirmschoner nacheinander
+anzeigen soll: One-Minute-Wonder, Aushänge, Termine und Ähnliches.
+
+Zugelassene Dateitypen
+----------------------
+  *.pdf    *.png    *.jpg    *.jpeg
+
+Dateien bekannt machen
+----------------------
+Ein Browser darf aus Sicherheitsgründen kein Verzeichnis auslesen. Die
+Belegungstafel erfährt die Dateinamen deshalb auf einem dieser drei Wege:
+
+1. Über die Liste slides.json in diesem Ordner. Sie enthält die Dateinamen,
+   zum Beispiel:
+
+       [
+         "one-minute-wonder-zvk.pdf",
+         "termine-november.png"
+       ]
+
+   Danach in den Einstellungen der Tafel (Zahnrad unten rechts) unter
+   "Bildschirmschoner" auf "Ordner einlesen" klicken.
+
+2. Automatisch, wenn die Tafel über einen Webserver ausgeliefert wird, der
+   für diesen Ordner eine Verzeichnisübersicht erzeugt. Dann genügt
+   "Ordner einlesen"; slides.json wird nicht gebraucht.
+
+3. Von Hand: in den Einstellungen unter "Bildschirmschoner" die Schaltfläche
+   "+ Datei von Hand" und den Dateinamen eintragen. Das funktioniert immer,
+   auch wenn die Tafel direkt von der Festplatte geöffnet wird.
+
+Hinweise
+--------
+- Jeder Eintrag lässt sich in den Einstellungen einzeln an- und abschalten,
+  in der Reihenfolge verschieben und mit einer eigenen Anzeigedauer versehen.
+  Ohne eigene Angabe gilt die zentrale Vorgabe (Voreinstellung 10 Sekunden).
+- Querformat passt am besten zum Stationsmonitor.
+- PDF-Dateien werden vom Browser angezeigt; mehrseitige PDF zeigen nur die
+  erste Seite formatfüllend. Für eine Diaschau je Seite die Seiten als
+  einzelne Dateien ablegen.
+- Die Dateien bleiben lokal; sie werden nirgendwohin übertragen.

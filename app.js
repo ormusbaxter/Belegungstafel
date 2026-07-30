@@ -7,7 +7,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '1.3.0';
+const VERSION = '1.4.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -322,6 +322,35 @@ const PALETTE = [
   '#d6e6f7', '#1e5f9e', '#e9d8f2', '#6a1b9a'
 ];
 
+/* ------------------------------------------------------------------ *
+ * Bildschirmschoner
+ * Die Dateien der Diaschau liegen im Unterordner „slides“ neben index.html.
+ * Ein Browser kann keinen Ordner auslesen; die Dateinamen kommen deshalb aus
+ * der Liste slides/slides.json oder – falls der Webserver eine Verzeichnis-
+ * übersicht ausliefert – aus dieser Übersicht. Von Hand eingetragene Namen
+ * funktionieren immer, auch wenn die Seite direkt von der Festplatte kommt.
+ * ------------------------------------------------------------------ */
+const SLIDE_DIR = 'slides/';
+const SLIDE_TYPES = /\.(pdf|png|jpe?g)$/i;
+const SAVER_MIN = 10;          /* kürzeste Wartezeit bis zum Start, Sekunden */
+const SAVER_ITEM_MIN = 2;      /* kürzeste Anzeigedauer je Eintrag, Sekunden */
+
+const DEFAULT_SAVER = {
+  on: false,
+  seconds: 300,
+  defaultSeconds: 10,
+  items: []
+};
+
+function newSlideId() {
+  return 'dia' + Math.random().toString(36).slice(2, 8);
+}
+
+function slideItem(props) {
+  return { id: newSlideId(), kind: 'datei', file: '', title: '', text: '',
+           on: true, seconds: null, ...props };
+}
+
 const SETTINGS_KEY = 'belegungstafel.einstellungen';
 
 let settings = loadSettings();
@@ -335,7 +364,8 @@ function loadSettings() {
     options: copy(DEFAULT_OPTIONS),
     /* Ein Stil je Spalte, nicht je Eintrag */
     styles: Object.fromEntries(OPTION_CATEGORIES.filter(c => c.kind === 'text').map(c => [c.key, {}])),
-    privacy: { on: true, seconds: 120 }
+    privacy: { on: true, seconds: 120 },
+    screensaver: copy(DEFAULT_SAVER)
   };
   let stored = null;
   try {
@@ -389,6 +419,41 @@ function mergeSettings(target, source) {
     const seconds = parseInt(source.privacy.seconds, 10);
     if (Number.isFinite(seconds)) target.privacy.seconds = Math.min(3600, Math.max(5, seconds));
   }
+  mergeSaver(target.screensaver, source.screensaver);
+}
+
+/* Einstellungen des Bildschirmschoners übernehmen und dabei prüfen. */
+function mergeSaver(target, source) {
+  if (!source || typeof source !== 'object') return;
+  target.on = source.on === true;
+  const start = parseInt(source.seconds, 10);
+  if (Number.isFinite(start)) target.seconds = Math.min(3600, Math.max(SAVER_MIN, start));
+  const each = parseInt(source.defaultSeconds, 10);
+  if (Number.isFinite(each)) target.defaultSeconds = Math.min(600, Math.max(SAVER_ITEM_MIN, each));
+  if (!Array.isArray(source.items)) return;
+  target.items = source.items
+    .filter(item => item && typeof item === 'object')
+    .map(item => {
+      const seconds = parseInt(item.seconds, 10);
+      return slideItem({
+        id: String(item.id || newSlideId()),
+        kind: item.kind === 'text' ? 'text' : 'datei',
+        file: slideName(item.file),
+        title: String(item.title || ''),
+        text: String(item.text || ''),
+        on: item.on !== false,
+        seconds: Number.isFinite(seconds) && seconds > 0
+          ? Math.min(600, Math.max(SAVER_ITEM_MIN, seconds))
+          : null
+      });
+    })
+    .filter(item => item.kind === 'text' || item.file);
+}
+
+/* Reiner Dateiname innerhalb des Ordners slides, ohne Pfadangaben. */
+function slideName(value) {
+  const name = String(value || '').trim().replace(/^.*[\\/]/, '');
+  return SLIDE_TYPES.test(name) ? name : '';
 }
 
 function saveSettings() {
@@ -424,6 +489,7 @@ function applySettings() {
     else COL_BY_KEY[cat.key].options = settings.options[cat.key];
   }
   privacyDelay = settings.privacy.on ? settings.privacy.seconds : 0;
+  saverDelay = settings.screensaver.on ? settings.screensaver.seconds : 0;
 }
 
 const NOTE_FIELDS = [
@@ -1059,6 +1125,7 @@ function renderTabs() {
   box.replaceChildren();
   const tabs = [
     { key: 'allgemein', label: 'Allgemein' },
+    { key: 'schoner', label: 'Bildschirmschoner' },
     { key: 'header', label: 'Spaltenköpfe' },
     { key: 'betten', label: 'Bettplätze' },
     ...OPTION_CATEGORIES,
@@ -1077,6 +1144,7 @@ function renderPane() {
   const pane = $('#settingsPane');
   pane.replaceChildren();
   if (activeTab === 'allgemein') return renderGeneralPane(pane);
+  if (activeTab === 'schoner') return renderSaverPane(pane);
   if (activeTab === 'daten') return renderDataPane(pane);
   if (activeTab === 'header') return renderHeaderPane(pane);
   if (activeTab === 'betten') return renderBedPane(pane);
@@ -1223,39 +1291,63 @@ function moveButton(text, title, onClick) {
   return btn;
 }
 
-function renderGeneralPane(pane) {
-  pane.appendChild(el('h3', null, 'Sichtschutz'));
-  pane.appendChild(el('p', 'panehint',
-    'Blendet die patientenbezogenen Angaben aus, wenn eine Zeit lang keine Eingabe erfolgt.'));
-
+function checkRow(label, checked, onChange) {
   const row = el('label', 'setrow');
   const box = el('input');
   box.type = 'checkbox';
-  box.checked = draft.privacy.on;
+  box.checked = checked;
+  box.addEventListener('change', () => onChange(box.checked));
   row.appendChild(box);
-  row.appendChild(el('span', null, 'Sichtschutz aktiv'));
-  pane.appendChild(row);
+  row.appendChild(el('span', null, label));
+  return row;
+}
 
-  const timeRow = el('label', 'setrow');
-  timeRow.appendChild(el('span', null, 'Zeit ohne Eingabe'));
-  const seconds = el('input');
-  seconds.type = 'number';
-  seconds.min = '5';
-  seconds.max = '3600';
-  seconds.step = '5';
-  seconds.value = String(draft.privacy.seconds);
-  seconds.disabled = !draft.privacy.on;
-  seconds.addEventListener('input', () => {
-    draft.privacy.seconds = parseInt(seconds.value, 10) || 0;
-  });
-  timeRow.appendChild(seconds);
-  timeRow.appendChild(el('span', 'unit', 'Sekunden'));
-  pane.appendChild(timeRow);
+function numberRow(label, value, limits, onInput) {
+  const row = el('label', 'setrow');
+  row.appendChild(el('span', null, label));
+  const field = el('input');
+  field.type = 'number';
+  field.min = String(limits.min);
+  field.max = String(limits.max);
+  field.step = String(limits.step || 1);
+  field.value = String(value);
+  field.addEventListener('input', () => onInput(parseInt(field.value, 10) || 0));
+  row.appendChild(field);
+  row.appendChild(el('span', 'unit', limits.unit || 'Sekunden'));
+  row.field = field;
+  return row;
+}
 
-  box.addEventListener('change', () => {
-    draft.privacy.on = box.checked;
-    seconds.disabled = !box.checked;
-  });
+function renderGeneralPane(pane) {
+  pane.appendChild(el('h3', null, '1. Sichtschutz'));
+  pane.appendChild(el('p', 'panehint',
+    'Blendet die patientenbezogenen Angaben aus, wenn eine Zeit lang keine Eingabe erfolgt.'));
+
+  const time = numberRow('Zeit ohne Eingabe', draft.privacy.seconds, { min: 5, max: 3600, step: 5 },
+    value => { draft.privacy.seconds = value; });
+  time.field.disabled = !draft.privacy.on;
+
+  pane.appendChild(checkRow('Sichtschutz aktiv', draft.privacy.on, on => {
+    draft.privacy.on = on;
+    time.field.disabled = !on;
+  }));
+  pane.appendChild(time);
+
+  pane.appendChild(el('h3', null, '2. Bildschirmschoner'));
+  pane.appendChild(el('p', 'panehint',
+    'Startet nach der eingestellten Zeit ohne Eingabe eine Diaschau aus den Inhalten unter ' +
+    '„Bildschirmschoner“. Unabhängig davon lässt sich die Schau jederzeit über die ' +
+    'Schaltfläche im Seitenkopf starten; jede Eingabe beendet sie wieder.'));
+
+  const saverTime = numberRow('Zeit ohne Eingabe', draft.screensaver.seconds,
+    { min: SAVER_MIN, max: 3600, step: 10 }, value => { draft.screensaver.seconds = value; });
+  saverTime.field.disabled = !draft.screensaver.on;
+
+  pane.appendChild(checkRow('Bildschirmschoner aktiv', draft.screensaver.on, on => {
+    draft.screensaver.on = on;
+    saverTime.field.disabled = !on;
+  }));
+  pane.appendChild(saverTime);
 }
 
 /* Beschriftung der Spaltenköpfe */
@@ -1277,6 +1369,171 @@ function renderHeaderPane(pane) {
     list.appendChild(row);
   }
   pane.appendChild(list);
+}
+
+/* Inhalte der Diaschau: Dateien aus dem Ordner „slides“ und eigene Hinweise */
+function renderSaverPane(pane) {
+  pane.appendChild(el('h3', null, 'Bildschirmschoner'));
+  pane.appendChild(el('p', 'panehint',
+    'Gezeigt werden alle angehakten Einträge nacheinander, in der Reihenfolge dieser Liste. ' +
+    'Dateien (PDF, PNG, JPEG) gehören in den Ordner „slides“ neben index.html. „Ordner ' +
+    'einlesen“ sucht sie über die Datei slides/slides.json oder die Verzeichnisübersicht des ' +
+    'Webservers; findet der Browser nichts, lässt sich der Dateiname von Hand eintragen.'));
+
+  pane.appendChild(numberRow('Anzeigedauer je Eintrag', draft.screensaver.defaultSeconds,
+    { min: SAVER_ITEM_MIN, max: 600, step: 1 }, value => { draft.screensaver.defaultSeconds = value; }));
+  pane.appendChild(el('p', 'panehint',
+    'Gilt für alle Einträge ohne eigene Angabe in der Spalte „Dauer“.'));
+
+  const status = el('p', 'panehint slidestatus');
+  const list = el('div', 'entrylist');
+
+  const bar = el('div', 'slidebar');
+  const scan = el('button', 'addentry', 'Ordner einlesen');
+  scan.type = 'button';
+  scan.addEventListener('click', async () => {
+    scan.disabled = true;
+    status.textContent = 'Ordner „slides“ wird gelesen …';
+    const found = await scanSlideFolder();
+    scan.disabled = false;
+    const added = mergeFoundSlides(draft.screensaver.items, found);
+    markMissingSlides(draft.screensaver.items, found);
+    renderSlideEntries(list, status);
+    status.textContent = !found.length
+      ? 'Im Ordner „slides“ wurde keine Datei gefunden. Entweder liegt dort nichts, oder der ' +
+        'Browser darf das Verzeichnis nicht lesen – dann bitte slides/slides.json pflegen oder ' +
+        'den Dateinamen von Hand eintragen.'
+      : found.length + (found.length === 1 ? ' Datei gefunden' : ' Dateien gefunden') +
+        (added ? ', ' + added + ' neu übernommen.' : ', nichts Neues.');
+  });
+  bar.appendChild(scan);
+
+  const addFile = el('button', 'addentry', '+ Datei von Hand');
+  addFile.type = 'button';
+  addFile.addEventListener('click', () => {
+    draft.screensaver.items.push(slideItem({ kind: 'datei', file: '' }));
+    renderSlideEntries(list, status);
+    focusLast(list, '.slidefile');
+  });
+  bar.appendChild(addFile);
+
+  const addText = el('button', 'addentry', '+ Eigener Hinweis');
+  addText.type = 'button';
+  addText.addEventListener('click', () => {
+    draft.screensaver.items.push(slideItem({ kind: 'text' }));
+    renderSlideEntries(list, status);
+    focusLast(list, '.slidetitle');
+  });
+  bar.appendChild(addText);
+
+  pane.appendChild(bar);
+  pane.appendChild(status);
+  pane.appendChild(list);
+  renderSlideEntries(list, status);
+}
+
+function focusLast(list, selector) {
+  const fields = list.querySelectorAll(selector);
+  if (fields.length) fields[fields.length - 1].focus();
+}
+
+/* Neu gefundene Dateien hinten anfügen; bekannte behalten ihre Einstellungen. */
+function mergeFoundSlides(items, found) {
+  let added = 0;
+  for (const file of found) {
+    if (items.some(item => item.kind === 'datei' && item.file.toLowerCase() === file.toLowerCase())) continue;
+    items.push(slideItem({ kind: 'datei', file }));
+    added++;
+  }
+  return added;
+}
+
+/* Nur kennzeichnen, wenn überhaupt etwas gefunden wurde – sonst wäre jeder
+   Eintrag als fehlend markiert, obwohl bloß das Auslesen nicht möglich war. */
+function markMissingSlides(items, found) {
+  for (const item of items) {
+    if (item.kind !== 'datei') continue;
+    item.missing = found.length > 0 &&
+      !found.some(file => file.toLowerCase() === item.file.toLowerCase());
+  }
+}
+
+function renderSlideEntries(list, status) {
+  const items = draft.screensaver.items;
+  list.replaceChildren();
+
+  items.forEach((item, index) => {
+    const row = el('div', 'entry entry-slide' + (item.on ? '' : ' off'));
+
+    const box = el('input', 'slideon');
+    box.type = 'checkbox';
+    box.checked = item.on;
+    box.title = 'Eintrag zeigen';
+    box.addEventListener('change', () => {
+      item.on = box.checked;
+      row.classList.toggle('off', !item.on);
+    });
+    row.appendChild(box);
+
+    const main = el('div', 'slidemain');
+    if (item.kind === 'text') {
+      row.appendChild(el('span', 'slidekind', 'Hinweis'));
+      main.appendChild(entryInput(item.title, 'Überschrift', 'slidetitle',
+        value => { item.title = value; }));
+      const text = el('textarea', 'slidetext');
+      text.rows = 2;
+      text.value = item.text;
+      text.placeholder = 'Infotext';
+      text.addEventListener('input', () => { item.text = text.value; });
+      main.appendChild(text);
+    } else {
+      row.appendChild(el('span', 'slidekind', /\.pdf$/i.test(item.file) ? 'PDF' : 'Bild'));
+      main.appendChild(entryInput(item.file, 'dateiname.pdf', 'slidefile', value => {
+        item.file = slideName(value);
+        item.missing = false;
+      }));
+      if (item.missing) main.appendChild(el('span', 'slidewarn', 'im Ordner nicht gefunden'));
+    }
+    row.appendChild(main);
+
+    const secs = el('input', 'slidesec');
+    secs.type = 'number';
+    secs.min = String(SAVER_ITEM_MIN);
+    secs.max = '600';
+    secs.value = item.seconds > 0 ? String(item.seconds) : '';
+    secs.placeholder = String(draft.screensaver.defaultSeconds);
+    secs.title = 'Dauer in Sekunden, leer = Vorgabe';
+    secs.addEventListener('input', () => {
+      const value = parseInt(secs.value, 10);
+      item.seconds = Number.isFinite(value) && value > 0 ? value : null;
+    });
+    row.appendChild(secs);
+    row.appendChild(el('span', 'unit', 's'));
+
+    row.appendChild(moveButton('↑', 'nach oben', () => {
+      if (index === 0) return;
+      [items[index - 1], items[index]] = [items[index], items[index - 1]];
+      renderSlideEntries(list, status);
+    }));
+    row.appendChild(moveButton('↓', 'nach unten', () => {
+      if (index === items.length - 1) return;
+      [items[index + 1], items[index]] = [items[index], items[index + 1]];
+      renderSlideEntries(list, status);
+    }));
+    const remove = moveButton('×', 'entfernen', () => {
+      items.splice(index, 1);
+      renderSlideEntries(list, status);
+    });
+    remove.classList.add('remove');
+    row.appendChild(remove);
+
+    list.appendChild(row);
+  });
+
+  if (!items.length) {
+    list.appendChild(el('p', 'panehint',
+      'Noch keine Inhalte. Ohne Inhalte zeigt der Bildschirmschoner nur Uhrzeit und Datum.'));
+  }
 }
 
 /* Bettplätze */
@@ -1375,6 +1632,16 @@ function commitSettings() {
   }
   draft.privacy.seconds = Math.min(3600, Math.max(5, draft.privacy.seconds || 120));
 
+  /* Bildschirmschoner: Zeiten begrenzen, leere Einträge verwerfen */
+  const saver = draft.screensaver;
+  saver.seconds = Math.min(3600, Math.max(SAVER_MIN, saver.seconds || DEFAULT_SAVER.seconds));
+  saver.defaultSeconds = Math.min(600, Math.max(SAVER_ITEM_MIN,
+    saver.defaultSeconds || DEFAULT_SAVER.defaultSeconds));
+  saver.items = saver.items
+    .map(item => ({ ...item, title: item.title.trim(), text: item.text.trim(),
+                    seconds: item.seconds > 0 ? Math.min(600, Math.max(SAVER_ITEM_MIN, item.seconds)) : null }))
+    .filter(item => item.kind === 'text' ? (item.title || item.text) : item.file);
+
   draft.beds = draft.beds.filter(bed => bed.label.trim())
     .map(bed => ({ id: bed.id, label: bed.label.trim() }));
   if (!draft.beds.length) draft.beds = copy(DEFAULT_BEDS);
@@ -1390,13 +1657,19 @@ function commitSettings() {
   manualLock = false;
   setPrivacy(false);
   restartPrivacyTimer();
+  restartSaverTimer();
   $('#settingsDlg').close();
   setSaveState('Einstellungen übernommen');
 }
 
 function resetCategory() {
   if (activeTab === 'allgemein' || activeTab === 'daten') return;
-  if (activeTab === 'header') draft.headers = {};
+  if (activeTab === 'schoner') {
+    if (!confirm('Alle Inhalte des Bildschirmschoners entfernen?')) return;
+    draft.screensaver.items = [];
+    draft.screensaver.defaultSeconds = DEFAULT_SAVER.defaultSeconds;
+  }
+  else if (activeTab === 'header') draft.headers = {};
   else if (activeTab === 'betten') draft.beds = copy(DEFAULT_BEDS);
   else {
     draft.options[activeTab] = copy(DEFAULT_OPTIONS[activeTab]);
@@ -1445,10 +1718,13 @@ function restartPrivacyTimer() {
 }
 
 function wake(event) {
+  /* Läuft der Bildschirmschoner, beendet ihn die erste echte Eingabe. */
+  if (saverOn && !stopSaver(event)) return;
   if (manualLock && event && event.type === 'mousemove') return;
   manualLock = false;
   setPrivacy(false);
   restartPrivacyTimer();
+  restartSaverTimer();
 }
 
 function lockNow() {
@@ -1464,6 +1740,196 @@ function initPrivacy() {
     document.addEventListener(type, wake, { passive: true });
   }
   restartPrivacyTimer();
+}
+
+/* ------------------------------------------------------------------ *
+ * Bildschirmschoner: Diaschau
+ * Zeigt nacheinander die freigegebenen Dateien aus dem Ordner „slides“ und
+ * die von Hand angelegten Einträge. Der Start erfolgt nach der eingestellten
+ * Zeit ohne Eingabe oder von Hand über die Schaltfläche im Seitenkopf; jede
+ * Eingabe beendet die Schau wieder.
+ * ------------------------------------------------------------------ */
+let saverDelay = 0;
+let saverTimer = null;
+let saverOn = false;
+let saverGuard = 0;
+let saverPos = null;
+let slideTimer = null;
+let slideClock = null;
+let slideList = [];
+let slideIndex = 0;
+
+/* Alle freigegebenen Einträge mit Inhalt, in eingestellter Reihenfolge */
+function saverPlaylist() {
+  return settings.screensaver.items.filter(item => item.on &&
+    (item.kind === 'text' ? (item.title.trim() || item.text.trim()) : item.file));
+}
+
+function slideSeconds(item) {
+  return item && item.seconds > 0 ? item.seconds : settings.screensaver.defaultSeconds;
+}
+
+function restartSaverTimer() {
+  clearTimeout(saverTimer);
+  if (saverOn || saverDelay <= 0) return;
+  saverTimer = setTimeout(() => {
+    /* Ein offenes Fenster (Einstellungen, Auswahl) bleibt unangetastet. */
+    if (document.querySelector('dialog[open]')) restartSaverTimer();
+    else startSaver();
+  }, saverDelay * 1000);
+}
+
+/* Erste Eingabe nach dem Start beendet die Schau. Ein winziges Zucken der
+   Maus zählt nicht, sonst ließe sich die Schau von Hand kaum starten. */
+function saverWakes(event) {
+  if (Date.now() < saverGuard) return false;
+  if (event && event.type === 'mousemove') {
+    if (!saverPos) {
+      saverPos = { x: event.clientX, y: event.clientY };
+      return false;
+    }
+    if (Math.abs(event.clientX - saverPos.x) + Math.abs(event.clientY - saverPos.y) < 30) return false;
+  }
+  return true;
+}
+
+function startSaver() {
+  if (saverOn) return;
+  slideList = saverPlaylist();
+  saverOn = true;
+  saverGuard = Date.now() + 800;
+  saverPos = null;
+  clearTimeout(saverTimer);
+  clearTimeout(privacyTimer);
+  if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+  setPrivacy(true);
+  $('#saver').hidden = false;
+  document.body.classList.add('saver-on');
+  showSlide(0);
+  tickSlideClock();
+  slideClock = setInterval(tickSlideClock, 1000);
+}
+
+function stopSaver(event) {
+  if (!saverWakes(event)) return false;
+  saverOn = false;
+  clearTimeout(slideTimer);
+  clearInterval(slideClock);
+  $('#saverStage').replaceChildren();
+  $('#saver').hidden = true;
+  document.body.classList.remove('saver-on');
+  return true;
+}
+
+function showSlide(index) {
+  clearTimeout(slideTimer);
+  const count = slideList.length;
+  slideIndex = count ? ((index % count) + count) % count : 0;
+  const item = count ? slideList[slideIndex] : null;
+
+  const stage = $('#saverStage');
+  stage.replaceChildren(item ? slideNode(item) : emptySlideNode());
+  $('#saverCount').textContent = count > 1 ? slideIndex + 1 + ' / ' + count : '';
+
+  /* Bei nur einem Eintrag gibt es nichts weiterzuschalten. */
+  if (count > 1) slideTimer = setTimeout(() => showSlide(slideIndex + 1), slideSeconds(item) * 1000);
+}
+
+function slideNode(item) {
+  if (item.kind === 'text') {
+    const card = el('div', 'slide slide-text');
+    if (item.title.trim()) card.appendChild(el('h2', null, item.title));
+    if (item.text.trim()) card.appendChild(el('p', null, item.text));
+    return card;
+  }
+
+  const src = SLIDE_DIR + encodeURIComponent(item.file);
+  if (/\.pdf$/i.test(item.file)) {
+    const frame = el('iframe', 'slide slide-pdf');
+    frame.src = src + '#toolbar=0&navpanes=0&scrollbar=0&view=Fit';
+    frame.title = item.file;
+    return frame;
+  }
+
+  const img = el('img', 'slide slide-img');
+  img.src = src;
+  img.alt = item.file;
+  img.addEventListener('error', () => img.replaceWith(missingSlideNode(item.file)));
+  return img;
+}
+
+function missingSlideNode(file) {
+  const card = el('div', 'slide slide-text slide-missing');
+  card.appendChild(el('h2', null, 'Datei nicht gefunden'));
+  card.appendChild(el('p', null, SLIDE_DIR + file));
+  return card;
+}
+
+function emptySlideNode() {
+  const card = el('div', 'slide slide-text');
+  card.appendChild(el('h2', null, 'Belegungstafel Intensivstation'));
+  card.appendChild(el('p', null,
+    'Für die Diaschau sind noch keine Inhalte freigegeben. Dateien (PDF, PNG, JPEG) ' +
+    'gehören in den Ordner „slides“ neben der Tafel; eigene Hinweise lassen sich in den ' +
+    'Einstellungen unter „Bildschirmschoner“ anlegen.'));
+  return card;
+}
+
+function tickSlideClock() {
+  const d = new Date();
+  const days = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+  $('#saverClock').textContent = timeStr(d);
+  $('#saverDate').textContent = days[d.getDay()] + ', ' + pad(d.getDate()) + '.' +
+    pad(d.getMonth() + 1) + '.' + d.getFullYear();
+}
+
+function initSaver() {
+  $('#btnSaver').addEventListener('click', startSaver);
+  restartSaverTimer();
+}
+
+/* ------------------------------------------------------------------ *
+ * Dateien im Ordner „slides“ suchen
+ * Ein Browser kann kein Verzeichnis auflisten. Gelesen wird deshalb die
+ * Liste slides/slides.json und – sofern der Webserver eine Verzeichnis-
+ * übersicht ausliefert – zusätzlich diese Übersicht.
+ * ------------------------------------------------------------------ */
+async function scanSlideFolder() {
+  const found = [];
+  const add = value => {
+    const name = slideName(value);
+    if (name && !found.some(f => f.toLowerCase() === name.toLowerCase())) found.push(name);
+  };
+
+  try {
+    const res = await fetch(SLIDE_DIR + 'slides.json', { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : Array.isArray(data && data.slides) ? data.slides : [];
+      for (const entry of list) add(typeof entry === 'string' ? entry : entry && entry.file);
+    }
+  } catch (err) {
+    /* keine Liste vorhanden oder nicht lesbar – kein Fehler */
+  }
+
+  try {
+    const res = await fetch(SLIDE_DIR, { cache: 'no-store' });
+    if (res.ok) {
+      const html = await res.text();
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      for (const link of doc.querySelectorAll('a[href]')) {
+        try {
+          add(decodeURIComponent(link.getAttribute('href')));
+        } catch (err) {
+          add(link.getAttribute('href'));
+        }
+      }
+    }
+  } catch (err) {
+    /* keine Verzeichnisübersicht – kein Fehler */
+  }
+
+  return found;
 }
 
 /* ------------------------------------------------------------------ *
@@ -1913,6 +2379,7 @@ function importJson(file) {
       buildHead();
       renderPhones();
       restartPrivacyTimer();
+      restartSaverTimer();
     }
     buildBody();
     renderStation();
@@ -1977,6 +2444,7 @@ function init() {
   initAutoSize();
   setPrintRowHeight();
   initPrivacy();
+  initSaver();
   initSettings();
   initCombo();
   tickClock();

@@ -55,6 +55,13 @@
       </svg>
       Datenschutz
     </button>
+    <button type="button" id="btnSaver" class="iconbtn" title="Diaschau sofort starten">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+        <path fill="currentColor" d="M21 3H3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7v2H7v2h10v-2h-3v-2h7a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 12H3V5h18v10Z"/>
+        <path fill="currentColor" d="M10 7.5v5l4.5-2.5L10 7.5Z"/>
+      </svg>
+      Diaschau
+    </button>
     <button type="button" id="btnPrint" class="iconbtn" title="Tafel drucken">
       <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
         <path fill="currentColor" d="M17 3H7v4h10V3Zm2 6H5a3 3 0 0 0-3 3v5h4v4h12v-4h4v-5a3 3 0 0 0-3-3Zm-3 10H8v-5h8v5Zm3-6.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>
@@ -88,6 +95,19 @@
 
 <div class="privacyhint" id="privacyHint" role="status">
   Sichtschutz aktiv – Maus bewegen oder Taste drücken
+</div>
+
+<!-- Bildschirmschoner: Diaschau -->
+<div class="saver" id="saver" role="presentation" hidden>
+  <div class="saverstage" id="saverStage"></div>
+  <div class="saverveil"></div>
+  <footer class="saverfoot">
+    <span class="saverclock" id="saverClock">–</span>
+    <span class="saverdate" id="saverDate"></span>
+    <span class="spacer"></span>
+    <span class="savercount" id="saverCount"></span>
+    <span class="saverhint">Maus bewegen oder Taste drücken</span>
+  </footer>
 </div>
 
 <section class="notes">
@@ -194,6 +214,28 @@
       <p>Die Schaltfläche <b>Datenschutz</b> oben rechts schaltet sofort um, etwa wenn Besuch die
         Station betritt; dieser Zustand bleibt bis zum nächsten Klick oder Tastendruck bestehen.
         Der Ausdruck bleibt immer vollständig lesbar.</p>
+    </section>
+
+    <section>
+      <h3>Bildschirmschoner (Diaschau)</h3>
+      <p>Die Schaltfläche <b>Diaschau</b> oben rechts startet sofort eine bildschirmfüllende
+        Anzeige, die alle freigegebenen Inhalte nacheinander zeigt – etwa Aushänge, Schulungs-
+        blätter oder Termine. Ist der Bildschirmschoner eingeschaltet, startet dieselbe Schau
+        außerdem von allein, sobald eine eingestellte Zeit lang niemand etwas eingegeben hat.
+        Die Tafel liegt dabei verdeckt darunter; <b>jede Mausbewegung oder Taste</b> beendet die
+        Schau und bringt die Tafel zurück.</p>
+      <ul>
+        <li><b>Dateien</b> (PDF, PNG, JPEG) gehören in den Ordner <b>slides</b> neben der Tafel.
+          In den Einstellungen liest „Ordner einlesen“ die vorhandenen Dateien ein; findet der
+          Browser nichts, lässt sich der Dateiname dort von Hand eintragen.</li>
+        <li><b>Eigene Hinweise</b> mit Überschrift und Infotext werden direkt in den Einstellungen
+          angelegt – ohne Datei, etwa für Termine oder kurze Merksätze.</li>
+        <li>Jeder Eintrag lässt sich <b>einzeln an- und abschalten</b> und in der Reihenfolge
+          verschieben. Die <b>Dauer</b> gilt je Eintrag; bleibt das Feld leer, gilt die zentrale
+          Vorgabe von 10 Sekunden.</li>
+      </ul>
+      <p>Der Bildschirmschoner zeigt keine Patientendaten und startet nicht, solange ein Fenster
+        wie die Einstellungen geöffnet ist.</p>
     </section>
 
     <section>
