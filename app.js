@@ -4,6 +4,12 @@
  */
 'use strict';
 
+/* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
+   grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
+   Korrekturen und kleinen Anpassungen. */
+const VERSION = '1.0.0';
+const COPYRIGHT = '\u00A9 2026 Oliver Becker';
+
 /* ------------------------------------------------------------------ *
  * Bettplätze
  * ------------------------------------------------------------------ */
@@ -225,17 +231,15 @@ const NAME_CLASS = {
   'CV': 'st-abwesend'
 };
 
-const LEGEND = [
-  ['st-frei', 'Bett frei (kein Status gesetzt)'],
+/* Zeilenfarben, wie sie in der Hilfe erklärt werden */
+const ROW_COLORS = [
+  ['st-frei', 'freier Bettplatz – kein Status gesetzt'],
   ['st-aufnahme', 'A >>> – Aufnahme angekündigt'],
-  ['st-belegt', '\u25cf / Notbett – belegt'],
+  ['st-belegt', '\u25cf oder eigener Status – belegt'],
   ['st-nvk', 'NVK, NVK 1–3'],
   ['st-verlegung', '<<< V – Verlegung'],
-  ['st-abwesend', 'NA / OP / CV im Feld Patientenname'],
-  ['st-gesperrt', 'gesperrt / Reinigung im Feld Patientenname'],
-  ['lg-iso', 'bestätigter Keim – Kennzeichen ISO am Bettplatz'],
-  ['lg-verdacht', 'nur Verdachtsfälle – Kennzeichen ISO? am Bettplatz'],
-  ['lg-limit', 'Therapielimitierung hinterlegt']
+  ['st-abwesend', 'NA, OP oder CV im Feld Patientenname'],
+  ['st-gesperrt', 'gesperrt oder Reinigung im Feld Patientenname']
 ];
 
 /* Stationsweite Angaben über der Tafel */
@@ -414,7 +418,6 @@ const NOTE_FIELDS = [
 
 const STORAGE_KEY = 'belegungstafel.intensiv.v1';
 const THEME_KEY = 'belegungstafel.theme';
-const LEGEND_KEY = 'belegungstafel.legende';
 
 /* Sichtschutz: patientenbezogene Spalten zwischen Bettplatz und
    Therapielimitierung (jeweils ausschließlich bzw. einschließlich). */
@@ -1733,33 +1736,20 @@ function renderPhones() {
   }
 }
 
-/* --- 5) Legende ein- und ausklappen --------------------------------------- */
-function initLegend() {
-  const box = $('#legendBox');
-  box.open = localStorage.getItem(LEGEND_KEY) === 'auf';
-  box.addEventListener('toggle', () => {
-    localStorage.setItem(LEGEND_KEY, box.open ? 'auf' : 'zu');
-  });
-  /* Für den Ausdruck wird die Legende vorübergehend geöffnet. */
-  window.addEventListener('beforeprint', () => {
-    box.dataset.vorher = String(box.open);
-    box.open = true;
-    wake();
-  });
-  window.addEventListener('afterprint', () => {
-    if (box.dataset.vorher !== undefined) box.open = box.dataset.vorher === 'true';
-  });
-}
-
-function renderLegend() {
-  const ul = $('#legend');
-  ul.replaceChildren();
-  for (const [cls, text] of LEGEND) {
+/* ------------------------------------------------------------------ *
+ * Hilfe
+ * ------------------------------------------------------------------ */
+function initHelp() {
+  const list = $('#helpColors');
+  for (const [cls, text] of ROW_COLORS) {
     const li = el('li');
     li.appendChild(el('span', 'swatch ' + cls));
     li.appendChild(el('span', null, text));
-    ul.appendChild(li);
+    list.appendChild(li);
   }
+  $('#helpVersion').textContent = 'Version ' + VERSION + ' \u00B7 ' + COPYRIGHT;
+  $('#btnHelp').addEventListener('click', () => $('#helpDlg').showModal());
+  $('#helpClose').addEventListener('click', () => $('#helpDlg').close());
 }
 
 /* ------------------------------------------------------------------ *
@@ -1899,8 +1889,7 @@ function init() {
   renderStation();
   renderPhones();
   renderStats();
-  renderLegend();
-  initLegend();
+  initHelp();
   initDragDrop();
   initKeyboardNav();
   initPrivacy();
@@ -1954,6 +1943,7 @@ function init() {
   });
 
   /* Offene Eingaben sichern, bevor die Seite verlassen oder verdeckt wird */
+  window.addEventListener('beforeprint', wake);
   window.addEventListener('resize', measureSticky);
   window.addEventListener('beforeunload', writeNow);
   document.addEventListener('visibilitychange', () => {

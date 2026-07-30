@@ -77,6 +77,8 @@
   </table>
 </main>
 
+<button type="button" class="help" id="btnHelp" title="Hilfe" aria-label="Hilfe">?</button>
+
 <button type="button" class="gear" id="btnSettings" title="Einstellungen" aria-label="Einstellungen">
   <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
     <path fill="currentColor" d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z"/>
@@ -103,15 +105,109 @@
   </div>
 </section>
 
-<details class="legend" id="legendBox">
-  <summary>Legende</summary>
-  <ul id="legend"></ul>
-  <p class="hint">
-    Navigation mit den Pfeiltasten, Zeilenwechsel mit der Eingabetaste. Eingaben werden automatisch
-    lokal im Browser gespeichert (localStorage) – es werden keine Daten an einen Server übertragen.
-    Für den Datenaustausch zwischen Geräten bitte Export/Import verwenden.
-  </p>
-</details>
+
+<!-- Hilfe -->
+<dialog id="helpDlg" class="dlg dlg-help">
+  <h2>Belegungstafel – Kurzanleitung</h2>
+  <div class="helpbody">
+
+    <section>
+      <h3>Eingeben und ändern</h3>
+      <p>Jede Zeile ist ein Bettplatz, jede Spalte eine Angabe. Alle Felder werden direkt in der
+        Tabelle bearbeitet, ein Speichern von Hand ist nicht nötig – die Statuszeile über der
+        Tabelle zeigt, wann zuletzt gespeichert wurde.</p>
+      <ul>
+        <li><b>Auswahlfelder</b> (z. B. Fachdisziplin, Kostform): anklicken und Wert wählen.
+          Der leere Eintrag ganz oben setzt das Feld zurück.</li>
+        <li><b>Mehrfachauswahl</b> (Beatmungsform, Kreislaufunterstützung, Isolation,
+          Therapielimitierung): Klick auf die Zelle öffnet ein Fenster, in dem sich mehrere
+          Einträge ankreuzen lassen. Bei der Isolation bedeutet das Häkchen „bestätigt“; das
+          zusätzliche Feld <b>V. a.</b> daneben macht daraus einen Verdacht.</li>
+        <li><b>Patientenname und Telefon</b>: frei eintippen oder über das kleine <b>▾</b> am
+          rechten Rand die hinterlegte Liste öffnen – dort stehen immer alle Einträge, auch wenn
+          im Feld schon etwas steht.</li>
+        <li><b>Abstriche</b>: Klick öffnet das Datum des nächsten Screenings, wahlweise über
+          „nächster Montag“ oder „übernächster Montag“.</li>
+        <li><b>Bettplatz räumen</b>: das <b>×</b> in der Bettplatz-Spalte löscht nach Rückfrage
+          alle Einträge dieses Platzes.</li>
+      </ul>
+      <p>Mit der Tastatur: <b>Pfeiltasten</b> wechseln die Zelle, die <b>Eingabetaste</b> springt
+        eine Zeile nach unten (mit Umschalt nach oben). In Textfeldern bewegen Links und Rechts
+        zuerst den Schreibcursor. In Auswahlfeldern öffnet <b>Alt + Pfeil nach unten</b> die Liste,
+        alternativ genügt der Anfangsbuchstabe.</p>
+    </section>
+
+    <section>
+      <h3>Wann ein Bett als belegt zählt</h3>
+      <p>Die Kennzahl <b>belegte Betten</b> im Kopf zählt jeden Bettplatz, bei dem in der ersten
+        Spalte ein <b>Anwesenheitsstatus</b> gesetzt ist – gleich welcher. Angekündigte Aufnahmen
+        und anstehende Verlegungen zählen also mit.</p>
+      <ul>
+        <li>Leerer Status = freier Bettplatz, zählt nicht.</li>
+        <li>Ein Eintrag wie <b>gesperrt</b> oder <b>Reinigung</b> im Feld Patientenname
+          beschreibt den Bettplatz statt eines Patienten: Er wird kursiv dargestellt, färbt die
+          Zeile grau und zählt nicht als belegt.</li>
+        <li><b>Screening fällig</b> zählt die Bettplätze, deren Screening-Datum erreicht oder
+          überschritten ist.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3>Patienten verschieben (Ziehen und Ablegen)</h3>
+      <p>So wird ein Patient auf einen anderen Bettplatz umgebettet:</p>
+      <ol>
+        <li>Mit der Maus auf die <b>Bettplatz-Zelle</b> der Zeile zeigen – der Zeiger wird zur
+          Greifhand.</li>
+        <li>Maustaste gedrückt halten und die Zeile auf den <b>Ziel-Bettplatz</b> ziehen. Die
+          Zielzeile wird blau umrandet, die gezogene Zeile blasser dargestellt.</li>
+        <li>Maustaste loslassen. Ist das Ziel frei, wandert der gesamte Eintrag dorthin. Ist das
+          Ziel belegt, <b>tauschen</b> beide Bettplätze ihre Einträge.</li>
+      </ol>
+      <p>Verschoben wird immer die vollständige Zeile mit allen Angaben. In der Statuszeile
+        erscheint danach ein Hinweis mit der Schaltfläche <b>Rückgängig</b>, mit der sich der
+        letzte Vorgang zurücknehmen lässt – solange noch keine andere Änderung erfolgt ist.</p>
+      <p class="warn">Ziehen und Ablegen funktioniert mit der Maus, nicht per Fingertipp auf
+        einem Touchscreen.</p>
+    </section>
+
+    <section>
+      <h3>Kennzeichen und Farben</h3>
+      <ul class="colorlist" id="helpColors"></ul>
+      <ul>
+        <li>Am Bettplatz steht <b>ISO</b>, sobald ein Keim bestätigt ist, und <b>ISO?</b>,
+          solange nur Verdachtsfälle eingetragen sind.</li>
+        <li>Ein <b>rot hinterlegtes Datum</b> in der Spalte Abstriche bedeutet: Screening fällig
+          oder überfällig.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3>Datenschutz</h3>
+      <p>Nach einer einstellbaren Zeit ohne Eingabe werden die patientenbezogenen Spalten –
+        von Patientenname bis Therapielimitierung – sowie die Textfelder unter der Tafel
+        unkenntlich gemacht. Jede Mausbewegung oder Taste hebt das wieder auf.</p>
+      <p>Die Schaltfläche <b>Datenschutz</b> oben rechts schaltet sofort um, etwa wenn Besuch die
+        Station betritt; dieser Zustand bleibt bis zum nächsten Klick oder Tastendruck bestehen.
+        Der Ausdruck bleibt immer vollständig lesbar.</p>
+    </section>
+
+    <section>
+      <h3>Speichern, Drucken, Austausch</h3>
+      <p>Alle Eingaben bleiben <b>lokal auf diesem Rechner</b> im Browser gespeichert; es werden
+        keine Daten an einen Server übertragen. Mehrere geöffnete Fenster desselben Rechners
+        werden abgeglichen, andere Arbeitsplätze sehen die Tafel jedoch nicht.</p>
+      <p><b>Drucken</b> gibt die Tafel als eine Seite A3 quer aus. Über das Zahnrad unten rechts
+        stehen unter <b>Daten</b> Export (JSON oder CSV), Import und „Tafel leeren“ bereit; dort
+        lassen sich auch Bettplätze, Spaltenköpfe und alle Auswahllisten anpassen.</p>
+    </section>
+
+  </div>
+  <menu class="dlgmenu">
+    <span class="version" id="helpVersion"></span>
+    <span class="spacer"></span>
+    <button type="button" id="helpClose" class="primary">Schließen</button>
+  </menu>
+</dialog>
 
 <!-- Einstellungen -->
 <dialog id="settingsDlg" class="dlg dlg-settings">

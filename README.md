@@ -109,8 +109,10 @@ Spalte der Tafel zugeordnet.
 - **Unter der Tafel**: Textfeld für geplante Aufnahmen, feste Rufnummernliste der Station
   und Textfeld für allgemeine Informationen; die beiden Textfelder werden mitgespeichert
   und exportiert
-- **Legende** ein- und ausklappbar, der Zustand wird gemerkt; für den Ausdruck wird sie
-  automatisch aufgeklappt
+- **Hilfe** über den runden Fragezeichen-Knopf unten rechts, oberhalb des Zahnrads: eine
+  Kurzanleitung für die Bedienung der Tafel – Eingabe der Felder, Zählung der belegten Betten,
+  Verschieben per Ziehen und Ablegen, Kennzeichen und Zeilenfarben, Datenschutz sowie
+  Speichern, Drucken und Austausch. Am Fuß stehen Fassung und Urheberhinweis
 - **Verschieben per Ziehen und Ablegen**: Bettplatz-Zelle greifen und auf einen anderen
   Bettplatz ziehen. Ist das Ziel belegt, tauschen beide Plätze ihre Einträge; der
   letzte Vorgang lässt sich über „Rückgängig“ in der Statuszeile zurücknehmen
@@ -144,6 +146,17 @@ Spalte der Tafel zugeordnet.
   CSV-Export für Excel
 - **Druckansicht** (A3 quer) mit ausgeblendeter Bedienleiste
 - Änderungen werden zwischen mehreren Browser-Tabs desselben Rechners abgeglichen
+
+## Fassung
+
+Die Fassung steht in `app.js` als Konstante `VERSION` und erscheint im Fuß der Hilfe
+zusammen mit dem Urheberhinweis. Sie wird mit jeder Änderung erhöht:
+
+| Stelle | wann |
+|---|---|
+| erste (1.x.x) | grundlegender Umbau, geänderte Datenhaltung |
+| zweite (x.1.x) | neue Funktion oder spürbar geänderte Bedienung |
+| dritte (x.x.1) | Korrekturen, Beschriftungen, kleine Anpassungen |
 
 ## Anpassung
 
