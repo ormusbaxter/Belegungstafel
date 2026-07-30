@@ -48,6 +48,16 @@
       <input type="search" id="search" placeholder="Suchen (Name, Diagnose, Pflegekraft …)">
     </label>
     <label class="chk"><input type="checkbox" id="onlyOccupied"> nur belegte Betten</label>
+    <label class="chk">Sichtschutz
+      <select id="privacyDelay" aria-label="Sichtschutz nach Zeit ohne Eingabe">
+        <option value="0">aus</option>
+        <option value="30">30 s</option>
+        <option value="60">1 min</option>
+        <option value="120">2 min</option>
+        <option value="300">5 min</option>
+      </select>
+    </label>
+    <button type="button" id="btnLock" title="Sichtschutz sofort einschalten">Abdunkeln</button>
     <button type="button" id="btnPrint">Drucken</button>
     <button type="button" id="btnExport">Export</button>
     <button type="button" id="btnImport">Import</button>
@@ -67,6 +77,10 @@
     <tbody id="tbody"></tbody>
   </table>
 </main>
+
+<div class="privacyhint" id="privacyHint" role="status">
+  Sichtschutz aktiv – Maus bewegen oder Taste drücken
+</div>
 
 <section class="notes">
   <div class="note">

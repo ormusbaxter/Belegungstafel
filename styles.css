@@ -516,6 +516,43 @@ td.col-kreislauf .chip { background: #b3261e; color: #fff; }
 td.col-abstriche .chip { background: #6a4c93; color: #fff; }
 td.col-physio .chip { background: #2f7d32; color: #fff; }
 
+/* ---------------- Sichtschutz ---------------- */
+body.privacy td.privatecol > *,
+body.privacy .note textarea,
+body.privacy .dlg {
+  filter: blur(6px);
+  user-select: none;
+}
+td.privatecol > *, .note textarea { transition: filter .12s ease-out; }
+
+.privacyhint {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: none;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 12.5px;
+  font-weight: 600;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .25);
+  pointer-events: none;
+}
+body.privacy .privacyhint { display: block; }
+
+.tools .chk select {
+  padding: 4px 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12.5px;
+}
+
 /* ---------------- Aufnahmen, Rufnummern, Informationen ---------------- */
 .notes {
   display: grid;
@@ -763,6 +800,10 @@ td.col-physio .chip { background: #2f7d32; color: #fff; }
   }
   .note-phones li { font-size: 8px; }
   input::placeholder, textarea::placeholder { opacity: 0 !important; }
+  /* Der Ausdruck wird nie unkenntlich gemacht. */
+  body.privacy td.privatecol > *,
+  body.privacy .note textarea { filter: none !important; }
+  .privacyhint { display: none !important; }
   .phonenr { color: #000; }
   .dlg { display: none !important; }
   :focus, :focus-visible { outline: none !important; }

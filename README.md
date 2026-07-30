@@ -106,6 +106,13 @@ Spalte der Tafel zugeordnet.
 - **Verschieben per Ziehen und Ablegen**: Bettplatz-Zelle greifen und auf einen anderen
   Bettplatz ziehen. Ist das Ziel belegt, tauschen beide Plätze ihre Einträge; der
   letzte Vorgang lässt sich über „Rückgängig“ in der Statuszeile zurücknehmen
+- **Sichtschutz**: Nach einer einstellbaren Zeit ohne Eingabe (aus / 30 s / 1 min / 2 min /
+  5 min, Voreinstellung 2 min) werden die patientenbezogenen Spalten – Patientenname bis
+  einschließlich Therapielimitierung – sowie die beiden Textfelder unter der Tafel
+  unkenntlich gemacht. Jede Mausbewegung oder Taste hebt das auf; die Schaltfläche
+  „Abdunkeln“ schaltet sofort um und bleibt dann bis zu einem Klick oder Tastendruck
+  bestehen. Bettplatz, Anwesenheitsstatus und die Kennzahlen bleiben lesbar, der Ausdruck
+  wird nie unkenntlich gemacht
 - **Suche** über alle Felder und Filter „nur belegte Betten“
 - **Bettplatz räumen** über das `×` in der Bettspalte, „Tafel leeren“ für die gesamte Station
 - **Export/Import** als JSON (vollständige Tafel) sowie CSV-Export für Excel

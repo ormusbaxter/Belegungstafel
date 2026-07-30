@@ -229,6 +229,14 @@ const NOTE_FIELDS = [
 const STORAGE_KEY = 'belegungstafel.intensiv.v1';
 const THEME_KEY = 'belegungstafel.theme';
 const LEGEND_KEY = 'belegungstafel.legende';
+const PRIVACY_KEY = 'belegungstafel.sichtschutz';
+
+/* Sichtschutz: patientenbezogene Spalten zwischen Bettplatz und
+   Therapielimitierung (jeweils ausschließlich bzw. einschließlich). */
+const PRIVATE_KEYS = COLUMNS
+  .slice(COLUMNS.findIndex(col => col.type === 'bed') + 1,
+         COLUMNS.findIndex(col => col.key === 'limitierung') + 1)
+  .map(col => col.key);
 
 /* ------------------------------------------------------------------ *
  * Zustand
@@ -366,6 +374,7 @@ function buildHead() {
   const tr = el('tr');
   for (const col of COLUMNS) {
     const th = el('th', 'col-' + col.key, col.head || col.label);
+    if (PRIVATE_KEYS.includes(col.key)) th.classList.add('privatecol');
     th.title = col.label;
     th.style.width = col.width + 'px';
     th.style.minWidth = col.width + 'px';
@@ -404,6 +413,7 @@ function buildRow(bed) {
 
   for (const col of COLUMNS) {
     const td = el('td', 'col-' + col.key);
+    if (PRIVATE_KEYS.includes(col.key)) td.classList.add('privatecol');
     td.dataset.bed = bed.id;
     td.dataset.key = col.key;
     td.appendChild(buildField(bed, col, data));
@@ -616,6 +626,59 @@ function clearBed(bed) {
   save();
   renderStats();
   applyFilter();
+}
+
+/* ------------------------------------------------------------------ *
+ * Sichtschutz
+ * Nach der eingestellten Zeit ohne Eingabe werden die patientenbezogenen
+ * Angaben unkenntlich gemacht. Jede Bewegung oder Taste hebt das wieder auf;
+ * ein von Hand eingeschalteter Sichtschutz bleibt bis zu einem Klick oder
+ * Tastendruck bestehen.
+ * ------------------------------------------------------------------ */
+let privacyDelay = 120;
+let privacyTimer = null;
+let manualLock = false;
+
+function setPrivacy(on) {
+  document.body.classList.toggle('privacy', on);
+}
+
+function restartPrivacyTimer() {
+  clearTimeout(privacyTimer);
+  if (privacyDelay > 0) privacyTimer = setTimeout(() => setPrivacy(true), privacyDelay * 1000);
+}
+
+function wake(event) {
+  if (manualLock && event && event.type === 'mousemove') return;
+  manualLock = false;
+  setPrivacy(false);
+  restartPrivacyTimer();
+}
+
+function lockNow() {
+  manualLock = true;
+  clearTimeout(privacyTimer);
+  setPrivacy(true);
+}
+
+function initPrivacy() {
+  const select = $('#privacyDelay');
+  const stored = parseInt(localStorage.getItem(PRIVACY_KEY), 10);
+  if (Number.isFinite(stored)) privacyDelay = stored;
+  select.value = String(privacyDelay);
+  select.addEventListener('change', () => {
+    privacyDelay = parseInt(select.value, 10) || 0;
+    localStorage.setItem(PRIVACY_KEY, String(privacyDelay));
+    if (privacyDelay === 0) setPrivacy(false);
+    manualLock = false;
+    restartPrivacyTimer();
+  });
+  $('#btnLock').addEventListener('click', lockNow);
+
+  for (const type of ['mousemove', 'mousedown', 'keydown', 'wheel', 'touchstart', 'focusin']) {
+    document.addEventListener(type, wake, { passive: true });
+  }
+  restartPrivacyTimer();
 }
 
 /* ------------------------------------------------------------------ *
@@ -977,6 +1040,7 @@ function initLegend() {
   window.addEventListener('beforeprint', () => {
     box.dataset.vorher = String(box.open);
     box.open = true;
+    wake();
   });
   window.addEventListener('afterprint', () => {
     if (box.dataset.vorher !== undefined) box.open = box.dataset.vorher === 'true';
@@ -1149,6 +1213,7 @@ function init() {
   applyFilter();
   initDragDrop();
   initKeyboardNav();
+  initPrivacy();
   tickClock();
   setInterval(tickClock, 1000);
 
