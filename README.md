@@ -72,7 +72,7 @@ Spalte der Tafel zugeordnet.
 |---|---|---|
 | Auswahlliste | Anwesenheitsstatus, Fachdisziplin, Beatmungsform, Kreislaufunterstützung, Dialyse, TTM, Intervention, Kostform, Physiotherapie, Devices | Klick auf die Zelle, Wert wählen; leerer Eintrag setzt zurück |
 | Mehrfachauswahl | Therapielimitierung | Klick öffnet Dialog, mehrere Einträge kombinierbar |
-| Freitext mit Vorschlägen | Patientenname, Telefon | tippen oder Vorschlag wählen |
+| Freitext mit Klappliste | Patientenname, Telefon | frei tippen oder über `▾` bzw. Alt + Pfeil nach unten die vollständige Liste öffnen |
 | Datum | Abstriche | Klick öffnet Dialog mit Datumsfeld und den Schaltflächen „nächster Montag“, „übernächster Montag“ und „löschen“ |
 | Keimliste | Isolation | Klick öffnet Dialog; Häkchen = bestätigt, zusätzlich „V. a.“ = Verdacht |
 | Ankreuzfeld | privat, Norton / Stammblatt | direkt anklicken |

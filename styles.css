@@ -509,6 +509,54 @@ tr:hover .clearbed, .clearbed:focus-visible { opacity: 1; }
 .checkscell input { width: 12px; height: 12px; }
 .checkscell input, .boolcell input { accent-color: var(--accent); margin: 0; }
 
+/* Freitextfeld mit Klappliste */
+.combocell { display: flex; align-items: center; gap: 1px; }
+.combocell input { flex: 1; min-width: 0; }
+.combobtn {
+  flex: none;
+  width: 15px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: var(--ink-soft);
+  font-size: 10px;
+  line-height: 1;
+  opacity: .55;
+}
+.combobtn:hover { background: var(--line-soft); color: var(--accent); opacity: 1; }
+
+.combolist {
+  position: fixed;
+  z-index: 70;
+  max-height: 260px;
+  overflow: auto;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .22);
+}
+.comboitem {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  padding: 5px 8px;
+  border: none;
+  border-radius: 5px;
+  background: none;
+  color: var(--ink);
+  text-align: left;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.comboitem:hover, .comboitem:focus-visible { background: var(--line-soft); }
+.comboitem.current { font-weight: 700; color: var(--accent); }
+.combovalue { flex: 1; }
+.combolabel { color: var(--ink-soft); font-size: 12px; }
+.comboempty { margin: 0; padding: 6px 8px; font-size: 12.5px; color: var(--ink-soft); }
+
 /* Mehrfachauswahl-Zelle */
 .multicell {
   display: flex;
@@ -964,7 +1012,7 @@ body.privacy .privacyhint { display: block; }
   /* Der Ausdruck wird nie unkenntlich gemacht. */
   body.privacy td.privatecol > *,
   body.privacy .note textarea { filter: none !important; }
-  .privacyhint, .gear { display: none !important; }
+  .privacyhint, .gear, .combobtn, .combolist { display: none !important; }
   .phonenr { color: #000; }
   .dlg { display: none !important; }
   :focus, :focus-visible { outline: none !important; }

@@ -514,21 +514,75 @@ function buildHead() {
   $('#thead').replaceChildren(tr);
 }
 
-/* Vorschlagslisten für Freitextfelder (z. B. Telefonnummern) */
-function buildDatalists() {
-  for (const old of document.querySelectorAll('body > datalist')) old.remove();
-  for (const col of COLUMNS) {
-    if (col.type !== 'datalist') continue;
-    const dl = el('datalist');
-    dl.id = 'dl-' + col.key;
-    for (const opt of col.options) {
-      const option = el('option');
-      option.value = typeof opt === 'string' ? opt : opt.value;
-      if (typeof opt === 'object' && opt.label) option.label = opt.label;
-      dl.appendChild(option);
-    }
-    document.body.appendChild(dl);
+/* Klappliste für Freitextfelder mit hinterlegten Vorschlägen.
+   Sie liegt am Seitenende, damit sie nicht vom Tabellenrahmen beschnitten wird. */
+let comboOpen = null;
+
+function openCombo(input, col) {
+  closeCombo();
+  const list = el('div', 'combolist');
+  const items = [];
+
+  for (const opt of col.options) {
+    const value = typeof opt === 'string' ? opt : opt.value;
+    const item = el('button', 'comboitem');
+    item.type = 'button';
+    item.appendChild(el('span', 'combovalue', value));
+    if (typeof opt === 'object' && opt.label) item.appendChild(el('span', 'combolabel', opt.label));
+    if (value === input.value) item.classList.add('current');
+    item.addEventListener('mousedown', event => {
+      event.preventDefault();
+      input.value = value;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      closeCombo();
+      input.focus();
+    });
+    items.push(item);
+    list.appendChild(item);
   }
+  if (!items.length) list.appendChild(el('p', 'comboempty', 'Keine Einträge hinterlegt'));
+
+  list.addEventListener('keydown', event => {
+    const pos = items.indexOf(document.activeElement);
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      const next = items[pos + (event.key === 'ArrowDown' ? 1 : -1)];
+      (next || items[event.key === 'ArrowDown' ? 0 : items.length - 1]).focus();
+    } else if (event.key === 'Escape') {
+      closeCombo();
+      input.focus();
+    }
+  });
+
+  document.body.appendChild(list);
+  const rect = input.getBoundingClientRect();
+  const height = list.getBoundingClientRect().height;
+  const below = window.innerHeight - rect.bottom;
+  list.style.left = Math.round(Math.min(rect.left, window.innerWidth - list.offsetWidth - 8)) + 'px';
+  list.style.top = Math.round(below < height && rect.top > height ? rect.top - height - 2 : rect.bottom + 2) + 'px';
+  list.style.minWidth = Math.round(rect.width) + 'px';
+  comboOpen = { list, input };
+}
+
+function closeCombo() {
+  if (!comboOpen) return;
+  comboOpen.list.remove();
+  comboOpen = null;
+}
+
+function initCombo() {
+  document.addEventListener('mousedown', event => {
+    if (!comboOpen) return;
+    /* Die Schaltfläche der Zelle schaltet selbst um. */
+    if (comboOpen.list.contains(event.target) || event.target.closest('.combocell')) return;
+    closeCombo();
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') closeCombo();
+  });
+  window.addEventListener('resize', closeCombo);
+  document.addEventListener('scroll', closeCombo, true);
 }
 
 /* Der Versatz der fixierten Bettplatz-Spalte richtet sich nach der
@@ -628,7 +682,6 @@ function buildField(bed, col, data) {
     case 'datalist': {
       const input = el('input');
       input.type = col.inputType || 'text';
-      if (col.type === 'datalist') input.setAttribute('list', 'dl-' + col.key);
       input.placeholder = col.placeholder || '';
       input.value = data[col.key];
       input.setAttribute('aria-label', col.label + ' – Bett ' + bed.label);
@@ -641,7 +694,30 @@ function buildField(bed, col, data) {
         touch(bed.id);
       });
       input.addEventListener('change', applyFilter);
-      return input;
+      if (col.type !== 'datalist') return input;
+
+      /* Eigene Klappliste: Sie zeigt immer alle hinterlegten Einträge, auch
+         wenn im Feld bereits Text steht. */
+      const box = el('div', 'combocell');
+      const open = el('button', 'combobtn', '▾');
+      open.type = 'button';
+      open.tabIndex = -1;
+      open.title = col.label + ' – Liste öffnen';
+      open.setAttribute('aria-label', 'Liste öffnen');
+      open.addEventListener('mousedown', event => {
+        event.preventDefault();
+        if (comboOpen && comboOpen.input === input) closeCombo();
+        else openCombo(input, col);
+      });
+      input.addEventListener('keydown', event => {
+        if (event.altKey && event.key === 'ArrowDown') {
+          event.preventDefault();
+          openCombo(input, col);
+        }
+      });
+      box.appendChild(input);
+      box.appendChild(open);
+      return box;
     }
 
     case 'longtext': {
@@ -1002,7 +1078,6 @@ function commitSettings() {
   settings = draft;
   saveSettings();
   applySettings();
-  buildDatalists();
   buildBody();
   renderPhones();
   renderStats();
@@ -1553,7 +1628,6 @@ function importJson(file) {
       mergeSettings(settings, parsed.settings);
       saveSettings();
       applySettings();
-      buildDatalists();
       renderPhones();
       restartPrivacyTimer();
     }
@@ -1609,7 +1683,6 @@ function init() {
   initTheme();
   applySettings();
   buildHead();
-  buildDatalists();
   buildBody();
   renderStation();
   renderPhones();
@@ -1621,6 +1694,7 @@ function init() {
   initKeyboardNav();
   initPrivacy();
   initSettings();
+  initCombo();
   tickClock();
   setInterval(tickClock, 1000);
 
