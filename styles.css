@@ -69,6 +69,7 @@ html[data-theme="dark"] {
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
+.printcol { display: none; }
 
 body {
   margin: 0;
@@ -964,62 +965,95 @@ html[data-theme="dark"] .helpbody .warn { color: var(--iso); }
 .dlgmenu .spacer { flex: 1; }
 
 /* ---------------- Druck ---------------- */
+/* A4 quer, ohne Farbe. Der Ausdruck zeigt nur die Angaben, die auf der
+   Station am Blatt gebraucht werden, und füllt die Seite aus. */
 @media print {
-  @page { size: A3 landscape; margin: 8mm; }
+  @page { size: A4 landscape; margin: 7mm; }
 
-  body { background: #fff; color: #000; font-size: 9px; padding: 0; }
-  .topbar { position: static; border: none; padding: 0 0 6px; background: none; }
-  .tools, .clearbed, .savestate, .hint, .chk { display: none !important; }
-  .stationbar {
-    margin: 0 0 4px;
+  html, body {
+    background: #fff;
+    color: #000;
+    font-size: 10px;
+    padding: 0;
+  }
+
+  /* Alles ohne Farbe – der Druck erfolgt schwarzweiß. */
+  * {
+    color: #000 !important;
+    background: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+  }
+
+  /* Nicht mitdrucken */
+  .tools, .gear, .help, .savestate, .privacyhint, .dlg, .clearbed, .combobtn,
+  .combolist, .note-phones, .note-infos, #screeningCard, .sf-notfall,
+  td.col-status::after, .logo:not(.has-image) { display: none !important; }
+  .combocell::before { display: none; }
+
+  /* Spalten, die nicht auf das Blatt gehören */
+  .col-beatmung, .col-kreislauf, .col-dialyse, .col-ttm, .col-postform,
+  .col-privat, .col-physio, .col-devices, .col-norton, .col-abstriche,
+  .col-sonstiges { display: none !important; }
+  .printcol { display: table-cell !important; }
+
+  /* Kopfzeile */
+  .topbar {
+    position: static;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    padding: 0 0 3px;
+    border: none;
+    border-bottom: 1px solid #000;
+  }
+  .brand { gap: 8px; }
+  .logo { width: 34px; height: 34px; border: none; }
+  .brand h1 { font-size: 13px; }
+  .clock { font-size: 8.5px; }
+  .stats { gap: 14px; margin-left: auto; }
+  .stat {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 5px;
+    min-width: 0;
     padding: 0;
     border: none;
-    gap: 2px 18px;
-    grid-template-columns: repeat(3, auto);
-    justify-content: start;
   }
-  .stationlabel { font-size: 7px; }
-  .stationfield { grid-template-columns: auto auto; gap: 0 6px; }
-  .stationfield input {
-    border: none !important;
-    background: none !important;
-    padding: 0 !important;
-    font-size: 9px;
-    color: #000;
+  .statval { font-size: 13px; }
+  .statlabel { font-size: 8.5px; letter-spacing: 0; }
+  .stat-max input { border: none; padding: 0; font-size: 13px; width: auto; }
+  .plusone { font-size: 11px; }
+  .stat-melde select {
+    border: none;
+    padding: 0;
+    font-size: 13px;
+    text-align: left;
+    appearance: none;
     width: auto;
   }
-  .stat-max input { border: none; padding: 0; font-size: 11px; width: auto; }
-  .plusone { font-size: 10px; }
-  .stat-melde select { border: none; font-size: 10px; padding: 0; appearance: none; text-align: center; }
-  .stat-melde[data-melde] { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .brand { display: flex; align-items: center; gap: 12px; }
-.logo {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  overflow: hidden;
-  border: 1px dashed var(--line);
-  border-radius: 8px;
-  background: var(--panel-2);
-}
-.logo img { display: none; width: 100%; height: 100%; object-fit: contain; }
-.logo.has-image { border-style: solid; background: none; }
-.logo.has-image img { display: block; }
-.logo.has-image .logohint { display: none; }
-.logohint {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: .8px;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
 
-.brand h1 { font-size: 14px; }
-  .stats { gap: 4px; }
-  .stat { padding: 2px 6px; min-width: 0; }
+  /* Schichtleitung und Blutzuständigkeit */
+  .stationbar {
+    display: flex;
+    gap: 22px;
+    margin: 3px 0;
+    padding: 0;
+    border: none;
+  }
+  .stationfield { display: flex; align-items: baseline; gap: 5px; }
+  .stationlabel { font-size: 8.5px; }
+  .stationfield input {
+    border: none !important;
+    padding: 0 !important;
+    font-size: 10px;
+    width: auto;
+    min-width: 22mm;
+    border-bottom: 1px solid #999 !important;
+  }
 
+  /* Tabelle */
   .tablewrap {
     margin: 0;
     max-height: none;
@@ -1027,68 +1061,92 @@ html[data-theme="dark"] .helpbody .warn { color: var(--iso); }
     border: none;
     border-radius: 0;
   }
-  table { width: 100%; table-layout: auto; }
-  thead th {
+  table { table-layout: fixed; width: 100%; min-width: 0; }
+  thead th, tbody td {
+    width: auto !important;
+    min-width: 0 !important;
+    border: 1px solid #000;
     position: static;
-    font-size: 7.5px;
-    padding: 3px 2px;
-    border: 1px solid #666;
-    color: #000;
-    background: #eee;
   }
-  th.col-status, th.col-bed, td.col-bed { position: static; }
-  td.col-status { position: relative; }
+  thead th {
+    padding: 2px 3px;
+    font-size: 8px;
+    letter-spacing: 0;
+    text-align: center;
+    border-bottom-width: 1.5px;
+  }
   tbody td {
-    height: auto;
-    padding: 2px;
-    border: 1px solid #999;
-    font-size: 8.5px;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    height: var(--print-row, 9mm);
+    padding: 1px 3px;
+    font-size: 10.5px;
+    vertical-align: middle;
   }
-  tbody tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  td input, td select, td textarea, td .multicell {
+  tbody tr:hover td, tbody tr:focus-within td { box-shadow: none !important; }
+
+  th.col-status,    td.col-status    { width: 7% !important; }
+  th.col-bed,       td.col-bed       { width: 6% !important; }
+  th.col-name,      td.col-name      { width: 15% !important; }
+  th.col-disziplin, td.col-disziplin { width: 7% !important; }
+  th.col-isolation, td.col-isolation { width: 12% !important; }
+  th.col-intervention, td.col-intervention { width: 8% !important; }
+  th.col-limitierung,  td.col-limitierung  { width: 9% !important; }
+  th.col-telefon,   td.col-telefon   { width: 7% !important; }
+  th.col-pflege,    td.col-pflege    { width: 7% !important; }
+  th.col-notizen,   td.col-notizen   { width: 22% !important; }
+
+  td input, td select, td textarea {
     border: none !important;
-    background: none !important;
     padding: 0 !important;
-    font-size: 8.5px;
+    font-size: 10.5px;
     color: #000;
+    text-align: center;
     overflow: visible;
   }
-  td textarea { min-height: 0; height: auto; resize: none; }
-  .bedlabel { font-size: 11px; }
-  .chip:not(.styled) { background: none !important; color: #000 !important; padding: 0; }
-  .chip.styled { padding: 0 3px; }
-  td select.styled { padding: 0 3px !important; }
-  .datebadge { background: none !important; color: #000 !important; padding: 0; border: none; }
-  .chip-verdacht { border: none !important; }
-  .datebadge.due { font-weight: 700; }
+  td.col-name input { font-weight: 700; text-align: left; }
+  .bedlabel { font-size: 12px; }
+  input::placeholder, textarea::placeholder { opacity: 0 !important; }
+
+  /* Marken und Kennzeichen ohne Farbe */
+  .chip, .chip.styled, .chip-verdacht, .datebadge {
+    border: none !important;
+    padding: 0 !important;
+    font-size: 10px;
+    font-weight: 400;
+  }
   .chip:not(:last-child)::after { content: ","; }
+  /* Pseudo-Elemente werden vom Stern nicht erfasst und brauchen eigene Regeln. */
+  tr.has-iso td.col-bed .bedlabel::after,
+  tr.has-verdacht td.col-bed .bedlabel::after {
+    padding: 0 2px;
+    border: 1px solid #000;
+    border-radius: 3px;
+    background: none !important;
+    color: #000 !important;
+    font-size: 7px;
+  }
+  td.col-status::after, .chip::before, .datebadge::before { content: none !important; }
+
+  /* Geplante Aufnahmen */
   .notes {
-    margin: 4px 0 0;
-    gap: 10px;
+    display: block;
+    margin: 3px 0 0;
     page-break-inside: avoid;
   }
-  .note { border: 1px solid #999; padding: 3px 6px; }
-  .note h2 { font-size: 7px; margin-bottom: 2px; }
+  .note {
+    padding: 2px 0 0;
+    border: none;
+    border-top: 1px solid #000;
+  }
+  .note h2 { margin: 0; font-size: 8.5px; }
   .note textarea {
     border: none !important;
-    background: none !important;
     padding: 0 !important;
-    min-height: 0;
-    height: auto;
-    font-size: 9px;
-    color: #000;
+    min-height: 16mm;
+    height: 16mm;
+    font-size: 10px;
     resize: none;
+    text-align: left;
   }
-  .note-phones li { font-size: 8px; }
-  input::placeholder, textarea::placeholder { opacity: 0 !important; }
-  /* Der Ausdruck wird nie unkenntlich gemacht. */
-  body.privacy td.privatecol > *,
-  body.privacy .note textarea { filter: none !important; }
-  .privacyhint, .gear, .help, .combobtn, .combolist { display: none !important; }
-  .combocell::before { display: none; }
-  .phonenr { color: #000; }
-  .dlg { display: none !important; }
+
   :focus, :focus-visible { outline: none !important; }
 }

@@ -148,7 +148,12 @@ Spalte der Tafel zugeordnet.
 - **Bettplatz räumen** über das `×` in der Bettspalte
 - **Export/Import** als JSON (Belegung, Angaben zur Schicht und Einstellungen) sowie
   CSV-Export für Excel
-- **Druckansicht** (A3 quer) mit ausgeblendeter Bedienleiste
+- **Druckansicht**: eine Seite **A4 quer in Schwarzweiß**. Gedruckt werden belegte Betten,
+  maximale Bettenzahl und Meldestatus (ausgeschrieben), Schichtleitung und Blutzuständigkeit
+  mit Telefonnummer, die geplanten Aufnahmen sowie eine verkürzte Tabelle mit
+  Anwesenheitsstatus, Bettplatz, Patientenname, Fachdisziplin, Isolation, Intervention,
+  Therapielimitierung, Telefon und Pflegekraft, ergänzt um eine breite Spalte **Notizen**.
+  Die Zeilenhöhe richtet sich nach der Anzahl der Bettplätze, damit das Blatt gefüllt wird
 - Änderungen werden zwischen mehreren Browser-Tabs desselben Rechners abgeglichen
 
 ## Fassung

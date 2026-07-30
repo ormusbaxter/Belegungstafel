@@ -7,7 +7,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '1.1.1';
+const VERSION = '1.2.0';
 const COPYRIGHT = '\u00A9 2026 Oliver Becker';
 
 /* ------------------------------------------------------------------ *
@@ -571,6 +571,9 @@ function buildHead() {
     th.scope = 'col';
     tr.appendChild(th);
   }
+  const note = el('th', 'col-notizen printcol', 'Notizen');
+  note.scope = 'col';
+  tr.appendChild(note);
   $('#thead').replaceChildren(tr);
 }
 
@@ -686,6 +689,14 @@ function autoSizeColumns() {
   for (const field of AUTO_TEXT) autoSizeText(field);
 }
 
+/* Zeilenhöhe für den Ausdruck: Die Tabelle soll das Blatt füllen, unabhängig
+   davon, wie viele Bettplätze eingerichtet sind. */
+function setPrintRowHeight() {
+  const platz = 150;
+  const hoehe = Math.min(14, Math.max(6.5, platz / Math.max(1, BEDS.length)));
+  document.documentElement.style.setProperty('--print-row', hoehe.toFixed(1) + 'mm');
+}
+
 /* Die Breitenanpassung wird aufgeschoben, solange die Maustaste gedrückt ist.
    Sonst verschiebt sich die Tabelle beim Klick aus einem Textfeld in eine
    andere Zelle noch zwischen Drücken und Loslassen. */
@@ -753,6 +764,7 @@ function buildRow(bed) {
     td.appendChild(buildField(bed, col, data));
     tr.appendChild(td);
   }
+  tr.appendChild(el('td', 'col-notizen printcol'));
   applyRowState(tr, data);
   return tr;
 }
@@ -1752,7 +1764,7 @@ function renderStation() {
   const box = $('#stationbar');
   box.replaceChildren();
   for (const field of STATION_FIELDS) {
-    const group = el('div', 'stationfield');
+    const group = el('div', 'stationfield sf-' + field.key);
     group.appendChild(el('span', 'stationlabel', field.label));
 
     const name = el('input');
@@ -1947,6 +1959,7 @@ function init() {
   initDragDrop();
   initKeyboardNav();
   initAutoSize();
+  setPrintRowHeight();
   initPrivacy();
   initSettings();
   initCombo();
@@ -1998,7 +2011,10 @@ function init() {
   });
 
   /* Offene Eingaben sichern, bevor die Seite verlassen oder verdeckt wird */
-  window.addEventListener('beforeprint', wake);
+  window.addEventListener('beforeprint', () => {
+    wake();
+    setPrintRowHeight();
+  });
   window.addEventListener('resize', measureSticky);
   window.addEventListener('beforeunload', writeNow);
   document.addEventListener('visibilitychange', () => {

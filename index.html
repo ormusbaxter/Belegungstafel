@@ -42,7 +42,7 @@
       </select>
       <span class="statlabel">Meldestatus</span>
     </div>
-    <div class="stat">
+    <div class="stat" id="screeningCard">
       <span class="statval" id="statScreening">0</span>
       <span class="statlabel">Screening fällig</span>
     </div>
@@ -91,7 +91,7 @@
 </div>
 
 <section class="notes">
-  <div class="note">
+  <div class="note note-aufnahmen">
     <h2><label for="noteAufnahmen">Geplante Aufnahmen</label></h2>
     <textarea id="noteAufnahmen" placeholder="Name, Fachdisziplin, voraussichtliche Uhrzeit …"></textarea>
   </div>
@@ -99,7 +99,7 @@
     <h2>Telefonnummern</h2>
     <ul id="phoneList"></ul>
   </div>
-  <div class="note">
+  <div class="note note-infos">
     <h2><label for="noteInfos">Allgemeine Informationen</label></h2>
     <textarea id="noteInfos" placeholder="Hinweise für die Schicht …"></textarea>
   </div>
@@ -198,7 +198,12 @@
       <p>Alle Eingaben bleiben <b>lokal auf diesem Rechner</b> im Browser gespeichert; es werden
         keine Daten an einen Server übertragen. Mehrere geöffnete Fenster desselben Rechners
         werden abgeglichen, andere Arbeitsplätze sehen die Tafel jedoch nicht.</p>
-      <p><b>Drucken</b> gibt die Tafel als eine Seite A3 quer aus. Über das Zahnrad unten rechts
+      <p><b>Drucken</b> gibt eine Seite <b>A4 quer in Schwarzweiß</b> aus. Der Ausdruck enthält
+        die belegten Betten, die maximale Bettenzahl und den Meldestatus, die Schichtleitung und
+        die Blutzuständigkeit mit Telefonnummer, die geplanten Aufnahmen sowie eine verkürzte
+        Tabelle: Anwesenheitsstatus, Bettplatz, Name, Fachdisziplin, Isolation, Intervention,
+        Therapielimitierung, Telefon und Pflegekraft – dazu eine breite Spalte
+        <b>Notizen</b> für handschriftliche Vermerke. Über das Zahnrad unten rechts
         stehen unter <b>Daten</b> Export (JSON oder CSV), Import und „Tafel leeren“ bereit; dort
         lassen sich auch Bettplätze, Spaltenköpfe und alle Auswahllisten anpassen.</p>
     </section>
