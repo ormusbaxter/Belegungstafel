@@ -68,14 +68,30 @@
   </table>
 </main>
 
-<section class="legend">
-  <h2>Legende</h2>
+<section class="notes">
+  <div class="note">
+    <h2><label for="noteAufnahmen">Geplante Aufnahmen</label></h2>
+    <textarea id="noteAufnahmen" placeholder="Name, Fachdisziplin, voraussichtliche Uhrzeit …"></textarea>
+  </div>
+  <div class="note note-phones">
+    <h2>Telefonnummern</h2>
+    <ul id="phoneList"></ul>
+  </div>
+  <div class="note">
+    <h2><label for="noteInfos">Allgemeine Informationen</label></h2>
+    <textarea id="noteInfos" placeholder="Hinweise für die Schicht …"></textarea>
+  </div>
+</section>
+
+<details class="legend" id="legendBox">
+  <summary>Legende</summary>
   <ul id="legend"></ul>
   <p class="hint">
-    Eingaben werden automatisch lokal im Browser gespeichert (localStorage) – es werden keine Daten
-    an einen Server übertragen. Für den Datenaustausch zwischen Geräten bitte Export/Import verwenden.
+    Navigation mit den Pfeiltasten, Zeilenwechsel mit der Eingabetaste. Eingaben werden automatisch
+    lokal im Browser gespeichert (localStorage) – es werden keine Daten an einen Server übertragen.
+    Für den Datenaustausch zwischen Geräten bitte Export/Import verwenden.
   </p>
-</section>
+</details>
 
 <!-- Mehrfachauswahl -->
 <dialog id="multiDlg" class="dlg">
@@ -85,10 +101,11 @@
   <div class="dlgdate" id="multiDateRow" hidden>
     <label for="multiDate" id="multiDateLabel"></label>
     <input type="date" id="multiDate">
-    <button type="button" id="multiDate7">+ 7 Tage</button>
+    <button type="button" id="multiDateMon">nächster Montag</button>
+    <button type="button" id="multiDateMon2">übernächster Montag</button>
     <button type="button" id="multiDateOff">löschen</button>
   </div>
-  <div class="customrow">
+  <div class="customrow" id="multiCustomRow">
     <input type="text" id="multiCustom" placeholder="Eigener Eintrag …">
     <button type="button" id="multiAdd">Hinzufügen</button>
   </div>

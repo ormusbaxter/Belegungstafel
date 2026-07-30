@@ -108,8 +108,9 @@ const COLUMNS = [
   },
   { key: 'pflege', label: 'Pflegekraft', head: 'Pflege\u00ADkraft', type: 'text', width: 72, placeholder: 'Kürzel' },
   {
-    /* Datenquelle Spalte G (Kostform) */
-    key: 'postform', label: 'Postform', type: 'select', width: 92,
+    /* Datenquelle Spalte G. Der Schlüssel bleibt 'postform', damit vorhandene
+       Stände weiter eingelesen werden. */
+    key: 'postform', label: 'Kostform', type: 'select', width: 92,
     options: ['VK', '%', 'nüchtern', 'Tee/H2O', 'flüssig', 'Joghurt', 'passiert', 'proteinreich',
               'diabet. Kost', 'laktosefrei', 'vegetarisch', 'vegan', 'leichte Kost', 'Wunschkost',
               'VK o.S.', 'pass o. S.', 'prot. o. S.', 'diab. o. S.', 'lakt. o. S.', 'leicht o. S.',
@@ -130,14 +131,12 @@ const COLUMNS = [
   { key: 'norton', label: 'Norton / Stammblatt', type: 'checks', width: 86,
     options: ['Norton', 'Stammblatt'] },
   {
-    /* Keine Vorgabe in der Datenquelle – Liste bei Bedarf hier anpassen. */
-    key: 'abstriche', label: 'Abstriche', type: 'multi', width: 125,
-    date: { key: 'abstricheDatum', label: 'Nächstes Screening' },
-    options: ['MRSA-Screening', 'Nasen-/Rachenabstrich', 'Rektalabstrich', 'Wundabstrich',
-              'Trachealsekret', 'Leistenabstrich', 'Blutkulturen', 'Urinkultur',
-              'ausstehend', 'negativ', 'positiv']
+    /* Nur das Datum des nächsten Screenings. Ältere Stände hielten das Datum
+       im Feld abstricheDatum, es wird beim Einlesen übernommen. */
+    key: 'abstriche', label: 'Abstriche', type: 'date', width: 100,
+    dateLabel: 'Nächstes Screening', legacy: 'abstricheDatum'
   },
-  { key: 'sonstiges', label: 'Sonstiges', type: 'longtext', width: 110, placeholder: 'Bemerkungen …' }
+  { key: 'sonstiges', label: 'Sonstiges', type: 'longtext', width: 135, placeholder: 'Bemerkungen …' }
 ];
 
 /* Ein Isolationseintrag ist { v: Bezeichnung, s: 'bestaetigt' | 'verdacht' }.
@@ -208,11 +207,28 @@ const STATION_FIELDS = [
   { key: 'blut', label: 'Blutzuständigkeit', placeholder: 'Name / Kürzel' },
   { key: 'notfall', label: 'Notfallequipment', placeholder: 'Name / Kürzel' }
 ];
-const STATION_KEYS = ['maxBetten', 'meldestatus',
+const STATION_KEYS = ['maxBetten', 'meldestatus', 'aufnahmen', 'infos',
                       ...STATION_FIELDS.flatMap(f => [f.key, f.key + 'Tel'])];
+
+/* Feste Rufnummernliste unter der Tafel */
+const PHONES = [
+  ['4682', 'Dienst Anästhesie'],
+  ['4032', 'Dienst Innere'],
+  ['4286', 'Büro ITS'],
+  ['4004', 'ND Springer:in'],
+  ['4079', 'TD Springer:in'],
+  ['4753', 'Bettentransport'],
+  ['4101', 'Hol- und Bringed.']
+];
+
+const NOTE_FIELDS = [
+  ['#noteAufnahmen', 'aufnahmen'],
+  ['#noteInfos', 'infos']
+];
 
 const STORAGE_KEY = 'belegungstafel.intensiv.v1';
 const THEME_KEY = 'belegungstafel.theme';
+const LEGEND_KEY = 'belegungstafel.legende';
 
 /* ------------------------------------------------------------------ *
  * Zustand
@@ -226,7 +242,6 @@ function emptyBed() {
     if (col.type === 'multi' || col.type === 'checks' || col.type === 'germs') row[col.key] = [];
     else if (col.type === 'bool') row[col.key] = false;
     else row[col.key] = '';
-    if (col.date) row[col.date.key] = '';
   }
   row._updated = null;
   return row;
@@ -268,7 +283,8 @@ function merge(target, source) {
   if (!source || typeof source !== 'object') return;
   for (const col of COLUMNS) {
     if (col.type === 'bed') continue;
-    const val = source[col.key];
+    let val = source[col.key];
+    if (col.type === 'date' && typeof val !== 'string' && col.legacy) val = source[col.legacy];
     if (val === undefined || val === null) continue;
     if (col.type === 'germs') {
       target[col.key] = Array.isArray(val) ? val.map(entry => toGerm(entry, source)).filter(Boolean) : [];
@@ -280,26 +296,31 @@ function merge(target, source) {
       target[col.key] = String(val);
     }
   }
-  for (const col of COLUMNS) {
-    if (col.date && typeof source[col.date.key] === 'string') {
-      target[col.date.key] = source[col.date.key];
-    }
-  }
   if (typeof source._updated === 'string') target._updated = source._updated;
 }
 
 let saveTimer = null;
+let unsaved = false;
+
+/* Sammelt schnelle Eingaben und schreibt sie gebündelt weg. */
 function save() {
+  unsaved = true;
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    state.saved = new Date().toISOString();
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      setSaveState('Gespeichert um ' + timeStr(new Date()));
-    } catch (err) {
-      setSaveState('Speichern fehlgeschlagen: ' + err.message, true);
-    }
-  }, 250);
+  saveTimer = setTimeout(writeNow, 250);
+}
+
+function writeNow() {
+  clearTimeout(saveTimer);
+  if (!unsaved) return;
+  unsaved = false;
+  state.saved = new Date().toISOString();
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    setSaveState('Gespeichert um ' + timeStr(new Date()));
+  } catch (err) {
+    unsaved = true;
+    setSaveState('Speichern fehlgeschlagen: ' + err.message, true);
+  }
 }
 
 function touch(bedId) {
@@ -513,7 +534,8 @@ function buildField(bed, col, data) {
     }
 
     case 'multi':
-    case 'germs': {
+    case 'germs':
+    case 'date': {
       const btn = el('button', 'multicell');
       btn.type = 'button';
       btn.setAttribute('aria-label', col.label + ' – Bett ' + bed.label + ' bearbeiten');
@@ -534,14 +556,14 @@ function renderChips(btn, col, data) {
       chip.title = entry.v + (entry.s === 'verdacht' ? ' – Verdacht' : ' – bestätigt');
       btn.appendChild(chip);
     }
+  } else if (col.type === 'date') {
+    if (!values) return;
+    const due = el('span', 'datebadge', shortDate(values));
+    due.title = col.dateLabel + ': ' + fullDate(values);
+    if (values <= isoToday()) due.classList.add('due');
+    btn.appendChild(due);
   } else {
     for (const val of values) btn.appendChild(el('span', 'chip', val));
-  }
-  if (col.date && data[col.date.key]) {
-    const due = el('span', 'datebadge', shortDate(data[col.date.key]));
-    due.title = col.date.label + ': ' + fullDate(data[col.date.key]);
-    if (data[col.date.key] <= isoToday()) due.classList.add('due');
-    btn.appendChild(due);
   }
 }
 
@@ -558,6 +580,15 @@ function fullDate(iso) {
   const [y, m, d] = iso.split('-');
   return d + '.' + m + '.' + y;
 }
+/* Nächster bzw. übernächster Montag, immer in der Zukunft */
+function nextMonday(weeks) {
+  const d = new Date();
+  d.setHours(12, 0, 0, 0);
+  const ahead = (8 - d.getDay()) % 7 || 7;
+  d.setDate(d.getDate() + ahead + (weeks - 1) * 7);
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+}
+
 function addDays(iso, days) {
   const base = iso ? new Date(iso + 'T12:00:00') : new Date();
   base.setDate(base.getDate() + days);
@@ -577,8 +608,7 @@ function applyRowState(tr, data) {
 
 function clearBed(bed) {
   const data = state.beds[bed.id];
-  const hasContent = COLUMNS.some(c => c.type !== 'bed' &&
-    (isSet(data[c.key]) || (c.date && data[c.date.key])));
+  const hasContent = COLUMNS.some(c => c.type !== 'bed' && isSet(data[c.key]));
   if (hasContent && !confirm('Bettplatz ' + bed.label + ' vollständig leeren?')) return;
   state.beds[bed.id] = emptyBed();
   const tr = document.querySelector(`tr[data-bed="${bed.id}"]`);
@@ -586,6 +616,81 @@ function clearBed(bed) {
   save();
   renderStats();
   applyFilter();
+}
+
+/* ------------------------------------------------------------------ *
+ * Navigation mit den Pfeiltasten
+ * Hoch/Runter wechselt die Zeile, Links/Rechts die Spalte. In Textfeldern
+ * wechseln Links/Rechts erst am Anfang bzw. Ende des Textes die Zelle.
+ * Auswahlfelder werden mit der Tastatur über die Anfangsbuchstaben oder mit
+ * Alt + Pfeil nach unten geändert, damit die Pfeiltasten zum Navigieren frei
+ * bleiben. Die Eingabetaste springt eine Zeile nach unten.
+ * ------------------------------------------------------------------ */
+const NAV_COLS = COLUMNS.map((col, index) => (col.type === 'bed' ? -1 : index))
+  .filter(index => index >= 0);
+
+function visibleRows() {
+  return [...$('#tbody').querySelectorAll('tr:not([hidden])')];
+}
+
+function focusable(td) {
+  return td && td.querySelector('input:not([disabled]), select, textarea, button');
+}
+
+/* Darf die Zelle in dieser Richtung verlassen werden? */
+function mayLeave(node, key) {
+  const isText = node.tagName === 'TEXTAREA' ||
+    (node.tagName === 'INPUT' && ['text', 'tel', 'search'].includes(node.type));
+  if (!isText) return true;
+  const at = node.selectionStart;
+  const to = node.selectionEnd;
+  if (at === null || at !== to) return at === to;
+  if (key === 'ArrowLeft') return at === 0;
+  if (key === 'ArrowRight') return at === node.value.length;
+  if (key === 'ArrowUp') return node.tagName !== 'TEXTAREA' || at === 0;
+  if (key === 'ArrowDown') return node.tagName !== 'TEXTAREA' || at === node.value.length;
+  return true;
+}
+
+function moveFocus(td, key, shift) {
+  const tr = td.parentElement;
+  const rows = visibleRows();
+  const rowIdx = rows.indexOf(tr);
+  const colIdx = [...tr.children].indexOf(td);
+  let target = null;
+
+  if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'Enter') {
+    const step = key === 'ArrowUp' || (key === 'Enter' && shift) ? -1 : 1;
+    const next = rows[rowIdx + step];
+    target = next && next.children[colIdx];
+  } else {
+    const step = key === 'ArrowLeft' ? -1 : 1;
+    const pos = NAV_COLS.indexOf(colIdx);
+    const nextCol = NAV_COLS[pos + step];
+    target = nextCol === undefined ? null : tr.children[nextCol];
+  }
+
+  const node = focusable(target);
+  if (!node) return false;
+  node.focus();
+  if (typeof node.select === 'function' && node.tagName === 'INPUT' &&
+      ['text', 'tel'].includes(node.type)) {
+    node.select();
+  }
+  return true;
+}
+
+function initKeyboardNav() {
+  $('#tbody').addEventListener('keydown', event => {
+    const keys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'];
+    if (!keys.includes(event.key) || event.ctrlKey || event.metaKey || event.altKey) return;
+    const td = event.target.closest('td');
+    if (!td) return;
+    if (event.key === 'Enter' &&
+        (event.target.tagName === 'BUTTON' || event.target.type === 'checkbox')) return;
+    if (event.key !== 'Enter' && !mayLeave(event.target, event.key)) return;
+    if (moveFocus(td, event.key, event.shiftKey)) event.preventDefault();
+  });
 }
 
 /* ------------------------------------------------------------------ *
@@ -676,9 +781,10 @@ let multiCtx = null;
 
 function openMulti(bed, col) {
   const data = state.beds[bed.id];
+  const isDate = col.type === 'date';
   multiCtx = {
     bed, col,
-    selected: col.type === 'germs' ? new Set() : new Set(data[col.key]),
+    selected: col.type === 'multi' ? new Set(data[col.key]) : new Set(),
     germs: col.type === 'germs' ? new Map(data[col.key].map(e => [e.v, e.s])) : null
   };
   $('#multiTitle').textContent = col.label;
@@ -686,14 +792,16 @@ function openMulti(bed, col) {
     (col.type === 'germs' ? ' — Häkchen = bestätigt, zusätzlich „V. a.“ = Verdacht' : '');
   $('#multiCustom').value = '';
 
-  const dateRow = $('#multiDateRow');
-  dateRow.hidden = !col.date;
-  if (col.date) {
-    $('#multiDateLabel').textContent = col.date.label;
-    $('#multiDate').value = data[col.date.key];
+  $('#multiDateRow').hidden = !isDate;
+  $('#multiOpts').hidden = isDate;
+  $('#multiCustomRow').hidden = isDate;
+  $('#multiClear').hidden = isDate;
+  if (isDate) {
+    $('#multiDateLabel').textContent = col.dateLabel;
+    $('#multiDate').value = data[col.key];
+  } else {
+    renderMultiOpts();
   }
-
-  renderMultiOpts();
   $('#multiDlg').showModal();
 }
 
@@ -768,7 +876,9 @@ function addCustom() {
 function commitMulti() {
   const { bed, col, selected, germs } = multiCtx;
   const data = state.beds[bed.id];
-  if (germs) {
+  if (col.type === 'date') {
+    data[col.key] = $('#multiDate').value;
+  } else if (germs) {
     const names = [...col.options.filter(o => germs.has(o)),
                    ...[...germs.keys()].filter(v => !col.options.includes(v))];
     data[col.key] = names.map(v => ({ v, s: germs.get(v) }));
@@ -777,7 +887,6 @@ function commitMulti() {
     const extra = [...selected].filter(v => !col.options.includes(v));
     data[col.key] = [...known, ...extra];
   }
-  if (col.date) data[col.date.key] = $('#multiDate').value;
   const btn = document.querySelector(`td[data-bed="${bed.id}"][data-key="${col.key}"] .multicell`);
   renderChips(btn, col, data);
   applyRowState(btn.closest('tr'), data);
@@ -795,7 +904,7 @@ function renderStats() {
   $('#statBelegt').textContent =
     beds.filter(b => OCCUPIED.has(b.status)).length + ' / ' + BEDS.length;
   $('#statScreening').textContent =
-    beds.filter(b => b.abstricheDatum && b.abstricheDatum <= isoToday()).length;
+    beds.filter(b => b.abstriche && b.abstriche <= isoToday()).length;
 }
 
 /* Maximale Bettenzahl: x regulär betreibbare Plätze zuzüglich Notbett */
@@ -842,17 +951,45 @@ function renderStation() {
     group.appendChild(tel);
     box.appendChild(group);
   }
+
+  for (const [selector, key] of NOTE_FIELDS) $(selector).value = state.station[key];
+}
+
+function renderPhones() {
+  const list = $('#phoneList');
+  list.replaceChildren();
+  for (const [number, name] of PHONES) {
+    const li = el('li');
+    li.appendChild(el('span', 'phonenr', number));
+    li.appendChild(el('span', 'phonename', name));
+    list.appendChild(li);
+  }
+}
+
+/* --- 5) Legende ein- und ausklappen --------------------------------------- */
+function initLegend() {
+  const box = $('#legendBox');
+  box.open = localStorage.getItem(LEGEND_KEY) === 'auf';
+  box.addEventListener('toggle', () => {
+    localStorage.setItem(LEGEND_KEY, box.open ? 'auf' : 'zu');
+  });
+  /* Für den Ausdruck wird die Legende vorübergehend geöffnet. */
+  window.addEventListener('beforeprint', () => {
+    box.dataset.vorher = String(box.open);
+    box.open = true;
+  });
+  window.addEventListener('afterprint', () => {
+    if (box.dataset.vorher !== undefined) box.open = box.dataset.vorher === 'true';
+  });
 }
 
 function rowText(data) {
   return COLUMNS
     .filter(c => c.type !== 'bed')
     .map(c => {
-      const val = c.type === 'germs' ? data[c.key].map(germLabel).join(' ')
-        : Array.isArray(data[c.key]) ? data[c.key].join(' ')
-        : String(data[c.key]);
-      const date = c.date && data[c.date.key] ? ' ' + fullDate(data[c.date.key]) : '';
-      return val + date;
+      if (c.type === 'germs') return data[c.key].map(germLabel).join(' ');
+      if (c.type === 'date') return data[c.key] ? fullDate(data[c.key]) : '';
+      return Array.isArray(data[c.key]) ? data[c.key].join(' ') : String(data[c.key]);
     })
     .join(' ')
     .toLowerCase();
@@ -915,7 +1052,9 @@ function exportCsv() {
     ['Belegungstafel Intensivstation', fullDate(isoToday()) + ' ' + timeStr(new Date())],
     ['Maximale Bettenzahl', state.station.maxBetten ? state.station.maxBetten + ' + 1 (Notbett)' : ''],
     ['Meldestatus', state.station.meldestatus],
-    ...STATION_FIELDS.map(f => [f.label, state.station[f.key], state.station[f.key + 'Tel']])
+    ...STATION_FIELDS.map(f => [f.label, state.station[f.key], state.station[f.key + 'Tel']]),
+    ['Geplante Aufnahmen', state.station.aufnahmen.replace(/\r?\n/g, ' / ')],
+    ['Allgemeine Informationen', state.station.infos.replace(/\r?\n/g, ' / ')]
   ].map(row => row.map(esc).join(';'));
   const head = COLUMNS.map(c => esc(c.label)).join(';');
   const lines = BEDS.map(bed => {
@@ -924,11 +1063,9 @@ function exportCsv() {
       if (col.type === 'bed') return esc(bed.label);
       let val = data[col.key];
       if (col.type === 'germs') val = val.map(germLabel).join('; ');
+      else if (col.type === 'date') val = val ? fullDate(val) : '';
       else if (Array.isArray(val)) val = val.join('; ');
       else if (typeof val === 'boolean') val = val ? 'ja' : 'nein';
-      if (col.date && data[col.date.key]) {
-        val = (val ? val + ' – ' : '') + col.date.label + ': ' + fullDate(data[col.date.key]);
-      }
       return esc(val);
     }).join(';');
   });
@@ -1005,15 +1142,22 @@ function init() {
   buildDatalists();
   buildBody();
   renderStation();
+  renderPhones();
   renderStats();
   renderLegend();
+  initLegend();
   applyFilter();
   initDragDrop();
+  initKeyboardNav();
   tickClock();
   setInterval(tickClock, 1000);
 
   if (state.saved) setSaveState('Zuletzt gespeichert um ' + timeStr(new Date(state.saved)));
 
+  for (const [selector, key] of NOTE_FIELDS) {
+    const field = $(selector);
+    field.addEventListener('input', () => { state.station[key] = field.value; save(); });
+  }
   $('#maxBetten').addEventListener('input', event => {
     state.station.maxBetten = event.target.value;
     updateMaxTitle();
@@ -1050,12 +1194,17 @@ function init() {
     renderMultiOpts();
   });
   $('#multiAdd').addEventListener('click', addCustom);
-  $('#multiDate7').addEventListener('click', () => {
-    $('#multiDate').value = addDays($('#multiDate').value, 7);
-  });
+  $('#multiDateMon').addEventListener('click', () => { $('#multiDate').value = nextMonday(1); });
+  $('#multiDateMon2').addEventListener('click', () => { $('#multiDate').value = nextMonday(2); });
   $('#multiDateOff').addEventListener('click', () => { $('#multiDate').value = ''; });
   $('#multiCustom').addEventListener('keydown', event => {
     if (event.key === 'Enter') { event.preventDefault(); addCustom(); }
+  });
+
+  /* Offene Eingaben sichern, bevor die Seite verlassen oder verdeckt wird */
+  window.addEventListener('beforeunload', writeNow);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') writeNow();
   });
 
   /* Änderungen in einem zweiten Tab übernehmen */

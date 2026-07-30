@@ -23,7 +23,7 @@ app.js        Spalten- und Bettenkonfiguration, Datenhaltung, Bedienlogik
 
 Anwesenheitsstatus · Bettplatz · Patientenname · Fachdisziplin · Beatmungsform ·
 Kreislaufunterstützung · Dialyse · Isolation · TTM · Intervention · Therapielimitierung ·
-Telefon · Pflegekraft · Postform · privat · Physiotherapie · Devices ·
+Telefon · Pflegekraft · Kostform · privat · Physiotherapie · Devices ·
 Norton / Stammblatt · Abstriche · Sonstiges
 
 ### Herkunft der Auswahlwerte
@@ -40,7 +40,7 @@ Excel-Belegungstafel und sind wörtlich übernommen:
 | Kreislaufunterstützung | D | ECMO, ECOS, ECPELLA, ILA, IMPELLA, pass. SM, PiCCO |
 | Dialyse | E | CiCa, (CiCa) |
 | TTM | F | ❄, ☼ |
-| Postform | G | VK, %, nüchtern, Tee/H2O … Schonkost (26 Kostformen) |
+| Kostform | G | VK, %, nüchtern, Tee/H2O … Schonkost (26 Kostformen) |
 | Telefon | H | Vorschlagsliste 4149 … 4212, freie Eingabe möglich |
 | Intervention | I | Angio, Broncho, CT, Endo, ggf. OP, HKL, MRT, OP, PTR, RÖ, TEE, VAC, ext. Dial. |
 | Therapielimitierung | M | DNR, DNI, DND, DNR/DNI, DNR/DND, DNR/I/D |
@@ -56,9 +56,9 @@ Einlesen automatisch übernommen: `V. a. …` wird als Verdacht erkannt.
 Ein Eintrag aus Spalte J im Feld Patientenname (z. B. `gesperrt` oder `OP`) beschreibt
 den Bettplatz statt eines Patienten: Er wird kursiv dargestellt und färbt die Zeile ein.
 
-Ohne Vorgabe in der Datenquelle und daher frei bzw. mit eigener Liste belegt:
-Pflegekraft, Sonstiges (Freitext), Norton / Stammblatt (zwei Ankreuzfelder)
-und Abstriche (Mehrfachauswahl).
+Ohne Vorgabe in der Datenquelle: Pflegekraft und Sonstiges (Freitext),
+Norton / Stammblatt (zwei Ankreuzfelder) sowie Abstriche (Datum des nächsten
+Screenings).
 
 Die Spalten **K** (1, 2, 3) und **L** (N, S, V) der Datenquelle sind noch keiner
 Spalte der Tafel zugeordnet.
@@ -67,9 +67,9 @@ Spalte der Tafel zugeordnet.
 
 | Typ | Spalten | Bedienung |
 |---|---|---|
-| Auswahlliste | Anwesenheitsstatus, Fachdisziplin, Beatmungsform, Kreislaufunterstützung, Dialyse, TTM, Intervention, Therapielimitierung, Postform, Physiotherapie, Devices | Klick auf die Zelle, Wert wählen; leerer Eintrag setzt zurück |
+| Auswahlliste | Anwesenheitsstatus, Fachdisziplin, Beatmungsform, Kreislaufunterstützung, Dialyse, TTM, Intervention, Therapielimitierung, Kostform, Physiotherapie, Devices | Klick auf die Zelle, Wert wählen; leerer Eintrag setzt zurück |
 | Freitext mit Vorschlägen | Patientenname, Telefon | tippen oder Vorschlag wählen |
-| Mehrfachauswahl | Abstriche | Klick öffnet Dialog, freie Einträge möglich |
+| Datum | Abstriche | Klick öffnet Dialog mit Datumsfeld und den Schaltflächen „nächster Montag“, „übernächster Montag“ und „löschen“ |
 | Keimliste | Isolation | Klick öffnet Dialog; Häkchen = bestätigt, zusätzlich „V. a.“ = Verdacht |
 | Ankreuzfeld | privat, Norton / Stammblatt | direkt anklicken |
 | Freitext | Pflegekraft, Sonstiges | direkt tippen |
@@ -91,8 +91,18 @@ Spalte der Tafel zugeordnet.
   als gefüllte, Verdachtsfälle als gestrichelte Marke mit vorangestelltem `V. a.`.
   Am Bettplatz steht `ISO`, sobald ein Keim bestätigt ist, und `ISO?`, solange nur
   Verdachtsfälle eingetragen sind
-- **Abstriche**: Datum des nächsten Screenings mit Schaltfläche „+ 7 Tage“; ein fälliges
-  oder überfälliges Datum wird rot hervorgehoben und in den Kennzahlen gezählt
+- **Abstriche**: nur das Datum des nächsten Screenings, wahlweise über die Schaltflächen
+  „nächster Montag“ und „übernächster Montag“; ein fälliges oder überfälliges Datum wird rot
+  hervorgehoben und im Kopfbereich gezählt
+- **Tastatur**: Navigation durch die Tabelle mit den Pfeiltasten, Zeilenwechsel mit der
+  Eingabetaste (mit Umschalt aufwärts). In Textfeldern wechseln Links und Rechts erst am
+  Anfang bzw. Ende des Textes die Zelle. Auswahlfelder werden über die Anfangsbuchstaben
+  oder mit Alt + Pfeil nach unten geändert, damit die Pfeiltasten zum Navigieren frei bleiben
+- **Unter der Tafel**: Textfeld für geplante Aufnahmen, feste Rufnummernliste der Station
+  und Textfeld für allgemeine Informationen; die beiden Textfelder werden mitgespeichert
+  und exportiert
+- **Legende** ein- und ausklappbar, der Zustand wird gemerkt; für den Ausdruck wird sie
+  automatisch aufgeklappt
 - **Verschieben per Ziehen und Ablegen**: Bettplatz-Zelle greifen und auf einen anderen
   Bettplatz ziehen. Ist das Ziel belegt, tauschen beide Plätze ihre Einträge; der
   letzte Vorgang lässt sich über „Rückgängig“ in der Statuszeile zurücknehmen
