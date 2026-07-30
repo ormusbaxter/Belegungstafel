@@ -87,9 +87,17 @@ const COLUMNS = [
               'TEE', 'VAC', 'ext. Dial.']
   },
   {
-    /* Datenquelle Spalte M */
-    key: 'limitierung', label: 'Therapielimitierung', head: 'Therapie\u00ADlimitierung', type: 'select', width: 82,
-    options: ['DNR', 'DNI', 'DND', 'DNR/DNI', 'DNR/DND', 'DNR/I/D']
+    /* Datenquelle Spalte M. Mehrere Einträge kombinierbar; die früheren
+       zusammengesetzten Werte (DNR/DNI, DNR/DND, DNR/I/D) entfallen und
+       werden beim Einlesen in die einzelnen Einträge aufgeteilt. */
+    key: 'limitierung', label: 'Therapielimitierung', head: 'Therapie\u00ADlimitierung',
+    type: 'multi', width: 95,
+    options: ['DNR', 'DNI', 'DND'],
+    fromLegacy: value => {
+      const map = { DNR: 'DNR', DNI: 'DNI', DND: 'DND', I: 'DNI', D: 'DND', R: 'DNR' };
+      const parts = value.split('/').map(part => map[part.trim().toUpperCase()]);
+      return [...new Set(parts.filter(Boolean))];
+    }
   },
   {
     /* Datenquelle Spalte H – Vorschlagsliste, freie Eingabe bleibt möglich.
@@ -136,7 +144,7 @@ const COLUMNS = [
     key: 'abstriche', label: 'Abstriche', type: 'date', width: 100,
     dateLabel: 'Nächstes Screening', legacy: 'abstricheDatum'
   },
-  { key: 'sonstiges', label: 'Sonstiges', type: 'longtext', width: 135, placeholder: 'Bemerkungen …' }
+  { key: 'sonstiges', label: 'Sonstiges', type: 'longtext', width: 122, placeholder: 'Bemerkungen …' }
 ];
 
 /* Ein Isolationseintrag ist { v: Bezeichnung, s: 'bestaetigt' | 'verdacht' }.
@@ -250,7 +258,7 @@ const SETTINGS_KEY = 'belegungstafel.einstellungen';
 let settings = loadSettings();
 
 function loadSettings() {
-  const fresh = { options: copy(DEFAULT_OPTIONS), privacy: { on: true, seconds: 120 } };
+  const fresh = { version: 2, options: copy(DEFAULT_OPTIONS), privacy: { on: true, seconds: 120 } };
   let stored = null;
   try {
     stored = JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null');
@@ -264,6 +272,9 @@ function loadSettings() {
 function mergeSettings(target, source) {
   if (!source || typeof source !== 'object') return;
   for (const cat of OPTION_CATEGORIES) {
+    /* Vor Fassung 2 war die Therapielimitierung eine Einfachauswahl mit
+       zusammengesetzten Werten – dort gilt wieder die Voreinstellung. */
+    if (cat.key === 'limitierung' && !(source.version >= 2)) continue;
     const list = source.options && source.options[cat.key];
     if (!Array.isArray(list)) continue;
     target.options[cat.key] = cat.kind === 'phone'
@@ -369,7 +380,8 @@ function merge(target, source) {
     if (col.type === 'germs') {
       target[col.key] = Array.isArray(val) ? val.map(entry => toGerm(entry, source)).filter(Boolean) : [];
     } else if (col.type === 'multi' || col.type === 'checks') {
-      target[col.key] = Array.isArray(val) ? val.map(String) : [];
+      if (typeof val === 'string' && col.fromLegacy) target[col.key] = col.fromLegacy(val);
+      else target[col.key] = Array.isArray(val) ? val.map(String) : [];
     } else if (col.type === 'bool') {
       target[col.key] = Boolean(val);
     } else {

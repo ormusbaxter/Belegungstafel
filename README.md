@@ -43,7 +43,7 @@ Excel-Belegungstafel und sind wörtlich übernommen:
 | Kostform | G | VK, %, nüchtern, Tee/H2O … Schonkost (26 Kostformen) |
 | Telefon | H | Vorschlagsliste 4149 … 4212, freie Eingabe möglich |
 | Intervention | I | Angio, Broncho, CT, Endo, ggf. OP, HKL, MRT, OP, PTR, RÖ, TEE, VAC, ext. Dial. |
-| Therapielimitierung | M | DNR, DNI, DND, DNR/DNI, DNR/DND, DNR/I/D |
+| Therapielimitierung | M | DNR, DNI, DND – mehrere Einträge kombinierbar |
 | Devices | N | ZVK, BDK, ZVK/BDK, keins |
 | Isolation | O | 3MRGN … VRE, mehrere Einträge kombinierbar, je Eintrag bestätigt oder Verdacht |
 | privat | P | Ankreuzfeld, entspricht dem Wert `ja` |
@@ -52,6 +52,9 @@ Excel-Belegungstafel und sind wörtlich übernommen:
 Die vier Werte `V. a. CoViD`, `V.a. C. diff.`, `V.a. Noro` und `V.a. Rota` der Datenquelle
 entfallen, da der Verdacht nun je Eintrag gekennzeichnet wird. Ältere Stände werden beim
 Einlesen automatisch übernommen: `V. a. …` wird als Verdacht erkannt.
+
+Ebenso entfallen die zusammengesetzten Werte `DNR/DNI`, `DNR/DND` und `DNR/I/D` der
+Therapielimitierung; sie werden beim Einlesen in die einzelnen Einträge aufgeteilt.
 
 Ein Eintrag aus Spalte J im Feld Patientenname (z. B. `gesperrt` oder `OP`) beschreibt
 den Bettplatz statt eines Patienten: Er wird kursiv dargestellt und färbt die Zeile ein.
@@ -67,7 +70,8 @@ Spalte der Tafel zugeordnet.
 
 | Typ | Spalten | Bedienung |
 |---|---|---|
-| Auswahlliste | Anwesenheitsstatus, Fachdisziplin, Beatmungsform, Kreislaufunterstützung, Dialyse, TTM, Intervention, Therapielimitierung, Kostform, Physiotherapie, Devices | Klick auf die Zelle, Wert wählen; leerer Eintrag setzt zurück |
+| Auswahlliste | Anwesenheitsstatus, Fachdisziplin, Beatmungsform, Kreislaufunterstützung, Dialyse, TTM, Intervention, Kostform, Physiotherapie, Devices | Klick auf die Zelle, Wert wählen; leerer Eintrag setzt zurück |
+| Mehrfachauswahl | Therapielimitierung | Klick öffnet Dialog, mehrere Einträge kombinierbar |
 | Freitext mit Vorschlägen | Patientenname, Telefon | tippen oder Vorschlag wählen |
 | Datum | Abstriche | Klick öffnet Dialog mit Datumsfeld und den Schaltflächen „nächster Montag“, „übernächster Montag“ und „löschen“ |
 | Keimliste | Isolation | Klick öffnet Dialog; Häkchen = bestätigt, zusätzlich „V. a.“ = Verdacht |

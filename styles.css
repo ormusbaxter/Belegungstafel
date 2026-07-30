@@ -398,7 +398,7 @@ tr.has-iso td.col-bed .bedlabel::after {
   font-weight: 700;
   vertical-align: middle;
 }
-tr.has-limit td.col-limitierung select { color: var(--limit); font-weight: 600; }
+td.col-limitierung .chip { background: var(--limit); color: #fff; font-weight: 600; }
 tr.has-verdacht td.col-bed .bedlabel::after { content: "ISO?"; }
 
 /* Kennzeichen in Mehrfachauswahl-Zellen */
