@@ -33,7 +33,8 @@ const BEDS = [
 const COLUMNS = [
   {
     /* Datenquelle Spalte A */
-    key: 'status', label: 'Anwesenheitsstatus', head: 'Anwesenheits\u00ADstatus', type: 'status', width: 105,
+    /* Ohne Kopftext, damit die Spalte nur so breit sein muss wie ihre Werte. */
+    key: 'status', label: 'Anwesenheitsstatus', head: '', type: 'status', width: 62,
     options: ['A >>>', '\u25cf', 'NVK', 'NVK 1', 'NVK 2', 'NVK 3', '<<< V']
   },
   { key: 'bed', label: 'Bettplatz', type: 'bed', width: 78 },
@@ -418,8 +419,6 @@ function writeNow() {
 function touch(bedId) {
   pendingUndo = null;
   state.beds[bedId]._updated = new Date().toISOString();
-  const cell = document.querySelector(`td[data-bed="${bedId}"][data-key="bed"] .bedtime`);
-  if (cell) cell.textContent = timeStr(new Date());
   save();
 }
 
@@ -457,7 +456,7 @@ function setSaveState(msg, isError) {
 function buildHead() {
   const tr = el('tr');
   for (const col of COLUMNS) {
-    const th = el('th', 'col-' + col.key, col.head || col.label);
+    const th = el('th', 'col-' + col.key, 'head' in col ? col.head : col.label);
     if (PRIVATE_KEYS.includes(col.key)) th.classList.add('privatecol');
     th.title = col.label;
     th.style.width = col.width + 'px';
@@ -485,10 +484,20 @@ function buildDatalists() {
   }
 }
 
+/* Der Versatz der fixierten Bettplatz-Spalte richtet sich nach der
+   tatsächlichen Breite der Statusspalte. */
+function measureSticky() {
+  const th = document.querySelector('#thead th.col-status');
+  if (!th) return;
+  const width = Math.round(th.getBoundingClientRect().width);
+  document.documentElement.style.setProperty('--sticky-left', width + 'px');
+}
+
 function buildBody() {
   const frag = document.createDocumentFragment();
   for (const bed of BEDS) frag.appendChild(buildRow(bed));
   $('#tbody').replaceChildren(frag);
+  measureSticky();
 }
 
 function buildRow(bed) {
@@ -527,7 +536,6 @@ function buildField(bed, col, data) {
           .forEach(node => node.classList.remove('dragging', 'dragover'));
       });
       box.appendChild(el('span', 'bedlabel', bed.label));
-      box.appendChild(el('span', 'bedtime', data._updated ? timeStr(new Date(data._updated)) : ''));
       const btn = el('button', 'clearbed', '×');
       btn.type = 'button';
       btn.draggable = false;
@@ -1452,6 +1460,12 @@ function tickClock() {
     d.getFullYear() + ' · ' + timeStr(d) + ':' + pad(d.getSeconds()) + ' Uhr';
 }
 
+/* Liegt eine Datei logo.png neben index.html, ersetzt sie den Platzhalter. */
+function initLogo() {
+  const img = $('#logoImg');
+  img.addEventListener('load', () => $('#logo').classList.add('has-image'));
+}
+
 function initTheme() {
   const stored = localStorage.getItem(THEME_KEY);
   if (stored) document.documentElement.dataset.theme = stored;
@@ -1464,6 +1478,7 @@ function toggleTheme() {
 }
 
 function init() {
+  initLogo();
   initTheme();
   applySettings();
   buildHead();
@@ -1532,6 +1547,7 @@ function init() {
   });
 
   /* Offene Eingaben sichern, bevor die Seite verlassen oder verdeckt wird */
+  window.addEventListener('resize', measureSticky);
   window.addEventListener('beforeunload', writeNow);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') writeNow();

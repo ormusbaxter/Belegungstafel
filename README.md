@@ -80,7 +80,10 @@ Spalte der Tafel zugeordnet.
 
 ## Funktionen
 
-- **Autospeicherung** in den `localStorage` des Browsers; Uhrzeit der letzten Änderung je Bettplatz
+- **Firmenlogo**: Der quadratische Platzhalter links im Seitenkopf zeigt eine Datei
+  `logo.png`, sobald sie neben `index.html` liegt; ohne Datei bleibt der Platzhalter stehen
+  und wird nicht mitgedruckt
+- **Autospeicherung** in den `localStorage` des Browsers
 - **Farbkodierung** der Zeilen nach Anwesenheitsstatus (Aufnahme, belegt, NVK, außerhalb der
   Station, Verlegung, gesperrt), `ISO`-Kennzeichnung bei eingetragener Isolation,
   farbliche Hervorhebung einer hinterlegten Therapielimitierung
@@ -143,7 +146,9 @@ Neue Spalten werden allein durch einen weiteren Eintrag in `COLUMNS` angelegt; s
 Liste im Einstellungsdialog erscheinen, genügt ein Eintrag in `OPTION_CATEGORIES`.
 
 Alle 20 Spalten passen auf einem 1920 px breiten Bildschirm ohne Querscrollen nebeneinander;
-auf schmaleren Geräten bleiben Anwesenheitsstatus und Bettplatz beim Scrollen stehen.
+auf schmaleren Geräten bleiben Anwesenheitsstatus und Bettplatz beim Scrollen stehen. Die
+Statusspalte trägt keine Überschrift und ist nur so breit wie ihre Werte; der Versatz der
+fixierten Bettplatz-Spalte wird aus der gemessenen Breite abgeleitet.
 
 ## Datenschutz
 
