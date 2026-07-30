@@ -7,7 +7,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '1.0.1';
+const VERSION = '1.1.1';
 const COPYRIGHT = '\u00A9 2026 Oliver Becker';
 
 /* ------------------------------------------------------------------ *
@@ -686,6 +686,31 @@ function autoSizeColumns() {
   for (const field of AUTO_TEXT) autoSizeText(field);
 }
 
+/* Die Breitenanpassung wird aufgeschoben, solange die Maustaste gedrückt ist.
+   Sonst verschiebt sich die Tabelle beim Klick aus einem Textfeld in eine
+   andere Zelle noch zwischen Drücken und Loslassen. */
+let sizePending = false;
+let pointerDown = false;
+
+function requestAutoSize() {
+  if (pointerDown) {
+    sizePending = true;
+    return;
+  }
+  autoSizeColumns();
+  measureSticky();
+}
+
+function initAutoSize() {
+  document.addEventListener('mousedown', () => { pointerDown = true; }, true);
+  document.addEventListener('mouseup', () => {
+    pointerDown = false;
+    if (!sizePending) return;
+    sizePending = false;
+    requestAutoSize();
+  }, true);
+}
+
 /* Breite eines Freitextfeldes aus den Einträgen der Zeilen.
    Der Zuschlag deckt Zellenabstand und Feldrand ab, bei Feldern mit
    Klappliste zusätzlich deren Schaltfläche und den Ausgleich links. */
@@ -810,8 +835,8 @@ function buildField(bed, col, data) {
          wird erst beim Verlassen des Feldes angepasst, damit es beim Tippen
          nicht springt. */
       if (AUTO_TEXT.some(field => field.key === col.key)) {
-        input.addEventListener('change', () => { autoSizeColumns(); measureSticky(); });
-        input.addEventListener('blur', () => { autoSizeColumns(); measureSticky(); });
+        input.addEventListener('change', requestAutoSize);
+        input.addEventListener('blur', requestAutoSize);
       }
       if (col.type !== 'datalist') return input;
 
@@ -982,6 +1007,19 @@ function clearBed(bed) {
  * ------------------------------------------------------------------ */
 let draft = null;
 let activeTab = 'allgemein';
+
+/* Zugang zu den Einstellungen. Der Schutz verhindert versehentliches
+   Verstellen auf dem Stationsrechner; er ersetzt keine Zugriffskontrolle,
+   da das Passwort im Quelltext der Seite steht. */
+const SETTINGS_PASSWORD = 'Vinzenz1';
+
+function askPassword() {
+  const dlg = $('#pwDlg');
+  $('#pwInput').value = '';
+  $('#pwError').hidden = true;
+  dlg.showModal();
+  $('#pwInput').focus();
+}
 
 function openSettings() {
   draft = copy(settings);
@@ -1343,7 +1381,19 @@ function resetCategory() {
 }
 
 function initSettings() {
-  $('#btnSettings').addEventListener('click', openSettings);
+  $('#btnSettings').addEventListener('click', askPassword);
+  $('#pwCancel').addEventListener('click', () => $('#pwDlg').close());
+  $('#pwForm').addEventListener('submit', event => {
+    if ($('#pwInput').value !== SETTINGS_PASSWORD) {
+      event.preventDefault();
+      $('#pwError').hidden = false;
+      $('#pwInput').select();
+      return;
+    }
+    $('#pwInput').value = '';
+    $('#pwDlg').close();
+    openSettings();
+  });
   $('#settingsSave').addEventListener('click', commitSettings);
   $('#settingsCancel').addEventListener('click', () => $('#settingsDlg').close());
   $('#settingsReset').addEventListener('click', resetCategory);
@@ -1896,6 +1946,7 @@ function init() {
   initHelp();
   initDragDrop();
   initKeyboardNav();
+  initAutoSize();
   initPrivacy();
   initSettings();
   initCombo();

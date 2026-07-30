@@ -211,6 +211,24 @@
   </menu>
 </dialog>
 
+<!-- Passwortabfrage vor den Einstellungen -->
+<dialog id="pwDlg" class="dlg dlg-pw">
+  <h2>Einstellungen</h2>
+  <p class="dlgsub">Die Einstellungen sind durch ein Passwort geschützt.</p>
+  <form method="dialog" id="pwForm">
+    <label class="pwrow">
+      <span>Passwort</span>
+      <input type="password" id="pwInput" autocomplete="current-password" required>
+    </label>
+    <p class="pwerror" id="pwError" hidden>Passwort nicht richtig.</p>
+    <menu class="dlgmenu">
+      <span class="spacer"></span>
+      <button type="button" id="pwCancel">Abbrechen</button>
+      <button type="submit" class="primary">Öffnen</button>
+    </menu>
+  </form>
+</dialog>
+
 <!-- Einstellungen -->
 <dialog id="settingsDlg" class="dlg dlg-settings">
   <h2>Einstellungen</h2>

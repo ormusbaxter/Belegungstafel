@@ -118,7 +118,9 @@ Spalte der Tafel zugeordnet.
 - **Verschieben per Ziehen und Ablegen**: Bettplatz-Zelle greifen und auf einen anderen
   Bettplatz ziehen. Ist das Ziel belegt, tauschen beide Plätze ihre Einträge; der
   letzte Vorgang lässt sich über „Rückgängig“ in der Statuszeile zurücknehmen
-- **Einstellungen** über das Zahnrad unten rechts: Beschriftung der Spaltenköpfe,
+- **Einstellungen** über das Zahnrad unten rechts, geschützt durch eine Passwortabfrage
+  (Passwort in `app.js` als `SETTINGS_PASSWORD`; der Schutz verhindert versehentliches
+  Verstellen, ersetzt aber keine Zugriffskontrolle, da er im Quelltext der Seite steht): Beschriftung der Spaltenköpfe,
   Bezeichnung, Reihenfolge und Anzahl der **Bettplätze** sowie Bearbeiten der Auswahllisten
   für Anwesenheitsstatus, Fachdisziplinen, Beatmungsformen, Kreislaufunterstützung, Dialyse, Isolation,
   Interventionen, Therapielimitierung, Kostformen, Physiotherapie, der Telefonvorschläge

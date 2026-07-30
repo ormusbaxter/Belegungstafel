@@ -807,6 +807,22 @@ body.privacy .privacyhint { display: block; }
 .phonenr { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent); }
 .phonename { color: var(--ink-soft); }
 
+/* ---------------- Passwortabfrage ---------------- */
+.dlg.dlg-pw { width: min(380px, 92vw); }
+.pwrow { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.pwrow span { font-size: 13.5px; color: var(--ink-soft); }
+.pwrow input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--ink);
+  font: inherit;
+}
+.pwerror { margin: 8px 0 0; font-size: 12.5px; font-weight: 600; color: var(--danger); }
+html[data-theme="dark"] .pwerror { color: var(--iso); }
+
 /* ---------------- Hilfe ---------------- */
 .help {
   position: fixed;
