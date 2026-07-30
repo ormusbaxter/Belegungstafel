@@ -48,15 +48,6 @@
       <input type="search" id="search" placeholder="Suchen (Name, Diagnose, Pflegekraft …)">
     </label>
     <label class="chk"><input type="checkbox" id="onlyOccupied"> nur belegte Betten</label>
-    <label class="chk">Sichtschutz
-      <select id="privacyDelay" aria-label="Sichtschutz nach Zeit ohne Eingabe">
-        <option value="0">aus</option>
-        <option value="30">30 s</option>
-        <option value="60">1 min</option>
-        <option value="120">2 min</option>
-        <option value="300">5 min</option>
-      </select>
-    </label>
     <button type="button" id="btnLock" title="Sichtschutz sofort einschalten">Abdunkeln</button>
     <button type="button" id="btnPrint">Drucken</button>
     <button type="button" id="btnExport">Export</button>
@@ -77,6 +68,13 @@
     <tbody id="tbody"></tbody>
   </table>
 </main>
+
+<button type="button" class="gear" id="btnSettings" title="Einstellungen" aria-label="Einstellungen">
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+    <path fill="currentColor" d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z"/>
+    <path fill="currentColor" d="m19.4 13-.1-1 1.7-1.3-1.7-3-2 .7-1.7-1-.3-2.1h-3.4l-.3 2.1-1.7 1-2-.7-1.7 3L7.9 12l-.1 1-1.7 1.3 1.7 3 2-.7 1.7 1 .3 2.1h3.4l.3-2.1 1.7-1 2 .7 1.7-3L19.4 13Zm-2 1.7.1.6-.5.9-.9-.3-.6-.2-.5.3-1.3.8-.5.3-.1.6-.1.9h-1.1l-.1-.9-.1-.6-.5-.3-1.3-.8-.5-.3-.6.2-.9.3-.5-.9.7-.5.5-.4-.1-.6v-1.5l.1-.6-.5-.4-.7-.5.5-.9.9.3.6.2.5-.3 1.3-.8.5-.3.1-.6.1-.9h1.1l.1.9.1.6.5.3 1.3.8.5.3.6-.2.9-.3.5.9-.7.5-.5.4.1.6v1.5Z" opacity=".55"/>
+  </svg>
+</button>
 
 <div class="privacyhint" id="privacyHint" role="status">
   Sichtschutz aktiv – Maus bewegen oder Taste drücken
@@ -106,6 +104,22 @@
     Für den Datenaustausch zwischen Geräten bitte Export/Import verwenden.
   </p>
 </details>
+
+<!-- Einstellungen -->
+<dialog id="settingsDlg" class="dlg dlg-settings">
+  <h2>Einstellungen</h2>
+  <p class="dlgsub">Die Einstellungen gelten für diesen Arbeitsplatz und werden mit exportiert.</p>
+  <div class="settingsbody">
+    <nav class="settingstabs" id="settingsTabs" aria-label="Kategorien"></nav>
+    <section class="settingspane" id="settingsPane"></section>
+  </div>
+  <menu class="dlgmenu">
+    <button type="button" id="settingsReset" class="danger">Kategorie zurücksetzen</button>
+    <span class="spacer"></span>
+    <button type="button" id="settingsCancel">Abbrechen</button>
+    <button type="button" id="settingsSave" class="primary">Übernehmen</button>
+  </menu>
+</dialog>
 
 <!-- Mehrfachauswahl -->
 <dialog id="multiDlg" class="dlg">

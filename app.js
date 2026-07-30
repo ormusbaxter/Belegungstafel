@@ -210,16 +210,90 @@ const STATION_FIELDS = [
 const STATION_KEYS = ['maxBetten', 'meldestatus', 'aufnahmen', 'infos',
                       ...STATION_FIELDS.flatMap(f => [f.key, f.key + 'Tel'])];
 
-/* Feste Rufnummernliste unter der Tafel */
-const PHONES = [
-  ['4682', 'Dienst Anästhesie'],
-  ['4032', 'Dienst Innere'],
-  ['4286', 'Büro ITS'],
-  ['4004', 'ND Springer:in'],
-  ['4079', 'TD Springer:in'],
-  ['4753', 'Bettentransport'],
-  ['4101', 'Hol- und Bringed.']
+const COL_BY_KEY = Object.fromEntries(COLUMNS.map(c => [c.key, c]));
+
+/* Rufnummernliste unter der Tafel (über die Einstellungen änderbar) */
+let PHONES = [
+  { value: '4682', label: 'Dienst Anästhesie' },
+  { value: '4032', label: 'Dienst Innere' },
+  { value: '4286', label: 'Büro ITS' },
+  { value: '4004', label: 'ND Springer:in' },
+  { value: '4079', label: 'TD Springer:in' },
+  { value: '4753', label: 'Bettentransport' },
+  { value: '4101', label: 'Hol- und Bringed.' }
 ];
+
+/* In den Einstellungen bearbeitbare Listen */
+const OPTION_CATEGORIES = [
+  { key: 'disziplin',    label: 'Fachdisziplinen',        kind: 'text' },
+  { key: 'beatmung',     label: 'Beatmungsformen',        kind: 'text' },
+  { key: 'kreislauf',    label: 'Kreislaufunterstützung', kind: 'text' },
+  { key: 'dialyse',      label: 'Dialyse',                kind: 'text' },
+  { key: 'isolation',    label: 'Isolation',              kind: 'text' },
+  { key: 'intervention', label: 'Interventionen',         kind: 'text' },
+  { key: 'limitierung',  label: 'Therapielimitierung',    kind: 'text' },
+  { key: 'postform',     label: 'Kostformen',             kind: 'text' },
+  { key: 'physio',       label: 'Physiotherapie',         kind: 'text' },
+  { key: 'telefon',      label: 'Telefon (Spalte)',       kind: 'phone',
+    hint: 'Vorschläge im Feld Telefon der Tabelle' },
+  { key: 'phones',       label: 'Telefonliste',           kind: 'phone',
+    hint: 'Rufnummern im Infofeld unter der Tafel' }
+];
+
+const copy = value => JSON.parse(JSON.stringify(value));
+
+const DEFAULT_OPTIONS = Object.fromEntries(OPTION_CATEGORIES.map(cat =>
+  [cat.key, copy(cat.key === 'phones' ? PHONES : COL_BY_KEY[cat.key].options)]));
+
+const SETTINGS_KEY = 'belegungstafel.einstellungen';
+
+let settings = loadSettings();
+
+function loadSettings() {
+  const fresh = { options: copy(DEFAULT_OPTIONS), privacy: { on: true, seconds: 120 } };
+  let stored = null;
+  try {
+    stored = JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null');
+  } catch (err) {
+    console.warn('Einstellungen unlesbar, verwende die Voreinstellung.', err);
+  }
+  mergeSettings(fresh, stored);
+  return fresh;
+}
+
+function mergeSettings(target, source) {
+  if (!source || typeof source !== 'object') return;
+  for (const cat of OPTION_CATEGORIES) {
+    const list = source.options && source.options[cat.key];
+    if (!Array.isArray(list)) continue;
+    target.options[cat.key] = cat.kind === 'phone'
+      ? list.filter(e => e && (e.value || e.label))
+            .map(e => ({ value: String(e.value || ''), label: String(e.label || '') }))
+      : list.filter(e => typeof e === 'string' && e.trim()).map(String);
+  }
+  if (source.privacy && typeof source.privacy === 'object') {
+    target.privacy.on = source.privacy.on !== false;
+    const seconds = parseInt(source.privacy.seconds, 10);
+    if (Number.isFinite(seconds)) target.privacy.seconds = Math.min(3600, Math.max(5, seconds));
+  }
+}
+
+function saveSettings() {
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  } catch (err) {
+    setSaveState('Einstellungen konnten nicht gespeichert werden: ' + err.message, true);
+  }
+}
+
+/* Überträgt die Einstellungen auf Spalten, Rufnummern und Sichtschutz. */
+function applySettings() {
+  for (const cat of OPTION_CATEGORIES) {
+    if (cat.key === 'phones') PHONES = settings.options.phones;
+    else COL_BY_KEY[cat.key].options = settings.options[cat.key];
+  }
+  privacyDelay = settings.privacy.on ? settings.privacy.seconds : 0;
+}
 
 const NOTE_FIELDS = [
   ['#noteAufnahmen', 'aufnahmen'],
@@ -229,7 +303,6 @@ const NOTE_FIELDS = [
 const STORAGE_KEY = 'belegungstafel.intensiv.v1';
 const THEME_KEY = 'belegungstafel.theme';
 const LEGEND_KEY = 'belegungstafel.legende';
-const PRIVACY_KEY = 'belegungstafel.sichtschutz';
 
 /* Sichtschutz: patientenbezogene Spalten zwischen Bettplatz und
    Therapielimitierung (jeweils ausschließlich bzw. einschließlich). */
@@ -241,7 +314,6 @@ const PRIVATE_KEYS = COLUMNS
 /* ------------------------------------------------------------------ *
  * Zustand
  * ------------------------------------------------------------------ */
-const COL_BY_KEY = Object.fromEntries(COLUMNS.map(c => [c.key, c]));
 
 function emptyBed() {
   const row = {};
@@ -386,6 +458,7 @@ function buildHead() {
 
 /* Vorschlagslisten für Freitextfelder (z. B. Telefonnummern) */
 function buildDatalists() {
+  for (const old of document.querySelectorAll('body > datalist')) old.remove();
   for (const col of COLUMNS) {
     if (col.type !== 'datalist') continue;
     const dl = el('datalist');
@@ -466,6 +539,9 @@ function buildField(bed, col, data) {
         }
       } else {
         for (const opt of col.options) sel.appendChild(new Option(opt, opt));
+      }
+      if (data[col.key] && !optionList(col).includes(data[col.key])) {
+        sel.appendChild(new Option(data[col.key], data[col.key]));
       }
       sel.value = data[col.key];
       sel.addEventListener('change', () => {
@@ -629,6 +705,183 @@ function clearBed(bed) {
 }
 
 /* ------------------------------------------------------------------ *
+ * Einstellungen
+ * ------------------------------------------------------------------ */
+let draft = null;
+let activeTab = 'allgemein';
+
+function openSettings() {
+  draft = copy(settings);
+  activeTab = 'allgemein';
+  renderTabs();
+  renderPane();
+  $('#settingsDlg').showModal();
+}
+
+function renderTabs() {
+  const box = $('#settingsTabs');
+  box.replaceChildren();
+  const tabs = [{ key: 'allgemein', label: 'Allgemein' }, ...OPTION_CATEGORIES];
+  for (const tab of tabs) {
+    const btn = el('button', 'tab' + (tab.key === activeTab ? ' active' : ''), tab.label);
+    btn.type = 'button';
+    btn.addEventListener('click', () => { activeTab = tab.key; renderTabs(); renderPane(); });
+    box.appendChild(btn);
+  }
+  $('#settingsReset').hidden = activeTab === 'allgemein';
+}
+
+function renderPane() {
+  const pane = $('#settingsPane');
+  pane.replaceChildren();
+  if (activeTab === 'allgemein') return renderGeneralPane(pane);
+
+  const cat = OPTION_CATEGORIES.find(c => c.key === activeTab);
+  pane.appendChild(el('h3', null, cat.label));
+  if (cat.hint) pane.appendChild(el('p', 'panehint', cat.hint));
+
+  const list = el('div', 'entrylist');
+  pane.appendChild(list);
+  renderEntries(list, cat);
+
+  const add = el('button', 'addentry', '+ Eintrag hinzufügen');
+  add.type = 'button';
+  add.addEventListener('click', () => {
+    draft.options[cat.key].push(cat.kind === 'phone' ? { value: '', label: '' } : '');
+    renderEntries(list, cat);
+    const inputs = list.querySelectorAll('input');
+    if (inputs.length) inputs[inputs.length - (cat.kind === 'phone' ? 2 : 1)].focus();
+  });
+  pane.appendChild(add);
+}
+
+function renderEntries(list, cat) {
+  const entries = draft.options[cat.key];
+  list.replaceChildren();
+
+  entries.forEach((entry, index) => {
+    const row = el('div', 'entry' + (cat.kind === 'phone' ? ' entry-phone' : ''));
+
+    if (cat.kind === 'phone') {
+      row.appendChild(entryInput(entry.value, 'Nummer', 'nr', value => { entry.value = value; }));
+      row.appendChild(entryInput(entry.label, 'Bezeichnung', '', value => { entry.label = value; }));
+    } else {
+      row.appendChild(entryInput(entry, 'Bezeichnung', '', value => { entries[index] = value; }));
+    }
+
+    row.appendChild(moveButton('↑', 'nach oben', () => {
+      if (index === 0) return;
+      [entries[index - 1], entries[index]] = [entries[index], entries[index - 1]];
+      renderEntries(list, cat);
+    }));
+    row.appendChild(moveButton('↓', 'nach unten', () => {
+      if (index === entries.length - 1) return;
+      [entries[index + 1], entries[index]] = [entries[index], entries[index + 1]];
+      renderEntries(list, cat);
+    }));
+    const remove = moveButton('×', 'entfernen', () => {
+      entries.splice(index, 1);
+      renderEntries(list, cat);
+    });
+    remove.classList.add('remove');
+    row.appendChild(remove);
+    list.appendChild(row);
+  });
+
+  if (!entries.length) list.appendChild(el('p', 'panehint', 'Noch keine Einträge.'));
+}
+
+function entryInput(value, placeholder, cls, onInput) {
+  const input = el('input', cls);
+  input.type = 'text';
+  input.value = value;
+  input.placeholder = placeholder;
+  input.addEventListener('input', () => onInput(input.value));
+  return input;
+}
+
+function moveButton(text, title, onClick) {
+  const btn = el('button', 'entrybtn', text);
+  btn.type = 'button';
+  btn.title = title;
+  btn.addEventListener('click', onClick);
+  return btn;
+}
+
+function renderGeneralPane(pane) {
+  pane.appendChild(el('h3', null, 'Sichtschutz'));
+  pane.appendChild(el('p', 'panehint',
+    'Blendet die patientenbezogenen Angaben aus, wenn eine Zeit lang keine Eingabe erfolgt.'));
+
+  const row = el('label', 'setrow');
+  const box = el('input');
+  box.type = 'checkbox';
+  box.checked = draft.privacy.on;
+  row.appendChild(box);
+  row.appendChild(el('span', null, 'Sichtschutz aktiv'));
+  pane.appendChild(row);
+
+  const timeRow = el('label', 'setrow');
+  timeRow.appendChild(el('span', null, 'Zeit ohne Eingabe'));
+  const seconds = el('input');
+  seconds.type = 'number';
+  seconds.min = '5';
+  seconds.max = '3600';
+  seconds.step = '5';
+  seconds.value = String(draft.privacy.seconds);
+  seconds.disabled = !draft.privacy.on;
+  seconds.addEventListener('input', () => {
+    draft.privacy.seconds = parseInt(seconds.value, 10) || 0;
+  });
+  timeRow.appendChild(seconds);
+  timeRow.appendChild(el('span', 'unit', 'Sekunden'));
+  pane.appendChild(timeRow);
+
+  box.addEventListener('change', () => {
+    draft.privacy.on = box.checked;
+    seconds.disabled = !box.checked;
+  });
+}
+
+function commitSettings() {
+  /* Leere Einträge fallen weg, damit keine leeren Auswahlwerte entstehen. */
+  for (const cat of OPTION_CATEGORIES) {
+    draft.options[cat.key] = cat.kind === 'phone'
+      ? draft.options[cat.key].filter(e => e.value.trim() || e.label.trim())
+          .map(e => ({ value: e.value.trim(), label: e.label.trim() }))
+      : draft.options[cat.key].map(e => e.trim()).filter(Boolean);
+  }
+  draft.privacy.seconds = Math.min(3600, Math.max(5, draft.privacy.seconds || 120));
+
+  settings = draft;
+  saveSettings();
+  applySettings();
+  buildDatalists();
+  buildBody();
+  renderPhones();
+  renderStats();
+  applyFilter();
+  manualLock = false;
+  setPrivacy(false);
+  restartPrivacyTimer();
+  $('#settingsDlg').close();
+  setSaveState('Einstellungen übernommen');
+}
+
+function resetCategory() {
+  if (activeTab === 'allgemein') return;
+  draft.options[activeTab] = copy(DEFAULT_OPTIONS[activeTab]);
+  renderPane();
+}
+
+function initSettings() {
+  $('#btnSettings').addEventListener('click', openSettings);
+  $('#settingsSave').addEventListener('click', commitSettings);
+  $('#settingsCancel').addEventListener('click', () => $('#settingsDlg').close());
+  $('#settingsReset').addEventListener('click', resetCategory);
+}
+
+/* ------------------------------------------------------------------ *
  * Sichtschutz
  * Nach der eingestellten Zeit ohne Eingabe werden die patientenbezogenen
  * Angaben unkenntlich gemacht. Jede Bewegung oder Taste hebt das wieder auf;
@@ -662,17 +915,6 @@ function lockNow() {
 }
 
 function initPrivacy() {
-  const select = $('#privacyDelay');
-  const stored = parseInt(localStorage.getItem(PRIVACY_KEY), 10);
-  if (Number.isFinite(stored)) privacyDelay = stored;
-  select.value = String(privacyDelay);
-  select.addEventListener('change', () => {
-    privacyDelay = parseInt(select.value, 10) || 0;
-    localStorage.setItem(PRIVACY_KEY, String(privacyDelay));
-    if (privacyDelay === 0) setPrivacy(false);
-    manualLock = false;
-    restartPrivacyTimer();
-  });
   $('#btnLock').addEventListener('click', lockNow);
 
   for (const type of ['mousemove', 'mousedown', 'keydown', 'wheel', 'touchstart', 'focusin']) {
@@ -1021,10 +1263,10 @@ function renderStation() {
 function renderPhones() {
   const list = $('#phoneList');
   list.replaceChildren();
-  for (const [number, name] of PHONES) {
+  for (const entry of PHONES) {
     const li = el('li');
-    li.appendChild(el('span', 'phonenr', number));
-    li.appendChild(el('span', 'phonename', name));
+    li.appendChild(el('span', 'phonenr', entry.value));
+    li.appendChild(el('span', 'phonename', entry.label));
     list.appendChild(li);
   }
 }
@@ -1107,7 +1349,8 @@ function stamp() {
 }
 
 function exportJson() {
-  download('belegungstafel-' + stamp() + '.json', JSON.stringify(state, null, 2), 'application/json');
+  const data = { ...state, settings };
+  download('belegungstafel-' + stamp() + '.json', JSON.stringify(data, null, 2), 'application/json');
 }
 
 function exportCsv() {
@@ -1159,6 +1402,14 @@ function importJson(file) {
     }
     state.station = emptyStation();
     mergeStation(state.station, parsed.station);
+    if (parsed.settings) {
+      mergeSettings(settings, parsed.settings);
+      saveSettings();
+      applySettings();
+      buildDatalists();
+      renderPhones();
+      restartPrivacyTimer();
+    }
     buildBody();
     renderStation();
     renderStats();
@@ -1202,6 +1453,7 @@ function toggleTheme() {
 
 function init() {
   initTheme();
+  applySettings();
   buildHead();
   buildDatalists();
   buildBody();
@@ -1214,6 +1466,7 @@ function init() {
   initDragDrop();
   initKeyboardNav();
   initPrivacy();
+  initSettings();
   tickClock();
   setInterval(tickClock, 1000);
 

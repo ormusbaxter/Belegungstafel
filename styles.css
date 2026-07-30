@@ -516,6 +516,102 @@ td.col-kreislauf .chip { background: #b3261e; color: #fff; }
 td.col-abstriche .chip { background: #6a4c93; color: #fff; }
 td.col-physio .chip { background: #2f7d32; color: #fff; }
 
+/* ---------------- Einstellungen ---------------- */
+.gear {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink-soft);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .18);
+}
+.gear:hover { color: var(--accent); border-color: var(--accent); background: var(--panel); }
+
+.dlg-settings { width: min(760px, 94vw); }
+.settingsbody {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 14px;
+  margin-top: 12px;
+}
+.settingstabs {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 56vh;
+  overflow: auto;
+  padding-right: 4px;
+  border-right: 1px solid var(--line-soft);
+}
+.settingstabs .tab {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--ink);
+  text-align: left;
+  font-size: 13px;
+}
+.settingstabs .tab:hover { background: var(--line-soft); }
+.settingstabs .tab.active {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+.settingspane {
+  max-height: 56vh;
+  overflow: auto;
+  padding-right: 4px;
+}
+.settingspane h3 { margin: 0 0 2px; font-size: 14px; }
+.panehint { margin: 0 0 10px; font-size: 12px; color: var(--ink-soft); }
+.entrylist { display: flex; flex-direction: column; gap: 4px; }
+.entry { display: grid; grid-template-columns: 1fr auto auto auto; gap: 4px; align-items: center; }
+.entry-phone { grid-template-columns: 78px 1fr auto auto auto; }
+.entry input {
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  min-width: 0;
+}
+.entry input.nr { font-variant-numeric: tabular-nums; text-align: center; }
+.entrybtn {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--ink-soft);
+}
+.entrybtn.remove:hover { background: var(--danger); border-color: var(--danger); color: #fff; }
+.addentry { margin-top: 8px; font-size: 12.5px; }
+.setrow { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 13.5px; }
+.setrow input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; }
+.setrow input[type="number"] {
+  width: 90px;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--ink);
+  font: inherit;
+}
+.setrow .unit { color: var(--ink-soft); font-size: 12.5px; }
+
 /* ---------------- Sichtschutz ---------------- */
 body.privacy td.privatecol > *,
 body.privacy .note textarea,
@@ -803,7 +899,7 @@ body.privacy .privacyhint { display: block; }
   /* Der Ausdruck wird nie unkenntlich gemacht. */
   body.privacy td.privatecol > *,
   body.privacy .note textarea { filter: none !important; }
-  .privacyhint { display: none !important; }
+  .privacyhint, .gear { display: none !important; }
   .phonenr { color: #000; }
   .dlg { display: none !important; }
   :focus, :focus-visible { outline: none !important; }

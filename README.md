@@ -106,8 +106,16 @@ Spalte der Tafel zugeordnet.
 - **Verschieben per Ziehen und Ablegen**: Bettplatz-Zelle greifen und auf einen anderen
   Bettplatz ziehen. Ist das Ziel belegt, tauschen beide Plätze ihre Einträge; der
   letzte Vorgang lässt sich über „Rückgängig“ in der Statuszeile zurücknehmen
-- **Sichtschutz**: Nach einer einstellbaren Zeit ohne Eingabe (aus / 30 s / 1 min / 2 min /
-  5 min, Voreinstellung 2 min) werden die patientenbezogenen Spalten – Patientenname bis
+- **Einstellungen** über das Zahnrad unten rechts: Bearbeiten der Auswahllisten für
+  Fachdisziplinen, Beatmungsformen, Kreislaufunterstützung, Dialyse, Isolation,
+  Interventionen, Therapielimitierung, Kostformen, Physiotherapie, der Telefonvorschläge
+  der Tabelle und der Rufnummernliste unter der Tafel – Einträge lassen sich hinzufügen,
+  umbenennen, sortieren und entfernen, jede Kategorie einzeln auf die Voreinstellung
+  zurücksetzen. Unter „Allgemein“ der Sichtschutz mit Ein/Aus und Zeit in Sekunden.
+  Ein Wert, der in einem Bettplatz steht, bleibt erhalten, auch wenn er später aus der
+  Liste entfernt wird
+- **Sichtschutz**: Nach der eingestellten Zeit ohne Eingabe (Voreinstellung 120 Sekunden)
+  werden die patientenbezogenen Spalten – Patientenname bis
   einschließlich Therapielimitierung – sowie die beiden Textfelder unter der Tafel
   unkenntlich gemacht. Jede Mausbewegung oder Taste hebt das auf; die Schaltfläche
   „Abdunkeln“ schaltet sofort um und bleibt dann bis zu einem Klick oder Tastendruck
@@ -122,10 +130,13 @@ Spalte der Tafel zugeordnet.
 
 ## Anpassung
 
+Die Auswahllisten der meisten Spalten werden über das Zahnrad unten rechts gepflegt und
+liegen im `localStorage` unter `belegungstafel.einstellungen`; die Werte in `app.js` sind
+die Voreinstellung, auf die sich jede Kategorie zurücksetzen lässt.
+
 Bettplätze und Spalten sind am Anfang von `app.js` in `BEDS` und `COLUMNS` hinterlegt.
-Auswahllisten lassen sich dort durch Ergänzen der `options`-Arrays an die Gepflogenheiten
-der Station anpassen; neue Spalten werden allein durch einen weiteren Eintrag in `COLUMNS`
-angelegt.
+Neue Spalten werden allein durch einen weiteren Eintrag in `COLUMNS` angelegt; soll eine
+Liste im Einstellungsdialog erscheinen, genügt ein Eintrag in `OPTION_CATEGORIES`.
 
 Alle 20 Spalten passen auf einem 1920 px breiten Bildschirm ohne Querscrollen nebeneinander;
 auf schmaleren Geräten bleiben Anwesenheitsstatus und Bettplatz beim Scrollen stehen.
