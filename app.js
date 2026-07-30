@@ -165,6 +165,26 @@ function germLabel(entry) {
   return (entry.s === 'verdacht' ? 'V. a. ' : '') + entry.v;
 }
 
+/* Hinterlegter Stil eines Auswahlwertes, sonst null */
+function styleFor(colKey, value) {
+  const styles = settings.styles && settings.styles[colKey];
+  const style = styles && styles[value];
+  return style && (style.fg || style.bg || style.border) ? style : null;
+}
+
+/* Überträgt den Stil auf ein Auswahlfeld oder eine Marke. */
+function paint(node, colKey, value) {
+  const style = styleFor(colKey, value);
+  node.style.color = '';
+  node.style.background = '';
+  node.style.border = '';
+  node.classList.toggle('styled', Boolean(style));
+  if (!style) return;
+  if (style.fg) node.style.color = style.fg;
+  if (style.bg) node.style.background = style.bg;
+  if (style.border) node.style.border = '1px ' + style.border + ' ' + (style.fg || 'currentColor');
+}
+
 /* Flache Werteliste einer Spalte – berücksichtigt Gruppen und Datalist-Einträge. */
 function optionList(col) {
   if (col.groups) return col.groups.flatMap(g => g.options);
@@ -254,12 +274,27 @@ const copy = value => JSON.parse(JSON.stringify(value));
 const DEFAULT_OPTIONS = Object.fromEntries(OPTION_CATEGORIES.map(cat =>
   [cat.key, copy(cat.key === 'phones' ? PHONES : COL_BY_KEY[cat.key].options)]));
 
+/* Rahmenstile, die je Auswahlwert eingestellt werden können */
+const BORDER_STYLES = [
+  ['', 'ohne Rahmen'],
+  ['solid', 'durchgezogen'],
+  ['dashed', 'gestrichelt'],
+  ['dotted', 'gepunktet'],
+  ['double', 'doppelt']
+];
+const HEX = /^#[0-9a-f]{6}$/i;
+
 const SETTINGS_KEY = 'belegungstafel.einstellungen';
 
 let settings = loadSettings();
 
 function loadSettings() {
-  const fresh = { version: 2, options: copy(DEFAULT_OPTIONS), privacy: { on: true, seconds: 120 } };
+  const fresh = {
+    version: 2,
+    options: copy(DEFAULT_OPTIONS),
+    styles: Object.fromEntries(OPTION_CATEGORIES.filter(c => c.kind === 'text').map(c => [c.key, {}])),
+    privacy: { on: true, seconds: 120 }
+  };
   let stored = null;
   try {
     stored = JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null');
@@ -282,6 +317,18 @@ function mergeSettings(target, source) {
       ? list.filter(e => e && (e.value || e.label))
             .map(e => ({ value: String(e.value || ''), label: String(e.label || '') }))
       : list.filter(e => typeof e === 'string' && e.trim()).map(String);
+  }
+  for (const cat of OPTION_CATEGORIES) {
+    if (cat.kind !== 'text') continue;
+    const styles = source.styles && source.styles[cat.key];
+    if (!styles || typeof styles !== 'object') continue;
+    for (const [value, style] of Object.entries(styles)) {
+      const clean = {};
+      if (HEX.test(style.fg || '')) clean.fg = style.fg;
+      if (HEX.test(style.bg || '')) clean.bg = style.bg;
+      if (BORDER_STYLES.some(([id]) => id && id === style.border)) clean.border = style.border;
+      if (Object.keys(clean).length) target.styles[cat.key][String(value)] = clean;
+    }
   }
   if (source.privacy && typeof source.privacy === 'object') {
     target.privacy.on = source.privacy.on !== false;
@@ -564,8 +611,10 @@ function buildField(bed, col, data) {
         sel.appendChild(new Option(data[col.key], data[col.key]));
       }
       sel.value = data[col.key];
+      paint(sel, col.key, sel.value);
       sel.addEventListener('change', () => {
         data[col.key] = sel.value;
+        paint(sel, col.key, sel.value);
         applyRowState(sel.closest('tr'), data);
         touch(bed.id);
         renderStats();
@@ -660,6 +709,7 @@ function renderChips(btn, col, data) {
     for (const entry of values) {
       const chip = el('span', 'chip' + (entry.s === 'verdacht' ? ' chip-verdacht' : ''), germLabel(entry));
       chip.title = entry.v + (entry.s === 'verdacht' ? ' – Verdacht' : ' – bestätigt');
+      if (entry.s !== 'verdacht') paint(chip, col.key, entry.v);
       btn.appendChild(chip);
     }
   } else if (col.type === 'date') {
@@ -669,7 +719,11 @@ function renderChips(btn, col, data) {
     if (values <= isoToday()) due.classList.add('due');
     btn.appendChild(due);
   } else {
-    for (const val of values) btn.appendChild(el('span', 'chip', val));
+    for (const val of values) {
+      const chip = el('span', 'chip', val);
+      paint(chip, col.key, val);
+      btn.appendChild(chip);
+    }
   }
 }
 
@@ -760,6 +814,12 @@ function renderPane() {
   pane.appendChild(el('h3', null, cat.label));
   if (cat.hint) pane.appendChild(el('p', 'panehint', cat.hint));
 
+  if (cat.kind === 'text') {
+    pane.appendChild(el('p', 'panehint',
+      'Je Eintrag lassen sich Textfarbe, Hintergrundfarbe und Rahmenstil festlegen; ' +
+      '⟲ entfernt den Stil wieder.'));
+  }
+
   const list = el('div', 'entrylist');
   pane.appendChild(list);
   renderEntries(list, cat);
@@ -780,13 +840,55 @@ function renderEntries(list, cat) {
   list.replaceChildren();
 
   entries.forEach((entry, index) => {
-    const row = el('div', 'entry' + (cat.kind === 'phone' ? ' entry-phone' : ''));
+    const row = el('div', 'entry' + (cat.kind === 'phone' ? ' entry-phone' : ' entry-styled'));
 
     if (cat.kind === 'phone') {
       row.appendChild(entryInput(entry.value, 'Nummer', 'nr', value => { entry.value = value; }));
       row.appendChild(entryInput(entry.label, 'Bezeichnung', '', value => { entry.label = value; }));
     } else {
-      row.appendChild(entryInput(entry, 'Bezeichnung', '', value => { entries[index] = value; }));
+      const styles = draft.styles[cat.key];
+      const field = entryInput(entry, 'Bezeichnung', '', value => {
+        const before = entries[index];
+        entries[index] = value;
+        /* Ein umbenannter Eintrag behält seinen Stil. */
+        if (styles[before]) {
+          styles[value] = styles[before];
+          if (value !== before) delete styles[before];
+        }
+        paintPreview(field, styles[value]);
+      });
+      paintPreview(field, styles[entry]);
+      row.appendChild(field);
+
+      const style = () => (styles[entries[index]] ||= {});
+      const update = () => {
+        const current = styles[entries[index]];
+        if (current && !current.fg && !current.bg && !current.border) delete styles[entries[index]];
+        paintPreview(field, styles[entries[index]]);
+      };
+
+      row.appendChild(colorPicker(styles[entry] && styles[entry].fg, '#12181f', 'Textfarbe',
+        value => { style().fg = value; update(); }));
+      row.appendChild(colorPicker(styles[entry] && styles[entry].bg, '#ffffff', 'Hintergrundfarbe',
+        value => { style().bg = value; update(); }));
+
+      const border = el('select', 'borderpick');
+      border.title = 'Rahmenstil';
+      for (const [value, name] of BORDER_STYLES) border.appendChild(new Option(name, value));
+      border.value = (styles[entry] && styles[entry].border) || '';
+      border.addEventListener('change', () => {
+        if (border.value) style().border = border.value;
+        else if (styles[entries[index]]) delete styles[entries[index]].border;
+        update();
+      });
+      row.appendChild(border);
+
+      const clear = moveButton('⟲', 'Stil entfernen', () => {
+        delete styles[entries[index]];
+        renderEntries(list, cat);
+      });
+      clear.classList.add('clearstyle');
+      row.appendChild(clear);
     }
 
     row.appendChild(moveButton('↑', 'nach oben', () => {
@@ -809,6 +911,23 @@ function renderEntries(list, cat) {
   });
 
   if (!entries.length) list.appendChild(el('p', 'panehint', 'Noch keine Einträge.'));
+}
+
+/* Zeigt den gewählten Stil direkt im Eingabefeld des Editors. */
+function paintPreview(field, style) {
+  field.style.color = style && style.fg ? style.fg : '';
+  field.style.background = style && style.bg ? style.bg : '';
+  field.style.borderStyle = style && style.border ? style.border : '';
+  field.style.borderColor = style && style.border ? (style.fg || 'currentColor') : '';
+}
+
+function colorPicker(value, fallback, title, onInput) {
+  const input = el('input', 'colorpick');
+  input.type = 'color';
+  input.value = value || fallback;
+  input.title = title;
+  input.addEventListener('input', () => onInput(input.value));
+  return input;
 }
 
 function entryInput(value, placeholder, cls, onInput) {
@@ -870,6 +989,13 @@ function commitSettings() {
       ? draft.options[cat.key].filter(e => e.value.trim() || e.label.trim())
           .map(e => ({ value: e.value.trim(), label: e.label.trim() }))
       : draft.options[cat.key].map(e => e.trim()).filter(Boolean);
+    /* Stile ohne zugehörigen Eintrag verwerfen. */
+    if (cat.kind === 'text') {
+      const known = new Set(draft.options[cat.key]);
+      for (const value of Object.keys(draft.styles[cat.key] || {})) {
+        if (!known.has(value)) delete draft.styles[cat.key][value];
+      }
+    }
   }
   draft.privacy.seconds = Math.min(3600, Math.max(5, draft.privacy.seconds || 120));
 
@@ -891,6 +1017,7 @@ function commitSettings() {
 function resetCategory() {
   if (activeTab === 'allgemein') return;
   draft.options[activeTab] = copy(DEFAULT_OPTIONS[activeTab]);
+  if (draft.styles[activeTab]) draft.styles[activeTab] = {};
   renderPane();
 }
 

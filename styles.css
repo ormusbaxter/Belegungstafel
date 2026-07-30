@@ -404,7 +404,7 @@ tr.st-gesperrt td select { opacity: .75; }
 tr.name-state td.col-name input { font-style: italic; font-weight: 600; color: var(--ink-soft); }
 
 /* Isolation / Therapielimitierung */
-td.col-isolation .chip { background: var(--iso); color: #fff; font-weight: 600; }
+td.col-isolation .chip:not(.styled) { background: var(--iso); color: #fff; font-weight: 600; }
 td.col-isolation .chip-verdacht {
   background: transparent;
   border: 1px dashed var(--iso);
@@ -422,7 +422,7 @@ tr.has-iso td.col-bed .bedlabel::after {
   font-weight: 700;
   vertical-align: middle;
 }
-td.col-limitierung .chip { background: var(--limit); color: #fff; font-weight: 600; }
+td.col-limitierung .chip:not(.styled) { background: var(--limit); color: #fff; font-weight: 600; }
 tr.has-verdacht td.col-bed .bedlabel::after { content: "ISO?"; }
 
 /* Kennzeichen in Mehrfachauswahl-Zellen */
@@ -521,6 +521,7 @@ tr:hover .clearbed, .clearbed:focus-visible { opacity: 1; }
   border-color: transparent;
   background: transparent;
 }
+.chip.styled { padding: 0 6px; }
 .chip {
   padding: 1px 6px;
   border-radius: 9px;
@@ -554,7 +555,7 @@ td.col-physio .chip { background: #2f7d32; color: #fff; }
 }
 .gear:hover { color: var(--accent); border-color: var(--accent); background: var(--panel); }
 
-.dlg-settings { width: min(760px, 94vw); }
+.dlg.dlg-settings { width: min(900px, 96vw); }
 .settingsbody {
   display: grid;
   grid-template-columns: 190px 1fr;
@@ -595,6 +596,27 @@ td.col-physio .chip { background: #2f7d32; color: #fff; }
 .entrylist { display: flex; flex-direction: column; gap: 4px; }
 .entry { display: grid; grid-template-columns: 1fr auto auto auto; gap: 4px; align-items: center; }
 .entry-phone { grid-template-columns: 78px 1fr auto auto auto; }
+.entry-styled { grid-template-columns: 1fr 30px 30px 108px auto auto auto auto; }
+.colorpick {
+  width: 30px;
+  height: 26px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  cursor: pointer;
+}
+.borderpick {
+  padding: 4px 4px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 11.5px;
+}
+.entry input[type="text"] { border-width: 1px; }
+.entrybtn.clearstyle { font-size: 15px; }
 .entry input {
   padding: 5px 8px;
   border: 1px solid var(--line);
@@ -911,7 +933,9 @@ body.privacy .privacyhint { display: block; }
   }
   td textarea { min-height: 0; height: auto; resize: none; }
   .bedlabel { font-size: 11px; }
-  .chip { background: none !important; color: #000 !important; padding: 0; }
+  .chip:not(.styled) { background: none !important; color: #000 !important; padding: 0; }
+  .chip.styled { padding: 0 3px; }
+  td select.styled { padding: 0 3px !important; }
   .datebadge { background: none !important; color: #000 !important; padding: 0; border: none; }
   .chip-verdacht { border: none !important; }
   .datebadge.due { font-weight: 700; }
