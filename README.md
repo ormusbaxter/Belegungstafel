@@ -33,7 +33,7 @@ Excel-Belegungstafel und sind wörtlich übernommen:
 
 | Spalte der Tafel | Datenquelle | Werte |
 |---|---|---|
-| Anwesenheitsstatus | A | `A >>>`, `●`, `NVK`, `NVK 1`, `NVK 2`, `NVK 3`, `<<< V` |
+| Anwesenheitsstatus | A | ➡ (grün, Aufnahme), `●`, `NVK`, `NVK 1`, `NVK 2`, `NVK 3`, ⬅ (dunkelrot, Verlegung) |
 | Patientenname | J | Freitext mit optionaler Auswahl: `Notbett`, `gesperrt`, `Reinigung`, `NA`, `OP`, `CV` |
 | Fachdisziplin | B | ACH, DIAB, GAST, GCH, INF, INT, KARD, ONKO, RAD, TCH, UCH, X |
 | Beatmungsform | C | INV, NIV, HFNC, NIV/HF, (INV), (NIV), (HFNC), (NIV/HF), MIRUS – mehrere Einträge kombinierbar |
@@ -55,6 +55,10 @@ Einlesen automatisch übernommen: `V. a. …` wird als Verdacht erkannt.
 
 Ebenso entfallen die zusammengesetzten Werte `DNR/DNI`, `DNR/DND` und `DNR/I/D` der
 Therapielimitierung; sie werden beim Einlesen in die einzelnen Einträge aufgeteilt.
+
+Die Textkürzel `A >>>` und `<<< V` der ersten Spalte sind durch einen kräftigen grünen
+Pfeil nach rechts (Aufnahme) und einen dunkelroten Pfeil nach links (Verlegung) ersetzt;
+vorhandene Stände werden beim Einlesen umgestellt.
 
 Ein Eintrag aus Spalte J im Feld Patientenname (z. B. `gesperrt` oder `OP`) beschreibt
 den Bettplatz statt eines Patienten: Er wird kursiv dargestellt und färbt die Zeile ein.

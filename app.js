@@ -7,7 +7,14 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '1.2.1';
+const VERSION = '1.3.0';
+
+/* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
+const ARROW_IN = '\u27A1\uFE0E';
+const ARROW_OUT = '\u2B05\uFE0E';
+
+/* Frühere Textkürzel werden beim Einlesen auf die Pfeile umgestellt. */
+const STATUS_LEGACY = { 'A >>>': ARROW_IN, 'A >>': ARROW_IN, '<<< V': ARROW_OUT, '<< V': ARROW_OUT };
 const COPYRIGHT = '\u00A9 2026 Oliver Becker';
 
 /* ------------------------------------------------------------------ *
@@ -44,7 +51,9 @@ const COLUMNS = [
     /* Datenquelle Spalte A */
     /* Ohne Kopftext, damit die Spalte nur so breit sein muss wie ihre Werte. */
     key: 'status', label: 'Anwesenheitsstatus', head: '', type: 'status', width: 58,
-    options: ['A >>>', '\u25cf', 'NVK', 'NVK 1', 'NVK 2', 'NVK 3', '<<< V']
+    /* \u27A1\uFE0E Aufnahme, \u2B05\uFE0E Verlegung – die Textvariante (U+FE0E)
+       verhindert, dass der Browser bunte Emoji zeichnet. */
+    options: [ARROW_IN, '\u25cf', 'NVK', 'NVK 1', 'NVK 2', 'NVK 3', ARROW_OUT]
   },
   { key: 'bed', label: 'Bettplatz', type: 'bed', width: 68 },
   {
@@ -208,13 +217,13 @@ function optionList(col) {
 
 /* Status (Spalte A) → Farbklasse und Belegungslogik */
 const STATUS_CLASS = {
-  'A >>>': 'st-aufnahme',
+  [ARROW_IN]: 'st-aufnahme',
   '\u25cf': 'st-belegt',
   'NVK': 'st-nvk',
   'NVK 1': 'st-nvk',
   'NVK 2': 'st-nvk',
   'NVK 3': 'st-nvk',
-  '<<< V': 'st-verlegung'
+  [ARROW_OUT]: 'st-verlegung'
 };
 /* Belegt ist ein Bettplatz, sobald ein Anwesenheitsstatus oder eine
    Fachdisziplin eingetragen ist – so wirken auch selbst vergebene oder
@@ -238,10 +247,10 @@ const NAME_CLASS = {
 /* Zeilenfarben, wie sie in der Hilfe erklärt werden */
 const ROW_COLORS = [
   ['st-frei', 'freier Bettplatz – kein Status gesetzt'],
-  ['st-aufnahme', 'A >>> – Aufnahme angekündigt'],
+  ['st-aufnahme', ARROW_IN + '  Aufnahme angekündigt'],
   ['st-belegt', '\u25cf oder eigener Status – belegt'],
   ['st-nvk', 'NVK, NVK 1–3'],
-  ['st-verlegung', '<<< V – Verlegung'],
+  ['st-verlegung', ARROW_OUT + '  Verlegung'],
   ['st-abwesend', 'NA, OP oder CV im Feld Patientenname'],
   ['st-gesperrt', 'gesperrt oder Reinigung im Feld Patientenname']
 ];
@@ -320,7 +329,7 @@ BEDS = settings.beds;
 
 function loadSettings() {
   const fresh = {
-    version: 2,
+    version: 3,
     beds: copy(DEFAULT_BEDS),
     headers: {},
     options: copy(DEFAULT_OPTIONS),
@@ -342,8 +351,10 @@ function mergeSettings(target, source) {
   if (!source || typeof source !== 'object') return;
   for (const cat of OPTION_CATEGORIES) {
     /* Vor Fassung 2 war die Therapielimitierung eine Einfachauswahl mit
-       zusammengesetzten Werten – dort gilt wieder die Voreinstellung. */
+       zusammengesetzten Werten, vor Fassung 3 trug die erste Spalte
+       Textkürzel statt Pfeilen – dort gilt wieder die Voreinstellung. */
     if (cat.key === 'limitierung' && !(source.version >= 2)) continue;
+    if (cat.key === 'status' && !(source.version >= 3)) continue;
     const list = source.options && source.options[cat.key];
     if (!Array.isArray(list)) continue;
     target.options[cat.key] = cat.kind === 'phone'
@@ -492,6 +503,8 @@ function merge(target, source) {
       else target[col.key] = Array.isArray(val) ? val.map(String) : [];
     } else if (col.type === 'bool') {
       target[col.key] = Boolean(val);
+    } else if (col.type === 'status') {
+      target[col.key] = STATUS_LEGACY[String(val)] || String(val);
     } else {
       target[col.key] = String(val);
     }

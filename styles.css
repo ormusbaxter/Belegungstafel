@@ -31,6 +31,8 @@
   --melde-gruen: #2f7d32;
   --melde-gelb: #d99a00;
   --melde-rot: #b3261e;
+  --pfeil-auf: #2f7d32;
+  --pfeil-ab: #8e1c1c;
 
   --row-h: 42px;
 }
@@ -65,6 +67,8 @@ html[data-theme="dark"] {
   --melde-gruen: #3f9e42;
   --melde-gelb: #c58f10;
   --melde-rot: #c0392b;
+  --pfeil-auf: #5cb860;
+  --pfeil-ab: #e46b6b;
 }
 
 * { box-sizing: border-box; }
@@ -391,6 +395,16 @@ tr.st-gesperrt td input,
 tr.st-gesperrt td textarea,
 tr.st-gesperrt td select { opacity: .75; }
 tr.name-state td.col-name input { font-style: italic; font-weight: 600; color: var(--ink-soft); }
+
+/* Aufnahme und Verlegung als kräftige Pfeile */
+tr.st-aufnahme  td.col-status select,
+tr.st-verlegung td.col-status select {
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 700;
+}
+tr.st-aufnahme  td.col-status select { color: var(--pfeil-auf); }
+tr.st-verlegung td.col-status select { color: var(--pfeil-ab); }
 
 /* Isolation / Therapielimitierung */
 td.col-isolation .chip:not(.styled) { background: var(--iso); color: #fff; font-weight: 600; }
@@ -1104,6 +1118,8 @@ html[data-theme="dark"] .helpbody .warn { color: var(--iso); }
   }
   td.col-name input { font-weight: 700; text-align: left; }
   .bedlabel { font-size: 12px; }
+  tr.st-aufnahme td.col-status select,
+  tr.st-verlegung td.col-status select { font-size: 15px; }
   input::placeholder, textarea::placeholder { opacity: 0 !important; }
 
   /* Marken und Kennzeichen ohne Farbe */
