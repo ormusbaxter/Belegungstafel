@@ -159,6 +159,9 @@ Spalte der Tafel zugeordnet.
   beendet ihn wieder. Solange ein Dialog geöffnet ist, startet er nicht. Jeder Eintrag lässt
   sich einzeln an- und abschalten, in der Reihenfolge verschieben und mit einer eigenen
   Anzeigedauer versehen; ohne eigene Angabe gilt die zentrale Vorgabe (10 Sekunden).
+  Mit der Option **Reihenfolge zufällig** werden die Einträge bei jedem Start und nach jedem
+  vollen Durchlauf neu gemischt (Fisher-Yates); je Durchlauf kommt jeder Eintrag genau einmal
+  an die Reihe, und an der Nahtstelle wiederholt sich kein Eintrag.
   Jeder Inhalt wird vollständig eingepasst und muss nie gescrollt werden: Bilder füllen die
   Fläche formatfüllend ohne Beschnitt, PDF-Seiten werden über `view=Fit` und das aus
   `/MediaBox` gelesene Seitenverhältnis auf die Bühnengröße gerechnet, zu lange Hinweistexte

@@ -7,7 +7,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '1.5.0';
+const VERSION = '1.5.1';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -339,6 +339,7 @@ const DEFAULT_SAVER = {
   on: false,
   seconds: 300,
   defaultSeconds: 10,
+  shuffle: false,
   items: []
 };
 
@@ -439,6 +440,7 @@ function mergeSaver(target, source) {
   if (Number.isFinite(start)) target.seconds = Math.min(3600, Math.max(SAVER_MIN, start));
   const each = parseInt(source.defaultSeconds, 10);
   if (Number.isFinite(each)) target.defaultSeconds = Math.min(600, Math.max(SAVER_ITEM_MIN, each));
+  target.shuffle = source.shuffle === true;
   if (!Array.isArray(source.items)) return;
   target.items = source.items
     .filter(item => item && typeof item === 'object')
@@ -1449,7 +1451,8 @@ function renderHeaderPane(pane) {
 function renderSaverPane(pane) {
   pane.appendChild(el('h3', null, 'Bildschirmschoner'));
   pane.appendChild(el('p', 'panehint',
-    'Gezeigt werden alle angehakten Einträge nacheinander, in der Reihenfolge dieser Liste. ' +
+    'Gezeigt werden alle angehakten Einträge nacheinander – in der Reihenfolge dieser Liste ' +
+    'oder gemischt, siehe „Reihenfolge zufällig“. ' +
     'Dateien (PDF, PNG, JPEG) gehören in den Ordner „slides“ neben index.html. „Ordner ' +
     'einlesen“ sucht sie über die Datei slides/slides.json oder die Verzeichnisübersicht des ' +
     'Webservers; findet der Browser nichts, lässt sich der Dateiname von Hand eintragen.'));
@@ -1458,6 +1461,13 @@ function renderSaverPane(pane) {
     { min: SAVER_ITEM_MIN, max: 600, step: 1 }, value => { draft.screensaver.defaultSeconds = value; }));
   pane.appendChild(el('p', 'panehint',
     'Gilt für alle Einträge ohne eigene Angabe in der Spalte „Dauer“.'));
+
+  pane.appendChild(checkRow('Reihenfolge zufällig', draft.screensaver.shuffle, on => {
+    draft.screensaver.shuffle = on;
+  }));
+  pane.appendChild(el('p', 'panehint',
+    'Mischt die Einträge bei jedem Start der Schau und nach jedem vollen Durchlauf neu. ' +
+    'Ohne Haken laufen sie in der Reihenfolge dieser Liste.'));
 
   const status = el('p', 'panehint slidestatus');
   const list = el('div', 'entrylist');
@@ -1743,6 +1753,7 @@ function resetCategory() {
     if (!confirm('Alle Inhalte des Bildschirmschoners entfernen?')) return;
     draft.screensaver.items = [];
     draft.screensaver.defaultSeconds = DEFAULT_SAVER.defaultSeconds;
+    draft.screensaver.shuffle = DEFAULT_SAVER.shuffle;
   }
   else if (activeTab === 'header') draft.headers = {};
   else if (activeTab === 'betten') draft.beds = copy(DEFAULT_BEDS);
@@ -1837,10 +1848,26 @@ let slideClock = null;
 let slideList = [];
 let slideIndex = 0;
 
-/* Alle freigegebenen Einträge mit Inhalt, in eingestellter Reihenfolge */
+/* Alle freigegebenen Einträge mit Inhalt, in eingestellter Reihenfolge –
+   auf Wunsch gemischt. */
 function saverPlaylist() {
-  return settings.screensaver.items.filter(item => item.on &&
+  const list = settings.screensaver.items.filter(item => item.on &&
     (item.kind === 'text' ? (item.title.trim() || item.text.trim()) : item.file));
+  return settings.screensaver.shuffle ? shuffled(list) : list;
+}
+
+/* Mischen nach Fisher und Yates. Beim Neumischen einer laufenden Schau steht
+   der zuletzt gezeigte Eintrag nicht gleich wieder am Anfang. */
+function shuffled(list, notFirst) {
+  const mixed = list.slice();
+  for (let i = mixed.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [mixed[i], mixed[j]] = [mixed[j], mixed[i]];
+  }
+  if (notFirst && mixed.length > 1 && mixed[0] === notFirst) {
+    [mixed[0], mixed[mixed.length - 1]] = [mixed[mixed.length - 1], mixed[0]];
+  }
+  return mixed;
 }
 
 function slideSeconds(item) {
@@ -1902,6 +1929,14 @@ function stopSaver(event) {
 function showSlide(index) {
   clearTimeout(slideTimer);
   const count = slideList.length;
+
+  /* Nach einem vollen Durchlauf wird neu gemischt, damit sich die Abfolge
+     nicht wiederholt. */
+  if (settings.screensaver.shuffle && count > 1 && index >= count) {
+    slideList = shuffled(slideList, slideList[count - 1]);
+    index = 0;
+  }
+
   slideIndex = count ? ((index % count) + count) % count : 0;
   const item = count ? slideList[slideIndex] : null;
 

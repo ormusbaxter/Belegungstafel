@@ -37,6 +37,8 @@ Hinweise
 - Jeder Eintrag lässt sich in den Einstellungen einzeln an- und abschalten,
   in der Reihenfolge verschieben und mit einer eigenen Anzeigedauer versehen.
   Ohne eigene Angabe gilt die zentrale Vorgabe (Voreinstellung 10 Sekunden).
+- Mit der Option "Reihenfolge zufällig" laufen die Einträge gemischt statt in
+  der Reihenfolge der Liste.
 - Querformat passt am besten zum Stationsmonitor.
 - PDF-Dateien werden vom Browser angezeigt; mehrseitige PDF zeigen nur die
   erste Seite formatfüllend. Für eine Diaschau je Seite die Seiten als
