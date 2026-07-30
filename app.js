@@ -165,16 +165,15 @@ function germLabel(entry) {
   return (entry.s === 'verdacht' ? 'V. a. ' : '') + entry.v;
 }
 
-/* Hinterlegter Stil eines Auswahlwertes, sonst null */
-function styleFor(colKey, value) {
-  const styles = settings.styles && settings.styles[colKey];
-  const style = styles && styles[value];
+/* Hinterlegter Stil einer Spalte, sonst null */
+function styleFor(colKey) {
+  const style = settings.styles && settings.styles[colKey];
   return style && (style.fg || style.bg || style.border) ? style : null;
 }
 
-/* Überträgt den Stil auf ein Auswahlfeld oder eine Marke. */
-function paint(node, colKey, value) {
-  const style = styleFor(colKey, value);
+/* Überträgt den Stil der Spalte auf ein Auswahlfeld oder eine Marke. */
+function paint(node, colKey, hasValue) {
+  const style = hasValue === false ? null : styleFor(colKey);
   node.style.color = '';
   node.style.background = '';
   node.style.border = '';
@@ -284,6 +283,14 @@ const BORDER_STYLES = [
 ];
 const HEX = /^#[0-9a-f]{6}$/i;
 
+/* Feste Farbauswahl – vier neutrale Töne und sechs Farben je hell und kräftig */
+const PALETTE = [
+  '#ffffff', '#d9dee5', '#6b7683', '#12181f',
+  '#f8d7d5', '#c62828', '#fff3c4', '#d99a00',
+  '#d9f0da', '#2f7d32', '#d2f0ee', '#00796b',
+  '#d6e6f7', '#1e5f9e', '#e9d8f2', '#6a1b9a'
+];
+
 const SETTINGS_KEY = 'belegungstafel.einstellungen';
 
 let settings = loadSettings();
@@ -292,6 +299,7 @@ function loadSettings() {
   const fresh = {
     version: 2,
     options: copy(DEFAULT_OPTIONS),
+    /* Ein Stil je Spalte, nicht je Eintrag */
     styles: Object.fromEntries(OPTION_CATEGORIES.filter(c => c.kind === 'text').map(c => [c.key, {}])),
     privacy: { on: true, seconds: 120 }
   };
@@ -320,15 +328,13 @@ function mergeSettings(target, source) {
   }
   for (const cat of OPTION_CATEGORIES) {
     if (cat.kind !== 'text') continue;
-    const styles = source.styles && source.styles[cat.key];
-    if (!styles || typeof styles !== 'object') continue;
-    for (const [value, style] of Object.entries(styles)) {
-      const clean = {};
-      if (HEX.test(style.fg || '')) clean.fg = style.fg;
-      if (HEX.test(style.bg || '')) clean.bg = style.bg;
-      if (BORDER_STYLES.some(([id]) => id && id === style.border)) clean.border = style.border;
-      if (Object.keys(clean).length) target.styles[cat.key][String(value)] = clean;
-    }
+    const style = source.styles && source.styles[cat.key];
+    if (!style || typeof style !== 'object') continue;
+    const clean = {};
+    if (HEX.test(style.fg || '')) clean.fg = style.fg;
+    if (HEX.test(style.bg || '')) clean.bg = style.bg;
+    if (BORDER_STYLES.some(([id]) => id && id === style.border)) clean.border = style.border;
+    target.styles[cat.key] = clean;
   }
   if (source.privacy && typeof source.privacy === 'object') {
     target.privacy.on = source.privacy.on !== false;
@@ -665,10 +671,10 @@ function buildField(bed, col, data) {
         sel.appendChild(new Option(data[col.key], data[col.key]));
       }
       sel.value = data[col.key];
-      paint(sel, col.key, sel.value);
+      paint(sel, col.key, Boolean(sel.value));
       sel.addEventListener('change', () => {
         data[col.key] = sel.value;
-        paint(sel, col.key, sel.value);
+        paint(sel, col.key, Boolean(sel.value));
         applyRowState(sel.closest('tr'), data);
         touch(bed.id);
         renderStats();
@@ -785,7 +791,12 @@ function renderChips(btn, col, data) {
     for (const entry of values) {
       const chip = el('span', 'chip' + (entry.s === 'verdacht' ? ' chip-verdacht' : ''), germLabel(entry));
       chip.title = entry.v + (entry.s === 'verdacht' ? ' – Verdacht' : ' – bestätigt');
-      if (entry.s !== 'verdacht') paint(chip, col.key, entry.v);
+      paint(chip, col.key);
+      /* Ein Verdacht bleibt am gestrichelten Rahmen erkennbar. */
+      if (entry.s === 'verdacht') {
+        const style = styleFor(col.key);
+        if (style) chip.style.border = '1px dashed ' + (style.fg || 'currentColor');
+      }
       btn.appendChild(chip);
     }
   } else if (col.type === 'date') {
@@ -797,7 +808,7 @@ function renderChips(btn, col, data) {
   } else {
     for (const val of values) {
       const chip = el('span', 'chip', val);
-      paint(chip, col.key, val);
+      paint(chip, col.key);
       btn.appendChild(chip);
     }
   }
@@ -890,11 +901,7 @@ function renderPane() {
   pane.appendChild(el('h3', null, cat.label));
   if (cat.hint) pane.appendChild(el('p', 'panehint', cat.hint));
 
-  if (cat.kind === 'text') {
-    pane.appendChild(el('p', 'panehint',
-      'Je Eintrag lassen sich Textfarbe, Hintergrundfarbe und Rahmenstil festlegen; ' +
-      '⟲ entfernt den Stil wieder.'));
-  }
+  if (cat.kind === 'text') renderStyleBlock(pane, cat);
 
   const list = el('div', 'entrylist');
   pane.appendChild(list);
@@ -916,55 +923,13 @@ function renderEntries(list, cat) {
   list.replaceChildren();
 
   entries.forEach((entry, index) => {
-    const row = el('div', 'entry' + (cat.kind === 'phone' ? ' entry-phone' : ' entry-styled'));
+    const row = el('div', 'entry' + (cat.kind === 'phone' ? ' entry-phone' : ''));
 
     if (cat.kind === 'phone') {
       row.appendChild(entryInput(entry.value, 'Nummer', 'nr', value => { entry.value = value; }));
       row.appendChild(entryInput(entry.label, 'Bezeichnung', '', value => { entry.label = value; }));
     } else {
-      const styles = draft.styles[cat.key];
-      const field = entryInput(entry, 'Bezeichnung', '', value => {
-        const before = entries[index];
-        entries[index] = value;
-        /* Ein umbenannter Eintrag behält seinen Stil. */
-        if (styles[before]) {
-          styles[value] = styles[before];
-          if (value !== before) delete styles[before];
-        }
-        paintPreview(field, styles[value]);
-      });
-      paintPreview(field, styles[entry]);
-      row.appendChild(field);
-
-      const style = () => (styles[entries[index]] ||= {});
-      const update = () => {
-        const current = styles[entries[index]];
-        if (current && !current.fg && !current.bg && !current.border) delete styles[entries[index]];
-        paintPreview(field, styles[entries[index]]);
-      };
-
-      row.appendChild(colorPicker(styles[entry] && styles[entry].fg, '#12181f', 'Textfarbe',
-        value => { style().fg = value; update(); }));
-      row.appendChild(colorPicker(styles[entry] && styles[entry].bg, '#ffffff', 'Hintergrundfarbe',
-        value => { style().bg = value; update(); }));
-
-      const border = el('select', 'borderpick');
-      border.title = 'Rahmenstil';
-      for (const [value, name] of BORDER_STYLES) border.appendChild(new Option(name, value));
-      border.value = (styles[entry] && styles[entry].border) || '';
-      border.addEventListener('change', () => {
-        if (border.value) style().border = border.value;
-        else if (styles[entries[index]]) delete styles[entries[index]].border;
-        update();
-      });
-      row.appendChild(border);
-
-      const clear = moveButton('⟲', 'Stil entfernen', () => {
-        delete styles[entries[index]];
-        renderEntries(list, cat);
-      });
-      clear.classList.add('clearstyle');
-      row.appendChild(clear);
+      row.appendChild(entryInput(entry, 'Bezeichnung', '', value => { entries[index] = value; }));
     }
 
     row.appendChild(moveButton('↑', 'nach oben', () => {
@@ -989,21 +954,72 @@ function renderEntries(list, cat) {
   if (!entries.length) list.appendChild(el('p', 'panehint', 'Noch keine Einträge.'));
 }
 
-/* Zeigt den gewählten Stil direkt im Eingabefeld des Editors. */
-function paintPreview(field, style) {
-  field.style.color = style && style.fg ? style.fg : '';
-  field.style.background = style && style.bg ? style.bg : '';
-  field.style.borderStyle = style && style.border ? style.border : '';
-  field.style.borderColor = style && style.border ? (style.fg || 'currentColor') : '';
+/* Darstellung einer ganzen Spalte: Textfarbe, Hintergrundfarbe, Rahmen */
+function renderStyleBlock(pane, cat) {
+  const block = el('div', 'styleblock');
+  const style = draft.styles[cat.key] || (draft.styles[cat.key] = {});
+
+  const redraw = () => {
+    const next = el('div', 'styleblock');
+    block.replaceWith(next);
+    fillStyleBlock(next, cat, redraw);
+  };
+  fillStyleBlock(block, cat, redraw);
+  pane.appendChild(block);
+  return block;
 }
 
-function colorPicker(value, fallback, title, onInput) {
-  const input = el('input', 'colorpick');
-  input.type = 'color';
-  input.value = value || fallback;
-  input.title = title;
-  input.addEventListener('input', () => onInput(input.value));
-  return input;
+function fillStyleBlock(block, cat, redraw) {
+  const style = draft.styles[cat.key];
+  const set = (key, value) => {
+    if (value) style[key] = value;
+    else delete style[key];
+    redraw();
+  };
+
+  const head = el('div', 'stylehead');
+  head.appendChild(el('span', 'styletitle', 'Darstellung in der Tabelle'));
+  const sample = el('span', 'sample', 'Beispiel');
+  if (style.fg) sample.style.color = style.fg;
+  if (style.bg) sample.style.background = style.bg;
+  if (style.border) sample.style.border = '1px ' + style.border + ' ' + (style.fg || 'currentColor');
+  head.appendChild(sample);
+  block.appendChild(head);
+
+  block.appendChild(paletteRow('Textfarbe', style.fg, value => set('fg', value)));
+  block.appendChild(paletteRow('Hintergrund', style.bg, value => set('bg', value)));
+
+  const row = el('div', 'palrow');
+  row.appendChild(el('span', 'palname', 'Rahmen'));
+  const border = el('select', 'borderpick');
+  for (const [value, name] of BORDER_STYLES) border.appendChild(new Option(name, value));
+  border.value = style.border || '';
+  border.addEventListener('change', () => set('border', border.value));
+  row.appendChild(border);
+  block.appendChild(row);
+}
+
+function paletteRow(label, current, onPick) {
+  const row = el('div', 'palrow');
+  row.appendChild(el('span', 'palname', label));
+  const grid = el('div', 'swatches');
+
+  const none = el('button', 'swatch none' + (current ? '' : ' active'));
+  none.type = 'button';
+  none.title = 'Standard';
+  none.addEventListener('click', () => onPick(''));
+  grid.appendChild(none);
+
+  for (const color of PALETTE) {
+    const item = el('button', 'swatch' + (current === color ? ' active' : ''));
+    item.type = 'button';
+    item.title = color;
+    item.style.background = color;
+    item.addEventListener('click', () => onPick(color));
+    grid.appendChild(item);
+  }
+  row.appendChild(grid);
+  return row;
 }
 
 function entryInput(value, placeholder, cls, onInput) {
@@ -1065,13 +1081,6 @@ function commitSettings() {
       ? draft.options[cat.key].filter(e => e.value.trim() || e.label.trim())
           .map(e => ({ value: e.value.trim(), label: e.label.trim() }))
       : draft.options[cat.key].map(e => e.trim()).filter(Boolean);
-    /* Stile ohne zugehörigen Eintrag verwerfen. */
-    if (cat.kind === 'text') {
-      const known = new Set(draft.options[cat.key]);
-      for (const value of Object.keys(draft.styles[cat.key] || {})) {
-        if (!known.has(value)) delete draft.styles[cat.key][value];
-      }
-    }
   }
   draft.privacy.seconds = Math.min(3600, Math.max(5, draft.privacy.seconds || 120));
 

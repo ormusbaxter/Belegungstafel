@@ -118,10 +118,11 @@ Spalte der Tafel zugeordnet.
   Interventionen, Therapielimitierung, Kostformen, Physiotherapie, der Telefonvorschläge
   der Tabelle und der Rufnummernliste unter der Tafel – Einträge lassen sich hinzufügen,
   umbenennen, sortieren und entfernen, jede Kategorie einzeln auf die Voreinstellung
-  zurücksetzen. Für jeden einzelnen Auswahlwert lassen sich zusätzlich **Textfarbe,
-  Hintergrundfarbe und Rahmenstil** (ohne, durchgezogen, gestrichelt, gepunktet, doppelt)
-  festlegen – die Vorschau steht direkt im Editor, `⟲` entfernt den Stil wieder. Die Farben
-  gelten in der Tabelle für Auswahlfelder und Marken und bleiben im Ausdruck erhalten.
+  zurücksetzen. Je Kategorie lassen sich zusätzlich **Textfarbe, Hintergrundfarbe und
+  Rahmenstil** festlegen (z. B. alle Isolationen gelb hinterlegt mit dunkler Schrift). Die
+  Farbauswahl erfolgt über 16 feste Farbkästchen plus „Standard“; eine Beispielmarke zeigt
+  das Ergebnis sofort. Die Angaben gelten in der Tabelle für das Auswahlfeld der Spalte und
+  für alle Marken der Mehrfachauswahl und bleiben im Ausdruck erhalten.
   Unter „Allgemein“ der Sichtschutz mit Ein/Aus und Zeit in Sekunden.
   Ein Wert, der in einem Bettplatz steht, bleibt erhalten, auch wenn er später aus der
   Liste entfernt wird
