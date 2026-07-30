@@ -36,7 +36,7 @@ Excel-Belegungstafel und sind wörtlich übernommen:
 | Anwesenheitsstatus | A | `A >>>`, `●`, `NVK`, `NVK 1`, `NVK 2`, `NVK 3`, `<<< V` |
 | Patientenname | J | Freitext mit optionaler Auswahl: `Notbett`, `gesperrt`, `Reinigung`, `NA`, `OP`, `CV` |
 | Fachdisziplin | B | ACH, DIAB, GAST, GCH, INF, INT, KARD, ONKO, RAD, TCH, UCH, X |
-| Beatmungsform | C | INV, NIV, HFNC, NIV/HF, (INV), (NIV), (HFNC), (NIV/HF), MIRUS |
+| Beatmungsform | C | INV, NIV, HFNC, NIV/HF, (INV), (NIV), (HFNC), (NIV/HF), MIRUS – mehrere Einträge kombinierbar |
 | Kreislaufunterstützung | D | ECMO, ECOS, ECPELLA, ILA, IMPELLA, pass. SM, PiCCO – mehrere Einträge kombinierbar |
 | Dialyse | E | CiCa, (CiCa) |
 | TTM | F | ❄, ☼ |
@@ -70,8 +70,8 @@ Spalte der Tafel zugeordnet.
 
 | Typ | Spalten | Bedienung |
 |---|---|---|
-| Auswahlliste | Anwesenheitsstatus, Fachdisziplin, Beatmungsform, Dialyse, TTM, Intervention, Kostform, Physiotherapie, Devices | Klick auf die Zelle, Wert wählen; leerer Eintrag setzt zurück |
-| Mehrfachauswahl | Kreislaufunterstützung, Therapielimitierung | Klick öffnet Dialog, mehrere Einträge kombinierbar |
+| Auswahlliste | Anwesenheitsstatus, Fachdisziplin, Dialyse, TTM, Intervention, Kostform, Physiotherapie, Devices | Klick auf die Zelle, Wert wählen; leerer Eintrag setzt zurück |
+| Mehrfachauswahl | Beatmungsform, Kreislaufunterstützung, Therapielimitierung | Klick öffnet Dialog, mehrere Einträge kombinierbar |
 | Freitext mit Klappliste | Patientenname, Telefon | frei tippen oder über `▾` bzw. Alt + Pfeil nach unten die vollständige Liste öffnen |
 | Datum | Abstriche | Klick öffnet Dialog mit Datumsfeld und den Schaltflächen „nächster Montag“, „übernächster Montag“ und „löschen“ |
 | Keimliste | Isolation | Klick öffnet Dialog; Häkchen = bestätigt, zusätzlich „V. a.“ = Verdacht |
@@ -87,7 +87,8 @@ Spalte der Tafel zugeordnet.
 - **Farbkodierung** der Zeilen nach Anwesenheitsstatus (Aufnahme, belegt, NVK, außerhalb der
   Station, Verlegung, gesperrt), `ISO`-Kennzeichnung bei eingetragener Isolation,
   farbliche Hervorhebung einer hinterlegten Therapielimitierung
-- **Kopfbereich**: belegte Betten (x / 13), maximale Bettenzahl als Eingabefeld mit
+- **Kopfbereich**: belegte Betten (x / 13; als belegt zählen `A >>>`, `●`, `NVK`, `NVK 1–3`
+  und `<<< V`), maximale Bettenzahl als Eingabefeld mit
   festem Zusatz „+ 1“ für das Notbett, Meldestatus als farbiges Auswahlfeld
   (grün / gelb / rot) und Anzahl der fälligen Screenings; darunter Schichtleitung,
   Blutzuständigkeit und Notfallequipment mit jeweils zugehöriger Telefonnummer.
@@ -160,10 +161,10 @@ auf schmaleren Geräten bleiben Anwesenheitsstatus und Bettplatz beim Scrollen s
 Spaltenköpfe und Zellinhalte sind mittig ausgerichtet; Ausnahme sind die beiden
 Ankreuzfelder unter „Norton / Stammblatt“, die linksbündig untereinander stehen.
 
-Vier Spalten richten sich in der Breite nach ihrem Inhalt: gemessen werden der längste
-Statuswert, die längste Bettbezeichnung, der längste eingetragene Patientenname (96 bis
-300 px) und die längste Telefonnummer (78 bis 170 px); die beiden Textspalten werden beim
-Verlassen des Feldes angepasst. Platz für das Kennzeichen `ISO` kommt nur hinzu, wenn eine
+Fünf Spalten richten sich in der Breite nach ihrem Inhalt: gemessen werden der längste
+Statuswert, die längste Bettbezeichnung sowie der längste Eintrag unter Patientenname
+(96 bis 300 px), Telefon (78 bis 170 px) und Pflegekraft (62 bis 170 px); die drei
+Freitextspalten werden beim Verlassen des Feldes angepasst. Platz für das Kennzeichen `ISO` kommt nur hinzu, wenn eine
 Isolation eingetragen ist. Die Spalte „Sonstiges“ hat keine feste Breite und
 nimmt den verbleibenden Platz auf, sodass alle übrigen Spalten genau ihre Vorgabe behalten.
 

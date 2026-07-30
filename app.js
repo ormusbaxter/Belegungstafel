@@ -54,9 +54,11 @@ const COLUMNS = [
     options: ['ACH', 'DIAB', 'GAST', 'GCH', 'INF', 'INT', 'KARD', 'ONKO', 'RAD', 'TCH', 'UCH', 'X']
   },
   {
-    /* Datenquelle Spalte C */
-    key: 'beatmung', label: 'Beatmungsform', head: 'Beatmungs\u00ADform', type: 'select', width: 78,
-    options: ['INV', 'NIV', 'HFNC', 'NIV/HF', '(INV)', '(NIV)', '(HFNC)', '(NIV/HF)', 'MIRUS']
+    /* Datenquelle Spalte C – mehrere Formen kombinierbar. */
+    key: 'beatmung', label: 'Beatmungsform', head: 'Beatmungs\u00ADform',
+    type: 'multi', width: 88,
+    options: ['INV', 'NIV', 'HFNC', 'NIV/HF', '(INV)', '(NIV)', '(HFNC)', '(NIV/HF)', 'MIRUS'],
+    fromLegacy: value => (value ? [value] : [])
   },
   {
     /* Datenquelle Spalte D – mehrere Verfahren kombinierbar. */
@@ -208,7 +210,8 @@ const STATUS_CLASS = {
   'NVK 3': 'st-nvk',
   '<<< V': 'st-verlegung'
 };
-const OCCUPIED = new Set(['\u25cf', 'NVK', 'NVK 1', 'NVK 2', 'NVK 3', '<<< V']);
+/* Angekündigte Aufnahme und anstehende Verlegung gelten als belegt. */
+const OCCUPIED = new Set(['A >>>', '\u25cf', 'NVK', 'NVK 1', 'NVK 2', 'NVK 3', '<<< V']);
 
 /* Einträge aus Spalte J im Feld Patientenname beschreiben den Bettplatz
    und färben die Zeile entsprechend ein. */
@@ -221,7 +224,6 @@ const NAME_CLASS = {
   'CV': 'st-abwesend'
 };
 const BLOCKED = new Set(['gesperrt', 'Reinigung']);
-const INVASIV = new Set(['INV']);
 
 const LEGEND = [
   ['st-frei', 'Bett frei (kein Status gesetzt)'],
@@ -636,6 +638,13 @@ function initCombo() {
   document.addEventListener('scroll', closeCombo, true);
 }
 
+/* Freitextspalten, deren Breite sich nach den Einträgen richtet */
+const AUTO_TEXT = [
+  { key: 'name',    min: 96, max: 300, extra: 50 },
+  { key: 'telefon', min: 78, max: 170, extra: 50 },
+  { key: 'pflege',  min: 62, max: 170, extra: 22 }
+];
+
 /* Breite der beiden ersten Spalten aus ihrem Inhalt bestimmen: Sie sollen nur
    so breit sein wie der längste Statuswert bzw. die längste Bettbezeichnung. */
 const measureCanvas = document.createElement('canvas').getContext('2d');
@@ -667,20 +676,19 @@ function autoSizeColumns() {
   setColumnWidth(document.querySelector('#thead th.col-bed'),
     Math.max(52, Math.ceil(beds) + 34 + iso));
 
-  autoSizeText('name', 96, 300);
-  autoSizeText('telefon', 78, 170);
+  for (const field of AUTO_TEXT) autoSizeText(field);
 }
 
-/* Breite eines Freitextfeldes mit Klappliste aus den Einträgen der Zeilen */
-function autoSizeText(key, min, max) {
+/* Breite eines Freitextfeldes aus den Einträgen der Zeilen.
+   Der Zuschlag deckt Zellenabstand und Feldrand ab, bei Feldern mit
+   Klappliste zusätzlich deren Schaltfläche und den Ausgleich links. */
+function autoSizeText({ key, min, max, extra }) {
   const field = document.querySelector('#tbody td.col-' + key + ' input');
   if (!field) return;
   const values = BEDS.map(bed => (state.beds[bed.id] || {})[key] || '');
   const width = widestText(values, getComputedStyle(field).font);
-  /* Zuschlag für Zellenabstand, Feldrand, Klappschaltfläche und deren
-     Ausgleich auf der linken Seite. */
   setColumnWidth(document.querySelector('#thead th.col-' + key),
-    Math.min(max, Math.max(min, Math.ceil(width) + 50)));
+    Math.min(max, Math.max(min, Math.ceil(width) + extra)));
 }
 
 /* Der Versatz der fixierten Bettplatz-Spalte richtet sich nach der
@@ -794,7 +802,7 @@ function buildField(bed, col, data) {
       /* Die Namensspalte richtet sich nach dem längsten Eintrag; die Breite
          wird erst beim Verlassen des Feldes angepasst, damit es beim Tippen
          nicht springt. */
-      if (col.type === 'datalist') {
+      if (AUTO_TEXT.some(field => field.key === col.key)) {
         input.addEventListener('change', () => { autoSizeColumns(); measureSticky(); });
         input.addEventListener('blur', () => { autoSizeColumns(); measureSticky(); });
       }
