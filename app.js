@@ -59,9 +59,11 @@ const COLUMNS = [
     options: ['INV', 'NIV', 'HFNC', 'NIV/HF', '(INV)', '(NIV)', '(HFNC)', '(NIV/HF)', 'MIRUS']
   },
   {
-    /* Datenquelle Spalte D */
-    key: 'kreislauf', label: 'Kreislaufunterstützung', head: 'Kreislauf\u00ADunter\u00ADstützung', type: 'select', width: 85,
-    options: ['ECMO', 'ECOS', 'ECPELLA', 'ILA', 'IMPELLA', 'pass. SM', 'PiCCO']
+    /* Datenquelle Spalte D – mehrere Verfahren kombinierbar. */
+    key: 'kreislauf', label: 'Kreislaufunterstützung', head: 'Kreislauf\u00ADunter\u00ADstützung',
+    type: 'multi', width: 95,
+    options: ['ECMO', 'ECOS', 'ECPELLA', 'ILA', 'IMPELLA', 'pass. SM', 'PiCCO'],
+    fromLegacy: value => (value ? [value] : [])
   },
   {
     /* Datenquelle Spalte E */
@@ -665,12 +667,20 @@ function autoSizeColumns() {
   setColumnWidth(document.querySelector('#thead th.col-bed'),
     Math.max(52, Math.ceil(beds) + 34 + iso));
 
-  const nameField = document.querySelector('#tbody td.col-name input');
-  if (!nameField) return;
-  const names = BEDS.map(bed => (state.beds[bed.id] || {}).name || '');
-  const name = widestText(names, getComputedStyle(nameField).font);
-  setColumnWidth(document.querySelector('#thead th.col-name'),
-    Math.min(300, Math.max(96, Math.ceil(name) + 34)));
+  autoSizeText('name', 96, 300);
+  autoSizeText('telefon', 78, 170);
+}
+
+/* Breite eines Freitextfeldes mit Klappliste aus den Einträgen der Zeilen */
+function autoSizeText(key, min, max) {
+  const field = document.querySelector('#tbody td.col-' + key + ' input');
+  if (!field) return;
+  const values = BEDS.map(bed => (state.beds[bed.id] || {})[key] || '');
+  const width = widestText(values, getComputedStyle(field).font);
+  /* Zuschlag für Zellenabstand, Feldrand, Klappschaltfläche und deren
+     Ausgleich auf der linken Seite. */
+  setColumnWidth(document.querySelector('#thead th.col-' + key),
+    Math.min(max, Math.max(min, Math.ceil(width) + 50)));
 }
 
 /* Der Versatz der fixierten Bettplatz-Spalte richtet sich nach der
@@ -784,7 +794,7 @@ function buildField(bed, col, data) {
       /* Die Namensspalte richtet sich nach dem längsten Eintrag; die Breite
          wird erst beim Verlassen des Feldes angepasst, damit es beim Tippen
          nicht springt. */
-      if (col.key === 'name') {
+      if (col.type === 'datalist') {
         input.addEventListener('change', () => { autoSizeColumns(); measureSticky(); });
         input.addEventListener('blur', () => { autoSizeColumns(); measureSticky(); });
       }

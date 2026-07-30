@@ -37,7 +37,7 @@ Excel-Belegungstafel und sind wörtlich übernommen:
 | Patientenname | J | Freitext mit optionaler Auswahl: `Notbett`, `gesperrt`, `Reinigung`, `NA`, `OP`, `CV` |
 | Fachdisziplin | B | ACH, DIAB, GAST, GCH, INF, INT, KARD, ONKO, RAD, TCH, UCH, X |
 | Beatmungsform | C | INV, NIV, HFNC, NIV/HF, (INV), (NIV), (HFNC), (NIV/HF), MIRUS |
-| Kreislaufunterstützung | D | ECMO, ECOS, ECPELLA, ILA, IMPELLA, pass. SM, PiCCO |
+| Kreislaufunterstützung | D | ECMO, ECOS, ECPELLA, ILA, IMPELLA, pass. SM, PiCCO – mehrere Einträge kombinierbar |
 | Dialyse | E | CiCa, (CiCa) |
 | TTM | F | ❄, ☼ |
 | Kostform | G | VK, %, nüchtern, Tee/H2O … Schonkost (26 Kostformen) |
@@ -70,8 +70,8 @@ Spalte der Tafel zugeordnet.
 
 | Typ | Spalten | Bedienung |
 |---|---|---|
-| Auswahlliste | Anwesenheitsstatus, Fachdisziplin, Beatmungsform, Kreislaufunterstützung, Dialyse, TTM, Intervention, Kostform, Physiotherapie, Devices | Klick auf die Zelle, Wert wählen; leerer Eintrag setzt zurück |
-| Mehrfachauswahl | Therapielimitierung | Klick öffnet Dialog, mehrere Einträge kombinierbar |
+| Auswahlliste | Anwesenheitsstatus, Fachdisziplin, Beatmungsform, Dialyse, TTM, Intervention, Kostform, Physiotherapie, Devices | Klick auf die Zelle, Wert wählen; leerer Eintrag setzt zurück |
+| Mehrfachauswahl | Kreislaufunterstützung, Therapielimitierung | Klick öffnet Dialog, mehrere Einträge kombinierbar |
 | Freitext mit Klappliste | Patientenname, Telefon | frei tippen oder über `▾` bzw. Alt + Pfeil nach unten die vollständige Liste öffnen |
 | Datum | Abstriche | Klick öffnet Dialog mit Datumsfeld und den Schaltflächen „nächster Montag“, „übernächster Montag“ und „löschen“ |
 | Keimliste | Isolation | Klick öffnet Dialog; Häkchen = bestätigt, zusätzlich „V. a.“ = Verdacht |
@@ -157,12 +157,14 @@ Liste im Einstellungsdialog erscheinen, genügt ein Eintrag in `OPTION_CATEGORIE
 Alle 20 Spalten passen auf einem 1920 px breiten Bildschirm ohne Querscrollen nebeneinander;
 auf schmaleren Geräten bleiben Anwesenheitsstatus und Bettplatz beim Scrollen stehen.
 
-Spaltenköpfe und Zellinhalte sind mittig ausgerichtet.
+Spaltenköpfe und Zellinhalte sind mittig ausgerichtet; Ausnahme sind die beiden
+Ankreuzfelder unter „Norton / Stammblatt“, die linksbündig untereinander stehen.
 
-Die drei ersten Spalten richten sich in der Breite nach ihrem Inhalt: gemessen werden der
-längste Statuswert, die längste Bettbezeichnung und der längste eingetragene Patientenname
-(mindestens 96, höchstens 300 px, aktualisiert beim Verlassen des Feldes). Platz für das
-Kennzeichen `ISO` kommt nur hinzu, wenn eine Isolation eingetragen ist. Die Spalte „Sonstiges“ hat keine feste Breite und
+Vier Spalten richten sich in der Breite nach ihrem Inhalt: gemessen werden der längste
+Statuswert, die längste Bettbezeichnung, der längste eingetragene Patientenname (96 bis
+300 px) und die längste Telefonnummer (78 bis 170 px); die beiden Textspalten werden beim
+Verlassen des Feldes angepasst. Platz für das Kennzeichen `ISO` kommt nur hinzu, wenn eine
+Isolation eingetragen ist. Die Spalte „Sonstiges“ hat keine feste Breite und
 nimmt den verbleibenden Platz auf, sodass alle übrigen Spalten genau ihre Vorgabe behalten.
 
 ## Datenschutz
