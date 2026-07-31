@@ -4,6 +4,13 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.1.0
+
+- **Fällige Screenings** werden im Kopfbereich rot hervorgehoben
+- **Fehlende Pflichtangaben** bei belegtem Bettplatz – Kostform, Devices, Norton / Stammblatt
+  und Abstriche – werden in der jeweiligen Zelle dezent rot markiert; angekündigte Aufnahmen
+  und Plätze wie „gesperrt“ bleiben außen vor
+
 ## 2.0.0
 
 **Umbau der Dateistruktur.** `app.js` ist auf sechs Dateien im Ordner `js/` aufgeteilt:

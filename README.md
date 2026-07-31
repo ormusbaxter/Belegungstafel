@@ -121,7 +121,14 @@ Spalte der Tafel zugeordnet.
   Verdachtsfälle eingetragen sind
 - **Abstriche**: nur das Datum des nächsten Screenings, wahlweise über die Schaltflächen
   „nächster Montag“ und „übernächster Montag“; ein fälliges oder überfälliges Datum wird rot
-  hervorgehoben und im Kopfbereich gezählt
+  hervorgehoben und im Kopfbereich gezählt. Ist mindestens ein Screening fällig, wird die
+  Kennzahl **Screening fällig** im Kopf rot hinterlegt
+- **Fehlende Pflichtangaben**: Bei einem belegten Bettplatz prüft die Tafel **Kostform**,
+  **Devices**, **Norton / Stammblatt** und **Abstriche**; fehlt eine Angabe, wird die Zelle
+  dezent rot unterlegt und nennt im Zeigertext die fehlende Angabe. `keins` bei den Devices
+  gilt als Angabe, Norton / Stammblatt erst mit beiden Häkchen. Eine angekündigte Aufnahme
+  (grüner Pfeil) sowie `gesperrt` oder `Reinigung` werden nicht angemahnt; der Ausdruck bleibt
+  ohne Färbung
 - **Tastatur**: Navigation durch die Tabelle mit den Pfeiltasten, Zeilenwechsel mit der
   Eingabetaste (mit Umschalt aufwärts). In Textfeldern wechseln Links und Rechts erst am
   Anfang bzw. Ende des Textes die Zelle. Auswahlfelder werden über die Anfangsbuchstaben

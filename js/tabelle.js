@@ -371,6 +371,7 @@ function buildField(bed, col, data) {
           const list = new Set(data[col.key]);
           cb.checked ? list.add(opt) : list.delete(opt);
           data[col.key] = col.options.filter(o => list.has(o));
+          applyRowState(cb.closest('tr'), data);
           touch(bed.id, feldWas(bed, col));
         });
         label.appendChild(cb);
@@ -462,6 +463,42 @@ function applyRowState(tr, data) {
   tr.classList.toggle('has-limit', isSet(data.limitierung));
   tr.classList.toggle('has-verdacht',
     data.isolation.length > 0 && data.isolation.every(entry => entry.s === 'verdacht'));
+  markiereLuecken(tr, data);
+}
+
+/* ------------------------------------------------------------------ *
+ * Fehlende Pflichtangaben
+ * Liegt ein Patient auf dem Bettplatz, sollten Kostform, Devices,
+ * Norton / Stammblatt und das nächste Screening ausgefüllt sein. Fehlt
+ * eine Angabe, wird die Zelle dezent rot unterlegt. Eine angekündigte
+ * Aufnahme bleibt außen vor – dort ist noch nichts zu erfassen.
+ * ------------------------------------------------------------------ */
+const PFLICHT_KEYS = ['postform', 'devices', 'norton', 'abstriche'];
+
+function pflichtGilt(data) {
+  return isOccupied(data) && data.status !== ARROW_IN;
+}
+
+/* „keins“ bei den Devices ist eine bewusste Angabe und gilt als ausgefüllt;
+   bei den Ankreuzfeldern zählt die Angabe erst als vollständig, wenn beide
+   Häkchen gesetzt sind. */
+function pflichtOffen(data, key) {
+  const wert = data[key];
+  const col = COL_BY_KEY[key];
+  if (col.type === 'checks') return col.options.some(opt => !wert.includes(opt));
+  return !String(wert === undefined || wert === null ? '' : wert).trim();
+}
+
+function markiereLuecken(tr, data) {
+  const pruefen = pflichtGilt(data);
+  for (const key of PFLICHT_KEYS) {
+    const td = tr.querySelector('td.col-' + key);
+    if (!td) continue;
+    const offen = pruefen && pflichtOffen(data, key);
+    td.classList.toggle('luecke', offen);
+    if (offen) td.title = COL_BY_KEY[key].label + ' fehlt';
+    else td.removeAttribute('title');
+  }
 }
 
 function clearBed(bed) {
@@ -749,8 +786,16 @@ function renderStats() {
   const beds = BEDS.map(b => state.beds[b.id]);
   $('#statBelegt').textContent =
     beds.filter(isOccupied).length + ' / ' + BEDS.length;
-  $('#statScreening').textContent =
-    beds.filter(b => b.abstriche && b.abstriche <= isoToday()).length;
+
+  /* Fällige Screenings werden im Kopf rot hervorgehoben. */
+  const faellig = beds.filter(b => b.abstriche && b.abstriche <= isoToday()).length;
+  $('#statScreening').textContent = faellig;
+  const karte = $('#screeningCard');
+  karte.classList.toggle('faellig', faellig > 0);
+  karte.title = faellig
+    ? faellig + (faellig === 1 ? ' Screening ist fällig' : ' Screenings sind fällig') +
+      ' – siehe die rot hinterlegten Daten in der Spalte Abstriche'
+    : 'Kein Screening fällig';
 }
 
 /* Maximale Bettenzahl: x regulär betreibbare Plätze zuzüglich Notbett */
