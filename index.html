@@ -68,7 +68,7 @@
       </svg>
       Drucken
     </button>
-    <button type="button" id="btnTheme" title="Hell / Dunkel">◐</button>
+    <button type="button" id="btnTheme" title="Hell / Dunkel">◐<span class="themelabel" id="themeLabel"></span></button>
     <input type="file" id="fileInput" accept="application/json" hidden>
   </div>
 </header>
@@ -245,6 +245,18 @@
       </ul>
       <p>Der Bildschirmschoner zeigt keine Patientendaten und startet nicht, solange ein Fenster
         wie die Einstellungen geöffnet ist.</p>
+    </section>
+
+    <section>
+      <h3>Tag- und Nachtansicht</h3>
+      <p>Die Schaltfläche <b>◐</b> oben rechts stellt die Tafel hell oder dunkel dar – dunkel
+        blendet nachts deutlich weniger.</p>
+      <p>Ist in den Einstellungen unter <b>Allgemein</b> die <b>automatische Tag-/Nachtansicht</b>
+        eingeschaltet, schaltet die Schaltfläche durch drei Zustände: <b>Auto</b> → <b>dunkel</b>
+        → <b>hell</b> → wieder Auto. Im Zustand Auto steht <b>„Auto“ neben dem Symbol</b>, und die
+        Tafel richtet sich nach der Uhrzeit: von 19 bis 7 Uhr dunkel, tagsüber hell. Der Wechsel
+        erfolgt zur vollen Stunde von selbst, ohne dass die Seite neu geladen werden muss.
+        Ohne die Option bleibt es beim Umschalten zwischen hell und dunkel.</p>
     </section>
 
     <section>

@@ -139,9 +139,9 @@ Spalte der Tafel zugeordnet.
   das Ergebnis sofort. Die Angaben gelten in der Tabelle für das Auswahlfeld der Spalte und
   für alle Marken der Mehrfachauswahl und bleiben im Ausdruck erhalten.
   Unter „Allgemein“ als Punkt 1 der Sichtschutz und als Punkt 2 der Bildschirmschoner –
-  jeweils mit Ein/Aus und Zeit in Sekunden – sowie als Punkt 3 die Größe der Darstellung,
-  unter „Bildschirmschoner“ die Inhalte der Diaschau, unter „Daten“ Export, Import und
-  „Tafel leeren“.
+  jeweils mit Ein/Aus und Zeit in Sekunden –, als Punkt 3 die automatische Tag-/Nachtansicht
+  und als Punkt 4 die Größe der Darstellung, unter „Bildschirmschoner“ die Inhalte der
+  Diaschau, unter „Daten“ Export, Import und „Tafel leeren“.
   Ein Wert, der in einem Bettplatz steht, bleibt erhalten, auch wenn er später aus der
   Liste entfernt wird
 - **Sichtschutz**: Nach der eingestellten Zeit ohne Eingabe (Voreinstellung 120 Sekunden)
@@ -172,7 +172,14 @@ Spalte der Tafel zugeordnet.
   über `slides/slides.json`, über die Verzeichnisübersicht des Webservers oder durch eine
   Eingabe von Hand („Ordner einlesen“ bzw. „+ Datei von Hand“ in den Einstellungen);
   Einzelheiten stehen in `slides/LIESMICH.txt`
-- **Größe der Darstellung**: Schieberegler in den Einstellungen unter „Allgemein“ (Punkt 3),
+- **Tag- und Nachtansicht**: Die Schaltfläche `◐` oben rechts schaltet hell und dunkel um. Ist
+  in den Einstellungen unter „Allgemein“ (Punkt 3) die **automatische Tag-/Nachtansicht**
+  aktiviert, führt sie durch drei Zustände – **Auto → dunkel → hell**. Im Zustand Auto steht
+  „Auto“ neben dem Symbol, und die Darstellung richtet sich nach der Uhrzeit: von **19 bis
+  7 Uhr dunkel**, sonst hell; der Wechsel geschieht im laufenden Betrieb zur vollen Stunde
+  (Konstanten `NIGHT_FROM` und `NIGHT_TO` in `app.js`). Der zuletzt gewählte Zustand liegt im
+  `localStorage` unter `belegungstafel.theme` (`auto`, `dark`, `light`)
+- **Größe der Darstellung**: Schieberegler in den Einstellungen unter „Allgemein“ (Punkt 4),
   **25 % bis 300 %** in Schritten von 5 %, passend zu Monitor und Auflösung. Er wirkt über die
   CSS-Eigenschaft `zoom` auf Kopfbereich, Stationszeile, Tabelle und die Textfelder darunter;
   Dialoge, Hilfe, Bildschirmschoner und der Ausdruck bleiben unverändert. Die Größe wird beim
@@ -181,7 +188,7 @@ Spalte der Tafel zugeordnet.
   ab einem Kopfbereich von mehr als zwei Fünfteln der Bildschirmhöhe läuft dieser nicht mehr
   mit, damit die Tabelle nutzbar bleibt
 - **Bedienleiste** oben rechts: „Datenschutz“, „Diaschau“ und „Drucken“ mit Symbol sowie die
-  Hell-/Dunkel-Umschaltung. Export, Import und „Tafel leeren“ stehen in den Einstellungen
+  Umschaltung der Tag-/Nachtansicht. Export, Import und „Tafel leeren“ stehen in den Einstellungen
   unter „Daten“
 - **Bettplatz räumen** über das `×` in der Bettspalte
 - **Export/Import** als JSON (Belegung, Angaben zur Schicht und Einstellungen) sowie

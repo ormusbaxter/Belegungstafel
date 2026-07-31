@@ -7,7 +7,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '1.5.1';
+const VERSION = '1.6.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -373,7 +373,8 @@ function loadSettings() {
     styles: Object.fromEntries(OPTION_CATEGORIES.filter(c => c.kind === 'text').map(c => [c.key, {}])),
     privacy: { on: true, seconds: 120 },
     screensaver: copy(DEFAULT_SAVER),
-    zoom: 100
+    zoom: 100,
+    autoTheme: false
   };
   let stored = null;
   try {
@@ -429,6 +430,7 @@ function mergeSettings(target, source) {
   }
   const zoom = parseInt(source.zoom, 10);
   if (Number.isFinite(zoom)) target.zoom = clampZoom(zoom);
+  target.autoTheme = source.autoTheme === true;
   mergeSaver(target.screensaver, source.screensaver);
 }
 
@@ -502,6 +504,7 @@ function applySettings() {
   privacyDelay = settings.privacy.on ? settings.privacy.seconds : 0;
   saverDelay = settings.screensaver.on ? settings.screensaver.seconds : 0;
   applyZoom(settings.zoom);
+  applyTheme();
 }
 
 /* Vergrößerung der Tafel. Der Wert steuert die CSS-Eigenschaft zoom von
@@ -1388,7 +1391,18 @@ function renderGeneralPane(pane) {
   }));
   pane.appendChild(saverTime);
 
-  pane.appendChild(el('h3', null, '3. Größe der Darstellung'));
+  pane.appendChild(el('h3', null, '3. Tag- und Nachtansicht'));
+  pane.appendChild(el('p', 'panehint',
+    'Mit dieser Option schaltet die Schaltfläche ◐ im Seitenkopf durch drei Zustände: ' +
+    '„Auto“, dunkel und hell. Im Zustand Auto – erkennbar an der Beschriftung neben dem ' +
+    'Symbol – stellt sich die Tafel nach der Uhrzeit ein: von ' + NIGHT_FROM + ' bis ' +
+    NIGHT_TO + ' Uhr dunkel, tagsüber hell. Ohne diese Option schaltet die Schaltfläche ' +
+    'wie bisher nur zwischen hell und dunkel um.'));
+  pane.appendChild(checkRow('Automatische Tag-/Nachtansicht', draft.autoTheme, on => {
+    draft.autoTheme = on;
+  }));
+
+  pane.appendChild(el('h3', null, '4. Größe der Darstellung'));
   pane.appendChild(el('p', 'panehint',
     'Vergrößert oder verkleinert die ganze Tafel – Kopfbereich, Tabelle und die Textfelder ' +
     'darunter – passend zu Monitor und Auflösung. Die Änderung ist sofort im Hintergrund zu ' +
@@ -1731,8 +1745,15 @@ function commitSettings() {
     .map(bed => ({ id: bed.id, label: bed.label.trim() }));
   if (!draft.beds.length) draft.beds = copy(DEFAULT_BEDS);
 
+  /* Frisch eingeschaltet, beginnt die Tafel im Zustand „Auto“. */
+  const autoNeu = draft.autoTheme && !settings.autoTheme;
+
   settings = draft;
   saveSettings();
+  if (autoNeu) {
+    themeMode = 'auto';
+    localStorage.setItem(THEME_KEY, themeMode);
+  }
   applySettings();
   syncBeds();
   buildHead();
@@ -2591,6 +2612,8 @@ function tickClock() {
   const days = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
   $('#clock').textContent = days[d.getDay()] + ', ' + pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.' +
     d.getFullYear() + ' · ' + timeStr(d) + ':' + pad(d.getSeconds()) + ' Uhr';
+  /* Im Zustand „Auto“ wechselt die Darstellung zur eingestellten Stunde. */
+  if (themeMode === 'auto') applyTheme();
 }
 
 /* Liegt eine Datei logo.png neben index.html, ersetzt sie den Platzhalter.
@@ -2602,15 +2625,57 @@ function initLogo() {
   img.addEventListener('load', zeigen);
 }
 
-function initTheme() {
-  const stored = localStorage.getItem(THEME_KEY);
-  if (stored) document.documentElement.dataset.theme = stored;
+/* ------------------------------------------------------------------ *
+ * Hell, dunkel, automatisch
+ * Ohne den automatischen Tag/Nacht-Modus schaltet die Schaltfläche wie
+ * bisher zwischen hell und dunkel. Ist er in den Einstellungen aktiviert,
+ * kommt der Zustand „Auto“ hinzu: Er richtet sich nach der Uhrzeit und
+ * steht als Beschriftung neben dem Symbol.
+ * ------------------------------------------------------------------ */
+const THEME_MODES = ['auto', 'dark', 'light'];
+const NIGHT_FROM = 19;   /* ab 19 Uhr dunkel */
+const NIGHT_TO = 7;      /* bis 7 Uhr dunkel */
+let themeMode = 'light';
+
+function nightNow() {
+  const hour = new Date().getHours();
+  return hour >= NIGHT_FROM || hour < NIGHT_TO;
 }
 
-function toggleTheme() {
-  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-  document.documentElement.dataset.theme = next;
-  localStorage.setItem(THEME_KEY, next);
+function initTheme() {
+  const stored = localStorage.getItem(THEME_KEY);
+  themeMode = THEME_MODES.includes(stored) ? stored : (settings.autoTheme ? 'auto' : 'light');
+  applyTheme();
+}
+
+/* Übernimmt den Zustand in die Darstellung und beschriftet die Schaltfläche. */
+function applyTheme() {
+  if (!settings.autoTheme && themeMode === 'auto') {
+    themeMode = nightNow() ? 'dark' : 'light';
+    localStorage.setItem(THEME_KEY, themeMode);
+  }
+  const dark = themeMode === 'auto' ? nightNow() : themeMode === 'dark';
+  const next = dark ? 'dark' : 'light';
+  if (document.documentElement.dataset.theme !== next) document.documentElement.dataset.theme = next;
+
+  const btn = $('#btnTheme');
+  if (!btn) return;
+  const label = $('#themeLabel');
+  label.textContent = themeMode === 'auto' ? 'Auto' : '';
+  btn.classList.toggle('is-auto', themeMode === 'auto');
+  btn.title = themeMode === 'auto'
+    ? 'Automatisch nach Uhrzeit (' + NIGHT_FROM + ' bis ' + NIGHT_TO + ' Uhr dunkel) – klicken für dunkel'
+    : themeMode === 'dark'
+      ? 'Dunkel – klicken für hell'
+      : 'Hell – klicken für ' + (settings.autoTheme ? 'automatisch' : 'dunkel');
+}
+
+function cycleTheme() {
+  const order = settings.autoTheme ? THEME_MODES : ['light', 'dark'];
+  const at = order.indexOf(themeMode);
+  themeMode = order[(at + 1) % order.length];
+  localStorage.setItem(THEME_KEY, themeMode);
+  applyTheme();
 }
 
 function init() {
@@ -2651,7 +2716,7 @@ function init() {
     save();
   });
   $('#btnPrint').addEventListener('click', () => window.print());
-  $('#btnTheme').addEventListener('click', toggleTheme);
+  $('#btnTheme').addEventListener('click', cycleTheme);
 
   $('#expJson').addEventListener('click', () => { exportJson(); $('#exportDlg').close(); });
   $('#expCsv').addEventListener('click', () => { exportCsv(); $('#exportDlg').close(); });
