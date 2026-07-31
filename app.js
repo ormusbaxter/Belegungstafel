@@ -7,7 +7,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '1.6.0';
+const VERSION = '1.6.1';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -1497,12 +1497,13 @@ function renderSaverPane(pane) {
     const added = mergeFoundSlides(draft.screensaver.items, found);
     markMissingSlides(draft.screensaver.items, found);
     renderSlideEntries(list, status);
-    status.textContent = !found.length
+    status.textContent = (found.hinweis ? found.hinweis + ' ' : '') + (!found.length
       ? 'Im Ordner „slides“ wurde keine Datei gefunden. Entweder liegt dort nichts, oder der ' +
         'Browser darf das Verzeichnis nicht lesen – dann bitte slides/slides.json pflegen oder ' +
         'den Dateinamen von Hand eintragen.'
       : found.length + (found.length === 1 ? ' Datei gefunden' : ' Dateien gefunden') +
-        (added ? ', ' + added + ' neu übernommen.' : ', nichts Neues.');
+        (added ? ', ' + added + ' neu übernommen.' : ', nichts Neues.'));
+    status.classList.toggle('warnstatus', !!found.hinweis);
   });
   bar.appendChild(scan);
 
@@ -2101,6 +2102,7 @@ function initSaver() {
  * ------------------------------------------------------------------ */
 async function scanSlideFolder() {
   const found = [];
+  let fehler = '';
   const add = value => {
     const name = slideName(value);
     if (name && !found.some(f => f.toLowerCase() === name.toLowerCase())) found.push(name);
@@ -2109,12 +2111,19 @@ async function scanSlideFolder() {
   try {
     const res = await fetch(SLIDE_DIR + 'slides.json', { cache: 'no-store' });
     if (res.ok) {
-      const data = await res.json();
-      const list = Array.isArray(data) ? data : Array.isArray(data && data.slides) ? data.slides : [];
-      for (const entry of list) add(typeof entry === 'string' ? entry : entry && entry.file);
+      const text = await res.text();
+      try {
+        const data = JSON.parse(text);
+        const list = Array.isArray(data) ? data : Array.isArray(data && data.slides) ? data.slides : [];
+        for (const entry of list) add(typeof entry === 'string' ? entry : entry && entry.file);
+      } catch (err) {
+        /* Ein Tippfehler in der Liste darf nicht unbemerkt bleiben. */
+        fehler = 'Die Datei slides/slides.json ist fehlerhaft und wurde übergangen (' +
+          err.message + ').';
+      }
     }
   } catch (err) {
-    /* keine Liste vorhanden oder nicht lesbar – kein Fehler */
+    /* keine Liste vorhanden oder nicht erreichbar – kein Fehler */
   }
 
   try {
@@ -2134,6 +2143,7 @@ async function scanSlideFolder() {
     /* keine Verzeichnisübersicht – kein Fehler */
   }
 
+  found.hinweis = fehler;
   return found;
 }
 

@@ -784,6 +784,7 @@ tr:hover .clearbed, .clearbed:focus-visible { opacity: 1; }
 .slidebar { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 4px; }
 .slidebar .addentry { margin-top: 0; }
 .slidestatus { margin: 6px 0 8px; }
+.slidestatus.warnstatus { color: var(--danger); font-weight: 600; }
 .entry-slide {
   grid-template-columns: auto 52px 1fr 64px auto auto auto auto;
   align-items: start;
