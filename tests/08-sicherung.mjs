@@ -28,7 +28,7 @@ gleich('Sicherung enthält die Belegung', inhalt.beds['0a'].name, 'Sicherungstes
 pruefe('Sicherung enthält die Einstellungen', Boolean(inhalt.settings && inhalt.settings.beds));
 
 await page.waitForTimeout(300);
-enthaelt('Rückmeldung im Fenster', await page.textContent('.slidestatus'), 'Download-Ordner');
+enthaelt('Rückmeldung im Fenster', await page.textContent('.backupstatus'), 'Download-Ordner');
 await page.click('#settingsCancel');
 
 /* ---- Merkzettel verhindert doppelte Sicherung am selben Tag ---- */

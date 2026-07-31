@@ -367,6 +367,26 @@
     </section>
 
     <section>
+      <h3>Vorgabe der Station</h3>
+      <p>Die Tafel wird mit Beispiellisten ausgeliefert. Ist sie einmal nach den Gepflogenheiten
+        der Station eingerichtet, lässt sich dieser Stand als <b>Vorgabe</b> festhalten: In den
+        Einstellungen unter <b>Daten</b> erzeugt <b>„Aktuelle Einstellungen als Vorgabe sichern“</b>
+        die Datei <b>vorgaben.js</b>. Diese in den Ordner <b>js</b> neben die übrigen Dateien
+        legen (die dort liegende gleichnamige Datei ersetzen) und die Tafel neu laden.</p>
+      <p>Danach gilt:</p>
+      <ul>
+        <li>Ein <b>neuer Arbeitsplatz</b> – oder ein Browser, dessen Daten gelöscht wurden –
+          startet sofort mit Ihren Bettplätzen, Listen, Farben und Zeiten.</li>
+        <li><b>Kategorie zurücksetzen</b> im Einstellungsfenster führt auf Ihre Werte zurück,
+          nicht mehr auf die ausgelieferten Beispiele.</li>
+        <li>Auf einem bereits eingerichteten Arbeitsplatz ändert sich <b>nichts</b>: Was dort
+          gespeichert ist, hat Vorrang.</li>
+      </ul>
+      <p>Die Datei enthält <b>ausschließlich Einstellungen und keine Patientendaten</b>; sie darf
+        also unbedenklich kopiert und auf andere Rechner mitgenommen werden.</p>
+    </section>
+
+    <section>
       <h3>Sicherung</h3>
       <p>Die Tafel liegt ausschließlich im Browser dieses Rechners. Wird das Browserprofil
         zurückgesetzt oder der Rechner getauscht, ist alles verloren. Unter <b>Daten</b> lässt
@@ -479,6 +499,7 @@
 
 <!-- Reihenfolge beachten: jede Datei setzt die vorherigen voraus. -->
 <script src="js/konfiguration.js"></script>
+<script src="js/vorgaben.js"></script>
 <script src="js/daten.js"></script>
 <script src="js/tabelle.js"></script>
 <script src="js/einstellungen.js"></script>

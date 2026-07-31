@@ -711,8 +711,58 @@ function renderDataPane(pane) {
   }, true);
 
   pane.appendChild(actions);
+  renderVorgabeBlock(pane);
   renderBackupBlock(pane);
   renderInstanzBlock(pane);
+}
+
+/* Vorgabe der Station: js/vorgaben.js erzeugen */
+function renderVorgabeBlock(pane) {
+  pane.appendChild(el('h3', null, 'Vorgabe der Station'));
+  pane.appendChild(el('p', 'panehint',
+    'Die Datei js/vorgaben.js bestimmt, mit welchen Einstellungen die Tafel startet, wenn im ' +
+    'Browser noch nichts gespeichert ist – und worauf „Kategorie zurücksetzen“ zurückführt. ' +
+    'Die Schaltfläche erzeugt sie aus den zuletzt übernommenen Einstellungen; sie enthält ' +
+    'keine Patientendaten und darf weitergegeben werden.'));
+
+  const status = el('p', 'panehint slidestatus vorgabestatus');
+  const stand = vorgabeStand();
+  status.textContent = stand
+    ? 'Hinterlegte Vorgabe vom ' + fullDate(stand.slice(0, 10)) + ', ' +
+      timeStr(new Date(stand)) + ' Uhr.'
+    : 'Zurzeit ist keine eigene Vorgabe hinterlegt – es gelten die ausgelieferten Werte.';
+
+  const btn = el('button', 'addentry', 'Aktuelle Einstellungen als Vorgabe sichern');
+  btn.type = 'button';
+  btn.addEventListener('click', () => {
+    download('vorgaben.js', vorgabenDatei(), 'text/javascript');
+    status.textContent = 'Datei vorgaben.js erzeugt. Sie gehört in den Ordner js/ neben ' +
+      'konfiguration.js und ersetzt die dortige Datei; danach die Tafel neu laden.';
+  });
+
+  pane.appendChild(btn);
+  pane.appendChild(status);
+}
+
+/* Inhalt der Datei js/vorgaben.js aus den gespeicherten Einstellungen. */
+function vorgabenDatei() {
+  const werte = { erzeugt: new Date().toISOString(), ...copy(settings) };
+  const jetzt = new Date();
+  return [
+    '/* Vorgaben dieser Station',
+    ' *',
+    ' * Erzeugt am ' + fullDate(isoToday()) + ' um ' + timeStr(jetzt) + ' Uhr aus den',
+    ' * Einstellungen dieses Arbeitsplatzes' + (INSTANZ ? ' (Kennung: ' + INSTANZ + ')' : '') + '.',
+    ' *',
+    ' * Diese Datei gehört in den Ordner js/ neben konfiguration.js und bestimmt,',
+    ' * mit welchen Einstellungen die Tafel startet, wenn im Browser noch nichts',
+    ' * gespeichert ist – und worauf „Kategorie zurücksetzen“ zurückführt.',
+    ' *',
+    ' * Sie enthält ausschließlich Einstellungen, keine Patientendaten.',
+    ' */',
+    'const VORGABEN = ' + JSON.stringify(werte, null, 2) + ';',
+    ''
+  ].join('\n');
 }
 
 /* Automatische Sicherung */
@@ -724,7 +774,7 @@ function renderBackupBlock(pane) {
     'legt die Tafel einmal am Tag eine vollständige Sicherung als JSON-Datei ab, die sich ' +
     'über „Import“ wieder einlesen lässt.'));
 
-  const status = el('p', 'panehint slidestatus');
+  const status = el('p', 'panehint slidestatus backupstatus');
   const zielRow = el('div', 'setrow');
   zielRow.appendChild(el('span', null, 'Ablage'));
   const ziel = el('select', 'zielpick');
@@ -873,19 +923,19 @@ function commitSettings() {
   setSaveState('Einstellungen übernommen');
 }
 
+/* Zurückgesetzt wird auf die Vorgabe der Station (js/vorgaben.js); ohne eine
+   solche Datei sind das die eingebauten Werte. */
 function resetCategory() {
   if (activeTab === 'allgemein' || activeTab === 'daten') return;
   if (activeTab === 'schoner') {
-    if (!confirm('Alle Inhalte des Bildschirmschoners entfernen?')) return;
-    draft.screensaver.items = [];
-    draft.screensaver.defaultSeconds = DEFAULT_SAVER.defaultSeconds;
-    draft.screensaver.shuffle = DEFAULT_SAVER.shuffle;
+    if (!confirm('Inhalte des Bildschirmschoners auf die Vorgabe zurücksetzen?')) return;
+    draft.screensaver = copy(VORGABE.screensaver);
   }
-  else if (activeTab === 'header') draft.headers = {};
-  else if (activeTab === 'betten') draft.beds = copy(DEFAULT_BEDS);
+  else if (activeTab === 'header') draft.headers = copy(VORGABE.headers);
+  else if (activeTab === 'betten') draft.beds = copy(VORGABE.beds);
   else {
-    draft.options[activeTab] = copy(DEFAULT_OPTIONS[activeTab]);
-    if (draft.styles[activeTab]) draft.styles[activeTab] = {};
+    draft.options[activeTab] = copy(VORGABE.options[activeTab]);
+    if (draft.styles[activeTab]) draft.styles[activeTab] = copy(VORGABE.styles[activeTab] || {});
   }
   renderPane();
 }

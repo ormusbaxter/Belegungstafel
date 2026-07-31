@@ -13,6 +13,7 @@ Webserver bereitstellen.
 index.html            Grundgerüst und Dialoge
 styles.css            Layout, Farbkodierung, Druckansicht
 js/konfiguration.js   Bettplätze, Spalten, Auswahllisten, Hilfsfunktionen
+js/vorgaben.js        Vorgabe der Station (überschreibt die ausgelieferten Werte)
 js/daten.js           Einstellungen, Speicherung, Verlauf
 js/tabelle.js         Aufbau und Bedienung der Tabelle
 js/einstellungen.js   Einstellungsfenster
@@ -223,6 +224,14 @@ Spalte der Tafel zugeordnet.
 - **Bettplatz räumen** über das `×` in der Bettspalte
 - **Export/Import** als JSON (Belegung, Angaben zur Schicht und Einstellungen) sowie
   CSV-Export für Excel
+- **Vorgabe der Station**: Die Datei `js/vorgaben.js` legt fest, mit welchen Einstellungen die
+  Tafel startet, wenn im Browser noch nichts gespeichert ist, und worauf „Kategorie
+  zurücksetzen“ zurückführt. Erzeugt wird sie in den Einstellungen unter „Daten“ über
+  **Aktuelle Einstellungen als Vorgabe sichern**; die heruntergeladene Datei ersetzt die
+  gleichnamige im Ordner `js/`. Bewusst eine JavaScript-Datei und keine JSON-Datei, weil der
+  Browser beim Betrieb von der Festplatte keine Datei nachladen darf, ein `<script>` aber
+  einbindet. Sie enthält nur Einstellungen, keine Patientendaten. Reihenfolge der Geltung:
+  eingebaute Werte → `js/vorgaben.js` → gespeicherte Einstellungen des Arbeitsplatzes
 - **Automatische Sicherung** (Einstellungen → Daten): einmal am Tag eine vollständige
   JSON-Sicherung, wahlweise in einen einmalig gewählten Ordner – etwa auf einem Netzlaufwerk,
   der Zugriff wird über die File System Access API vergeben und in IndexedDB behalten – oder

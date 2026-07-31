@@ -4,6 +4,13 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.3.0
+
+- **Vorgabe der Station**: „Aktuelle Einstellungen als Vorgabe sichern“ (Einstellungen → Daten)
+  erzeugt die Datei `js/vorgaben.js`. Sie bestimmt den Startzustand eines noch nicht
+  eingerichteten Arbeitsplatzes und den Bezugspunkt von „Kategorie zurücksetzen“; gespeicherte
+  Einstellungen behalten Vorrang. Die Datei enthält keine Patientendaten
+
 ## 2.2.0
 
 - **Druck Physio**: eigener Ausdruck für die Physiotherapie – A4 quer, schwarzweiß, nur

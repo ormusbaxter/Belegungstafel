@@ -14,11 +14,10 @@ const KEY_SUFFIX = INSTANZ ? '.' + INSTANZ.toLowerCase().replace(/[^a-z0-9]+/g, 
 
 const SETTINGS_KEY = 'belegungstafel.einstellungen' + KEY_SUFFIX;
 
-let settings = loadSettings();
-BEDS = settings.beds;
-
-function loadSettings() {
-  const fresh = {
+/* Die im Quelltext hinterlegten Werte – ohne Vorgabedatei und ohne den
+   örtlichen Speicher. */
+function grundEinstellungen() {
+  return {
     version: 3,
     beds: copy(DEFAULT_BEDS),
     headers: {},
@@ -32,6 +31,35 @@ function loadSettings() {
     night: { ...DEFAULT_NIGHT },
     backup: { on: false, ziel: 'ordner', behalten: 30 }
   };
+}
+
+/* Wirksame Vorgabe der Station: die eingebauten Werte, überlagert von
+   js/vorgaben.js. Sie gilt beim ersten Start und beim Zurücksetzen einer
+   Kategorie. Fehlt die Datei, bleibt es bei den eingebauten Werten. */
+const VORGABE = (() => {
+  const werte = grundEinstellungen();
+  const eigen = typeof VORGABEN === 'undefined' ? null : VORGABEN;
+  if (eigen && typeof eigen === 'object') {
+    try {
+      mergeSettings(werte, eigen);
+    } catch (err) {
+      console.warn('js/vorgaben.js ist fehlerhaft und wird übergangen.', err);
+    }
+  }
+  return werte;
+})();
+
+/* Wann wurde die Vorgabedatei erzeugt? Leer, wenn keine hinterlegt ist. */
+function vorgabeStand() {
+  const eigen = typeof VORGABEN === 'undefined' ? null : VORGABEN;
+  return eigen && typeof eigen === 'object' && typeof eigen.erzeugt === 'string' ? eigen.erzeugt : '';
+}
+
+let settings = loadSettings();
+BEDS = settings.beds;
+
+function loadSettings() {
+  const fresh = copy(VORGABE);
   let stored = null;
   try {
     stored = JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null');
