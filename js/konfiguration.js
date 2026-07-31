@@ -6,10 +6,12 @@
  * die sich einen gemeinsamen Namensraum teilen:
  *
  *   konfiguration.js  Bettplätze, Spalten, Auswahllisten, Hilfsfunktionen
+ *   vorgaben.js       Vorgabe der Station (ersetzt die ausgelieferten Werte)
  *   daten.js          Einstellungen, Speicherung, Verlauf
  *   tabelle.js        Aufbau und Bedienung der Tabelle
  *   einstellungen.js  Einstellungsfenster
  *   schoner.js        Bildschirmschoner und Diaschau
+ *   statistik.js      Auswertung je Schicht
  *   tafel.js          Sichtschutz, Ansicht, Sicherung, Start
  *
  * "use strict" gilt nur je Datei und steht deshalb in jeder von ihnen.
@@ -19,7 +21,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.3.0';
+const VERSION = '2.4.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -364,6 +366,24 @@ function slideItem(props) {
   return { id: newSlideId(), kind: 'datei', file: '', title: '', text: '',
            on: true, seconds: null, page: 1, ratio: 0, ...props };
 }
+
+/* ------------------------------------------------------------------ *
+ * Statistik
+ * Erfasst je Schicht eine Momentaufnahme der Kennzahlen. Die Schichten
+ * werden durch ihre Anfangszeiten beschrieben und schließen lückenlos
+ * aneinander an; die letzte reicht über Mitternacht in die erste.
+ * ------------------------------------------------------------------ */
+const DEFAULT_STATISTIK = {
+  on: true,
+  button: true,
+  intervall: 15,   /* Minuten zwischen zwei Momentaufnahmen */
+  tage: 180,       /* Aufbewahrung */
+  schichten: [
+    { key: 'frueh', name: 'Frühdienst',  start: '06:00' },
+    { key: 'spaet', name: 'Spätdienst',  start: '14:12' },
+    { key: 'nacht', name: 'Nachtdienst', start: '20:30' }
+  ]
+};
 
 /* Nachtspanne der automatischen Tag-/Nachtansicht */
 const DEFAULT_NIGHT = { from: '19:00', to: '07:00' };

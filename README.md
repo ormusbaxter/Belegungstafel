@@ -18,6 +18,7 @@ js/daten.js           Einstellungen, Speicherung, Verlauf
 js/tabelle.js         Aufbau und Bedienung der Tabelle
 js/einstellungen.js   Einstellungsfenster
 js/schoner.js         Bildschirmschoner und Diaschau
+js/statistik.js       Auswertung je Schicht
 js/tafel.js           Sichtschutz, Ansicht, Sicherung, Start
 slides/               Inhalte für den Bildschirmschoner (PDF, PNG, JPEG)
 tests/                Prüfungen im echten Browser (siehe tests/README.md)
@@ -224,6 +225,18 @@ Spalte der Tafel zugeordnet.
 - **Bettplatz räumen** über das `×` in der Bettspalte
 - **Export/Import** als JSON (Belegung, Angaben zur Schicht und Einstellungen) sowie
   CSV-Export für Excel
+- **Statistik je Schicht** über die runde Schaltfläche unten rechts (über der Hilfe; ihre
+  Sichtbarkeit ist einstellbar): je Schicht **belegte Betten, maximale Bettenzahl, Isolationen
+  (bestätigt oder Verdacht), Beatmungen und Dialysen**, dazu Mittelwerte je Schichtart und
+  gesamt sowie ein CSV-Export. Die Tafel legt dafür in einstellbarem Abstand (ab Werk 15 min)
+  eine Momentaufnahme ab und ordnet sie der laufenden Schicht zu; eine spätere Aufnahme ersetzt
+  die frühere derselben Schicht. Gezählt werden nur belegte Bettplätze; `gesperrt` und
+  `Reinigung` bleiben außen vor, ebenso die externe Dialyse (sie steht als Intervention
+  `ext. Dial.`). Schichten (Bezeichnung und Beginn, ab Werk 06:00 / 14:12 / 20:30), Abstand,
+  Aufbewahrung und Sichtbarkeit der Schaltfläche stehen in den Einstellungen unter „Statistik“.
+  Die Daten liegen im `localStorage` unter `belegungstafel.statistik`, enthalten keine
+  Patientendaten und gehen in die automatische Sicherung mit ein. Erfasst wird nur, solange die
+  Tafel geöffnet ist
 - **Vorgabe der Station**: Die Datei `js/vorgaben.js` legt fest, mit welchen Einstellungen die
   Tafel startet, wenn im Browser noch nichts gespeichert ist, und worauf „Kategorie
   zurücksetzen“ zurückführt. Erzeugt wird sie in den Einstellungen unter „Daten“ über

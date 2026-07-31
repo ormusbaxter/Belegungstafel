@@ -141,6 +141,7 @@ function importJson(file) {
     }
     state.station = emptyStation();
     mergeStation(state.station, parsed.station);
+    if (Array.isArray(parsed.statistik)) statistikSpeichern(parsed.statistik);
     if (parsed.settings) {
       mergeSettings(settings, parsed.settings);
       saveSettings();
@@ -247,7 +248,9 @@ function sicherungsName() {
 
 /* Schreibt eine Sicherung. Gibt eine Meldung für die Oberfläche zurück. */
 async function sicherungSchreiben(fragen) {
-  const daten = JSON.stringify({ ...state, settings }, null, 2);
+  /* Die Sicherung umfasst auch die erfasste Statistik – sie liegt sonst
+     nirgends sonst und wäre mit dem Browserprofil verloren. */
+  const daten = JSON.stringify({ ...state, settings, statistik: statistikLaden() }, null, 2);
   const name = sicherungsName();
 
   if (settings.backup.ziel === 'download' || !ordnerWahlMoeglich) {
@@ -444,6 +447,7 @@ function init() {
   initSettings();
   initSlideFolderInput();
   initVerlauf();
+  initStatistik();
   initBackup();
   initCombo();
   standMerken();

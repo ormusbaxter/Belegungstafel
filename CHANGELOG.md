@@ -4,6 +4,14 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.4.0
+
+- **Statistik je Schicht**: neue Auswertung über die runde Schaltfläche unten rechts mit
+  belegten Betten, maximaler Bettenzahl, Isolationen, Beatmungen und Dialysen je Schicht,
+  Mittelwerten und CSV-Export. Erfassung, Abstand der Aufnahmen, Aufbewahrung, Sichtbarkeit
+  der Schaltfläche und die Schichtzeiten stehen in den Einstellungen unter „Statistik“
+- die erfasste Statistik geht in die automatische Sicherung und den Import mit ein
+
 ## 2.3.0
 
 - **Vorgabe der Station**: „Aktuelle Einstellungen als Vorgabe sichern“ (Einstellungen → Daten)

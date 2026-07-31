@@ -29,7 +29,8 @@ function grundEinstellungen() {
     zoom: 100,
     autoTheme: false,
     night: { ...DEFAULT_NIGHT },
-    backup: { on: false, ziel: 'ordner', behalten: 30 }
+    backup: { on: false, ziel: 'ordner', behalten: 30 },
+    statistik: copy(DEFAULT_STATISTIK)
   };
 }
 
@@ -126,6 +127,32 @@ function mergeSettings(target, source) {
     if (Number.isFinite(behalten)) target.backup.behalten = Math.min(365, Math.max(1, behalten));
   }
   mergeSaver(target.screensaver, source.screensaver);
+  mergeStatistik(target.statistik, source.statistik);
+}
+
+/* Einstellungen der Statistik übernehmen und dabei prüfen. */
+function mergeStatistik(target, source) {
+  if (!source || typeof source !== 'object') return;
+  target.on = source.on !== false;
+  target.button = source.button !== false;
+  const takt = parseInt(source.intervall, 10);
+  if (Number.isFinite(takt)) target.intervall = Math.min(120, Math.max(1, takt));
+  const tage = parseInt(source.tage, 10);
+  if (Number.isFinite(tage)) target.tage = Math.min(3650, Math.max(7, tage));
+  if (!Array.isArray(source.schichten)) return;
+  const schichten = source.schichten
+    .filter(s => s && CLOCK.test(s.start || ''))
+    .map((s, i) => ({
+      key: String(s.key || 'schicht' + i),
+      name: String(s.name || 'Schicht ' + (i + 1)).trim() || 'Schicht ' + (i + 1),
+      start: s.start
+    }));
+  if (schichten.length >= 2) target.schichten = sortiereSchichten(schichten);
+}
+
+/* Schichten liegen immer in der Reihenfolge ihrer Anfangszeiten. */
+function sortiereSchichten(liste) {
+  return liste.slice().sort((a, b) => clockMinutes(a.start) - clockMinutes(b.start));
 }
 
 /* Einstellungen des Bildschirmschoners übernehmen und dabei prüfen. */

@@ -38,6 +38,7 @@ function renderTabs() {
   const tabs = [
     { key: 'allgemein', label: 'Allgemein' },
     { key: 'schoner', label: 'Bildschirmschoner' },
+    { key: 'statistik', label: 'Statistik' },
     { key: 'header', label: 'Spaltenköpfe' },
     { key: 'betten', label: 'Bettplätze' },
     ...OPTION_CATEGORIES,
@@ -57,6 +58,7 @@ function renderPane() {
   pane.replaceChildren();
   if (activeTab === 'allgemein') return renderGeneralPane(pane);
   if (activeTab === 'schoner') return renderSaverPane(pane);
+  if (activeTab === 'statistik') return renderStatistikPane(pane);
   if (activeTab === 'daten') return renderDataPane(pane);
   if (activeTab === 'header') return renderHeaderPane(pane);
   if (activeTab === 'betten') return renderBedPane(pane);
@@ -627,6 +629,107 @@ function renderSlideEntries(list, status) {
   }
 }
 
+/* Statistik: Erfassung, Schichten, Aufbewahrung */
+function renderStatistikPane(pane) {
+  const stat = draft.statistik;
+
+  pane.appendChild(el('h3', null, 'Statistik je Schicht'));
+  pane.appendChild(el('p', 'panehint',
+    'Die Tafel legt in regelmäßigen Abständen eine Momentaufnahme ab: belegte Betten, ' +
+    'maximale Bettenzahl, Isolationen (bestätigt oder Verdacht), Beatmungen und Dialysen. ' +
+    'Jede Aufnahme gehört zu der Schicht, die gerade läuft, und ersetzt die vorherige ' +
+    'derselben Schicht – am Ende steht je Schicht der zuletzt gesehene Stand. Erfasst wird ' +
+    'nur, solange die Tafel geöffnet ist. Externe Dialysen zählen nicht mit, da sie als ' +
+    'Intervention „ext. Dial.“ geführt werden.'));
+
+  const takt = numberRow('Abstand der Aufnahmen', stat.intervall,
+    { min: 1, max: 120, step: 1, unit: 'Minuten' }, value => { stat.intervall = value; });
+  const tage = numberRow('Aufbewahrung', stat.tage,
+    { min: 7, max: 3650, step: 1, unit: 'Tage' }, value => { stat.tage = value; });
+
+  pane.appendChild(checkRow('Erfassung aktiv', stat.on, on => {
+    stat.on = on;
+    takt.field.disabled = !on;
+    tage.field.disabled = !on;
+  }));
+  pane.appendChild(takt);
+  pane.appendChild(tage);
+  takt.field.disabled = !stat.on;
+  tage.field.disabled = !stat.on;
+
+  pane.appendChild(checkRow('Schaltfläche in der Tafel zeigen', stat.button, on => {
+    stat.button = on;
+  }));
+  pane.appendChild(el('p', 'panehint',
+    'Die runde Schaltfläche unten rechts über der Hilfe öffnet die Auswertung. Ohne sie ' +
+    'bleibt die Erfassung bestehen, die Auswertung ist dann nur über diese Einstellungen ' +
+    'erreichbar.'));
+
+  pane.appendChild(el('h3', null, 'Schichten'));
+  pane.appendChild(el('p', 'panehint',
+    'Bezeichnung und Beginn jeder Schicht. Die Schichten schließen lückenlos aneinander an; ' +
+    'die letzte reicht über Mitternacht bis zum Beginn der ersten.'));
+
+  const liste = el('div', 'entrylist');
+  pane.appendChild(liste);
+  renderSchichtEntries(liste);
+
+  const add = el('button', 'addentry', '+ Schicht hinzufügen');
+  add.type = 'button';
+  add.addEventListener('click', () => {
+    stat.schichten.push({ key: 'schicht' + Math.random().toString(36).slice(2, 7),
+                          name: '', start: '12:00' });
+    renderSchichtEntries(liste);
+  });
+  pane.appendChild(add);
+
+  const zeigen = el('button', 'addentry', 'Auswertung öffnen');
+  zeigen.type = 'button';
+  zeigen.addEventListener('click', () => {
+    $('#settingsDlg').close();
+    oeffneStatistik();
+  });
+  pane.appendChild(zeigen);
+
+  const leeren = el('button', 'addentry danger', 'Erfasste Daten löschen');
+  leeren.type = 'button';
+  leeren.addEventListener('click', () => {
+    const anzahl = statistikLaden().length;
+    if (!anzahl) {
+      setSaveState('Es ist nichts erfasst.');
+      return;
+    }
+    if (!confirm('Alle ' + anzahl + ' erfassten Schichten löschen? Das lässt sich nicht ' +
+                 'rückgängig machen.')) return;
+    statistikSpeichern([]);
+    setSaveState('Erfasste Statistik gelöscht');
+  });
+  pane.appendChild(leeren);
+}
+
+function renderSchichtEntries(liste) {
+  const schichten = draft.statistik.schichten;
+  liste.replaceChildren();
+
+  schichten.forEach((schicht, index) => {
+    const row = el('div', 'entry entry-schicht');
+    row.appendChild(entryInput(schicht.name, 'Bezeichnung', '', value => { schicht.name = value; }));
+    row.appendChild(el('span', 'palname', 'ab'));
+    row.appendChild(timeField(schicht.start, value => { schicht.start = value; }));
+    const remove = moveButton('×', 'entfernen', () => {
+      if (schichten.length <= 2) {
+        alert('Mindestens zwei Schichten sind nötig.');
+        return;
+      }
+      schichten.splice(index, 1);
+      renderSchichtEntries(liste);
+    });
+    remove.classList.add('remove');
+    row.appendChild(remove);
+    liste.appendChild(row);
+  });
+}
+
 /* Bettplätze */
 function renderBedPane(pane) {
   pane.appendChild(el('h3', null, 'Bettplätze'));
@@ -896,6 +999,15 @@ function commitSettings() {
                     seconds: item.seconds > 0 ? Math.min(600, Math.max(SAVER_ITEM_MIN, item.seconds)) : null }))
     .filter(item => item.kind === 'text' ? (item.title || item.text) : item.file);
 
+  /* Statistik: Schichten ohne Bezeichnung bekommen eine, Reihenfolge nach Beginn */
+  const stat = draft.statistik;
+  stat.schichten = sortiereSchichten(stat.schichten
+    .filter(s => CLOCK.test(s.start))
+    .map((s, i) => ({ key: s.key || 'schicht' + i,
+                      name: s.name.trim() || 'Schicht ' + (i + 1),
+                      start: s.start })));
+  if (stat.schichten.length < 2) stat.schichten = copy(DEFAULT_STATISTIK.schichten);
+
   draft.beds = draft.beds.filter(bed => bed.label.trim())
     .map(bed => ({ id: bed.id, label: bed.label.trim() }));
   if (!draft.beds.length) draft.beds = copy(DEFAULT_BEDS);
@@ -919,6 +1031,8 @@ function commitSettings() {
   setPrivacy(false);
   restartPrivacyTimer();
   restartSaverTimer();
+  statistikButtonZeigen();
+  statistikTaktStarten();
   $('#settingsDlg').close();
   setSaveState('Einstellungen übernommen');
 }
@@ -927,7 +1041,10 @@ function commitSettings() {
    solche Datei sind das die eingebauten Werte. */
 function resetCategory() {
   if (activeTab === 'allgemein' || activeTab === 'daten') return;
-  if (activeTab === 'schoner') {
+  if (activeTab === 'statistik') {
+    draft.statistik = copy(VORGABE.statistik);
+  }
+  else if (activeTab === 'schoner') {
     if (!confirm('Inhalte des Bildschirmschoners auf die Vorgabe zurücksetzen?')) return;
     draft.screensaver = copy(VORGABE.screensaver);
   }

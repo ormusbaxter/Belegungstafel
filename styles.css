@@ -995,6 +995,74 @@ html[data-theme="dark"] .pwerror { color: var(--iso); }
 }
 .help:hover { color: var(--accent); border-color: var(--accent); background: var(--panel); }
 
+/* Statistik – über der Hilfe */
+.statsbtn {
+  position: fixed;
+  right: 18px;
+  bottom: 126px;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink-soft);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .18);
+}
+.statsbtn:hover { color: var(--accent); border-color: var(--accent); background: var(--panel); }
+
+/* Fenster der Statistik */
+.dlg.dlg-stats { width: min(940px, 96vw); }
+.statsbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin: 10px 0 6px;
+  font-size: 13px;
+}
+.statsbar select {
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--ink);
+  font: inherit;
+}
+.statsbar button { padding: 4px 12px; font-size: 12.5px; }
+.statsinfo { margin: 0 0 10px; }
+.statssummary { margin-bottom: 14px; }
+.statstable { max-height: 46vh; overflow: auto; }
+.statstab {
+  width: 100%;
+  min-width: max-content;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.statstab th, .statstab td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--line-soft);
+  text-align: left;
+  white-space: nowrap;
+}
+.statstab th {
+  position: sticky;
+  top: 0;
+  background: var(--panel);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--ink-soft);
+  border-bottom: 1.5px solid var(--line);
+}
+.statstab .num { text-align: right; font-variant-numeric: tabular-nums; }
+.statstab tbody tr:hover { background: var(--panel-2); }
+.statstab tr.summe td { font-weight: 700; border-top: 1.5px solid var(--line); }
+
 .dlg.dlg-help { width: min(820px, 96vw); }
 .helpbody {
   max-height: 66vh;

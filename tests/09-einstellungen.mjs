@@ -19,8 +19,8 @@ await page.waitForTimeout(200);
 pruefe('richtiges Passwort öffnet', await page.isVisible('#settingsDlg'));
 
 const reiter = await page.$$eval('#settingsTabs .tab', ts => ts.map(t => t.textContent));
-gleich('Reiter in der erwarteten Reihenfolge', reiter.slice(0, 5).join(' | '),
-  'Allgemein | Bildschirmschoner | Spaltenköpfe | Bettplätze | Anwesenheitsstatus');
+gleich('Reiter in der erwarteten Reihenfolge', reiter.slice(0, 6).join(' | '),
+  'Allgemein | Bildschirmschoner | Statistik | Spaltenköpfe | Bettplätze | Anwesenheitsstatus');
 
 /* ---- Auswahlliste ändern ---- */
 await page.click('#settingsTabs .tab:text-is("Fachdisziplinen")');

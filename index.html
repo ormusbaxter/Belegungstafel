@@ -102,6 +102,13 @@
   </table>
 </main>
 
+<button type="button" class="statsbtn" id="btnStats" title="Statistik je Schicht"
+        aria-label="Statistik" hidden>
+  <svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true">
+    <path fill="currentColor" d="M4 20h16v1.6H4zM5.6 10h3.2v8.4H5.6zm4.8-5.6h3.2v14h-3.2zm4.8 8.8h3.2v5.2h-3.2z"/>
+  </svg>
+</button>
+
 <button type="button" class="help" id="btnHelp" title="Hilfe" aria-label="Hilfe">?</button>
 
 <button type="button" class="gear" id="btnSettings" title="Einstellungen" aria-label="Einstellungen">
@@ -367,6 +374,31 @@
     </section>
 
     <section>
+      <h3>Statistik je Schicht</h3>
+      <p>Die runde Schaltfläche mit dem Balkendiagramm unten rechts – über der Hilfe – öffnet die
+        Auswertung. Sie zeigt je Schicht: <b>belegte Betten</b>, <b>maximale Bettenzahl</b>,
+        <b>Isolationen</b> (bestätigt oder Verdacht), <b>Beatmungen</b> und <b>Dialysen</b>,
+        dazu die Mittelwerte je Schichtart und über alles. Der Zeitraum lässt sich oben wählen,
+        <b>CSV für Excel</b> gibt die Zahlen zur Weiterverarbeitung aus.</p>
+      <p>Wie die Zahlen entstehen: Die Tafel legt in regelmäßigen Abständen – ab Werk alle
+        15 Minuten – eine Momentaufnahme ab und ordnet sie der laufenden Schicht zu. Eine
+        spätere Aufnahme ersetzt die frühere derselben Schicht, sodass am Ende <b>je Schicht der
+        zuletzt gesehene Stand</b> steht. <b>Jetzt erfassen</b> nimmt sofort einen Stand auf.</p>
+      <ul>
+        <li>Gezählt werden nur <b>belegte Bettplätze</b>; <b>gesperrt</b> und <b>Reinigung</b>
+          bleiben außen vor.</li>
+        <li>Die <b>externe Dialyse</b> zählt nicht mit – sie wird als Intervention
+          „ext. Dial.“ geführt, nicht in der Spalte Dialyse.</li>
+        <li>Die Auswertung enthält <b>keine Patientendaten</b>, nur Zahlen.</li>
+      </ul>
+      <p class="warn">Erfasst wird nur, solange die Tafel geöffnet ist. Bleibt der Rechner
+        während einer Schicht aus, fehlt diese Schicht in der Auswertung.</p>
+      <p>In den Einstellungen unter <b>Statistik</b> lassen sich die Erfassung ein- und
+        ausschalten, der Abstand der Aufnahmen, die Aufbewahrungsdauer, die Sichtbarkeit der
+        Schaltfläche sowie <b>Bezeichnung und Beginn der Schichten</b> festlegen.</p>
+    </section>
+
+    <section>
       <h3>Vorgabe der Station</h3>
       <p>Die Tafel wird mit Beispiellisten ausgeliefert. Ist sie einmal nach den Gepflogenheiten
         der Station eingerichtet, lässt sich dieser Stand als <b>Vorgabe</b> festhalten: In den
@@ -472,6 +504,36 @@
   </menu>
 </dialog>
 
+<!-- Statistik je Schicht -->
+<dialog id="statsDlg" class="dlg dlg-stats">
+  <h2>Statistik je Schicht</h2>
+  <p class="dlgsub">Je Schicht wird der zuletzt erfasste Stand geführt: belegte Betten,
+    maximale Bettenzahl, Isolationen (bestätigt oder Verdacht), Beatmungen und Dialysen.
+    Erfasst wird, solange die Tafel geöffnet ist.</p>
+
+  <div class="statsbar">
+    <label for="statsRange">Zeitraum</label>
+    <select id="statsRange">
+      <option value="7">letzte 7 Tage</option>
+      <option value="30" selected>letzte 30 Tage</option>
+      <option value="90">letzte 90 Tage</option>
+      <option value="365">letztes Jahr</option>
+      <option value="0">alles</option>
+    </select>
+    <button type="button" id="statsNow">Jetzt erfassen</button>
+    <button type="button" id="statsCsv">CSV für Excel</button>
+  </div>
+
+  <p class="panehint statsinfo" id="statsInfo"></p>
+  <div class="statssummary" id="statsSummary"></div>
+  <div class="statstable" id="statsTable"></div>
+
+  <menu class="dlgmenu">
+    <span class="spacer"></span>
+    <button type="button" id="statsClose" class="primary">Schließen</button>
+  </menu>
+</dialog>
+
 <!-- Verlauf (Papierkorb) -->
 <dialog id="histDlg" class="dlg dlg-hist">
   <h2>Verlauf</h2>
@@ -504,6 +566,7 @@
 <script src="js/tabelle.js"></script>
 <script src="js/einstellungen.js"></script>
 <script src="js/schoner.js"></script>
+<script src="js/statistik.js"></script>
 <script src="js/tafel.js"></script>
 </body>
 </html>
