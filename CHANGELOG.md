@@ -4,6 +4,12 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.7.0
+
+- **Schichtleitung, Blutzuständigkeit und Notfallequipment** stehen jetzt **unter der
+  Tabelle** statt im Kopfbereich – am Bildschirm wie im Ausdruck. Der Kopf bleibt schmal,
+  die Tafel beginnt weiter oben, und es sind mehr Bettplätze ohne Scrollen zu sehen
+
 ## 2.6.0
 
 - **Vorbelegungen des Patientennamens** sind über die Einstellungen zu pflegen (eigener

@@ -112,10 +112,12 @@ Spalte der Tafel zugeordnet.
   den Einstellungen hinterlegt sind; `gesperrt` oder `Reinigung` im Feld Patientenname zählt
   nie), maximale Bettenzahl als Eingabefeld mit
   festem Zusatz „+ 1“ für das Notbett, Meldestatus als farbiges Auswahlfeld
-  (grün / gelb / rot) und Anzahl der fälligen Screenings; darunter Schichtleitung,
-  Blutzuständigkeit und Notfallequipment mit jeweils zugehöriger Telefonnummer.
-  Diese Angaben gelten für die gesamte Station, werden mitgespeichert, mit exportiert
-  und mitgedruckt; „Tafel leeren“ lässt sie stehen
+  (grün / gelb / rot) und Anzahl der fälligen Screenings
+- **Angaben zur Schicht** – Schichtleitung, Blutzuständigkeit und Notfallequipment mit
+  jeweils zugehöriger Telefonnummer – **unter der Tabelle**, zwischen Tafel und den
+  Textfeldern. Der Kopfbereich bleibt dadurch schmal, und es sind mehr Bettplätze ohne
+  Scrollen zu sehen. Diese Angaben gelten für die gesamte Station, werden mitgespeichert,
+  mit exportiert und mitgedruckt; „Tafel leeren“ lässt sie stehen
 - **Isolation**: beliebig viele Einträge je Bettplatz, jeder einzeln als bestätigt oder als
   Verdacht geführt (z. B. MRSA bestätigt und Verdacht auf VRE). Bestätigte Keime erscheinen
   als gefüllte, Verdachtsfälle als gestrichelte Marke mit vorangestelltem `V. a.`.
@@ -274,11 +276,12 @@ Spalte der Tafel zugeordnet.
   (`setPhysioRowHeight`), sodass bei wenigen Patienten sehr groß und bei voller Station immer
   noch auf einer Seite gedruckt wird; ein besonders langer Name wird allein in seiner Zeile
   verkleinert, damit er vollständig lesbar bleibt
-- **Druckansicht**: eine Seite **A4 quer in Schwarzweiß**. Gedruckt werden belegte Betten,
-  maximale Bettenzahl und Meldestatus (ausgeschrieben), Schichtleitung und Blutzuständigkeit
-  mit Telefonnummer, die geplanten Aufnahmen sowie eine verkürzte Tabelle mit
+- **Druckansicht**: eine Seite **A4 quer in Schwarzweiß**. Oben stehen belegte Betten,
+  maximale Bettenzahl und Meldestatus (ausgeschrieben), darunter eine verkürzte Tabelle mit
   Anwesenheitsstatus, Bettplatz, Patientenname, Fachdisziplin, Isolation, Intervention,
-  Therapielimitierung, Telefon und Pflegekraft, ergänzt um eine breite Spalte **Notizen**.
+  Therapielimitierung, Telefon und Pflegekraft, ergänzt um eine breite Spalte **Notizen**;
+  unter der Tabelle Schichtleitung und Blutzuständigkeit mit Telefonnummer sowie die
+  geplanten Aufnahmen – dieselbe Anordnung wie am Bildschirm.
   Die Zeilenhöhe richtet sich nach der Anzahl der Bettplätze, damit das Blatt gefüllt wird
 - Änderungen werden zwischen mehreren Browser-Tabs desselben Rechners abgeglichen
 

@@ -27,6 +27,32 @@ pruefe('Statistik-Schaltfläche nicht im Druck', await versteckt('.statsbtn'));
 pruefe('Telefonliste nicht im Druck', await versteckt('.note-phones'));
 pruefe('geplante Aufnahmen im Druck', !(await versteckt('.note-aufnahmen')));
 
+/* Die Angaben zur Schicht stehen unter der Tabelle – am Bildschirm wie auf
+   dem Blatt; die schwebenden Schaltflächen dürfen kein Feld verdecken. */
+const reihenfolge = async () => await page.$$eval('body > *',
+  es => es.filter(e => ['HEADER', 'MAIN', 'SECTION'].includes(e.tagName) &&
+                       getComputedStyle(e).display !== 'none')
+          .map(e => e.className.split(' ')[0]).join(' → '));
+gleich('Schichtangaben unter der Tabelle im Druck', await reihenfolge(),
+  'topbar → tablewrap → stationbar → notes');
+
+await page.emulateMedia({ media: 'screen' });
+gleich('Schichtangaben unter der Tabelle am Schirm', await reihenfolge(),
+  'topbar → tablewrap → stationbar → notes');
+const verdeckt = await page.evaluate(() => {
+  const kasten = s => document.querySelector(s).getBoundingClientRect();
+  const knoepfe = ['#btnStats', '#btnHelp', '#btnSettings'].map(s => {
+    document.querySelector(s).hidden = false;
+    return kasten(s);
+  });
+  return [...document.querySelectorAll('.stationfield input')].some(feld => {
+    const f = feld.getBoundingClientRect();
+    return knoepfe.some(k => f.left < k.right && k.left < f.right && f.top < k.bottom && k.top < f.bottom);
+  });
+});
+pruefe('keine Schaltfläche über einem Feld der Schichtangaben', !verdeckt);
+await page.emulateMedia({ media: 'print' });
+
 const farben = await page.$$eval('#tbody td', tds => tds
   .map(td => getComputedStyle(td).backgroundColor)
   .filter(c => c !== 'rgba(0, 0, 0, 0)' && c !== 'transparent'));

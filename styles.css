@@ -247,13 +247,15 @@ body {
 }
 .stat-melde select option { color: var(--ink); background: var(--panel); }
 
-/* Schichtleitung, Blutzuständigkeit, Notfallequipment */
+/* Schichtleitung, Blutzuständigkeit, Notfallequipment – unter der Tafel */
 .stationbar {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 8px 14px;
   margin: 10px 18px 0;
-  padding: 10px 14px;
+  /* Rechts bleibt die Spur der schwebenden Schaltflächen frei – sonst liegt
+     auf schmalen Schirmen die Schaltfläche über dem letzten Telefonfeld. */
+  padding: 10px 70px 10px 14px;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -1357,13 +1359,16 @@ body.saver-on { overflow: hidden; }
     width: auto;
   }
 
-  /* Schichtleitung und Blutzuständigkeit */
+  /* Schichtleitung und Blutzuständigkeit – wie auf dem Schirm unter der
+     Tabelle, abgesetzt durch dieselbe Linie wie die Felder darunter. */
   .stationbar {
     display: flex;
     gap: 22px;
-    margin: 3px 0;
-    padding: 0;
+    margin: 3px 0 0;
+    padding: 2px 0 0;
     border: none;
+    border-top: 1px solid #000;
+    page-break-inside: avoid;
   }
   .stationfield { display: flex; align-items: baseline; gap: 5px; }
   .stationlabel { font-size: 8.5px; }

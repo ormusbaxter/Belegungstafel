@@ -91,8 +91,6 @@
   </div>
 </header>
 
-<section class="stationbar" id="stationbar"></section>
-
 <p class="savestate" id="saveState">Bereit</p>
 
 <main class="tablewrap" id="tablewrap">
@@ -101,6 +99,10 @@
     <tbody id="tbody"></tbody>
   </table>
 </main>
+
+<!-- Angaben zur Schicht; sie stehen unter der Tafel, damit der Kopfbereich
+     schmal bleibt und mehr Bettplätze ohne Scrollen sichtbar sind. -->
+<section class="stationbar" id="stationbar"></section>
 
 <button type="button" class="statsbtn" id="btnStats" title="Statistik je Schicht"
         aria-label="Statistik" hidden>
@@ -161,6 +163,9 @@
       <p>Jede Zeile ist ein Bettplatz, jede Spalte eine Angabe. Alle Felder werden direkt in der
         Tabelle bearbeitet, ein Speichern von Hand ist nicht nötig – die Statuszeile über der
         Tabelle zeigt, wann zuletzt gespeichert wurde.</p>
+      <p><b>Schichtleitung, Blutzuständigkeit und Notfallequipment</b> stehen mit ihrer
+        Telefonnummer <b>unter der Tabelle</b>. Sie gelten für die ganze Station, werden
+        mitgespeichert und mitgedruckt; „Tafel leeren“ lässt sie stehen.</p>
       <ul>
         <li><b>Auswahlfelder</b> (z. B. Anwesenheitsstatus, Fachdisziplin, Kostform):
           anklicken und Wert wählen. Der leere Eintrag ganz oben setzt das Feld zurück.
@@ -359,11 +364,12 @@
         keine Daten an einen Server übertragen. Mehrere geöffnete Fenster desselben Rechners
         werden abgeglichen, andere Arbeitsplätze sehen die Tafel jedoch nicht.</p>
       <p><b>Drucken</b> gibt eine Seite <b>A4 quer in Schwarzweiß</b> aus. Der Ausdruck enthält
-        die belegten Betten, die maximale Bettenzahl und den Meldestatus, die Schichtleitung und
-        die Blutzuständigkeit mit Telefonnummer, die geplanten Aufnahmen sowie eine verkürzte
-        Tabelle: Anwesenheitsstatus, Bettplatz, Name, Fachdisziplin, Isolation, Intervention,
-        Therapielimitierung, Telefon und Pflegekraft – dazu eine breite Spalte
-        <b>Notizen</b> für handschriftliche Vermerke. Über das Zahnrad unten rechts
+        oben die belegten Betten, die maximale Bettenzahl und den Meldestatus, darunter eine
+        verkürzte Tabelle: Anwesenheitsstatus, Bettplatz, Name, Fachdisziplin, Isolation,
+        Intervention, Therapielimitierung, Telefon und Pflegekraft – dazu eine breite Spalte
+        <b>Notizen</b> für handschriftliche Vermerke. Unter der Tabelle stehen wie am
+        Bildschirm die Schichtleitung und die Blutzuständigkeit mit Telefonnummer sowie die
+        geplanten Aufnahmen. Über das Zahnrad unten rechts
         stehen unter <b>Daten</b> Export (JSON oder CSV), Import und „Tafel leeren“ bereit; dort
         lassen sich auch Bettplätze, Spaltenköpfe und alle Auswahllisten anpassen.</p>
     </section>
