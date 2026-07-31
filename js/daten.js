@@ -259,12 +259,12 @@ const STORAGE_KEY = 'belegungstafel.intensiv.v1' + KEY_SUFFIX;
 const THEME_KEY = 'belegungstafel.theme' + KEY_SUFFIX;
 const BACKUP_KEY = 'belegungstafel.sicherung' + KEY_SUFFIX;
 
-/* Sichtschutz: patientenbezogene Spalten zwischen Bettplatz und
-   Therapielimitierung (jeweils ausschließlich bzw. einschließlich). */
-const PRIVATE_KEYS = COLUMNS
-  .slice(COLUMNS.findIndex(col => col.type === 'bed') + 1,
-         COLUMNS.findIndex(col => col.key === 'limitierung') + 1)
-  .map(col => col.key);
+/* Sichtschutz: alle patientenbezogenen Spalten. Offen bleiben allein die
+   Angaben, die den Bettplatz oder die Schicht beschreiben – Anwesenheits-
+   status, Bettplatz, Telefon und Pflegekraft. Eine später ergänzte Spalte
+   ist damit von sich aus geschützt. */
+const PRIVATE_OFFEN = ['status', 'bed', 'telefon', 'pflege'];
+const PRIVATE_KEYS = COLUMNS.map(col => col.key).filter(key => !PRIVATE_OFFEN.includes(key));
 
 /* ------------------------------------------------------------------ *
  * Zustand
@@ -330,6 +330,9 @@ function merge(target, source) {
       target[col.key] = Boolean(val);
     } else if (col.type === 'status') {
       target[col.key] = STATUS_LEGACY[String(val)] || String(val);
+    } else if (col.key === 'name') {
+      /* Auch in älteren Ständen wird das Pluszeichen zum Kreuz. */
+      target[col.key] = mitKreuz(val);
     } else {
       target[col.key] = String(val);
     }

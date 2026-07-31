@@ -49,6 +49,7 @@ Jede Datei meldet ihre Einzelprüfungen und endet mit `bestanden` oder `FEHLGESC
 | `11-physio-druck.mjs` | Blatt für die Physiotherapie: Spalten, Zeilen, Schriftgrößen, eine Seite |
 | `12-vorgaben.mjs` | Vorgabedatei erzeugen, Geltung, Zurücksetzen, fehlerhafte Datei |
 | `13-statistik.mjs` | Kennzahlen, Schichtzuordnung über Mitternacht, Fenster, Einstellungen |
+| `14-datenschutz-verstorben.mjs` | Umfang des Sichtschutzes, Kreuz und dunkle Namenszelle |
 
 `lib.mjs` enthält die gemeinsamen Hilfen: Browserstart, Prüfungen, das Setzen von
 Einstellungen ohne Umweg über den Dialog und einen kleinen Webserver für die Prüfungen,
@@ -56,7 +57,7 @@ die einen solchen voraussetzen.
 
 ## Eine Prüfung ergänzen
 
-Neue Datei nach dem Muster `14-name.mjs` anlegen:
+Neue Datei nach dem Muster `15-name.mjs` anlegen:
 
 ```js
 import { browserStarten, neueSeite, testName, gleich, keineFehler, bilanz } from './lib.mjs';

@@ -21,11 +21,25 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.4.1';
+const VERSION = '2.5.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
 const ARROW_OUT = '\u2B05\uFE0E';
+
+/* Verstorbene Patienten: Im Feld Patientenname wird ein für sich stehendes
+   Pluszeichen zum Kreuz; dahinter steht der Todeszeitpunkt, etwa
+   „Mustermann, Max † 14:30“. Die Zelle wird dann dunkel hinterlegt. */
+const KREUZ = '†';
+const PLUS_ZU_KREUZ = /(^|\s)\+(?=\s|\d|$)/g;
+
+function mitKreuz(text) {
+  return String(text).replace(PLUS_ZU_KREUZ, '$1' + KREUZ);
+}
+
+function istVerstorben(name) {
+  return String(name || '').includes(KREUZ);
+}
 
 /* Frühere Textkürzel werden beim Einlesen auf die Pfeile umgestellt. */
 const STATUS_LEGACY = { 'A >>>': ARROW_IN, 'A >>': ARROW_IN, '<<< V': ARROW_OUT, '<< V': ARROW_OUT };

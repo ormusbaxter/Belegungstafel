@@ -168,13 +168,20 @@ Spalte der Tafel zugeordnet.
   Diaschau, unter „Daten“ Export, Import und „Tafel leeren“.
   Ein Wert, der in einem Bettplatz steht, bleibt erhalten, auch wenn er später aus der
   Liste entfernt wird
+- **Verstorbene**: Ein für sich stehendes Pluszeichen im Feld Patientenname wird sofort zum
+  Kreuz `†`; dahinter steht der Todeszeitpunkt (`Mustermann, Max † 14:30`). Die Namenszelle
+  wird dann dunkelgrau hinterlegt und die Schrift hell gesetzt. Ein Plus innerhalb eines
+  Wortes bleibt unverändert; ältere Stände werden beim Einlesen umgesetzt. Der Bettplatz zählt
+  weiterhin als belegt
 - **Sichtschutz**: Nach der eingestellten Zeit ohne Eingabe (Voreinstellung 120 Sekunden)
-  werden die patientenbezogenen Spalten – Patientenname bis
-  einschließlich Therapielimitierung – sowie die beiden Textfelder unter der Tafel
+  werden **alle patientenbezogenen Spalten** – Patientenname bis Sonstiges, also auch Kostform,
+  privat, Physiotherapie, Devices, Norton / Stammblatt und Abstriche – sowie die beiden
+  Textfelder unter der Tafel
   unkenntlich gemacht. Jede Mausbewegung oder Taste hebt das auf; die Schaltfläche
   „Datenschutz“ schaltet sofort um und bleibt dann bis zu einem Klick oder Tastendruck
-  bestehen. Bettplatz, Anwesenheitsstatus und die Kennzahlen bleiben lesbar, der Ausdruck
-  wird nie unkenntlich gemacht
+  bestehen. Lesbar bleiben allein Anwesenheitsstatus, Bettplatz, Telefon und Pflegekraft
+  sowie die Kennzahlen; der Ausdruck wird nie unkenntlich gemacht. Eine später ergänzte
+  Spalte ist von sich aus geschützt (`PRIVATE_OFFEN` in `js/daten.js` nennt die Ausnahmen)
 - **Bildschirmschoner (Diaschau)**: zeigt bildschirmfüllend die freigegebenen Inhalte
   nacheinander – Dateien aus dem Ordner `slides` (PDF, PNG, JPEG) und in den Einstellungen
   angelegte Hinweise aus Überschrift und Infotext. Der Start erfolgt über die Schaltfläche

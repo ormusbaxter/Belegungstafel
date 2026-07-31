@@ -321,6 +321,16 @@ function buildField(bed, col, data) {
       input.value = data[col.key];
       input.setAttribute('aria-label', col.label + ' – Bett ' + bed.label);
       input.addEventListener('input', () => {
+        if (col.key === 'name') {
+          /* Ein für sich stehendes Plus wird sofort zum Kreuz. Beide Zeichen
+             sind gleich lang, die Schreibmarke bleibt deshalb stehen. */
+          const ersetzt = mitKreuz(input.value);
+          if (ersetzt !== input.value) {
+            const stelle = input.selectionStart;
+            input.value = ersetzt;
+            input.setSelectionRange(stelle, stelle);
+          }
+        }
         data[col.key] = input.value;
         if (col.key === 'name') {
           applyRowState(input.closest('tr'), data);
@@ -493,6 +503,7 @@ function applyRowState(tr, data) {
   tr.classList.toggle('has-limit', isSet(data.limitierung));
   tr.classList.toggle('has-verdacht',
     data.isolation.length > 0 && data.isolation.every(entry => entry.s === 'verdacht'));
+  tr.classList.toggle('verstorben', istVerstorben(data.name));
   markiereLuecken(tr, data);
 }
 

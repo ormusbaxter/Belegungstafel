@@ -35,6 +35,8 @@
   --pfeil-ab: #8e1c1c;
   --luecke: rgba(179, 38, 30, .10);
   --luecke-linie: rgba(179, 38, 30, .55);
+  --verstorben: #4a5058;
+  --verstorben-ink: #f4f6f8;
 
   --row-h: 42px;
 
@@ -76,6 +78,8 @@ html[data-theme="dark"] {
   --pfeil-ab: #e46b6b;
   --luecke: rgba(228, 107, 107, .16);
   --luecke-linie: rgba(228, 107, 107, .6);
+  --verstorben: #333a42;
+  --verstorben-ink: #e7edf3;
 }
 
 * { box-sizing: border-box; }
@@ -491,6 +495,21 @@ tr.has-verdacht td.col-bed .bedlabel::after { content: "ISO?"; }
 }
 .datebadge::before { content: "→ "; }
 .datebadge.due { background: var(--iso); color: #fff; font-weight: 700; }
+
+/* Verstorbene Patienten: die Namenszelle wird dunkelgrau hinterlegt, der
+   Name hell gesetzt, damit er lesbar bleibt. */
+tr.verstorben td.col-name { background: var(--verstorben); }
+tr.verstorben td.col-name input {
+  color: var(--verstorben-ink);
+  font-weight: 700;
+}
+tr.verstorben td.col-name input::placeholder { color: var(--verstorben-ink); opacity: .5; }
+tr.verstorben td.col-name .combobtn { color: var(--verstorben-ink); }
+tr.verstorben td.col-name input:hover,
+tr.verstorben td.col-name input:focus {
+  border-color: var(--verstorben-ink);
+  background: rgba(255, 255, 255, .10);
+}
 
 /* Fehlende Pflichtangabe bei belegtem Bettplatz: dezent rot unterlegt mit
    einem schmalen Streifen am oberen Rand. */

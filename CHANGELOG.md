@@ -4,6 +4,16 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.5.0
+
+- **Sichtschutz** erfasst jetzt alle patientenbezogenen Spalten: zusätzlich Kostform, privat,
+  Physiotherapie, Devices, Norton / Stammblatt, Abstriche und Sonstiges. Lesbar bleiben nur
+  Anwesenheitsstatus, Bettplatz, Telefon und Pflegekraft; später ergänzte Spalten sind von
+  sich aus geschützt
+- **Verstorbene**: Ein für sich stehendes Plus im Feld Patientenname wird zum Kreuz `†`,
+  dahinter steht der Todeszeitpunkt. Die Namenszelle wird dunkelgrau hinterlegt und hell
+  beschriftet
+
 ## 2.4.1
 
 - behoben: Die Schaltfläche der Statistik erschien in beiden Druckansichten
