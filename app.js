@@ -7,7 +7,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '1.6.1';
+const VERSION = '1.7.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -348,9 +348,18 @@ function newSlideId() {
 }
 
 function slideItem(props) {
+  /* ratio: Seitenverhältnis der ersten PDF-Seite, sofern bekannt */
   return { id: newSlideId(), kind: 'datei', file: '', title: '', text: '',
-           on: true, seconds: null, ...props };
+           on: true, seconds: null, ratio: 0, ...props };
 }
+
+/* Nachtspanne der automatischen Tag-/Nachtansicht */
+const DEFAULT_NIGHT = { from: '19:00', to: '07:00' };
+const CLOCK = /^([01]?\d|2[0-3]):[0-5]\d$/;
+const clockMinutes = value => {
+  const parts = String(value).split(':');
+  return (parseInt(parts[0], 10) || 0) * 60 + (parseInt(parts[1], 10) || 0);
+};
 
 /* Größe der Darstellung in Prozent – muss vor dem ersten Lesen der
    Einstellungen bereitstehen. */
@@ -374,7 +383,8 @@ function loadSettings() {
     privacy: { on: true, seconds: 120 },
     screensaver: copy(DEFAULT_SAVER),
     zoom: 100,
-    autoTheme: false
+    autoTheme: false,
+    night: { ...DEFAULT_NIGHT }
   };
   let stored = null;
   try {
@@ -431,6 +441,10 @@ function mergeSettings(target, source) {
   const zoom = parseInt(source.zoom, 10);
   if (Number.isFinite(zoom)) target.zoom = clampZoom(zoom);
   target.autoTheme = source.autoTheme === true;
+  if (source.night && typeof source.night === 'object') {
+    if (CLOCK.test(source.night.from || '')) target.night.from = source.night.from;
+    if (CLOCK.test(source.night.to || '')) target.night.to = source.night.to;
+  }
   mergeSaver(target.screensaver, source.screensaver);
 }
 
@@ -457,7 +471,8 @@ function mergeSaver(target, source) {
         on: item.on !== false,
         seconds: Number.isFinite(seconds) && seconds > 0
           ? Math.min(600, Math.max(SAVER_ITEM_MIN, seconds))
-          : null
+          : null,
+        ratio: Number.isFinite(item.ratio) && item.ratio > 0 ? item.ratio : 0
       });
     })
     .filter(item => item.kind === 'text' || item.file);
@@ -1344,6 +1359,16 @@ function checkRow(label, checked, onChange) {
   return row;
 }
 
+function timeField(value, onInput) {
+  const field = el('input', 'timefield');
+  field.type = 'time';
+  field.value = value;
+  field.addEventListener('input', () => {
+    if (CLOCK.test(field.value)) onInput(field.value);
+  });
+  return field;
+}
+
 function numberRow(label, value, limits, onInput) {
   const row = el('label', 'setrow');
   row.appendChild(el('span', null, label));
@@ -1395,12 +1420,35 @@ function renderGeneralPane(pane) {
   pane.appendChild(el('p', 'panehint',
     'Mit dieser Option schaltet die Schaltfläche ◐ im Seitenkopf durch drei Zustände: ' +
     '„Auto“, dunkel und hell. Im Zustand Auto – erkennbar an der Beschriftung neben dem ' +
-    'Symbol – stellt sich die Tafel nach der Uhrzeit ein: von ' + NIGHT_FROM + ' bis ' +
-    NIGHT_TO + ' Uhr dunkel, tagsüber hell. Ohne diese Option schaltet die Schaltfläche ' +
-    'wie bisher nur zwischen hell und dunkel um.'));
+    'Symbol – stellt sich die Tafel nach der Uhrzeit ein. Ohne diese Option schaltet die ' +
+    'Schaltfläche wie bisher nur zwischen hell und dunkel um.'));
+
+  const nightRow = el('div', 'setrow nightrow');
+  nightRow.appendChild(el('span', null, 'Dunkel von'));
+  const from = timeField(draft.night.from, value => { draft.night.from = value; });
+  nightRow.appendChild(from);
+  nightRow.appendChild(el('span', null, 'bis'));
+  const to = timeField(draft.night.to, value => { draft.night.to = value; });
+  nightRow.appendChild(to);
+  const nightBack = el('button', 'entrybtn zoomreset', 'Vorgabe');
+  nightBack.type = 'button';
+  nightBack.title = DEFAULT_NIGHT.from + ' bis ' + DEFAULT_NIGHT.to + ' Uhr';
+  nightBack.addEventListener('click', () => {
+    draft.night = { ...DEFAULT_NIGHT };
+    from.value = draft.night.from;
+    to.value = draft.night.to;
+  });
+  nightRow.appendChild(nightBack);
+
   pane.appendChild(checkRow('Automatische Tag-/Nachtansicht', draft.autoTheme, on => {
     draft.autoTheme = on;
+    for (const field of [from, to, nightBack]) field.disabled = !on;
   }));
+  pane.appendChild(nightRow);
+  for (const field of [from, to, nightBack]) field.disabled = !draft.autoTheme;
+  pane.appendChild(el('p', 'panehint',
+    'Zeitspanne, in der die Tafel im Zustand „Auto“ dunkel dargestellt wird; sie darf über ' +
+    'Mitternacht reichen. Der Wechsel erfolgt im laufenden Betrieb.'));
 
   pane.appendChild(el('h3', null, '4. Größe der Darstellung'));
   pane.appendChild(el('p', 'panehint',
@@ -1467,9 +1515,11 @@ function renderSaverPane(pane) {
   pane.appendChild(el('p', 'panehint',
     'Gezeigt werden alle angehakten Einträge nacheinander – in der Reihenfolge dieser Liste ' +
     'oder gemischt, siehe „Reihenfolge zufällig“. ' +
-    'Dateien (PDF, PNG, JPEG) gehören in den Ordner „slides“ neben index.html. „Ordner ' +
-    'einlesen“ sucht sie über die Datei slides/slides.json oder die Verzeichnisübersicht des ' +
-    'Webservers; findet der Browser nichts, lässt sich der Dateiname von Hand eintragen.'));
+    'Dateien (PDF, PNG, JPEG) gehören in den Ordner „slides“ neben index.html. ' +
+    '„Ordner wählen“ öffnet den Dateidialog und übernimmt alle Dateien des Ordners – das ' +
+    'funktioniert auch ohne Webserver. „Ordner einlesen“ kommt ohne Dialog aus, setzt aber ' +
+    'einen Webserver voraus (slides/slides.json oder Verzeichnisübersicht). Einzelne Namen ' +
+    'lassen sich außerdem von Hand eintragen.'));
 
   pane.appendChild(numberRow('Anzeigedauer je Eintrag', draft.screensaver.defaultSeconds,
     { min: SAVER_ITEM_MIN, max: 600, step: 1 }, value => { draft.screensaver.defaultSeconds = value; }));
@@ -1485,8 +1535,16 @@ function renderSaverPane(pane) {
 
   const status = el('p', 'panehint slidestatus');
   const list = el('div', 'entrylist');
+  /* Der Dateidialog liegt außerhalb des Fensters und meldet sich später
+     zurück; er braucht deshalb den Zugriff auf diese beiden Bereiche. */
+  slideUI = { list, status };
 
   const bar = el('div', 'slidebar');
+  const pick = el('button', 'addentry', 'Ordner wählen …');
+  pick.type = 'button';
+  pick.addEventListener('click', () => $('#folderInput').click());
+  bar.appendChild(pick);
+
   const scan = el('button', 'addentry', 'Ordner einlesen');
   scan.type = 'button';
   scan.addEventListener('click', async () => {
@@ -1529,6 +1587,65 @@ function renderSaverPane(pane) {
   pane.appendChild(status);
   pane.appendChild(list);
   renderSlideEntries(list, status);
+}
+
+/* Ordner über den Dateidialog übernehmen. Der Browser darf ein Verzeichnis
+   nicht von sich aus lesen; nach dieser einmaligen Auswahl kennt die Tafel
+   aber alle Dateinamen – auch ohne Webserver. Angezeigt werden die Dateien
+   weiterhin über den Pfad slides/…, die Auswahl dient nur den Namen. */
+let slideUI = null;
+
+function initSlideFolderInput() {
+  const input = $('#folderInput');
+  input.addEventListener('change', async () => {
+    const files = [...input.files];
+    input.value = '';
+    if (!slideUI || !draft || !files.length) return;
+    const { list, status } = slideUI;
+
+    const ordner = (files[0].webkitRelativePath || '').split('/')[0] || '';
+    const dateien = files.filter(file => SLIDE_TYPES.test(file.name))
+      .sort((a, b) => a.name.localeCompare(b.name, 'de'));
+    const namen = [];
+    for (const file of dateien) {
+      if (!namen.some(n => n.toLowerCase() === file.name.toLowerCase())) namen.push(file.name);
+    }
+
+    const added = mergeFoundSlides(draft.screensaver.items, namen);
+    markMissingSlides(draft.screensaver.items, namen);
+    renderSlideEntries(list, status);
+
+    const fremd = ordner && ordner.toLowerCase() !== 'slides'
+      ? 'Achtung: gewählt wurde der Ordner „' + ordner + '“. Die Dateien müssen im Ordner ' +
+        '„slides“ neben index.html liegen, sonst bleibt die Anzeige leer. '
+      : '';
+    status.textContent = fremd + (!namen.length
+      ? 'In diesem Ordner liegt keine Datei der Art PDF, PNG oder JPEG.'
+      : namen.length + (namen.length === 1 ? ' Datei übernommen' : ' Dateien gefunden') +
+        (added ? ', ' + added + ' neu übernommen.' : ', nichts Neues.') +
+        ' Seitenformate werden gelesen …');
+    status.classList.toggle('warnstatus', !!fremd);
+
+    /* Seitenverhältnis der PDF gleich aus den gewählten Dateien lesen –
+       ohne Webserver ist das später nicht mehr möglich. */
+    let gelesen = 0;
+    for (const file of dateien) {
+      if (!/\.pdf$/i.test(file.name)) continue;
+      const ratio = aspectFromPdfBytes(new Uint8Array(await file.arrayBuffer()));
+      if (!ratio) continue;
+      pdfRatios.set(SLIDE_DIR + encodeURIComponent(file.name), ratio);
+      for (const item of draft.screensaver.items) {
+        if (item.kind === 'datei' && item.file.toLowerCase() === file.name.toLowerCase()) {
+          item.ratio = ratio;
+          gelesen++;
+        }
+      }
+    }
+    if (namen.length) {
+      status.textContent = status.textContent.replace('Seitenformate werden gelesen …',
+        gelesen ? 'Seitenformat von ' + gelesen + ' PDF übernommen.' : '');
+    }
+  });
 }
 
 function focusLast(list, selector) {
@@ -1590,6 +1707,7 @@ function renderSlideEntries(list, status) {
       main.appendChild(entryInput(item.file, 'dateiname.pdf', 'slidefile', value => {
         item.file = slideName(value);
         item.missing = false;
+        item.ratio = 0;   /* neues Ziel, altes Seitenformat verwerfen */
       }));
       if (item.missing) main.appendChild(el('span', 'slidewarn', 'im Ordner nicht gefunden'));
     }
@@ -1731,6 +1849,8 @@ function commitSettings() {
   }
   draft.privacy.seconds = Math.min(3600, Math.max(5, draft.privacy.seconds || 120));
   draft.zoom = clampZoom(draft.zoom);
+  if (!CLOCK.test(draft.night.from)) draft.night.from = DEFAULT_NIGHT.from;
+  if (!CLOCK.test(draft.night.to)) draft.night.to = DEFAULT_NIGHT.to;
 
   /* Bildschirmschoner: Zeiten begrenzen, leere Einträge verwerfen */
   const saver = draft.screensaver;
@@ -1987,7 +2107,7 @@ function slideNode(item) {
     const frame = el('iframe', 'slide slide-pdf');
     frame.src = src + '#page=1&view=Fit&toolbar=0&navpanes=0&scrollbar=0&statusbar=0';
     frame.title = item.file;
-    applyPdfRatio(frame, src);
+    applyPdfRatio(frame, src, item.ratio);
     return frame;
   }
 
@@ -2003,8 +2123,8 @@ function slideNode(item) {
 /* Seitenverhältnis der ersten PDF-Seite, je Datei nur einmal gelesen */
 const pdfRatios = new Map();
 
-async function applyPdfRatio(frame, src) {
-  let ratio = pdfRatios.get(src);
+async function applyPdfRatio(frame, src, known) {
+  let ratio = known > 0 ? known : pdfRatios.get(src);
   if (ratio === undefined) {
     ratio = await pdfAspect(src);
     pdfRatios.set(src, ratio);
@@ -2022,17 +2142,23 @@ async function pdfAspect(src) {
   try {
     const res = await fetch(src, { cache: 'force-cache' });
     if (!res.ok) return 0;
-    const text = new TextDecoder('latin1').decode(await res.arrayBuffer());
-    const box = text.match(/\/MediaBox\s*\[\s*(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)/);
-    if (!box) return 0;
-    let width = Math.abs(parseFloat(box[3]) - parseFloat(box[1]));
-    let height = Math.abs(parseFloat(box[4]) - parseFloat(box[2]));
-    const turn = text.match(/\/Rotate\s+(-?\d+)/);
-    if (turn && Math.abs(parseInt(turn[1], 10) / 90) % 2 === 1) [width, height] = [height, width];
-    return width > 0 && height > 0 ? width / height : 0;
+    return aspectFromPdfBytes(new Uint8Array(await res.arrayBuffer()));
   } catch (err) {
+    /* Ohne Webserver ist fetch gesperrt – dann bleibt es beim vollen Rahmen
+       oder beim Wert aus der Ordnerauswahl. */
     return 0;
   }
+}
+
+function aspectFromPdfBytes(bytes) {
+  const text = new TextDecoder('latin1').decode(bytes);
+  const box = text.match(/\/MediaBox\s*\[\s*(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)/);
+  if (!box) return 0;
+  let width = Math.abs(parseFloat(box[3]) - parseFloat(box[1]));
+  let height = Math.abs(parseFloat(box[4]) - parseFloat(box[2]));
+  const turn = text.match(/\/Rotate\s+(-?\d+)/);
+  if (turn && Math.abs(parseInt(turn[1], 10) / 90) % 2 === 1) [width, height] = [height, width];
+  return width > 0 && height > 0 ? width / height : 0;
 }
 
 /* Passt das aktuelle Dia in die Fläche ein: PDF auf das Seitenverhältnis,
@@ -2643,13 +2769,17 @@ function initLogo() {
  * steht als Beschriftung neben dem Symbol.
  * ------------------------------------------------------------------ */
 const THEME_MODES = ['auto', 'dark', 'light'];
-const NIGHT_FROM = 19;   /* ab 19 Uhr dunkel */
-const NIGHT_TO = 7;      /* bis 7 Uhr dunkel */
 let themeMode = 'light';
 
+/* Liegt die aktuelle Uhrzeit in der eingestellten Nachtspanne? Die Spanne
+   darf über Mitternacht reichen (z. B. 19:00 bis 07:00). */
 function nightNow() {
-  const hour = new Date().getHours();
-  return hour >= NIGHT_FROM || hour < NIGHT_TO;
+  const now = new Date();
+  const cur = now.getHours() * 60 + now.getMinutes();
+  const from = clockMinutes(settings.night.from);
+  const to = clockMinutes(settings.night.to);
+  if (from === to) return false;
+  return from < to ? cur >= from && cur < to : cur >= from || cur < to;
 }
 
 function initTheme() {
@@ -2674,7 +2804,8 @@ function applyTheme() {
   label.textContent = themeMode === 'auto' ? 'Auto' : '';
   btn.classList.toggle('is-auto', themeMode === 'auto');
   btn.title = themeMode === 'auto'
-    ? 'Automatisch nach Uhrzeit (' + NIGHT_FROM + ' bis ' + NIGHT_TO + ' Uhr dunkel) – klicken für dunkel'
+    ? 'Automatisch nach Uhrzeit (dunkel von ' + settings.night.from + ' bis ' +
+      settings.night.to + ' Uhr) – klicken für dunkel'
     : themeMode === 'dark'
       ? 'Dunkel – klicken für hell'
       : 'Hell – klicken für ' + (settings.autoTheme ? 'automatisch' : 'dunkel');
@@ -2705,6 +2836,7 @@ function init() {
   initPrivacy();
   initSaver();
   initSettings();
+  initSlideFolderInput();
   initCombo();
   tickClock();
   setInterval(tickClock, 1000);

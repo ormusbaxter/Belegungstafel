@@ -780,6 +780,19 @@ tr:hover .clearbed, .clearbed:focus-visible { opacity: 1; }
 }
 .zoomreset { width: auto; padding: 0 8px; font-size: 12px; }
 
+/* Zeitspanne der Nachtansicht */
+.nightrow { gap: 8px; }
+.timefield {
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--ink);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+.timefield:disabled { opacity: .5; }
+
 /* Inhalte des Bildschirmschoners */
 .slidebar { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 4px; }
 .slidebar .addentry { margin-top: 0; }

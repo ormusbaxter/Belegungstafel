@@ -70,6 +70,8 @@
     </button>
     <button type="button" id="btnTheme" title="Hell / Dunkel">◐<span class="themelabel" id="themeLabel"></span></button>
     <input type="file" id="fileInput" accept="application/json" hidden>
+    <!-- Auswahl des Ordners „slides“ für den Bildschirmschoner -->
+    <input type="file" id="folderInput" webkitdirectory directory multiple hidden>
   </div>
 </header>
 
@@ -226,8 +228,12 @@
         Schau und bringt die Tafel zurück.</p>
       <ul>
         <li><b>Dateien</b> (PDF, PNG, JPEG) gehören in den Ordner <b>slides</b> neben der Tafel.
-          In den Einstellungen liest „Ordner einlesen“ die vorhandenen Dateien ein; findet der
-          Browser nichts, lässt sich der Dateiname dort von Hand eintragen.</li>
+          In den Einstellungen übernimmt <b>„Ordner wählen …“</b> alle Dateien des Ordners auf
+          einmal: Der Dateidialog öffnet sich, dort den Ordner <b>slides</b> auswählen und
+          bestätigen. Das ist der Weg, wenn die Tafel <b>ohne Webserver</b> direkt von der
+          Festplatte läuft. Wird sie über einen Webserver bereitgestellt, genügt
+          <b>„Ordner einlesen“</b> ganz ohne Dialog. Einzelne Namen lassen sich außerdem von
+          Hand eintragen.</li>
         <li><b>Eigene Hinweise</b> mit Überschrift und Infotext werden direkt in den Einstellungen
           angelegt – ohne Datei, etwa für Termine oder kurze Merksätze.</li>
         <li>Jeder Eintrag lässt sich <b>einzeln an- und abschalten</b> und in der Reihenfolge
@@ -254,9 +260,11 @@
       <p>Ist in den Einstellungen unter <b>Allgemein</b> die <b>automatische Tag-/Nachtansicht</b>
         eingeschaltet, schaltet die Schaltfläche durch drei Zustände: <b>Auto</b> → <b>dunkel</b>
         → <b>hell</b> → wieder Auto. Im Zustand Auto steht <b>„Auto“ neben dem Symbol</b>, und die
-        Tafel richtet sich nach der Uhrzeit: von 19 bis 7 Uhr dunkel, tagsüber hell. Der Wechsel
-        erfolgt zur vollen Stunde von selbst, ohne dass die Seite neu geladen werden muss.
-        Ohne die Option bleibt es beim Umschalten zwischen hell und dunkel.</p>
+        Tafel richtet sich nach der Uhrzeit. Die <b>Zeitspanne für die dunkle Ansicht</b> steht
+        gleich darunter in den Einstellungen („Dunkel von … bis …“, ab Werk 19:00 bis 07:00 Uhr)
+        und darf über Mitternacht reichen. Der Wechsel erfolgt im laufenden Betrieb, ohne dass
+        die Seite neu geladen werden muss. Ohne die Option bleibt es beim Umschalten zwischen
+        hell und dunkel.</p>
     </section>
 
     <section>

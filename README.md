@@ -168,17 +168,23 @@ Spalte der Tafel zugeordnet.
   werden schrittweise verkleinert, bis sie ganz sichtbar sind. Von mehrseitigen PDF erscheint
   die erste Seite.
   Patientendaten werden nie angezeigt, unten stehen Uhrzeit, Datum und die Position in der
-  Schau. Da ein Browser kein Verzeichnis auslesen darf, erfährt die Tafel die Dateinamen
-  über `slides/slides.json`, über die Verzeichnisübersicht des Webservers oder durch eine
-  Eingabe von Hand („Ordner einlesen“ bzw. „+ Datei von Hand“ in den Einstellungen);
-  Einzelheiten stehen in `slides/LIESMICH.txt`
+  Schau. Ein Browser darf ein Verzeichnis nicht von sich aus lesen; die Dateinamen kommen
+  deshalb aus einer der drei Quellen (Einzelheiten in `slides/LIESMICH.txt`):
+  - **„Ordner wählen …“** – der Dateidialog (`<input type="file" webkitdirectory>`) übernimmt
+    alle Dateien des gewählten Ordners auf einmal. Funktioniert **ohne Webserver**, also auch
+    beim Öffnen von der Festplatte; dabei wird zugleich das Seitenformat der PDF aus den Dateien
+    gelesen, was ohne Server sonst nicht möglich ist
+  - **„Ordner einlesen“** – ohne Dialog über `slides/slides.json` oder die Verzeichnisübersicht
+    des Webservers; eine fehlerhafte `slides.json` wird gemeldet
+  - **„+ Datei von Hand“** – einzelner Dateiname
 - **Tag- und Nachtansicht**: Die Schaltfläche `◐` oben rechts schaltet hell und dunkel um. Ist
   in den Einstellungen unter „Allgemein“ (Punkt 3) die **automatische Tag-/Nachtansicht**
   aktiviert, führt sie durch drei Zustände – **Auto → dunkel → hell**. Im Zustand Auto steht
-  „Auto“ neben dem Symbol, und die Darstellung richtet sich nach der Uhrzeit: von **19 bis
-  7 Uhr dunkel**, sonst hell; der Wechsel geschieht im laufenden Betrieb zur vollen Stunde
-  (Konstanten `NIGHT_FROM` und `NIGHT_TO` in `app.js`). Der zuletzt gewählte Zustand liegt im
-  `localStorage` unter `belegungstafel.theme` (`auto`, `dark`, `light`)
+  „Auto“ neben dem Symbol, und die Darstellung richtet sich nach der Uhrzeit. Die **Zeitspanne
+  der dunklen Ansicht** ist im selben Abschnitt einstellbar („Dunkel von … bis …“, Vorgabe
+  19:00 bis 07:00 Uhr) und darf über Mitternacht reichen; der Wechsel geschieht minutengenau im
+  laufenden Betrieb. Der zuletzt gewählte Zustand liegt im `localStorage` unter
+  `belegungstafel.theme` (`auto`, `dark`, `light`)
 - **Größe der Darstellung**: Schieberegler in den Einstellungen unter „Allgemein“ (Punkt 4),
   **25 % bis 300 %** in Schritten von 5 %, passend zu Monitor und Auflösung. Er wirkt über die
   CSS-Eigenschaft `zoom` auf Kopfbereich, Stationszeile, Tabelle und die Textfelder darunter;

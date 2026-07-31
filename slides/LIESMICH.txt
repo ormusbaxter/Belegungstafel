@@ -10,8 +10,17 @@ Zugelassene Dateitypen
 
 Dateien bekannt machen
 ----------------------
-Ein Browser darf aus Sicherheitsgründen kein Verzeichnis auslesen. Die
-Belegungstafel erfährt die Dateinamen deshalb auf einem dieser drei Wege:
+Ein Browser darf aus Sicherheitsgründen kein Verzeichnis von sich aus
+auslesen. Die Belegungstafel erfährt die Dateinamen deshalb auf einem
+dieser Wege:
+
+0. EMPFOHLEN, auch ohne Webserver: In den Einstellungen (Zahnrad unten
+   rechts) unter "Bildschirmschoner" auf "Ordner wählen ..." klicken, im
+   Dateidialog diesen Ordner "slides" auswählen und bestätigen. Die Tafel
+   übernimmt alle enthaltenen PDF-, PNG- und JPEG-Dateien mit Namen und
+   Seitenformat. Das ist einmalig nötig und nach jedem Hinzufügen neuer
+   Dateien zu wiederholen. Die Dateien selbst bleiben liegen, wo sie sind;
+   die Tafel merkt sich nur die Namen.
 
 1. Über die Liste slides.json in diesem Ordner. Sie enthält die Dateinamen,
    zum Beispiel:
@@ -22,7 +31,8 @@ Belegungstafel erfährt die Dateinamen deshalb auf einem dieser drei Wege:
        ]
 
    Danach in den Einstellungen der Tafel (Zahnrad unten rechts) unter
-   "Bildschirmschoner" auf "Ordner einlesen" klicken.
+   "Bildschirmschoner" auf "Ordner einlesen" klicken. Achtung: Diese Liste
+   kann nur gelesen werden, wenn die Tafel über einen Webserver läuft.
 
 2. Automatisch, wenn die Tafel über einen Webserver ausgeliefert wird, der
    für diesen Ordner eine Verzeichnisübersicht erzeugt. Dann genügt
