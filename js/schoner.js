@@ -1,0 +1,318 @@
+/* Belegungstafel Intensivstation – Bildschirmschoner und Diaschau
+ *
+ * Teil der Anwendung; die Dateien werden in der in index.html angegebenen
+ * Reihenfolge geladen und teilen sich einen gemeinsamen Namensraum.
+ */
+'use strict';
+
+/* ------------------------------------------------------------------ *
+ * Bildschirmschoner: Diaschau
+ * Zeigt nacheinander die freigegebenen Dateien aus dem Ordner „slides“ und
+ * die von Hand angelegten Einträge. Der Start erfolgt nach der eingestellten
+ * Zeit ohne Eingabe oder von Hand über die Schaltfläche im Seitenkopf; jede
+ * Eingabe beendet die Schau wieder.
+ * ------------------------------------------------------------------ */
+let saverDelay = 0;
+let saverTimer = null;
+let saverOn = false;
+let saverGuard = 0;
+let saverPos = null;
+let slideTimer = null;
+let slideClock = null;
+let slideList = [];
+let slideIndex = 0;
+
+/* Alle freigegebenen Einträge mit Inhalt, in eingestellter Reihenfolge –
+   auf Wunsch gemischt. */
+function saverPlaylist() {
+  const list = settings.screensaver.items.filter(item => item.on &&
+    (item.kind === 'text' ? (item.title.trim() || item.text.trim()) : item.file));
+  return settings.screensaver.shuffle ? shuffled(list) : list;
+}
+
+/* Mischen nach Fisher und Yates. Beim Neumischen einer laufenden Schau steht
+   der zuletzt gezeigte Eintrag nicht gleich wieder am Anfang. */
+function shuffled(list, notFirst) {
+  const mixed = list.slice();
+  for (let i = mixed.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [mixed[i], mixed[j]] = [mixed[j], mixed[i]];
+  }
+  if (notFirst && mixed.length > 1 && mixed[0] === notFirst) {
+    [mixed[0], mixed[mixed.length - 1]] = [mixed[mixed.length - 1], mixed[0]];
+  }
+  return mixed;
+}
+
+function slideSeconds(item) {
+  return item && item.seconds > 0 ? item.seconds : settings.screensaver.defaultSeconds;
+}
+
+function restartSaverTimer() {
+  clearTimeout(saverTimer);
+  if (saverOn || saverDelay <= 0) return;
+  saverTimer = setTimeout(() => {
+    /* Ein offenes Fenster (Einstellungen, Auswahl) bleibt unangetastet. */
+    if (document.querySelector('dialog[open]')) restartSaverTimer();
+    else startSaver();
+  }, saverDelay * 1000);
+}
+
+/* Erste Eingabe nach dem Start beendet die Schau. Ein winziges Zucken der
+   Maus zählt nicht, sonst ließe sich die Schau von Hand kaum starten. */
+function saverWakes(event) {
+  if (Date.now() < saverGuard) return false;
+  if (event && event.type === 'mousemove') {
+    if (!saverPos) {
+      saverPos = { x: event.clientX, y: event.clientY };
+      return false;
+    }
+    if (Math.abs(event.clientX - saverPos.x) + Math.abs(event.clientY - saverPos.y) < 30) return false;
+  }
+  return true;
+}
+
+function startSaver() {
+  if (saverOn) return;
+  slideList = saverPlaylist();
+  saverOn = true;
+  saverGuard = Date.now() + 800;
+  saverPos = null;
+  clearTimeout(saverTimer);
+  clearTimeout(privacyTimer);
+  if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+  setPrivacy(true);
+  $('#saver').hidden = false;
+  document.body.classList.add('saver-on');
+  showSlide(0);
+  tickSlideClock();
+  slideClock = setInterval(tickSlideClock, 1000);
+}
+
+function stopSaver(event) {
+  if (!saverWakes(event)) return false;
+  saverOn = false;
+  clearTimeout(slideTimer);
+  clearInterval(slideClock);
+  $('#saverStage').replaceChildren();
+  $('#saver').hidden = true;
+  document.body.classList.remove('saver-on');
+  return true;
+}
+
+function showSlide(index) {
+  clearTimeout(slideTimer);
+  const count = slideList.length;
+
+  /* Nach einem vollen Durchlauf wird neu gemischt, damit sich die Abfolge
+     nicht wiederholt. */
+  if (settings.screensaver.shuffle && count > 1 && index >= count) {
+    slideList = shuffled(slideList, slideList[count - 1]);
+    index = 0;
+  }
+
+  slideIndex = count ? ((index % count) + count) % count : 0;
+  const item = count ? slideList[slideIndex] : null;
+
+  const stage = $('#saverStage');
+  stage.replaceChildren(item ? slideNode(item) : emptySlideNode());
+  fitSlide();
+  $('#saverCount').textContent = count > 1 ? slideIndex + 1 + ' / ' + count : '';
+
+  /* Bei nur einem Eintrag gibt es nichts weiterzuschalten. */
+  if (count > 1) slideTimer = setTimeout(() => showSlide(slideIndex + 1), slideSeconds(item) * 1000);
+}
+
+function slideNode(item) {
+  if (item.kind === 'text') {
+    const card = el('div', 'slide slide-text');
+    if (item.title.trim()) card.appendChild(el('h2', null, item.title));
+    if (item.text.trim()) card.appendChild(el('p', null, item.text));
+    return card;
+  }
+
+  const src = SLIDE_DIR + encodeURIComponent(item.file);
+  if (/\.pdf$/i.test(item.file)) {
+    /* „view=Fit“ zeigt die ganze Seite statt sie auf die Breite zu ziehen;
+       zusätzlich erhält der Rahmen das Seitenverhältnis der ersten Seite,
+       damit die Seite die Fläche ohne Ränder und ohne Blättern ausfüllt. */
+    const frame = el('iframe', 'slide slide-pdf');
+    frame.src = src + '#page=' + (item.page > 1 ? item.page : 1) +
+      '&view=Fit&toolbar=0&navpanes=0&scrollbar=0&statusbar=0';
+    frame.title = item.file + (item.page > 1 ? ', Seite ' + item.page : '');
+    applyPdfRatio(frame, src, item.ratio);
+    return frame;
+  }
+
+  const img = el('img', 'slide slide-img');
+  img.src = src;
+  img.alt = item.file;
+  img.addEventListener('error', () => img.replaceWith(missingSlideNode(item.file)));
+  return img;
+}
+
+/* ---- Einpassen der Inhalte: nichts abschneiden, nichts scrollen ---- */
+
+/* Seitenverhältnis der ersten PDF-Seite, je Datei nur einmal gelesen */
+const pdfRatios = new Map();
+
+async function applyPdfRatio(frame, src, known) {
+  let ratio = known > 0 ? known : pdfRatios.get(src);
+  if (ratio === undefined) {
+    ratio = await pdfAspect(src);
+    pdfRatios.set(src, ratio);
+  }
+  if (!ratio) return;
+  frame.dataset.ratio = String(ratio);
+  /* Hängt der Rahmen noch nicht in der Bühne, passt showSlide() ihn gleich
+     selbst ein; ein spät gelesenes Verhältnis wird hier nachgezogen. */
+  if (frame.isConnected) fitSlide();
+}
+
+/* Liest /MediaBox und /Rotate aus der PDF-Datei. Steckt die Seitenangabe in
+   einem komprimierten Objektstrom, bleibt es beim vollflächigen Rahmen. */
+const OHNE_SERVER = location.protocol === 'file:';
+
+async function pdfAspect(src) {
+  /* Ohne Webserver ist fetch gesperrt. Der Versuch würde nur eine
+     Fehlermeldung in der Browserkonsole hinterlassen; das Seitenformat
+     kommt in diesem Fall aus der Ordnerauswahl. */
+  if (OHNE_SERVER) return 0;
+  try {
+    const res = await fetch(src, { cache: 'force-cache' });
+    if (!res.ok) return 0;
+    return aspectFromPdfBytes(new Uint8Array(await res.arrayBuffer()));
+  } catch (err) {
+    /* Ohne Webserver ist fetch gesperrt – dann bleibt es beim vollen Rahmen
+       oder beim Wert aus der Ordnerauswahl. */
+    return 0;
+  }
+}
+
+function aspectFromPdfBytes(bytes) {
+  const text = new TextDecoder('latin1').decode(bytes);
+  const box = text.match(/\/MediaBox\s*\[\s*(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)/);
+  if (!box) return 0;
+  let width = Math.abs(parseFloat(box[3]) - parseFloat(box[1]));
+  let height = Math.abs(parseFloat(box[4]) - parseFloat(box[2]));
+  const turn = text.match(/\/Rotate\s+(-?\d+)/);
+  if (turn && Math.abs(parseInt(turn[1], 10) / 90) % 2 === 1) [width, height] = [height, width];
+  return width > 0 && height > 0 ? width / height : 0;
+}
+
+/* Passt das aktuelle Dia in die Fläche ein: PDF auf das Seitenverhältnis,
+   Textkarten so weit verkleinert, bis der ganze Text sichtbar ist. */
+function fitSlide() {
+  const stage = $('#saverStage');
+  const slide = stage.firstElementChild;
+  if (!slide) return;
+
+  const frame = slide.classList.contains('slide-pdf') && slide.dataset.ratio
+    ? slide : null;
+  if (frame) {
+    const ratio = parseFloat(frame.dataset.ratio);
+    const height = Math.min(stage.clientWidth / ratio, stage.clientHeight);
+    frame.style.height = Math.floor(height) + 'px';
+    frame.style.width = Math.floor(height * ratio) + 'px';
+    return;
+  }
+
+  if (!slide.classList.contains('slide-text')) return;
+  slide.style.fontSize = '';
+  const start = parseFloat(getComputedStyle(slide).fontSize);
+  let size = start;
+  /* Die Karte ist auf die Bühnenhöhe begrenzt; ragt der Inhalt darüber
+     hinaus, wird schrittweise verkleinert. */
+  for (let step = 0; step < 40 && slide.scrollHeight > slide.clientHeight + 1 && size > 11; step++) {
+    size *= 0.93;
+    slide.style.fontSize = size + 'px';
+  }
+}
+
+function missingSlideNode(file) {
+  const card = el('div', 'slide slide-text slide-missing');
+  card.appendChild(el('h2', null, 'Datei nicht gefunden'));
+  card.appendChild(el('p', null, SLIDE_DIR + file));
+  return card;
+}
+
+function emptySlideNode() {
+  const card = el('div', 'slide slide-text');
+  card.appendChild(el('h2', null, 'Belegungstafel Intensivstation'));
+  card.appendChild(el('p', null,
+    'Für die Diaschau sind noch keine Inhalte freigegeben. Dateien (PDF, PNG, JPEG) ' +
+    'gehören in den Ordner „slides“ neben der Tafel; eigene Hinweise lassen sich in den ' +
+    'Einstellungen unter „Bildschirmschoner“ anlegen.'));
+  return card;
+}
+
+function tickSlideClock() {
+  const d = new Date();
+  const days = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+  $('#saverClock').textContent = timeStr(d);
+  $('#saverDate').textContent = days[d.getDay()] + ', ' + pad(d.getDate()) + '.' +
+    pad(d.getMonth() + 1) + '.' + d.getFullYear();
+}
+
+function initSaver() {
+  $('#btnSaver').addEventListener('click', startSaver);
+  restartSaverTimer();
+}
+
+/* ------------------------------------------------------------------ *
+ * Dateien im Ordner „slides“ suchen
+ * Ein Browser kann kein Verzeichnis auflisten. Gelesen wird deshalb die
+ * Liste slides/slides.json und – sofern der Webserver eine Verzeichnis-
+ * übersicht ausliefert – zusätzlich diese Übersicht.
+ * ------------------------------------------------------------------ */
+async function scanSlideFolder() {
+  const found = [];
+  let fehler = '';
+  if (OHNE_SERVER) {
+    found.hinweis = 'Ohne Webserver kann der Browser weder slides.json noch das Verzeichnis ' +
+      'lesen. Bitte „Ordner wählen …“ benutzen.';
+    return found;
+  }
+  const add = value => {
+    const name = slideName(value);
+    if (name && !found.some(f => f.toLowerCase() === name.toLowerCase())) found.push(name);
+  };
+
+  try {
+    const res = await fetch(SLIDE_DIR + 'slides.json', { cache: 'no-store' });
+    if (res.ok) {
+      const text = await res.text();
+      try {
+        const data = JSON.parse(text);
+        const list = Array.isArray(data) ? data : Array.isArray(data && data.slides) ? data.slides : [];
+        for (const entry of list) add(typeof entry === 'string' ? entry : entry && entry.file);
+      } catch (err) {
+        /* Ein Tippfehler in der Liste darf nicht unbemerkt bleiben. */
+        fehler = 'Die Datei slides/slides.json ist fehlerhaft und wurde übergangen (' +
+          err.message + ').';
+      }
+    }
+  } catch (err) {
+    /* keine Liste vorhanden oder nicht erreichbar – kein Fehler */
+  }
+
+  try {
+    const res = await fetch(SLIDE_DIR, { cache: 'no-store' });
+    if (res.ok) {
+      const html = await res.text();
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      for (const link of doc.querySelectorAll('a[href]')) {
+        try {
+          add(decodeURIComponent(link.getAttribute('href')));
+        } catch (err) {
+          add(link.getAttribute('href'));
+        }
+      }
+    }
+  } catch (err) {
+    /* keine Verzeichnisübersicht – kein Fehler */
+  }
+
+  found.hinweis = fehler;
+  return found;
+}

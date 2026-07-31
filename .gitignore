@@ -1,0 +1,6 @@
+# Nur für die Prüfungen; die Tafel selbst braucht keine Abhängigkeiten.
+tests/node_modules/
+tests/package-lock.json
+
+# Ausgaben von Testläufen
+tests/screenshots/

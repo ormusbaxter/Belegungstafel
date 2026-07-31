@@ -1,5 +1,11 @@
 <!DOCTYPE html>
-<html lang="de">
+<!--
+  data-instanz: Kennung dieser Tafel. Leer lassen für die normale Station.
+  Alle Kopien der Tafel auf einem Rechner teilen sich sonst denselben
+  Browser-Speicher – eine Test- oder Zweitkopie erhält hier eine eigene
+  Kennung (z. B. data-instanz="test"), damit sie eigene Daten führt.
+-->
+<html lang="de" data-instanz="">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -190,11 +196,25 @@
         <li>Maustaste loslassen. Ist das Ziel frei, wandert der gesamte Eintrag dorthin. Ist das
           Ziel belegt, <b>tauschen</b> beide Bettplätze ihre Einträge.</li>
       </ol>
-      <p>Verschoben wird immer die vollständige Zeile mit allen Angaben. In der Statuszeile
-        erscheint danach ein Hinweis mit der Schaltfläche <b>Rückgängig</b>, mit der sich der
-        letzte Vorgang zurücknehmen lässt – solange noch keine andere Änderung erfolgt ist.</p>
+      <p>Verschoben wird immer die vollständige Zeile mit allen Angaben. Zurücknehmen lässt sich
+        das über <b>Rückgängig</b> in der Statuszeile (siehe unten).</p>
       <p class="warn">Ziehen und Ablegen funktioniert mit der Maus, nicht per Fingertipp auf
         einem Touchscreen.</p>
+    </section>
+
+    <section>
+      <h3>Verlauf: Änderungen zurücknehmen</h3>
+      <p>Die Statuszeile über der Tabelle zeigt nach der ersten Änderung zwei Schaltflächen:
+        <b>Rückgängig</b> nimmt den letzten Schritt zurück – dasselbe leistet <b>Strg + Z</b>,
+        solange der Schreibcursor nicht in einem Textfeld steht. <b>Verlauf …</b> öffnet die
+        Liste der letzten <b>20 Schritte</b> mit Uhrzeit; dort lässt sich auch ein weiter
+        zurückliegender Schritt einzeln zurücknehmen.</p>
+      <p>Erfasst werden Eingaben in den Feldern (mehrere Tastendrücke im selben Feld gelten als
+        ein Schritt), das Räumen eines Bettplatzes, das Verschieben von Patienten, „Tafel
+        leeren“ und der Import. Auch das Zurücknehmen selbst landet im Verlauf und lässt sich
+        damit wieder aufheben.</p>
+      <p class="warn">Der Verlauf gilt nur für die laufende Sitzung: Wird die Seite neu geladen
+        oder geschlossen, beginnt er von vorn. Die Belegung selbst bleibt davon unberührt.</p>
     </section>
 
     <section>
@@ -239,6 +259,9 @@
         <li>Jeder Eintrag lässt sich <b>einzeln an- und abschalten</b> und in der Reihenfolge
           verschieben. Die <b>Dauer</b> gilt je Eintrag; bleibt das Feld leer, gilt die zentrale
           Vorgabe von 10 Sekunden.</li>
+        <li>Bei einem <b>mehrseitigen PDF</b> lässt sich in der Spalte <b>S.</b> die gewünschte
+          Seite angeben. Dieselbe Datei kann mehrfach mit unterschiedlichen Seiten eingetragen
+          werden – so läuft ein zweiseitiges Merkblatt als zwei Dias.</li>
         <li>Mit <b>Reihenfolge zufällig</b> laufen die Einträge gemischt: bei jedem Start der
           Schau und nach jedem vollen Durchlauf wird neu gemischt, wobei jeder Eintrag pro
           Durchlauf genau einmal an die Reihe kommt. Ohne Haken gilt die Reihenfolge der
@@ -294,6 +317,26 @@
         <b>Notizen</b> für handschriftliche Vermerke. Über das Zahnrad unten rechts
         stehen unter <b>Daten</b> Export (JSON oder CSV), Import und „Tafel leeren“ bereit; dort
         lassen sich auch Bettplätze, Spaltenköpfe und alle Auswahllisten anpassen.</p>
+    </section>
+
+    <section>
+      <h3>Sicherung</h3>
+      <p>Die Tafel liegt ausschließlich im Browser dieses Rechners. Wird das Browserprofil
+        zurückgesetzt oder der Rechner getauscht, ist alles verloren. Unter <b>Daten</b> lässt
+        sich deshalb eine <b>tägliche Sicherung</b> einschalten: Die Tafel legt dann einmal am
+        Tag eine vollständige Datei ab, die sich über <b>Import</b> wieder einlesen lässt.</p>
+      <ul>
+        <li><b>Ablage in einem Ordner</b>: einmalig „Ordner wählen …“ anklicken und den Ordner
+          bestätigen – gern auf einem Netzlaufwerk. Der Browser merkt sich die Freigabe.</li>
+        <li><b>Ablage im Download-Ordner</b> des Browsers, falls kein Ordner gewählt werden
+          kann.</li>
+        <li>Wie viele Sicherungen aufgehoben werden, ist einstellbar; ältere entfernt die Tafel
+          selbst.</li>
+        <li><b>Jetzt sichern</b> schreibt sofort eine Sicherung, unabhängig vom Tagesrhythmus.</li>
+      </ul>
+      <p>Unter <b>Kennung dieser Tafel</b> steht, unter welchem Namen diese Tafel ihre Daten
+        führt. Sie ist nur wichtig, wenn auf einem Rechner <b>mehrere Kopien</b> der Tafel
+        liegen: Ohne eigene Kennung würden sie sich denselben Speicher teilen.</p>
     </section>
 
   </div>
@@ -362,6 +405,19 @@
   </menu>
 </dialog>
 
+<!-- Verlauf (Papierkorb) -->
+<dialog id="histDlg" class="dlg dlg-hist">
+  <h2>Verlauf</h2>
+  <p class="dlgsub">Die letzten Änderungen dieser Sitzung. „Zurücknehmen“ stellt den Stand
+    <b>vor</b> dem jeweiligen Schritt wieder her; der aktuelle Stand wird dabei selbst in den
+    Verlauf gelegt. Beim Schließen der Seite endet der Verlauf.</p>
+  <div class="histlist" id="histList"></div>
+  <menu class="dlgmenu">
+    <span class="spacer"></span>
+    <button type="button" id="histClose" class="primary">Schließen</button>
+  </menu>
+</dialog>
+
 <!-- Export -->
 <dialog id="exportDlg" class="dlg">
   <h2>Export</h2>
@@ -374,6 +430,12 @@
   </menu>
 </dialog>
 
-<script src="app.js"></script>
+<!-- Reihenfolge beachten: jede Datei setzt die vorherigen voraus. -->
+<script src="js/konfiguration.js"></script>
+<script src="js/daten.js"></script>
+<script src="js/tabelle.js"></script>
+<script src="js/einstellungen.js"></script>
+<script src="js/schoner.js"></script>
+<script src="js/tafel.js"></script>
 </body>
 </html>

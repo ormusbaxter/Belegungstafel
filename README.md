@@ -6,15 +6,26 @@ Server-Anbindung.
 
 ## Start
 
-`index.html` im Browser öffnen (Doppelklick genügt) oder die drei Dateien auf einem
-beliebigen Webserver bereitstellen.
+`index.html` im Browser öffnen (Doppelklick genügt) oder den Ordner auf einem beliebigen
+Webserver bereitstellen.
 
 ```
-index.html    Grundgerüst und Dialoge
-styles.css    Layout, Farbkodierung, Druckansicht
-app.js        Spalten- und Bettenkonfiguration, Datenhaltung, Bedienlogik
-slides/       Inhalte für den Bildschirmschoner (PDF, PNG, JPEG) mit Liste slides.json
+index.html            Grundgerüst und Dialoge
+styles.css            Layout, Farbkodierung, Druckansicht
+js/konfiguration.js   Bettplätze, Spalten, Auswahllisten, Hilfsfunktionen
+js/daten.js           Einstellungen, Speicherung, Verlauf
+js/tabelle.js         Aufbau und Bedienung der Tabelle
+js/einstellungen.js   Einstellungsfenster
+js/schoner.js         Bildschirmschoner und Diaschau
+js/tafel.js           Sichtschutz, Ansicht, Sicherung, Start
+slides/               Inhalte für den Bildschirmschoner (PDF, PNG, JPEG)
+tests/                Prüfungen im echten Browser (siehe tests/README.md)
+CHANGELOG.md          Änderungen je Fassung
 ```
+
+Die JavaScript-Dateien werden von `index.html` in dieser Reihenfolge geladen und teilen sich
+einen gemeinsamen Namensraum – bewusst klassische Skripte statt ES-Module, weil der Browser
+Module beim Öffnen von der Festplatte (`file://`) sperrt.
 
 ## Bettplätze
 
@@ -123,10 +134,14 @@ Spalte der Tafel zugeordnet.
   Verschieben per Ziehen und Ablegen, Kennzeichen und Zeilenfarben, Datenschutz,
   Bildschirmschoner sowie Speichern, Drucken und Austausch. Am Fuß stehen Fassung und Urheberhinweis
 - **Verschieben per Ziehen und Ablegen**: Bettplatz-Zelle greifen und auf einen anderen
-  Bettplatz ziehen. Ist das Ziel belegt, tauschen beide Plätze ihre Einträge; der
-  letzte Vorgang lässt sich über „Rückgängig“ in der Statuszeile zurücknehmen
+  Bettplatz ziehen. Ist das Ziel belegt, tauschen beide Plätze ihre Einträge
+- **Verlauf**: Die letzten **20 Schritte** dieser Sitzung lassen sich zurücknehmen – über
+  „Rückgängig“ in der Statuszeile, mit **Strg + Z** oder gezielt über „Verlauf …“. Erfasst
+  werden Feldeingaben (mehrere Tastendrücke im selben Feld gelten als ein Schritt), Räumen,
+  Verschieben, „Tafel leeren“ und Import; das Zurücknehmen selbst wird ebenfalls erfasst.
+  Der Verlauf liegt nur im Arbeitsspeicher und endet mit dem Neuladen der Seite
 - **Einstellungen** über das Zahnrad unten rechts, geschützt durch eine Passwortabfrage
-  (Passwort in `app.js` als `SETTINGS_PASSWORD`; der Schutz verhindert versehentliches
+  (Passwort in `js/einstellungen.js` als `SETTINGS_PASSWORD`; der Schutz verhindert versehentliches
   Verstellen, ersetzt aber keine Zugriffskontrolle, da er im Quelltext der Seite steht): Beschriftung der Spaltenköpfe,
   Bezeichnung, Reihenfolge und Anzahl der **Bettplätze** sowie Bearbeiten der Auswahllisten
   für Anwesenheitsstatus, Fachdisziplinen, Beatmungsformen, Kreislaufunterstützung, Dialyse, Isolation,
@@ -158,7 +173,9 @@ Spalte der Tafel zugeordnet.
   eingestellten Zeit ohne Eingabe (mindestens 10 Sekunden); jede Mausbewegung oder Taste
   beendet ihn wieder. Solange ein Dialog geöffnet ist, startet er nicht. Jeder Eintrag lässt
   sich einzeln an- und abschalten, in der Reihenfolge verschieben und mit einer eigenen
-  Anzeigedauer versehen; ohne eigene Angabe gilt die zentrale Vorgabe (10 Sekunden).
+  Anzeigedauer versehen; ohne eigene Angabe gilt die zentrale Vorgabe (10 Sekunden). Bei
+  einem mehrseitigen PDF lässt sich in der Spalte „S.“ die Seite angeben – dieselbe Datei kann
+  mehrfach mit verschiedenen Seiten eingetragen werden.
   Mit der Option **Reihenfolge zufällig** werden die Einträge bei jedem Start und nach jedem
   vollen Durchlauf neu gemischt (Fisher-Yates); je Durchlauf kommt jeder Eintrag genau einmal
   an die Reihe, und an der Nahtstelle wiederholt sich kein Eintrag.
@@ -199,6 +216,17 @@ Spalte der Tafel zugeordnet.
 - **Bettplatz räumen** über das `×` in der Bettspalte
 - **Export/Import** als JSON (Belegung, Angaben zur Schicht und Einstellungen) sowie
   CSV-Export für Excel
+- **Automatische Sicherung** (Einstellungen → Daten): einmal am Tag eine vollständige
+  JSON-Sicherung, wahlweise in einen einmalig gewählten Ordner – etwa auf einem Netzlaufwerk,
+  der Zugriff wird über die File System Access API vergeben und in IndexedDB behalten – oder
+  in den Download-Ordner des Browsers. Ältere Sicherungen entfernt die Tafel nach einer
+  einstellbaren Zahl selbst; „Jetzt sichern“ schreibt sofort. Der Zeitpunkt der letzten
+  Sicherung liegt unter `belegungstafel.sicherung` im `localStorage`
+- **Kennung der Tafel**: Beim Betrieb ohne Webserver teilen sich **alle Kopien der Tafel auf
+  einem Rechner denselben Browser-Speicher** – eine Testkopie würde also in die Echtdaten
+  schreiben. Das Attribut `data-instanz` am `<html>`-Tag in `index.html` hängt eine Kennung an
+  alle Speicherschlüssel und trennt die Kopien; ohne Angabe bleiben die bisherigen Schlüssel
+  unverändert. Die aktive Kennung steht in den Einstellungen unter „Daten“
 - **Druckansicht**: eine Seite **A4 quer in Schwarzweiß**. Gedruckt werden belegte Betten,
   maximale Bettenzahl und Meldestatus (ausgeschrieben), Schichtleitung und Blutzuständigkeit
   mit Telefonnummer, die geplanten Aufnahmen sowie eine verkürzte Tabelle mit
@@ -207,9 +235,24 @@ Spalte der Tafel zugeordnet.
   Die Zeilenhöhe richtet sich nach der Anzahl der Bettplätze, damit das Blatt gefüllt wird
 - Änderungen werden zwischen mehreren Browser-Tabs desselben Rechners abgeglichen
 
+## Prüfungen
+
+Im Ordner `tests/` liegen neun Testdateien, die die Tafel in einem echten Browser bedienen
+(Chromium über Playwright) und das Ergebnis prüfen – Zählung, Pfeile, Ausdruck, Zoom,
+Bildschirmschoner, Tag-/Nachtansicht, Verlauf, Sicherung und Einstellungen. Jede meldet
+Skript- und Konsolenfehler als Fehlschlag.
+
+```
+cd tests && npm install && npx playwright install chromium
+node run.mjs
+```
+
+Einzelheiten in `tests/README.md`. Die Tafel selbst bleibt abhängigkeitsfrei; Playwright wird
+nur für die Prüfungen gebraucht.
+
 ## Fassung
 
-Die Fassung steht in `app.js` als Konstante `VERSION` und erscheint im Fuß der Hilfe
+Die Fassung steht in `js/konfiguration.js` als Konstante `VERSION` und erscheint im Fuß der Hilfe
 zusammen mit dem Urheberhinweis. Sie wird mit jeder Änderung erhöht:
 
 | Stelle | wann |
@@ -221,10 +264,10 @@ zusammen mit dem Urheberhinweis. Sie wird mit jeder Änderung erhöht:
 ## Anpassung
 
 Die Auswahllisten der meisten Spalten werden über das Zahnrad unten rechts gepflegt und
-liegen im `localStorage` unter `belegungstafel.einstellungen`; die Werte in `app.js` sind
+liegen im `localStorage` unter `belegungstafel.einstellungen`; die Werte in `js/konfiguration.js` sind
 die Voreinstellung, auf die sich jede Kategorie zurücksetzen lässt.
 
-Bettplätze und Spalten sind am Anfang von `app.js` in `BEDS` und `COLUMNS` hinterlegt.
+Bettplätze und Spalten sind am Anfang von `js/konfiguration.js` in `BEDS` und `COLUMNS` hinterlegt.
 Neue Spalten werden allein durch einen weiteren Eintrag in `COLUMNS` angelegt; soll eine
 Liste im Einstellungsdialog erscheinen, genügt ein Eintrag in `OPTION_CATEGORIES`.
 
