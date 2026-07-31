@@ -4,6 +4,13 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.6.0
+
+- **Vorbelegungen des Patientennamens** sind über die Einstellungen zu pflegen (eigener
+  Reiter „Patientenname“): hinzufügen, umbenennen, sortieren, entfernen und auf die Vorgabe
+  zurücksetzen wie bei den übrigen Listen. Das Feld bleibt ein Freitextfeld; Zeilenfarbe und
+  Zählung hängen weiterhin an den Wörtern `gesperrt`, `Reinigung`, `NA`, `OP` und `CV`
+
 ## 2.5.0
 
 - **Sichtschutz** erfasst jetzt alle patientenbezogenen Spalten: zusätzlich Kostform, privat,

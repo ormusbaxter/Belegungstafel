@@ -23,7 +23,7 @@ function grundEinstellungen() {
     headers: {},
     options: copy(DEFAULT_OPTIONS),
     /* Ein Stil je Spalte, nicht je Eintrag */
-    styles: Object.fromEntries(OPTION_CATEGORIES.filter(c => c.kind === 'text').map(c => [c.key, {}])),
+    styles: Object.fromEntries(OPTION_CATEGORIES.filter(hatStil).map(c => [c.key, {}])),
     privacy: { on: true, seconds: 120 },
     screensaver: copy(DEFAULT_SAVER),
     zoom: 100,
@@ -87,7 +87,7 @@ function mergeSettings(target, source) {
       : list.filter(e => typeof e === 'string' && e.trim()).map(String);
   }
   for (const cat of OPTION_CATEGORIES) {
-    if (cat.kind !== 'text') continue;
+    if (!hatStil(cat)) continue;
     const style = source.styles && source.styles[cat.key];
     if (!style || typeof style !== 'object') continue;
     const clean = {};

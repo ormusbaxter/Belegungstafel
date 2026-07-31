@@ -48,7 +48,7 @@ Excel-Belegungstafel und sind wörtlich übernommen:
 | Spalte der Tafel | Datenquelle | Werte |
 |---|---|---|
 | Anwesenheitsstatus | A | ➡ (grün, Aufnahme), `●`, `NVK`, `NVK 1`, `NVK 2`, `NVK 3`, ⬅ (dunkelrot, Verlegung) |
-| Patientenname | J | Freitext mit optionaler Auswahl: `Notbett`, `gesperrt`, `Reinigung`, `NA`, `OP`, `CV` |
+| Patientenname | J | Freitext mit optionaler Auswahl: `Notbett`, `gesperrt`, `Reinigung`, `NA`, `OP`, `CV` (in den Einstellungen änderbar) |
 | Fachdisziplin | B | ACH, DIAB, GAST, GCH, INF, INT, KARD, ONKO, RAD, TCH, UCH, X |
 | Beatmungsform | C | INV, NIV, HFNC, NIV/HF, (INV), (NIV), (HFNC), (NIV/HF), MIRUS – mehrere Einträge kombinierbar |
 | Kreislaufunterstützung | D | ECMO, ECOS, ECPELLA, ILA, IMPELLA, pass. SM, PiCCO – mehrere Einträge kombinierbar |
@@ -153,11 +153,15 @@ Spalte der Tafel zugeordnet.
   (Passwort in `js/einstellungen.js` als `SETTINGS_PASSWORD`; der Schutz verhindert versehentliches
   Verstellen, ersetzt aber keine Zugriffskontrolle, da er im Quelltext der Seite steht): Beschriftung der Spaltenköpfe,
   Bezeichnung, Reihenfolge und Anzahl der **Bettplätze** sowie Bearbeiten der Auswahllisten
-  für Anwesenheitsstatus, Fachdisziplinen, Beatmungsformen, Kreislaufunterstützung, Dialyse, Isolation,
+  für Anwesenheitsstatus, Patientenname, Fachdisziplinen, Beatmungsformen, Kreislaufunterstützung, Dialyse, Isolation,
   Interventionen, Therapielimitierung, Kostformen, Physiotherapie, der Telefonvorschläge
   der Tabelle und der Rufnummernliste unter der Tafel – Einträge lassen sich hinzufügen,
   umbenennen, sortieren und entfernen, jede Kategorie einzeln auf die Voreinstellung
-  zurücksetzen. Je Kategorie lassen sich zusätzlich **Textfarbe, Hintergrundfarbe und
+  zurücksetzen. Der Patientenname bleibt dabei ein Freitextfeld; die Liste schlägt nur vor.
+  Wie die Zeile eingefärbt wird und ob der Platz als belegt zählt, hängt weiterhin an den
+  Wörtern `gesperrt`, `Reinigung`, `NA`, `OP` und `CV` in genau dieser Schreibweise –
+  eigene Einträge erscheinen in der Klappliste, färben die Zeile aber nicht.
+  Je Kategorie lassen sich zusätzlich **Textfarbe, Hintergrundfarbe und
   Rahmenstil** festlegen (z. B. alle Isolationen gelb hinterlegt mit dunkler Schrift). Die
   Farbauswahl erfolgt über 16 feste Farbkästchen plus „Standard“; eine Beispielmarke zeigt
   das Ergebnis sofort. Die Angaben gelten in der Tabelle für das Auswahlfeld der Spalte und

@@ -21,7 +21,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.5.0';
+const VERSION = '2.6.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -308,6 +308,13 @@ let PHONES = [
 /* In den Einstellungen bearbeitbare Listen */
 const OPTION_CATEGORIES = [
   { key: 'status',       label: 'Anwesenheitsstatus',     kind: 'text' },
+  /* Freitextspalte: Die Liste schlägt nur vor, eine Farbe je Spalte gibt es
+     hier nicht – deshalb ohne Stilblock. */
+  { key: 'name',         label: 'Patientenname',          kind: 'text', stil: false,
+    hint: 'Vorschläge im Feld Patientenname. Sie ersetzen die freie Eingabe nicht. ' +
+          '„gesperrt“ und „Reinigung“ gelten als nicht belegt, „NA“, „OP“ und „CV“ als ' +
+          'vorübergehend abwesend – beide färben die Zeile und wirken nur mit genau dieser ' +
+          'Schreibweise.' },
   { key: 'disziplin',    label: 'Fachdisziplinen',        kind: 'text' },
   { key: 'beatmung',     label: 'Beatmungsformen',        kind: 'text' },
   { key: 'kreislauf',    label: 'Kreislaufunterstützung', kind: 'text' },
@@ -322,6 +329,10 @@ const OPTION_CATEGORIES = [
   { key: 'phones',       label: 'Telefonliste',           kind: 'phone',
     hint: 'Rufnummern im Infofeld unter der Tafel' }
 ];
+
+/* Kategorien, für die sich Farbe und Rahmen der Spalte einstellen lassen –
+   nur Auswahllisten, keine Freitextfelder. */
+const hatStil = cat => cat.kind === 'text' && cat.stil !== false;
 
 const copy = value => JSON.parse(JSON.stringify(value));
 

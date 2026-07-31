@@ -19,8 +19,9 @@ await page.waitForTimeout(200);
 pruefe('richtiges Passwort öffnet', await page.isVisible('#settingsDlg'));
 
 const reiter = await page.$$eval('#settingsTabs .tab', ts => ts.map(t => t.textContent));
-gleich('Reiter in der erwarteten Reihenfolge', reiter.slice(0, 6).join(' | '),
-  'Allgemein | Bildschirmschoner | Statistik | Spaltenköpfe | Bettplätze | Anwesenheitsstatus');
+gleich('Reiter in der erwarteten Reihenfolge', reiter.slice(0, 7).join(' | '),
+  'Allgemein | Bildschirmschoner | Statistik | Spaltenköpfe | Bettplätze | ' +
+  'Anwesenheitsstatus | Patientenname');
 
 /* ---- Auswahlliste ändern ---- */
 await page.click('#settingsTabs .tab:text-is("Fachdisziplinen")');
@@ -31,6 +32,30 @@ await page.click('#settingsSave');
 await page.waitForTimeout(300);
 const optionen = await page.$$eval('#tbody tr:first-child td.col-disziplin option', os => os.map(o => o.value));
 pruefe('neuer Eintrag steht in der Tabelle', optionen.includes('Testfach'));
+
+/* ---- Vorbelegungen des Patientennamens ---- */
+await oeffneEinstellungen(page, 'Patientenname');
+pruefe('kein Stilblock beim Freitextfeld', !(await page.isVisible('#settingsPane .styleblock')));
+const vorher = await page.$$eval('#settingsPane .entry input', is => is.map(i => i.value));
+gleich('ausgelieferte Liste', vorher.join(', '), 'Notbett, gesperrt, Reinigung, NA, OP, CV');
+await page.click('#settingsPane .addentry');
+await page.fill('#settingsPane .entry:last-child input', 'Ausweichbett');
+await page.click('#settingsSave');
+await page.waitForTimeout(300);
+await page.click('tr[data-bed="0a"] td.col-name .combobtn');
+await page.waitForTimeout(150);
+const vorschlaege = await page.$$eval('.combolist .combovalue', ss => ss.map(s => s.textContent));
+pruefe('neuer Vorschlag in der Klappliste', vorschlaege.includes('Ausweichbett'), vorschlaege.join(', '));
+await page.keyboard.press('Escape');
+
+/* Zurücksetzen führt auf die Vorgabe */
+await oeffneEinstellungen(page, 'Patientenname');
+await page.click('#settingsReset');
+await page.waitForTimeout(150);
+const zurueck = await page.$$eval('#settingsPane .entry input', is => is.map(i => i.value));
+gleich('Kategorie zurücksetzbar', zurueck.join(', '), 'Notbett, gesperrt, Reinigung, NA, OP, CV');
+await page.click('#settingsCancel');
+await page.waitForTimeout(150);
 
 /* ---- Bettplatz umbenennen, Einträge bleiben ---- */
 await page.fill('tr[data-bed="0a"] td.col-name input', 'Bleibt erhalten');

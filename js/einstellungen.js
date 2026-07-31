@@ -67,7 +67,7 @@ function renderPane() {
   pane.appendChild(el('h3', null, cat.label));
   if (cat.hint) pane.appendChild(el('p', 'panehint', cat.hint));
 
-  if (cat.kind === 'text') renderStyleBlock(pane, cat);
+  if (hatStil(cat)) renderStyleBlock(pane, cat);
 
   const list = el('div', 'entrylist');
   pane.appendChild(list);
