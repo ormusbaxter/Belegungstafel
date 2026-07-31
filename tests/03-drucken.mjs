@@ -22,6 +22,8 @@ gleich('gedruckte Spalten', sichtbareSpalten.join(' | '),
 const versteckt = sel => page.locator(sel).evaluate(e => getComputedStyle(e).display === 'none');
 pruefe('Bedienleiste nicht im Druck', await versteckt('.tools'));
 pruefe('Zahnrad nicht im Druck', await versteckt('.gear'));
+pruefe('Hilfe nicht im Druck', await versteckt('.help'));
+pruefe('Statistik-Schaltfläche nicht im Druck', await versteckt('.statsbtn'));
 pruefe('Telefonliste nicht im Druck', await versteckt('.note-phones'));
 pruefe('geplante Aufnahmen im Druck', !(await versteckt('.note-aufnahmen')));
 

@@ -1291,7 +1291,7 @@ body.saver-on { overflow: hidden; }
   }
 
   /* Nicht mitdrucken */
-  .tools, .gear, .help, .savestate, .privacyhint, .saver, .dlg, .clearbed, .combobtn,
+  .tools, .gear, .help, .statsbtn, .savestate, .privacyhint, .saver, .dlg, .clearbed, .combobtn,
   .combolist, .note-phones, .note-infos, #screeningCard, .sf-notfall,
   td.col-status::after, .logo:not(.has-image) { display: none !important; }
   .combocell::before { display: none; }

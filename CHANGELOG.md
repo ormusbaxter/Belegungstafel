@@ -4,6 +4,10 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.4.1
+
+- behoben: Die Schaltfläche der Statistik erschien in beiden Druckansichten
+
 ## 2.4.0
 
 - **Statistik je Schicht**: neue Auswertung über die runde Schaltfläche unten rechts mit

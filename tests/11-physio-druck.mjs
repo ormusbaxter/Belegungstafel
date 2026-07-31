@@ -57,6 +57,8 @@ pruefe('keine Stationszeile', await versteckt('.stationbar'));
 pruefe('keine Notizfelder', await versteckt('.notes'));
 pruefe('keine Kennzahlen', await versteckt('.stats'));
 pruefe('keine Notizspalte', await versteckt('#thead th.col-notizen'));
+pruefe('keine schwebenden Schaltflächen', await versteckt('.statsbtn') && await versteckt('.help')
+  && await versteckt('.gear'));
 gleich('Blatt ist gekennzeichnet', await page.textContent('.printtag'), 'Physiotherapie');
 
 /* Schriftgrößen: groß genug für ausgeprägte Kurzsichtigkeit */
