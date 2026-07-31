@@ -22,6 +22,8 @@
     </div>
     <div class="brandtext">
       <h1>Belegungstafel <span>Intensivstation</span></h1>
+      <!-- erscheint nur auf dem Blatt für die Physiotherapie -->
+      <p class="printtag">Physiotherapie</p>
       <p class="clock" id="clock">–</p>
     </div>
   </div>
@@ -67,6 +69,14 @@
         <path fill="currentColor" d="M10 7.5v5l4.5-2.5L10 7.5Z"/>
       </svg>
       Diaschau
+    </button>
+    <button type="button" id="btnPrintPhysio" class="iconbtn"
+            title="Blatt für die Physiotherapie drucken – große Schrift, A4 quer">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+        <path fill="currentColor" d="M17 3H7v4h10V3Zm2 6H5a3 3 0 0 0-3 3v5h4v4h12v-4h4v-5a3 3 0 0 0-3-3Zm-3 10H8v-5h8v5Z"/>
+        <path fill="currentColor" d="M9.5 15.2h5v1.2h-5zm0 2h3v1.2h-3z"/>
+      </svg>
+      Druck Physio
     </button>
     <button type="button" id="btnPrint" class="iconbtn" title="Tafel drucken">
       <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
@@ -337,6 +347,23 @@
         <b>Notizen</b> für handschriftliche Vermerke. Über das Zahnrad unten rechts
         stehen unter <b>Daten</b> Export (JSON oder CSV), Import und „Tafel leeren“ bereit; dort
         lassen sich auch Bettplätze, Spaltenköpfe und alle Auswahllisten anpassen.</p>
+    </section>
+
+    <section>
+      <h3>Blatt für die Physiotherapie</h3>
+      <p>Die Schaltfläche <b>Druck Physio</b> oben rechts gibt ein eigenes Blatt aus, das nur
+        enthält, was für die Runde der Physiotherapie gebraucht wird: <b>Bettplatz,
+        Patientenname, Fachdisziplin, Isolation, Telefon und Pflegekraft</b> – ebenfalls
+        A4 quer in Schwarzweiß.</p>
+      <ul>
+        <li>Aufgeführt werden nur <b>belegte Bettplätze</b>. Freie Plätze und solche, die als
+          <b>gesperrt</b> oder <b>Reinigung</b> geführt werden, erscheinen nicht.</li>
+        <li>Die <b>Schrift richtet sich nach der Zahl der Zeilen</b>: Je weniger Patienten, desto
+          größer der Druck. Bei voller Station bleibt alles auf einer Seite.</li>
+        <li>Ein besonders langer Name wird nur in seiner eigenen Zeile kleiner gesetzt, damit er
+          vollständig lesbar bleibt.</li>
+      </ul>
+      <p>Der gewöhnliche Ausdruck über <b>Drucken</b> bleibt davon unberührt.</p>
     </section>
 
     <section>

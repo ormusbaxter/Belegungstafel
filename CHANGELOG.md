@@ -4,6 +4,14 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.2.0
+
+- **Druck Physio**: eigener Ausdruck für die Physiotherapie – A4 quer, schwarzweiß, nur
+  belegte Bettplätze mit Bettplatz, Name, Fachdisziplin, Isolation, Telefon und Pflegekraft;
+  Schriftgröße nach Zeilenzahl, lange Namen zeilenweise angepasst
+- behoben: Bettplatz- und Statusspalte blieben im Ausdruck „klebend“ und schoben sich über die
+  Nachbarspalte – betraf auch den bisherigen Ausdruck
+
 ## 2.1.0
 
 - **Fällige Screenings** werden im Kopfbereich rot hervorgehoben

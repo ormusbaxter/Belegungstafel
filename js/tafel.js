@@ -334,6 +334,21 @@ function clearAll() {
 /* ------------------------------------------------------------------ *
  * Oberfläche
  * ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ *
+ * Blatt für die Physiotherapie
+ * Derselbe Datenbestand, aber ein eigener Ausdruck: nur belegte
+ * Bettplätze mit Bettplatz, Name, Fachdisziplin, Isolation, Pflegekraft
+ * und Telefon – A4 quer, schwarzweiß und in möglichst großer Schrift.
+ * ------------------------------------------------------------------ */
+function physioDrucken() {
+  const zeilen = setPhysioRowHeight();
+  if (!zeilen && !confirm('Zurzeit ist kein Bettplatz belegt. Trotzdem drucken?')) return;
+  document.body.classList.add('physio-druck');
+  window.print();
+  /* Manche Browser lösen afterprint nicht aus; deshalb zusätzlich hier. */
+  setTimeout(() => document.body.classList.remove('physio-druck'), 1000);
+}
+
 function tickClock() {
   const d = new Date();
   const days = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
@@ -452,6 +467,7 @@ function init() {
     save();
   });
   $('#btnPrint').addEventListener('click', () => window.print());
+  $('#btnPrintPhysio').addEventListener('click', physioDrucken);
   $('#btnTheme').addEventListener('click', cycleTheme);
 
   $('#expJson').addEventListener('click', () => { exportJson(); $('#exportDlg').close(); });
@@ -484,6 +500,8 @@ function init() {
     wake();
     setPrintRowHeight();
   });
+  /* Nach dem Druck gilt wieder die gewöhnliche Ansicht. */
+  window.addEventListener('afterprint', () => document.body.classList.remove('physio-druck'));
   window.addEventListener('resize', () => {
     measureSticky();
     updateStickyHeader();

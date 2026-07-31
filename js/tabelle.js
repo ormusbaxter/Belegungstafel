@@ -151,6 +151,36 @@ function setPrintRowHeight() {
   document.documentElement.style.setProperty('--print-row', hoehe.toFixed(1) + 'mm');
 }
 
+/* Das Blatt für die Physiotherapie führt nur belegte Bettplätze. Je weniger
+   Zeilen, desto größer dürfen Zeilenhöhe und Schrift ausfallen; alle Maße des
+   Blattes leiten sich von diesem einen Wert ab. */
+function setPhysioRowHeight() {
+  const belegte = BEDS.filter(bed => isOccupied(state.beds[bed.id]));
+  const zeilen = belegte.length;
+  /* A4 quer bietet 196 mm Höhe; davon gehen Kopfzeile und Tabellenkopf ab.
+     Der Rest verteilt sich auf die Zeilen, begrenzt nach oben und unten. */
+  const platz = 150;
+  const hoehe = Math.min(30, Math.max(9, platz / Math.max(2, zeilen + 1)));
+  document.documentElement.style.setProperty('--physio-row', hoehe.toFixed(1) + 'mm');
+
+  /* Die Namensspalte nimmt 28 % der 283 mm Satzbreite ein. Namen sind
+     unterschiedlich lang; jede Zeile bekommt deshalb ihr eigenes Maß – ein
+     abgeschnittener Name wäre für die Runde wertlos, und kurze Namen sollen
+     trotzdem so groß wie möglich stehen. */
+  const spalte = 283 * 0.28 - 5;
+  const schrift = '700 10px "Segoe UI", Roboto, system-ui, sans-serif';
+  const gross = hoehe * 0.44;
+  document.documentElement.style.setProperty('--physio-name', gross.toFixed(2) + 'mm');
+  for (const bed of BEDS) {
+    const tr = document.querySelector(`tr[data-bed="${bed.id}"]`);
+    if (!tr) continue;
+    const breit = widestText([state.beds[bed.id].name], schrift) / 10;
+    const passend = breit > 0 ? Math.min(gross, spalte / breit) : gross;
+    tr.style.setProperty('--physio-name', Math.max(3, passend).toFixed(2) + 'mm');
+  }
+  return zeilen;
+}
+
 /* Die Breitenanpassung wird aufgeschoben, solange die Maustaste gedrückt ist.
    Sonst verschiebt sich die Tabelle beim Klick aus einem Textfeld in eine
    andere Zelle noch zwischen Drücken und Loslassen. */

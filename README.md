@@ -234,6 +234,13 @@ Spalte der Tafel zugeordnet.
   schreiben. Das Attribut `data-instanz` am `<html>`-Tag in `index.html` hängt eine Kennung an
   alle Speicherschlüssel und trennt die Kopien; ohne Angabe bleiben die bisherigen Schlüssel
   unverändert. Die aktive Kennung steht in den Einstellungen unter „Daten“
+- **Blatt für die Physiotherapie** über die Schaltfläche **Druck Physio**: eigener Ausdruck
+  auf **A4 quer in Schwarzweiß** mit Bettplatz, Patientenname, Fachdisziplin, Isolation,
+  Telefon und Pflegekraft. Aufgeführt werden nur belegte Bettplätze – freie sowie `gesperrt`
+  und `Reinigung` entfallen. Zeilenhöhe und Schrift werden aus der Zahl der Zeilen berechnet
+  (`setPhysioRowHeight`), sodass bei wenigen Patienten sehr groß und bei voller Station immer
+  noch auf einer Seite gedruckt wird; ein besonders langer Name wird allein in seiner Zeile
+  verkleinert, damit er vollständig lesbar bleibt
 - **Druckansicht**: eine Seite **A4 quer in Schwarzweiß**. Gedruckt werden belegte Betten,
   maximale Bettenzahl und Meldestatus (ausgeschrieben), Schichtleitung und Blutzuständigkeit
   mit Telefonnummer, die geplanten Aufnahmen sowie eine verkürzte Tabelle mit

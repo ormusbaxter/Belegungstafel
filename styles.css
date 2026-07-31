@@ -87,6 +87,8 @@ html[data-theme="dark"] {
 /* Sehr großer Kopfbereich läuft nicht mit, sonst bliebe kein Platz mehr. */
 body.flatheader .topbar { position: static; }
 .printcol { display: none; }
+/* Kennzeichnung, die nur auf dem Physio-Blatt erscheint */
+.printtag { display: none; margin: 2px 0 0; font-weight: 700; letter-spacing: .3px; }
 
 body {
   margin: 0;
@@ -1296,11 +1298,16 @@ body.saver-on { overflow: hidden; }
     border-radius: 0;
   }
   table { table-layout: fixed; width: 100%; min-width: 0; }
-  thead th, tbody td {
+  /* Die auf dem Schirm stehenden Spalten dürfen im Druck nicht verschoben
+     werden – sonst rutschen Bettplatz und Status über die Nachbarspalte. */
+  thead th, tbody td,
+  th.col-status, td.col-status,
+  th.col-bed, td.col-bed {
     width: auto !important;
     min-width: 0 !important;
     border: 1px solid #000;
-    position: static;
+    position: static !important;
+    left: auto !important;
   }
   thead th {
     padding: 2px 3px;
@@ -1385,4 +1392,65 @@ body.saver-on { overflow: hidden; }
   }
 
   :focus, :focus-visible { outline: none !important; }
+
+  /* ---------------- Blatt für die Physiotherapie ----------------
+     Nur belegte Bettplätze, sechs Spalten, alles so groß wie es die
+     Zeilenzahl zulässt. Alle Maße leiten sich von --physio-row ab, das
+     physioDrucken() vor dem Druck aus der Zahl der Zeilen berechnet. */
+  body.physio-druck .stats,
+  body.physio-druck .stationbar,
+  body.physio-druck .notes,
+  body.physio-druck .printcol,
+  body.physio-druck .col-status,
+  body.physio-druck .col-intervention,
+  body.physio-druck .col-limitierung { display: none !important; }
+
+  body.physio-druck .printtag { display: block; }
+
+  /* Freie und gesperrte Plätze gehören nicht auf das Blatt. */
+  body.physio-druck tbody tr.st-frei,
+  body.physio-druck tbody tr.st-gesperrt { display: none !important; }
+
+  body.physio-druck .topbar { padding-bottom: 2mm; border-bottom-width: 1.5px; }
+  body.physio-druck .logo { width: 11mm; height: 11mm; }
+  body.physio-druck .brand h1 { font-size: 5.5mm; }
+  body.physio-druck .printtag { font-size: 4.2mm; margin: 0; }
+  body.physio-druck .clock { font-size: 3.2mm; margin-top: 0.5mm; }
+
+  body.physio-druck thead th {
+    padding: 1mm 2mm;
+    font-size: calc(var(--physio-row, 12mm) * .26);
+    border-bottom-width: 2px;
+  }
+  /* Der Inhalt bleibt in seiner Spalte, auch wenn er lang ist. */
+  body.physio-druck thead th,
+  body.physio-druck tbody td { overflow: hidden; }
+  body.physio-druck tbody td {
+    height: var(--physio-row, 12mm);
+    padding: 0 2mm;
+    font-size: calc(var(--physio-row, 12mm) * .40);
+  }
+  body.physio-druck td.col-name input { padding-left: 1.5mm !important; }
+  /* Das Kennzeichen ISO am Bettplatz entfällt – die Spalte Isolation
+     nennt die Keime ohnehin und der Platz wird für die Schrift gebraucht. */
+  body.physio-druck tr.has-iso td.col-bed .bedlabel::after,
+  body.physio-druck tr.has-verdacht td.col-bed .bedlabel::after { content: none !important; }
+  body.physio-druck td input,
+  body.physio-druck td select,
+  body.physio-druck td textarea {
+    font-size: calc(var(--physio-row, 12mm) * .40);
+  }
+  body.physio-druck td.col-name input { font-size: var(--physio-name, 5mm); }
+  body.physio-druck .bedlabel { font-size: calc(var(--physio-row, 12mm) * .50); }
+  body.physio-druck .chip,
+  body.physio-druck .chip.styled,
+  body.physio-druck .chip-verdacht {
+    font-size: calc(var(--physio-row, 12mm) * .34);
+  }
+  body.physio-druck th.col-bed,       body.physio-druck td.col-bed       { width: 14% !important; }
+  body.physio-druck th.col-name,      body.physio-druck td.col-name      { width: 28% !important; }
+  body.physio-druck th.col-disziplin, body.physio-druck td.col-disziplin { width: 12% !important; }
+  body.physio-druck th.col-isolation, body.physio-druck td.col-isolation { width: 20% !important; }
+  body.physio-druck th.col-telefon,   body.physio-druck td.col-telefon   { width: 13% !important; }
+  body.physio-druck th.col-pflege,    body.physio-druck td.col-pflege    { width: 13% !important; }
 }
