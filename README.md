@@ -24,7 +24,14 @@ slides/               Inhalte für den Bildschirmschoner (PDF, PNG, JPEG)
 tests/                Prüfungen im echten Browser (siehe tests/README.md)
 CHANGELOG.md          Änderungen je Fassung
 DATENSCHUTZ.md        Steckbrief für Datenschutzbeauftragte, IT und Personalrat
+INSTALLATION.md       Auslieferung und Einrichtung der Stationsrechner
+release.sh/.ps1       erzeugt den Auslieferungsstand als ZIP unter dist/
 ```
+
+Für den Betrieb auf Station wird nicht der Projektordner kopiert, sondern ein Archiv
+erzeugt: `./release.sh` legt `dist/belegungstafel-<Fassung>.zip` an, ohne `tests/` und die
+Entwicklungsunterlagen. Der Ablauf von der Vorgabedatei bis zur Verknüpfung auf dem
+Stationsrechner steht in [INSTALLATION.md](INSTALLATION.md).
 
 Die JavaScript-Dateien werden von `index.html` in dieser Reihenfolge geladen und teilen sich
 einen gemeinsamen Namensraum – bewusst klassische Skripte statt ES-Module, weil der Browser
@@ -334,6 +341,31 @@ Statuswert, die längste Bettbezeichnung sowie der längste Eintrag unter Patien
 Freitextspalten werden beim Verlassen des Feldes angepasst. Platz für das Kennzeichen `ISO` kommt nur hinzu, wenn eine
 Isolation eingetragen ist. Die Spalte „Sonstiges“ hat keine feste Breite und
 nimmt den verbleibenden Platz auf, sodass alle übrigen Spalten genau ihre Vorgabe behalten.
+
+## Sicherheit
+
+Die Anwendung baut ihre Oberfläche ausschließlich über `el()` mit `textContent`; es gibt
+kein `innerHTML`, kein `eval` und kein `srcdoc`. Eingaben können deshalb nicht als Markup
+oder Skript wirksam werden – auch nicht aus einer importierten Datei, denn alle Übernahmen
+laufen über feste Schlüssellisten (`COLUMNS`, `STATION_KEYS`, `OPTION_CATEGORIES`, `BEDS`).
+Die Prüfung `tests/15-ausgaben-sicherheit.mjs` hält das fest.
+
+Die **CSV-Ausgaben** entschärfen Werte, die mit `=`, `+`, `-` oder `@` beginnen, durch ein
+vorangestelltes Hochkomma (`csvFeld` in `js/konfiguration.js`). Ohne das würde eine
+Tabellenkalkulation sie beim Öffnen als Formel ausführen – die Anführungszeichen der CSV
+schützen davor nicht.
+
+Drei Punkte kann die Anwendung nicht selbst lösen; sie gehören zur Einrichtung des
+Arbeitsplatzes und stehen in [INSTALLATION.md](INSTALLATION.md):
+
+- **Der Anwendungsordner muss für normale Benutzer schreibgeschützt sein.** Wer eine der
+  Dateien unter `js/` ändern kann – etwa `vorgaben.js` – führt beim nächsten Laden
+  beliebigen Code in der Seite aus. Das gilt für jede Seite, die von der Festplatte läuft
+- **Der Browser-Speicher ist nicht abgeschottet.** Alle unter `file://` geöffneten Seiten
+  teilen sich denselben `localStorage`; jede andere HTML-Datei, die im selben Browserprofil
+  geöffnet wird, kann die Tafel mitlesen. Deshalb ein eigenes Profil nur für die Tafel
+- **In `slides/` gehören nur geprüfte Dateien**, weil PDFs im Betrachter des Browsers
+  angezeigt werden
 
 ## Datenschutz
 

@@ -4,6 +4,26 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.8.1
+
+Vorbereitung der Auslieferung.
+
+- **CSV-Ausgaben entschärft**: Werte, die mit `=`, `+`, `-` oder `@` beginnen, erhalten ein
+  vorangestelltes Hochkomma. Ohne das führt eine Tabellenkalkulation sie beim Öffnen als
+  Formel aus – die Anführungszeichen der CSV schützen davor nicht. Betrifft die Belegung
+  wie die Statistik
+- **Erfasste Statistik wird geprüft**, beim Laden wie beim Import: Nur Einträge mit gültigem
+  Datum und Zahlen in den Kennzahlen werden übernommen. Eine beschädigte Sicherungsdatei
+  kann die Auswertung damit nicht mehr verfälschen
+- **`release.sh` / `release.ps1`** erzeugen den Auslieferungsstand als
+  `dist/belegungstafel-<Fassung>.zip` – aus dem eingecheckten Stand, ohne `tests/` und die
+  Entwicklungsunterlagen (`.gitattributes`), mit Prüfsumme und Inhaltsverzeichnis. Fehlt die
+  Vorgabe der Station in `js/vorgaben.js`, wird darauf hingewiesen
+- **`INSTALLATION.md`**: Abhakbare Anleitung von der Vorgabedatei über den schreibgeschützten
+  Ordner und die Verknüpfung mit eigenem Browserprofil bis zum Aktualisieren
+- neuer Abschnitt **Sicherheit** in `README.md`; die Prüfung
+  `tests/15-ausgaben-sicherheit.mjs` hält fest, dass Eingaben Text bleiben
+
 ## 2.8.0
 
 Datenschutz – drei Maßnahmen aus der Durchsicht des bisherigen Standes.

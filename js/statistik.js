@@ -65,10 +65,37 @@ function schichtName(key) {
 /* ------------------------------------------------------------------ *
  * Ablage
  * ------------------------------------------------------------------ */
+/* Erfasste Stände prüfen und auf das erwartete Format bringen.
+ *
+ * Die Auswertung wird weitergegeben; eine verdorbene Sicherungsdatei oder ein
+ * beschädigter Speicher dürfen deshalb keine Werte einschleusen, die als Zahl
+ * gelesen und dann zu NaN werden. Übernommen wird nur, was erkennbar zu einem
+ * Eintrag gehört – alles Übrige fällt weg, auch zusätzliche Felder.
+ */
+const STATS_DATUM = /^\d{4}-\d{2}-\d{2}$/;
+
+function statistikPruefen(liste) {
+  if (!Array.isArray(liste)) return [];
+  const text = wert => (typeof wert === 'string' ? wert : '');
+  const zahl = wert => (typeof wert === 'number' && Number.isFinite(wert) ? wert : null);
+  return liste
+    .filter(e => e && typeof e === 'object' && STATS_DATUM.test(text(e.datum)) && text(e.schicht))
+    .map(e => {
+      const eintrag = {
+        datum: e.datum,
+        schicht: e.schicht,
+        name: text(e.name),
+        start: CLOCK.test(text(e.start)) ? e.start : '',
+        zeit: text(e.zeit)
+      };
+      for (const [feld] of STATS_FELDER) eintrag[feld] = zahl(e[feld]);
+      return eintrag;
+    });
+}
+
 function statistikLaden() {
   try {
-    const daten = JSON.parse(localStorage.getItem(STATS_KEY) || '[]');
-    return Array.isArray(daten) ? daten.filter(e => e && e.datum && e.schicht) : [];
+    return statistikPruefen(JSON.parse(localStorage.getItem(STATS_KEY) || '[]'));
   } catch (err) {
     console.warn('Statistik unlesbar, beginne neu.', err);
     return [];
@@ -243,7 +270,8 @@ function renderStatistikTabelle(daten) {
 
 /* Auswertung als CSV für die Tabellenkalkulation */
 function statistikCsv() {
-  const esc = v => '"' + String(v).replace(/"/g, '""') + '"';
+  /* Auch hier über csvFeld: Die Schichtbezeichnungen sind frei wählbar. */
+  const esc = csvFeld;
   const kopf = ['Datum', 'Schicht', 'Beginn', ...STATS_FELDER.map(([, label]) => label), 'erfasst um'];
   const zeilen = statistikZeitraumDaten().map(e => [
     e.datum,

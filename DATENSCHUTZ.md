@@ -89,6 +89,15 @@ Das Passwort vor dem Einstellungsfenster verhindert versehentliches Verstellen. 
 Quelltext der Seite und ist **kein Zugriffsschutz** – das ist beabsichtigt und darf nicht
 anders dargestellt werden.
 
+Zwei Eigenschaften des Betriebs von der Festplatte gehören dazu:
+
+- Alle unter `file://` geöffneten Seiten teilen sich denselben Browser-Speicher. Jede
+  andere HTML-Datei, die im selben Browserprofil geöffnet wird, kann die Tafel mitlesen.
+  Der Arbeitsplatz betreibt die Tafel deshalb in einem eigenen Browserprofil, in dem
+  nichts anderes geöffnet wird
+- Wer die Dateien der Anwendung ändern kann, führt beim nächsten Laden eigenen Code aus.
+  Der Anwendungsordner ist deshalb für normale Benutzer schreibgeschützt
+
 Wirksame Maßnahmen sind deshalb organisatorisch:
 
 - automatische Bildschirmsperre des Arbeitsplatzes nach ⟨n⟩ Minuten

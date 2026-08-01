@@ -21,7 +21,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.8.0';
+const VERSION = '2.8.1';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -439,6 +439,21 @@ const el = (tag, cls, text) => {
 const isSet = v => Array.isArray(v) ? v.length > 0
   : typeof v === 'boolean' ? v
   : Boolean(v) && !['keins', 'keine KG'].includes(v);
+
+/* Ein Feld für die CSV-Ausgabe.
+ *
+ * Tabellenkalkulationen lesen einen führenden =, +, - oder @ als Formel –
+ * die Anführungszeichen der CSV schützen davor nicht, der Parser entfernt
+ * sie zuvor. Aus einem Eintrag im Feld Patientenname könnte so beim Öffnen
+ * der Datei ein Befehl werden. Ein vorangestelltes Hochkomma macht daraus
+ * wieder Text; eine Rufnummer „+4949“ erscheint dadurch als '+4949 und wird
+ * als Text übernommen, was hier gewollt ist.
+ */
+const FORMELSTART = /^[=+\-@\t\r]/;
+const csvFeld = value => {
+  const text = String(value === null || value === undefined ? '' : value);
+  return '"' + (FORMELSTART.test(text) ? "'" + text : text).replace(/"/g, '""') + '"';
+};
 
 function setSaveState(msg, isError) {
   const node = $('#saveState');

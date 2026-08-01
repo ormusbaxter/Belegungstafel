@@ -92,7 +92,9 @@ function exportJson() {
 }
 
 function exportCsv() {
-  const esc = v => '"' + String(v).replace(/"/g, '""') + '"';
+  /* csvFeld entschärft Werte, die eine Tabellenkalkulation sonst als Formel
+     lesen würde – siehe js/konfiguration.js. */
+  const esc = csvFeld;
   const info = [
     ['Belegungstafel Intensivstation', fullDate(isoToday()) + ' ' + timeStr(new Date())],
     ['Maximale Bettenzahl', state.station.maxBetten ? state.station.maxBetten + ' + 1 (Notbett)' : ''],
@@ -141,7 +143,7 @@ function importJson(file) {
     }
     state.station = emptyStation();
     mergeStation(state.station, parsed.station);
-    if (Array.isArray(parsed.statistik)) statistikSpeichern(parsed.statistik);
+    if (Array.isArray(parsed.statistik)) statistikSpeichern(statistikPruefen(parsed.statistik));
     if (parsed.settings) {
       mergeSettings(settings, parsed.settings);
       saveSettings();

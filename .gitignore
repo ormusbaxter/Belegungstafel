@@ -4,3 +4,6 @@ tests/package-lock.json
 
 # Ausgaben von Testläufen
 tests/screenshots/
+
+# Erzeugte Auslieferungsarchive (siehe release.sh)
+dist/
