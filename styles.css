@@ -93,6 +93,8 @@ body.flatheader .topbar { position: static; }
 .printcol { display: none; }
 /* Kennzeichnung, die nur auf dem Physio-Blatt erscheint */
 .printtag { display: none; margin: 2px 0 0; font-weight: 700; letter-spacing: .3px; }
+/* Fußzeile beider Ausdrucke */
+.printfoot { display: none; }
 
 body {
   margin: 0;
@@ -1483,6 +1485,17 @@ body.saver-on { overflow: hidden; }
     text-align: left;
   }
 
+  /* Fußzeile – auf beiden Blättern, deshalb außerhalb der Physio-Regeln */
+  .printfoot {
+    display: block;
+    margin: 2mm 0 0;
+    padding-top: 1mm;
+    border-top: 1px solid #000;
+    font-size: 8px;
+    letter-spacing: .2px;
+    page-break-inside: avoid;
+  }
+
   :focus, :focus-visible { outline: none !important; }
 
   /* ---------------- Blatt für die Physiotherapie ----------------
@@ -1507,6 +1520,9 @@ body.saver-on { overflow: hidden; }
   body.physio-druck .logo { width: 11mm; height: 11mm; }
   body.physio-druck .brand h1 { font-size: 5.5mm; }
   body.physio-druck .printtag { font-size: 4.2mm; margin: 0; }
+  /* Auf dem Physio-Blatt ist Platz, und gelesen wird es von Menschen, für die
+     das Blatt ohnehin groß gesetzt ist. */
+  body.physio-druck .printfoot { font-size: 3.2mm; }
   body.physio-druck .clock { font-size: 3.2mm; margin-top: 0.5mm; }
 
   body.physio-druck thead th {

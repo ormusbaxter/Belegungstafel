@@ -1,5 +1,5 @@
 /* Druckansicht: A4 quer, schwarzweiß, verkürzte Spaltenauswahl */
-import { browserStarten, neueSeite, testName, gleich, pruefe, keineFehler, bilanz } from './lib.mjs';
+import { browserStarten, neueSeite, testName, gleich, pruefe, enthaelt, keineFehler, bilanz } from './lib.mjs';
 
 testName('Druckansicht');
 const browser = await browserStarten();
@@ -20,6 +20,10 @@ gleich('gedruckte Spalten', sichtbareSpalten.join(' | '),
   'Therapielimitierung | Telefon | Pflegekraft | Notizen');
 
 const versteckt = sel => page.locator(sel).evaluate(e => getComputedStyle(e).display === 'none');
+pruefe('Fußzeile im Druck', !(await versteckt('.printfoot')));
+const fuss = await page.evaluate(() => { druckfussSetzen(); return document.querySelector('#printFoot').textContent; });
+enthaelt('Fußzeile nennt den Datenschutzbehälter', fuss, 'Datenschutzbehälter');
+enthaelt('Fußzeile nennt den Druckzeitpunkt', fuss, 'gedruckt am');
 pruefe('Bedienleiste nicht im Druck', await versteckt('.tools'));
 pruefe('Zahnrad nicht im Druck', await versteckt('.gear'));
 pruefe('Hilfe nicht im Druck', await versteckt('.help'));
@@ -65,6 +69,7 @@ const zoomImDruck = await page.locator('.tablewrap').evaluate(e => getComputedSt
 gleich('Bildschirmzoom gilt nicht im Druck', String(zoomImDruck), '1');
 
 await page.emulateMedia({ media: 'screen' });
+pruefe('Fußzeile nicht am Bildschirm', await versteckt('.printfoot'));
 const alleSpalten = await page.$$eval('#thead th', ths => ths.length);
 gleich('am Bildschirm alle Spalten', alleSpalten, 21);
 pruefe('Notizspalte nur im Druck', await versteckt('#thead th.col-notizen'));

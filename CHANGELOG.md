@@ -4,6 +4,21 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.8.0
+
+Datenschutz – drei Maßnahmen aus der Durchsicht des bisherigen Standes.
+
+- **Fußzeile auf beiden Ausdrucken** mit Druckzeitpunkt, Kennung der Tafel und dem Hinweis
+  „Enthält Patientendaten – nach Dienstende in den Datenschutzbehälter". Der Platz für die
+  Tabellenzeilen wurde entsprechend angepasst, beide Blätter bleiben einseitig
+- **Sicherungen**: Voreinstellung von 30 auf 7 Dateien gesenkt – die Sicherung soll einen
+  Ausfall überbrücken, kein Archiv anlegen. Das Einstellungsfenster weist jetzt darauf hin,
+  dass die Dateien alle Namen im Klartext enthalten, und warnt, wenn als Ablage der
+  Download-Ordner eingestellt ist. Bestehende Einstellungen bleiben unberührt
+- **`DATENSCHUTZ.md`**: Steckbrief für Datenschutzbeauftragte, IT und Personalrat – welche
+  Daten, wo gespeichert, wie lange, wer hat Zugriff, was verlässt den Rechner, und welche
+  Entscheidungen begründet sind. Als Entwurf mit auszufüllenden Stellen
+
 ## 2.7.0
 
 - **Schichtleitung, Blutzuständigkeit und Notfallequipment** stehen jetzt **unter der

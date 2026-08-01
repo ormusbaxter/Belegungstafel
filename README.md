@@ -23,6 +23,7 @@ js/tafel.js           Sichtschutz, Ansicht, Sicherung, Start
 slides/               Inhalte für den Bildschirmschoner (PDF, PNG, JPEG)
 tests/                Prüfungen im echten Browser (siehe tests/README.md)
 CHANGELOG.md          Änderungen je Fassung
+DATENSCHUTZ.md        Steckbrief für Datenschutzbeauftragte, IT und Personalrat
 ```
 
 Die JavaScript-Dateien werden von `index.html` in dieser Reihenfolge geladen und teilen sich
@@ -341,3 +342,19 @@ jeweiligen Arbeitsplatzes. Da es sich um Patientendaten handelt, gilt für den E
 nur auf Stationsrechnern innerhalb des Kliniknetzes betreiben, Bildschirmsperre nutzen
 und Export-Dateien nicht ungeschützt ablegen. Ein Mehrplatzbetrieb mit gemeinsamer
 Datenhaltung würde eine Server-Komponente erfordern und ist bewusst nicht enthalten.
+
+Welche Daten wo liegen, wie lange sie bleiben, was den Rechner verlässt und welche
+Entscheidungen dabei begründet sind, steht in **[DATENSCHUTZ.md](DATENSCHUTZ.md)** – als
+Vorlage für das Verzeichnis von Verarbeitungstätigkeiten. Die dort mit `⟨…⟩` markierten
+Stellen füllt die Station selbst aus.
+
+Drei Punkte, die dabei leicht übersehen werden:
+
+- Die **Sicherungsdateien** enthalten alle Namen im Klartext. Sie gehören in einen Ordner
+  mit Rechten für die Station, nicht in den Download-Ordner; voreingestellt sind sieben
+  Dateien, ältere werden gelöscht
+- Beide **Ausdrucke** tragen eine Fußzeile mit Druckzeitpunkt und dem Hinweis auf den
+  Datenschutzbehälter – besonders das Physio-Blatt verlässt die Station
+- Das **Passwort** vor den Einstellungen schützt vor versehentlichem Verstellen, nicht vor
+  Zugriff. Es steht im Quelltext. Der wirksame Schutz ist die Bildschirmsperre des
+  Arbeitsplatzes

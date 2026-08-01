@@ -343,6 +343,16 @@ function clearAll() {
  * Bettplätze mit Bettplatz, Name, Fachdisziplin, Isolation, Pflegekraft
  * und Telefon – A4 quer, schwarzweiß und in möglichst großer Schrift.
  * ------------------------------------------------------------------ */
+/* Fußzeile beider Ausdrucke. Der Zettel verlässt die Station – er soll
+   erkennen lassen, wie alt er ist und wohin er nach dem Dienst gehört. */
+function druckfussSetzen() {
+  const jetzt = new Date();
+  $('#printFoot').textContent = 'Belegungstafel Intensivstation' +
+    (INSTANZ ? ' (' + INSTANZ + ')' : '') +
+    ' · gedruckt am ' + fullDate(isoToday()) + ' um ' + timeStr(jetzt) + ' Uhr' +
+    ' · Enthält Patientendaten – nach Dienstende in den Datenschutzbehälter';
+}
+
 function physioDrucken() {
   const zeilen = setPhysioRowHeight();
   if (!zeilen && !confirm('Zurzeit ist kein Bettplatz belegt. Trotzdem drucken?')) return;
@@ -503,6 +513,7 @@ function init() {
   window.addEventListener('beforeprint', () => {
     wake();
     setPrintRowHeight();
+    druckfussSetzen();
   });
   /* Nach dem Druck gilt wieder die gewöhnliche Ansicht. */
   window.addEventListener('afterprint', () => document.body.classList.remove('physio-druck'));

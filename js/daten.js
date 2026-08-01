@@ -29,7 +29,10 @@ function grundEinstellungen() {
     zoom: 100,
     autoTheme: false,
     night: { ...DEFAULT_NIGHT },
-    backup: { on: false, ziel: 'ordner', behalten: 30 },
+    /* Die Sicherungen enthalten Klarnamen. Sie sollen den Ausfall eines
+       Arbeitsplatzes überbrücken, nicht ein Archiv bilden – deshalb eine
+       Woche statt eines Monats. */
+    backup: { on: false, ziel: 'ordner', behalten: 7 },
     statistik: copy(DEFAULT_STATISTIK)
   };
 }

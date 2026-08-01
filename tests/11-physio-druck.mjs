@@ -60,6 +60,7 @@ pruefe('keine Notizspalte', await versteckt('#thead th.col-notizen'));
 pruefe('keine schwebenden Schaltflächen', await versteckt('.statsbtn') && await versteckt('.help')
   && await versteckt('.gear'));
 gleich('Blatt ist gekennzeichnet', await page.textContent('.printtag'), 'Physiotherapie');
+pruefe('Fußzeile auch auf dem Physio-Blatt', !(await versteckt('.printfoot')));
 
 /* Schriftgrößen: groß genug für ausgeprägte Kurzsichtigkeit */
 const pt = sel => page.locator(sel).evaluate(e => parseFloat(getComputedStyle(e).fontSize) * 0.75);

@@ -876,6 +876,12 @@ function renderBackupBlock(pane) {
     'zurückgesetzt oder der Rechner getauscht, sind alle Daten verloren. Mit dieser Option ' +
     'legt die Tafel einmal am Tag eine vollständige Sicherung als JSON-Datei ab, die sich ' +
     'über „Import“ wieder einlesen lässt.'));
+  pane.appendChild(el('p', 'panehint',
+    'Achtung: Diese Datei enthält alle Patientennamen im Klartext. Als Ablage gehört ' +
+    'deshalb ein Ordner gewählt, den nur die Station lesen kann – nicht der Download-Ordner ' +
+    'und kein allgemein zugängliches Laufwerk. Die Sicherung soll den Ausfall eines ' +
+    'Arbeitsplatzes überbrücken, kein Archiv anlegen: Je Tag entsteht eine Datei, alles ' +
+    'darüber hinaus wird gelöscht. Sieben Dateien sind dafür in aller Regel genug.'));
 
   const status = el('p', 'panehint slidestatus backupstatus');
   const zielRow = el('div', 'setrow');
@@ -925,6 +931,7 @@ function renderBackupBlock(pane) {
     for (const node of [ziel, wahl, behalten.field, sofort]) {
       node.disabled = !on || (node !== behalten.field && node !== sofort && !ordnerWahlMoeglich);
     }
+    zeigeStatus();
   });
   pane.appendChild(anRow);
   pane.appendChild(zielRow);
@@ -943,8 +950,14 @@ function renderBackupBlock(pane) {
       ? 'Zuletzt gesichert am ' + fullDate(info.datum) + ' um ' + timeStr(new Date(info.zeit)) +
         (info.ordner ? ' in „' + info.ordner + '“.' : ' (Download-Ordner).')
       : 'Bisher wurde noch nicht gesichert.');
+    /* Der Download-Ordner ist auf einem gemeinsam genutzten Rechner für alle
+       Angemeldeten lesbar – als Ablage für Klarnamen ungeeignet. */
+    const inDownload = draft.backup.ziel === 'download' || !ordnerWahlMoeglich;
+    if (draft.backup.on && inDownload) {
+      teile.push('Der Download-Ordner ist kein geschützter Ablageort für Patientendaten.');
+    }
     status.textContent = teile.join(' ');
-    status.classList.remove('warnstatus');
+    status.classList.toggle('warnstatus', draft.backup.on && inDownload);
   }
   zeigeStatus();
 

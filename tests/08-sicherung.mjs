@@ -6,6 +6,22 @@ testName('Sicherung und Kennung');
 const browser = await browserStarten();
 const page = await neueSeite(browser);
 
+/* ---- Voreinstellung: eine Woche, Warnung vor dem Download-Ordner ---- */
+await oeffneEinstellungen(page, 'Daten');
+gleich('Voreinstellung sieben Sicherungen',
+  await page.inputValue('#settingsPane .setrow:has-text("Sicherungen behalten") input'), '7');
+enthaelt('Hinweis auf die Klarnamen', await page.textContent('#settingsPane'),
+  'enthält alle Patientennamen im Klartext');
+await page.click('#settingsPane .setrow:has-text("Tägliche Sicherung") input[type=checkbox]');
+await page.waitForTimeout(150);
+const ordnerwahl = await page.evaluate(() => ordnerWahlMoeglich);
+if (ordnerwahl) await page.selectOption('#settingsPane .zielpick', 'download');
+await page.waitForTimeout(150);
+enthaelt('Warnung vor dem Download-Ordner', await page.textContent('.backupstatus'),
+  'kein geschützter Ablageort');
+await page.click('#settingsCancel');
+await page.waitForTimeout(150);
+
 /* ---- Sicherung von Hand in den Download-Ordner ---- */
 await page.fill('tr[data-bed="0a"] td.col-name input', 'Sicherungstest');
 await page.waitForTimeout(400);

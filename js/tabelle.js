@@ -146,7 +146,9 @@ function autoSizeColumns() {
 /* Zeilenhöhe für den Ausdruck: Die Tabelle soll das Blatt füllen, unabhängig
    davon, wie viele Bettplätze eingerichtet sind. */
 function setPrintRowHeight() {
-  const platz = 150;
+  /* A4 quer abzüglich Kopfzeile, Tabellenkopf, Angaben zur Schicht,
+     geplanten Aufnahmen und Fußzeile. */
+  const platz = 144;
   const hoehe = Math.min(14, Math.max(6.5, platz / Math.max(1, BEDS.length)));
   document.documentElement.style.setProperty('--print-row', hoehe.toFixed(1) + 'mm');
 }
