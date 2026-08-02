@@ -29,6 +29,8 @@ function grundEinstellungen() {
     zoom: 100,
     autoTheme: false,
     night: { ...DEFAULT_NIGHT },
+    norton: { ...DEFAULT_NORTON },
+    uebergabe: { ...DEFAULT_UEBERGABE },
     /* Die Sicherungen enthalten Klarnamen. Sie sollen den Ausfall eines
        Arbeitsplatzes überbrücken, nicht ein Archiv bilden – deshalb eine
        Woche statt eines Monats. */
@@ -129,8 +131,22 @@ function mergeSettings(target, source) {
     const behalten = parseInt(source.backup.behalten, 10);
     if (Number.isFinite(behalten)) target.backup.behalten = Math.min(365, Math.max(1, behalten));
   }
+  if (source.norton && typeof source.norton === 'object') {
+    const tage = parseInt(source.norton.tage, 10);
+    if (Number.isFinite(tage)) target.norton.tage = Math.min(365, Math.max(1, tage));
+  }
+  if (source.uebergabe && typeof source.uebergabe === 'object') {
+    target.uebergabe.button = source.uebergabe.button !== false;
+  }
   mergeSaver(target.screensaver, source.screensaver);
   mergeStatistik(target.statistik, source.statistik);
+}
+
+/* Umbenannte Auswahlwerte älterer Stände übernehmen (z. B. Stammblatt →
+   Pflegestatus), damit vorhandene Häkchen erhalten bleiben. */
+function umbenannt(col, wert) {
+  const text = String(wert);
+  return col.legacyValues && col.legacyValues[text] ? col.legacyValues[text] : text;
 }
 
 /* Einstellungen der Statistik übernehmen und dabei prüfen. */
@@ -225,7 +241,7 @@ function applySettings() {
   }
   for (const cat of OPTION_CATEGORIES) {
     if (cat.key === 'phones') PHONES = settings.options.phones;
-    else COL_BY_KEY[cat.key].options = settings.options[cat.key];
+    else FIELD_BY_KEY[cat.key].options = settings.options[cat.key];
   }
   privacyDelay = settings.privacy.on ? settings.privacy.seconds : 0;
   saverDelay = settings.screensaver.on ? settings.screensaver.seconds : 0;
@@ -275,7 +291,7 @@ const PRIVATE_KEYS = COLUMNS.map(col => col.key).filter(key => !PRIVATE_OFFEN.in
 
 function emptyBed() {
   const row = {};
-  for (const col of COLUMNS) {
+  for (const col of [...COLUMNS, ...EXTRA_FIELDS]) {
     if (col.type === 'bed') continue;
     if (col.type === 'multi' || col.type === 'checks' || col.type === 'germs') row[col.key] = [];
     else if (col.type === 'bool') row[col.key] = false;
@@ -328,7 +344,7 @@ function merge(target, source) {
       target[col.key] = Array.isArray(val) ? val.map(entry => toGerm(entry, source)).filter(Boolean) : [];
     } else if (col.type === 'multi' || col.type === 'checks') {
       if (typeof val === 'string' && col.fromLegacy) target[col.key] = col.fromLegacy(val);
-      else target[col.key] = Array.isArray(val) ? val.map(String) : [];
+      else target[col.key] = Array.isArray(val) ? val.map(eintrag => umbenannt(col, eintrag)) : [];
     } else if (col.type === 'bool') {
       target[col.key] = Boolean(val);
     } else if (col.type === 'status') {
@@ -339,6 +355,13 @@ function merge(target, source) {
     } else {
       target[col.key] = String(val);
     }
+  }
+  /* Angaben ohne eigene Spalte: Norton-Fälligkeit und Übergabezettel. */
+  for (const feld of EXTRA_FIELDS) {
+    const val = source[feld.key];
+    if (val === undefined || val === null) continue;
+    if (feld.type === 'multi') target[feld.key] = Array.isArray(val) ? val.map(String) : [];
+    else target[feld.key] = String(val);
   }
   if (typeof source._updated === 'string') target._updated = source._updated;
 }

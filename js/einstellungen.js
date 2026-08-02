@@ -343,6 +343,23 @@ function renderGeneralPane(pane) {
   });
   row.appendChild(back);
   pane.appendChild(row);
+
+  pane.appendChild(el('h3', null, '5. Norton-Skala'));
+  pane.appendChild(el('p', 'panehint',
+    'Wird das Häkchen „Norton“ gesetzt, gilt die Skala als heute erhoben; die Tafel merkt ' +
+    'sich den nächsten Termin und zeigt ihn hinter den Häkchen an. Ist er erreicht, wird er ' +
+    'rot. Das Datum lässt sich je Bettplatz auch von Hand ändern.'));
+  pane.appendChild(numberRow('Erneut fällig nach', draft.norton.tage,
+    { min: 1, max: 365, step: 1, unit: 'Tagen' }, value => { draft.norton.tage = value; }));
+
+  pane.appendChild(el('h3', null, '6. Übergabezettel'));
+  pane.appendChild(el('p', 'panehint',
+    'Blendet die Schaltfläche „Übergabezettel“ in der Werkzeugleiste ein. Dort werden ' +
+    'Diagnosen, Neurologie und Katecholamine je Bettplatz erfasst – sie erscheinen nicht auf ' +
+    'der Tafel, werden aber mitgespeichert. Die Auswahllisten für Neurologie und ' +
+    'Katecholamine stehen in den gleichnamigen Reitern.'));
+  pane.appendChild(checkRow('Schaltfläche anzeigen', draft.uebergabe.button,
+    on => { draft.uebergabe.button = on; }));
 }
 
 /* Beschriftung der Spaltenköpfe */
@@ -1045,6 +1062,7 @@ function commitSettings() {
   restartPrivacyTimer();
   restartSaverTimer();
   statistikButtonZeigen();
+  uebergabeButtonZeigen();
   statistikTaktStarten();
   $('#settingsDlg').close();
   setSaveState('Einstellungen übernommen');

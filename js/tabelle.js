@@ -304,9 +304,11 @@ function buildField(bed, col, data) {
       }
       sel.value = data[col.key];
       paint(sel, col.key, Boolean(sel.value));
+      klammerRahmen(sel, col.key, sel.value);
       sel.addEventListener('change', () => {
         data[col.key] = sel.value;
         paint(sel, col.key, Boolean(sel.value));
+        klammerRahmen(sel, col.key, sel.value);
         applyRowState(sel.closest('tr'), data);
         touch(bed.id, feldWas(bed, col));
         renderStats();
@@ -403,23 +405,7 @@ function buildField(bed, col, data) {
 
     case 'checks': {
       const box = el('div', 'checkscell');
-      for (const opt of col.options) {
-        const label = el('label');
-        const cb = el('input');
-        cb.type = 'checkbox';
-        cb.checked = data[col.key].includes(opt);
-        cb.setAttribute('aria-label', col.label + ' ' + opt + ' – Bett ' + bed.label);
-        cb.addEventListener('change', () => {
-          const list = new Set(data[col.key]);
-          cb.checked ? list.add(opt) : list.delete(opt);
-          data[col.key] = col.options.filter(o => list.has(o));
-          applyRowState(cb.closest('tr'), data);
-          touch(bed.id, feldWas(bed, col));
-        });
-        label.appendChild(cb);
-        label.appendChild(el('span', null, opt));
-        box.appendChild(label);
-      }
+      renderChecks(box, bed, col, data);
       return box;
     }
 
@@ -435,6 +421,56 @@ function buildField(bed, col, data) {
     }
   }
   return el('span');
+}
+
+/* Ankreuzfeld-Zelle. Trägt die Spalte ein Fälligkeitsdatum (Norton-Skala),
+   erscheint es als Marke hinter den Häkchen: Setzen bedeutet „heute erhoben“
+   und legt den nächsten Termin fest, Entfernen löscht ihn wieder. */
+function renderChecks(box, bed, col, data) {
+  box.replaceChildren();
+  /* Die Marke steckt in einer eigenen Hülle: Beim Umschalten wird nur sie
+     neu aufgebaut, die Ankreuzfelder bleiben stehen und behalten den Fokus. */
+  const huelle = el('span', 'duewrap');
+
+  for (const opt of col.options) {
+    const label = el('label');
+    const cb = el('input');
+    cb.type = 'checkbox';
+    cb.checked = data[col.key].includes(opt);
+    cb.setAttribute('aria-label', col.label + ' ' + opt + ' – Bett ' + bed.label);
+    cb.addEventListener('change', () => {
+      const list = new Set(data[col.key]);
+      cb.checked ? list.add(opt) : list.delete(opt);
+      data[col.key] = col.options.filter(o => list.has(o));
+      if (col.due === opt) {
+        data[col.dueKey] = cb.checked ? addDays('', settings.norton.tage) : '';
+      }
+      zeigeFaelligkeit(huelle, bed, col, data);
+      applyRowState(cb.closest('tr'), data);
+      touch(bed.id, feldWas(bed, col));
+    });
+    label.appendChild(cb);
+    label.appendChild(el('span', null, opt));
+    box.appendChild(label);
+  }
+
+  box.appendChild(huelle);
+  zeigeFaelligkeit(huelle, bed, col, data);
+}
+
+/* Termin der nächsten Erhebung – nur, solange das zugehörige Häkchen sitzt. */
+function zeigeFaelligkeit(huelle, bed, col, data) {
+  huelle.replaceChildren();
+  if (!col.due || !data[col.key].includes(col.due)) return;
+  const datum = data[col.dueKey];
+  const marke = el('button', 'datebadge duebadge', datum ? shortDate(datum) : '–');
+  marke.type = 'button';
+  marke.title = datum
+    ? col.dueLabel + ': ' + fullDate(datum)
+    : col.dueLabel + ' – noch kein Datum';
+  if (datum && datum <= isoToday()) marke.classList.add('due');
+  marke.addEventListener('click', () => openMulti(bed, col, true));
+  huelle.appendChild(marke);
 }
 
 function renderChips(btn, col, data) {
@@ -462,6 +498,9 @@ function renderChips(btn, col, data) {
     for (const val of values) {
       const chip = el('span', 'chip', val);
       paint(chip, col.key);
+      /* (INV) heißt geplant, beendet oder nur zeitweise – wie beim Verdacht
+         in der Spalte Isolation bleibt das am gestrichelten Rahmen erkennbar. */
+      if (klammerRahmen(chip, col.key, val)) chip.title = ohneKlammer(val) + ' – in Klammern';
       btn.appendChild(chip);
     }
   }
@@ -512,7 +551,7 @@ function applyRowState(tr, data) {
 /* ------------------------------------------------------------------ *
  * Fehlende Pflichtangaben
  * Liegt ein Patient auf dem Bettplatz, sollten Kostform, Devices,
- * Norton / Stammblatt und das nächste Screening ausgefüllt sein. Fehlt
+ * Norton / Pflegestatus und das nächste Screening ausgefüllt sein. Fehlt
  * eine Angabe, wird die Zelle dezent rot unterlegt. Eine angekündigte
  * Aufnahme bleibt außen vor – dort ist noch nichts zu erfassen.
  * ------------------------------------------------------------------ */
@@ -542,11 +581,49 @@ function markiereLuecken(tr, data) {
     if (offen) td.title = COL_BY_KEY[key].label + ' fehlt';
     else td.removeAttribute('title');
   }
+  markiereWidersprueche(tr, data);
+}
+
+/* Derselbe Wert mit und ohne Klammern schließt einander aus: (INV) heißt
+   geplant oder beendet, INV heißt laufend – beides zugleich kann nicht sein.
+   Geprüft wird jede Mehrfachauswahl, nicht nur die Beatmungsform. */
+function widersprueche(data) {
+  const treffer = [];
+  for (const col of COLUMNS) {
+    if (col.type !== 'multi') continue;
+    const werte = data[col.key];
+    if (!Array.isArray(werte) || werte.length < 2) continue;
+    const laufend = new Set(werte.filter(v => !istKlammer(v)).map(v => String(v).trim()));
+    const doppelt = [...new Set(werte.filter(v => istKlammer(v) && laufend.has(ohneKlammer(v)))
+      .map(ohneKlammer))];
+    if (doppelt.length) treffer.push({ key: col.key, label: col.label, werte: doppelt });
+  }
+  return treffer;
+}
+
+function markiereWidersprueche(tr, data) {
+  const treffer = widersprueche(data);
+  for (const col of COLUMNS) {
+    if (col.type !== 'multi') continue;
+    const td = tr.querySelector('td.col-' + col.key);
+    if (!td) continue;
+    const fall = treffer.find(t => t.key === col.key);
+    td.classList.toggle('widerspruch', Boolean(fall));
+    if (fall) {
+      td.title = fall.werte.map(w => w + ' und (' + w + ')').join(', ') +
+        ' – beides zugleich ist nicht möglich';
+    } else if (td.title.includes('zugleich')) {
+      td.removeAttribute('title');
+    }
+  }
 }
 
 function clearBed(bed) {
   const data = state.beds[bed.id];
-  const hasContent = COLUMNS.some(c => c.type !== 'bed' && isSet(data[c.key]));
+  /* Auch die Angaben des Übergabezettels zählen – sie gingen sonst
+     unbemerkt mit verloren. */
+  const hasContent = [...COLUMNS, ...EXTRA_FIELDS]
+    .some(c => c.type !== 'bed' && isSet(data[c.key]));
   if (hasContent && !confirm('Bettplatz ' + bed.label + ' vollständig leeren?')) return;
   const name = data.name ? data.name + ' – ' : '';
   state.beds[bed.id] = emptyBed();
@@ -702,15 +779,18 @@ function initDragDrop() {
  * ------------------------------------------------------------------ */
 let multiCtx = null;
 
-function openMulti(bed, col) {
+/* alsFaellig: Es wird nicht die Spalte bearbeitet, sondern das Fälligkeits-
+   datum, das an ihr hängt (Norton-Skala). */
+function openMulti(bed, col, alsFaellig) {
   const data = state.beds[bed.id];
-  const isDate = col.type === 'date';
+  const isDate = col.type === 'date' || alsFaellig === true;
+  const dateKey = alsFaellig ? col.dueKey : col.key;
   multiCtx = {
-    bed, col,
+    bed, col, dateKey,
     selected: col.type === 'multi' ? new Set(data[col.key]) : new Set(),
     germs: col.type === 'germs' ? new Map(data[col.key].map(e => [e.v, e.s])) : null
   };
-  $('#multiTitle').textContent = col.label;
+  $('#multiTitle').textContent = alsFaellig ? col.dueLabel : col.label;
   $('#multiSub').textContent = 'Bettplatz ' + bed.label + (data.name ? ' · ' + data.name : '') +
     (col.type === 'germs' ? ' — Häkchen = bestätigt, zusätzlich „V. a.“ = Verdacht' : '');
   $('#multiCustom').value = '';
@@ -720,8 +800,15 @@ function openMulti(bed, col) {
   $('#multiCustomRow').hidden = isDate;
   $('#multiClear').hidden = isDate;
   if (isDate) {
-    $('#multiDateLabel').textContent = col.dateLabel;
-    $('#multiDate').value = data[col.key];
+    $('#multiDateLabel').textContent = alsFaellig ? col.dueLabel : col.dateLabel;
+    $('#multiDate').value = data[dateKey];
+    /* Bei der Norton-Skala ist der eingestellte Abstand die übliche Wahl,
+       beim Screening der Montag. */
+    const tage = settings.norton.tage;
+    $('#multiDateDays').hidden = !alsFaellig;
+    $('#multiDateDays').textContent = 'in ' + tage + (tage === 1 ? ' Tag' : ' Tagen');
+    $('#multiDateMon').hidden = Boolean(alsFaellig);
+    $('#multiDateMon2').hidden = Boolean(alsFaellig);
   } else {
     renderMultiOpts();
   }
@@ -797,8 +884,18 @@ function addCustom() {
 }
 
 function commitMulti() {
-  const { bed, col, selected, germs } = multiCtx;
+  const { bed, col, selected, germs, dateKey } = multiCtx;
   const data = state.beds[bed.id];
+  /* Das Fälligkeitsdatum der Norton-Skala hängt an der Ankreuzzelle; sie wird
+     danach neu aufgebaut statt der Markenliste. */
+  if (dateKey !== col.key) {
+    data[dateKey] = $('#multiDate').value;
+    const huelle = document.querySelector(`td[data-bed="${bed.id}"][data-key="${col.key}"] .duewrap`);
+    if (huelle) zeigeFaelligkeit(huelle, bed, col, data);
+    touch(bed.id, feldWas(bed, col));
+    $('#multiDlg').close();
+    return;
+  }
   if (col.type === 'date') {
     data[col.key] = $('#multiDate').value;
   } else if (germs) {

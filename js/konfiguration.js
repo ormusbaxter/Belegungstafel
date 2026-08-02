@@ -21,7 +21,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.8.1';
+const VERSION = '2.9.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -187,8 +187,16 @@ const COLUMNS = [
     key: 'devices', label: 'Devices', type: 'select', width: 78,
     options: ['ZVK', 'BDK', 'ZVK/BDK', 'keins']
   },
-  { key: 'norton', label: 'Norton / Stammblatt', type: 'checks', width: 86,
-    options: ['Norton', 'Stammblatt'] },
+  {
+    /* Die Norton-Skala wird regelmäßig wiederholt. Das Häkchen setzt deshalb
+       ein Fälligkeitsdatum; der Abstand dazu steht in den Einstellungen.
+       „Stammblatt“ hieß der zweite Punkt bis Fassung 2.8.1. */
+    key: 'norton', label: 'Norton / Pflegestatus', head: 'Norton /­Pflege­status',
+    type: 'checks', width: 92,
+    options: ['Norton', 'Pflegestatus'],
+    legacyValues: { Stammblatt: 'Pflegestatus' },
+    due: 'Norton', dueKey: 'nortonFaellig', dueLabel: 'Norton erneut fällig'
+  },
   {
     /* Nur das Datum des nächsten Screenings. Ältere Stände hielten das Datum
        im Feld abstricheDatum, es wird beim Einlesen übernommen. */
@@ -199,6 +207,32 @@ const COLUMNS = [
      anderen behalten dadurch genau die angegebene Breite. */
   { key: 'sonstiges', label: 'Sonstiges', type: 'longtext', placeholder: 'Bemerkungen …' }
 ];
+
+/* Angaben je Bettplatz, die keine Spalte der Tafel sind: das Fälligkeitsdatum
+   der Norton-Skala und die Felder des Übergabezettels. Sie werden wie die
+   Spalten gespeichert, exportiert und sind Teil des Verlaufs. */
+const EXTRA_FIELDS = [
+  { key: 'nortonFaellig', type: 'date' },
+  { key: 'diagnosen', label: 'Diagnosen', type: 'longtext',
+    placeholder: 'Haupt- und Nebendiagnosen …' },
+  { key: 'neuro', label: 'Neurologie', type: 'multi',
+    options: ['wach', 'orientiert', 'desorientiert', 'somnolent', 'soporös', 'komatös',
+              'sediert', 'RASS 0', 'RASS -1', 'RASS -2', 'RASS -3', 'RASS -4', 'RASS -5',
+              'Delir', 'unruhig', 'Pupillen o. B.', 'Anisokorie', 'Parese', 'Aphasie',
+              'Krampfanfall', 'ICP-Messung'] },
+  { key: 'katecholamine', label: 'Katecholamine', type: 'multi',
+    options: ['Norepinephrin', 'Epinephrin', 'Dobutamin', 'Vasopressin'] }
+];
+
+/* Die drei Felder des Übergabezettels in der Reihenfolge des Blattes */
+const UEBERGABE_FIELDS = EXTRA_FIELDS.filter(f => f.label);
+
+/* Ein in Klammern gesetzter Wert bedeutet auf der Station „geplant, beendet
+   oder nur zeitweise“ – etwa (INV) oder (CiCa). Solche Einträge werden wie
+   ein Verdacht gestrichelt dargestellt. */
+const KLAMMER = /^\s*\(.*\)\s*$/;
+const istKlammer = wert => KLAMMER.test(String(wert || ''));
+const ohneKlammer = wert => String(wert || '').replace(/^\s*\(|\)\s*$/g, '').trim();
 
 /* Ein Isolationseintrag ist { v: Bezeichnung, s: 'bestaetigt' | 'verdacht' }.
    Ältere Stände (reine Zeichenketten, ggf. mit dem früheren Kennzeichen für die
@@ -234,6 +268,17 @@ function paint(node, colKey, hasValue) {
   if (style.fg) node.style.color = style.fg;
   if (style.bg) node.style.background = style.bg;
   if (style.border) node.style.border = '1px ' + style.border + ' ' + (style.fg || 'currentColor');
+}
+
+/* Umrandet einen in Klammern gesetzten Wert gestrichelt und meldet zurück, ob
+   das zutraf. Dieselbe Lesart wie beim Verdacht in der Spalte Isolation:
+   (INV) ist geplant, beendet oder nur zeitweise – INV läuft. */
+function klammerRahmen(node, colKey, wert) {
+  if (!istKlammer(wert)) return false;
+  const style = styleFor(colKey);
+  node.style.border = '1px dashed ' + ((style && style.fg) || 'currentColor');
+  node.classList.add('klammer');
+  return true;
 }
 
 /* Flache Werteliste einer Spalte – berücksichtigt Gruppen und Datalist-Einträge. */
@@ -294,6 +339,10 @@ const STATION_KEYS = ['maxBetten', 'meldestatus', 'aufnahmen', 'infos',
 
 const COL_BY_KEY = Object.fromEntries(COLUMNS.map(c => [c.key, c]));
 
+/* Spalten und die Felder des Übergabezettels unter einem Zugriff – beide
+   haben pflegbare Auswahllisten. */
+const FIELD_BY_KEY = { ...COL_BY_KEY, ...Object.fromEntries(EXTRA_FIELDS.map(f => [f.key, f])) };
+
 /* Rufnummernliste unter der Tafel (über die Einstellungen änderbar) */
 let PHONES = [
   { value: '4682', label: 'Dienst Anästhesie' },
@@ -324,6 +373,11 @@ const OPTION_CATEGORIES = [
   { key: 'limitierung',  label: 'Therapielimitierung',    kind: 'text' },
   { key: 'postform',     label: 'Kostformen',             kind: 'text' },
   { key: 'physio',       label: 'Physiotherapie',         kind: 'text' },
+  /* Nur auf dem Übergabezettel, nicht in der Tabelle – deshalb ohne Stilblock. */
+  { key: 'neuro',        label: 'Neurologie',             kind: 'text', stil: false,
+    hint: 'Auswahl im Übergabezettel; erscheint nicht auf der Tafel' },
+  { key: 'katecholamine', label: 'Katecholamine',         kind: 'text', stil: false,
+    hint: 'Auswahl im Übergabezettel; erscheint nicht auf der Tafel' },
   { key: 'telefon',      label: 'Telefon (Spalte)',       kind: 'phone',
     hint: 'Vorschläge im Feld Telefon der Tabelle' },
   { key: 'phones',       label: 'Telefonliste',           kind: 'phone',
@@ -341,7 +395,7 @@ const DEFAULT_HEADS = Object.fromEntries(COLUMNS.map(col =>
   [col.key, { label: col.label, head: 'head' in col ? col.head : col.label }]));
 
 const DEFAULT_OPTIONS = Object.fromEntries(OPTION_CATEGORIES.map(cat =>
-  [cat.key, copy(cat.key === 'phones' ? PHONES : COL_BY_KEY[cat.key].options)]));
+  [cat.key, copy(cat.key === 'phones' ? PHONES : FIELD_BY_KEY[cat.key].options)]));
 
 /* Rahmenstile, die je Auswahlwert eingestellt werden können */
 const BORDER_STYLES = [
@@ -409,6 +463,12 @@ const DEFAULT_STATISTIK = {
     { key: 'nacht', name: 'Nachtdienst', start: '20:30' }
   ]
 };
+
+/* Norton-Skala: Abstand bis zur nächsten Erhebung, in Tagen */
+const DEFAULT_NORTON = { tage: 7 };
+
+/* Übergabezettel: Schaltfläche in der Werkzeugleiste anbieten */
+const DEFAULT_UEBERGABE = { button: true };
 
 /* Nachtspanne der automatischen Tag-/Nachtansicht */
 const DEFAULT_NIGHT = { from: '19:00', to: '07:00' };

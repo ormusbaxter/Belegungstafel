@@ -522,6 +522,24 @@ td.luecke {
   box-shadow: inset 0 2px 0 var(--luecke-linie);
 }
 
+/* Widerspruch: derselbe Wert mit und ohne Klammern. Anders als die fehlende
+   Pflichtangabe nicht flächig, sondern als Rahmen – es fehlt nichts, es passt
+   etwas nicht zusammen. */
+td.widerspruch {
+  box-shadow: inset 0 0 0 2px var(--luecke-linie);
+  border-radius: 3px;
+}
+
+/* Fälligkeitsmarke hinter den Ankreuzfeldern (Norton-Skala) */
+.duebadge {
+  margin-left: 2px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10.5px;
+}
+.duebadge:hover { border-color: var(--accent); }
+
 /* Felder */
 td input[type="text"],
 td input[type="tel"],
@@ -1039,6 +1057,47 @@ html[data-theme="dark"] .pwerror { color: var(--iso); }
 .statsbtn:hover { color: var(--accent); border-color: var(--accent); background: var(--panel); }
 
 /* Fenster der Statistik */
+/* Übergabezettel: je belegtem Bettplatz ein Block mit den drei Angaben,
+   die nicht auf der Tafel stehen. */
+.dlg.dlg-handover { width: min(980px, 96vw); }
+.handoverlist { max-height: 62vh; overflow: auto; display: flex; flex-direction: column; gap: 10px; }
+.handoverbed {
+  padding: 8px 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+.handoverhead { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+.handoverbednr {
+  min-width: 42px;
+  padding: 1px 7px;
+  border-radius: 6px;
+  background: var(--line-soft);
+  font-weight: 700;
+  text-align: center;
+}
+.handovername { font-weight: 600; }
+.handovermeta { color: var(--ink-soft); font-size: 12px; }
+.handoverfield { display: grid; grid-template-columns: 110px 1fr; gap: 8px; align-items: start; margin-top: 5px; }
+.handoverlabel { color: var(--ink-soft); font-size: 12px; padding-top: 4px; }
+.handoverfield textarea {
+  width: 100%;
+  padding: 5px 7px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  resize: vertical;
+}
+.handoverpick { display: flex; flex-wrap: wrap; gap: 3px 14px; }
+.handoverpick label { display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer; }
+.handoverpick input { accent-color: var(--accent); }
+
+/* Das Blatt selbst erscheint nur im Ausdruck. */
+.handoversheet { display: none; }
+
 .dlg.dlg-stats { width: min(940px, 96vw); }
 .statsbar {
   display: flex;
@@ -1484,6 +1543,60 @@ body.saver-on { overflow: hidden; }
     resize: none;
     text-align: left;
   }
+
+  /* ---------------- Übergabezettel ----------------
+     Ein eigenes Blatt statt der Tafel: nur belegte Bettplätze mit den
+     Angaben, die auf der Tafel nicht stehen. */
+  body.uebergabe-druck .topbar,
+  body.uebergabe-druck .stationbar,
+  body.uebergabe-druck .savestate,
+  body.uebergabe-druck .tablewrap,
+  body.uebergabe-druck .notes { display: none !important; }
+  body.uebergabe-druck .handoversheet { display: block; }
+
+  .handoversheet .sheethead {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding-bottom: 2mm;
+    border-bottom: 1.5px solid #000;
+  }
+  .handoversheet .sheettitle { font-size: 5mm; font-weight: 700; }
+  .handoversheet .sheetmeta { font-size: 3mm; }
+
+  .handoversheet .sheettable {
+    width: 100%;
+    margin-top: 2mm;
+    table-layout: fixed;
+    border-collapse: collapse;
+  }
+  .handoversheet th,
+  .handoversheet td {
+    border: 1px solid #000;
+    padding: 1mm 1.5mm;
+    vertical-align: top;
+    text-align: left;
+    overflow-wrap: break-word;
+  }
+  /* Lange Diagnosen dürfen auf ein zweites Blatt laufen – abschneiden wäre
+     hier falsch. Die Kopfzeile wiederholt sich dann. */
+  .handoversheet thead { display: table-header-group; }
+  .handoversheet th { font-size: 3mm; text-align: center; }
+  .handoversheet td { height: var(--uebergabe-row, 14mm); font-size: 3.4mm; }
+  .handoversheet .sheetbed {
+    width: 8%;
+    font-size: 5mm;
+    font-weight: 700;
+    text-align: center;
+  }
+  .handoversheet .sheetpatient { width: 20%; }
+  .handoversheet .sheet-diagnosen { width: 33%; }
+  .handoversheet .sheet-neuro { width: 21%; }
+  .handoversheet .sheet-katecholamine { width: 18%; }
+  .handoversheet .sheetname { font-weight: 700; font-size: 3.8mm; }
+  .handoversheet .sheetmetaline { font-size: 3mm; }
+  .handoversheet .sheetiso { font-size: 3mm; font-weight: 700; }
+  .handoversheet tr { page-break-inside: avoid; }
 
   /* Fußzeile – auf beiden Blättern, deshalb außerhalb der Physio-Regeln */
   .printfoot {

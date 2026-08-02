@@ -460,6 +460,7 @@ function init() {
   initSlideFolderInput();
   initVerlauf();
   initStatistik();
+  initUebergabe();
   initBackup();
   initCombo();
   standMerken();
@@ -506,6 +507,9 @@ function init() {
   $('#multiAdd').addEventListener('click', addCustom);
   $('#multiDateMon').addEventListener('click', () => { $('#multiDate').value = nextMonday(1); });
   $('#multiDateMon2').addEventListener('click', () => { $('#multiDate').value = nextMonday(2); });
+  $('#multiDateDays').addEventListener('click', () => {
+    $('#multiDate').value = addDays('', settings.norton.tage);
+  });
   $('#multiDateOff').addEventListener('click', () => { $('#multiDate').value = ''; });
   $('#multiCustom').addEventListener('keydown', event => {
     if (event.key === 'Enter') { event.preventDefault(); addCustom(); }

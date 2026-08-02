@@ -70,6 +70,14 @@
       </svg>
       Diaschau
     </button>
+    <button type="button" id="btnHandover" class="iconbtn" hidden
+            title="Übergabezettel: Diagnosen, Neurologie und Katecholamine erfassen und drucken">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+        <path fill="currentColor" d="M19 3h-4.2a3 3 0 0 0-5.6 0H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm-7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm7 16H5V5h2v2h10V5h2v14Z"/>
+        <path fill="currentColor" d="M7 10h10v1.6H7zm0 3.2h10v1.6H7zm0 3.2h6V18H7z"/>
+      </svg>
+      Übergabezettel
+    </button>
     <button type="button" id="btnPrintPhysio" class="iconbtn"
             title="Blatt für die Physiotherapie drucken – große Schrift, A4 quer">
       <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
@@ -152,7 +160,11 @@
   </div>
 </section>
 
-<!-- Fußzeile beider Ausdrucke; am Bildschirm ausgeblendet, der Text wird
+<!-- Blatt des Übergabezettels; nur im Ausdruck sichtbar. Es steht vor der
+     Fußzeile, damit diese auch hier unten erscheint. -->
+<section class="handoversheet" id="handoverSheet" aria-hidden="true"></section>
+
+<!-- Fußzeile aller Ausdrucke; am Bildschirm ausgeblendet, der Text wird
      vor dem Druck gesetzt. -->
 <p class="printfoot" id="printFoot"></p>
 
@@ -189,6 +201,14 @@
           <b>OP</b> und <b>CV</b>.</li>
         <li><b>Abstriche</b>: Klick öffnet das Datum des nächsten Screenings, wahlweise über
           „nächster Montag“ oder „übernächster Montag“.</li>
+        <li><b>Norton / Pflegestatus</b>: Das Häkchen <b>Norton</b> bedeutet „heute erhoben“.
+          Dahinter erscheint der nächste Termin – ab Werk in sieben Tagen, einstellbar unter
+          Einstellungen → Allgemein. Ist er erreicht, wird er rot. Ein Klick auf den Termin
+          öffnet ihn zum Ändern; wird das Häkchen entfernt, entfällt er.</li>
+        <li><b>Werte in Klammern</b> – etwa <b>(INV)</b> oder <b>(CiCa)</b> – stehen für
+          geplant, beendet oder nur zeitweise. Sie werden <b>gestrichelt</b> umrandet, wie
+          ein Verdacht bei der Isolation. Beides zugleich – <b>INV</b> und <b>(INV)</b> –
+          kann nicht sein; die Zelle bekommt dann einen roten Rahmen.</li>
         <li><b>Verstorbene</b>: Im Feld Patientenname hinter dem Namen ein <b>Plus</b> setzen und
           dahinter die Uhrzeit schreiben – etwa <b>Mustermann, Max + 14:30</b>. Das Pluszeichen
           wird sofort zum Kreuz <b>†</b>, und die Namenszelle wird dunkelgrau hinterlegt mit
@@ -224,14 +244,14 @@
     <section>
       <h3>Fehlende Angaben</h3>
       <p>Sobald ein Bettplatz belegt ist, prüft die Tafel vier Angaben, die zu jedem Patienten
-        gehören: <b>Kostform</b>, <b>Devices</b>, <b>Norton / Stammblatt</b> und
+        gehören: <b>Kostform</b>, <b>Devices</b>, <b>Norton / Pflegestatus</b> und
         <b>Abstriche</b> (nächstes Screening). Fehlt eine davon, wird die betreffende Zelle
         <b>dezent rot unterlegt</b>; der Zeiger auf der Zelle nennt die fehlende Angabe. Die
         Markierung verschwindet, sobald etwas eingetragen ist.</p>
       <ul>
         <li>Bei <b>Devices</b> ist <b>keins</b> eine gültige Angabe – die Markierung
           verschwindet damit ebenfalls.</li>
-        <li>Bei <b>Norton / Stammblatt</b> gilt die Zelle erst als erledigt, wenn
+        <li>Bei <b>Norton / Pflegestatus</b> gilt die Zelle erst als erledigt, wenn
           <b>beide</b> Häkchen gesetzt sind.</li>
         <li>Eine <b>angekündigte Aufnahme</b> (grüner Pfeil) wird nicht angemahnt – dort ist
           noch nichts zu erfassen. Ebenso wenig ein Platz, der als <b>gesperrt</b> oder
@@ -287,7 +307,7 @@
       <h3>Datenschutz</h3>
       <p>Nach einer einstellbaren Zeit ohne Eingabe werden <b>alle patientenbezogenen
         Spalten</b> – von Patientenname bis Sonstiges, einschließlich Kostform, privat,
-        Physiotherapie, Devices, Norton / Stammblatt und Abstriche – sowie die Textfelder
+        Physiotherapie, Devices, Norton / Pflegestatus und Abstriche – sowie die Textfelder
         unter der Tafel unkenntlich gemacht. Lesbar bleiben allein die Angaben zum Platz und
         zur Schicht: <b>Anwesenheitsstatus, Bettplatz, Telefon und Pflegekraft</b>. Jede
         Mausbewegung oder Taste hebt das wieder auf.</p>
@@ -382,6 +402,31 @@
         geplanten Aufnahmen. Über das Zahnrad unten rechts
         stehen unter <b>Daten</b> Export (JSON oder CSV), Import und „Tafel leeren“ bereit; dort
         lassen sich auch Bettplätze, Spaltenköpfe und alle Auswahllisten anpassen.</p>
+    </section>
+
+    <section>
+      <h3>Übergabezettel</h3>
+      <p>Für die Übergabe zwischen zwei Schichten werden Angaben gebraucht, die auf dem
+        dauerhaft sichtbaren Bildschirm nichts zu suchen haben. Die Schaltfläche
+        <b>Übergabezettel</b> oben öffnet ein eigenes Fenster mit je einem Block pro belegtem
+        Bettplatz: <b>Diagnosen</b> als Freitext, <b>Neurologie</b> und <b>Katecholamine</b>
+        als Mehrfachauswahl.</p>
+      <ul>
+        <li>Diese Angaben erscheinen <b>nicht auf der Tafel</b>, werden aber mitgespeichert:
+          Beim nächsten Öffnen stehen sie wieder da, auch nach einem Neustart. Erst
+          <b>Bettplatz räumen</b> löscht sie mit.</li>
+        <li><b>Drucken</b> gibt ein eigenes Blatt aus – A4 quer, nur belegte Plätze, mit
+          Bettplatz, Name, Fachdisziplin, Isolation und den drei Angaben. Bei langen
+          Diagnosen läuft es auf ein zweites Blatt, statt den Text zu beschneiden.</li>
+        <li>Die Auswahllisten für <b>Neurologie</b> und <b>Katecholamine</b> stehen in den
+          Einstellungen unter den gleichnamigen Punkten und lassen sich wie jede andere Liste
+          ergänzen.</li>
+        <li>Wird die Funktion nicht gebraucht, lässt sich die Schaltfläche unter
+          Einstellungen → Allgemein ausblenden.</li>
+      </ul>
+      <p>Der Zettel enthält Diagnosen im Klartext – von allen Ausdrucken der empfindlichste.
+        Er sollte die Station nicht verlassen und gehört nach dem Dienst in den
+        Datenschutzbehälter.</p>
     </section>
 
     <section>
@@ -516,6 +561,7 @@
   <div class="dlgdate" id="multiDateRow" hidden>
     <label for="multiDate" id="multiDateLabel"></label>
     <input type="date" id="multiDate">
+    <button type="button" id="multiDateDays" hidden>in 7 Tagen</button>
     <button type="button" id="multiDateMon">nächster Montag</button>
     <button type="button" id="multiDateMon2">übernächster Montag</button>
     <button type="button" id="multiDateOff">löschen</button>
@@ -529,6 +575,20 @@
     <span class="spacer"></span>
     <button type="button" id="multiCancel">Abbrechen</button>
     <button type="button" id="multiOk" class="primary">Übernehmen</button>
+  </menu>
+</dialog>
+
+<!-- Übergabezettel: Angaben, die nicht auf der Tafel stehen -->
+<dialog id="handoverDlg" class="dlg dlg-handover">
+  <h2>Übergabezettel</h2>
+  <p class="dlgsub">Diagnosen, Neurologie und Katecholamine je belegtem Bettplatz. Diese
+    Angaben erscheinen nicht auf der Belegungstafel, werden aber mitgespeichert und stehen
+    beim nächsten Öffnen wieder bereit.</p>
+  <div class="handoverlist" id="handoverList"></div>
+  <menu class="dlgmenu">
+    <span class="spacer"></span>
+    <button type="button" id="handoverClose">Schließen</button>
+    <button type="button" id="handoverPrint" class="primary">Drucken</button>
   </menu>
 </dialog>
 
@@ -595,6 +655,7 @@
 <script src="js/einstellungen.js"></script>
 <script src="js/schoner.js"></script>
 <script src="js/statistik.js"></script>
+<script src="js/uebergabe.js"></script>
 <script src="js/tafel.js"></script>
 </body>
 </html>

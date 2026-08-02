@@ -19,6 +19,7 @@ js/tabelle.js         Aufbau und Bedienung der Tabelle
 js/einstellungen.js   Einstellungsfenster
 js/schoner.js         Bildschirmschoner und Diaschau
 js/statistik.js       Auswertung je Schicht
+js/uebergabe.js       Übergabezettel (Diagnosen, Neurologie, Katecholamine)
 js/tafel.js           Sichtschutz, Ansicht, Sicherung, Start
 slides/               Inhalte für den Bildschirmschoner (PDF, PNG, JPEG)
 tests/                Prüfungen im echten Browser (siehe tests/README.md)
@@ -46,7 +47,9 @@ Module beim Öffnen von der Festplatte (`file://`) sperrt.
 Anwesenheitsstatus · Bettplatz · Patientenname · Fachdisziplin · Beatmungsform ·
 Kreislaufunterstützung · Dialyse · Isolation · TTM · Intervention · Therapielimitierung ·
 Telefon · Pflegekraft · Kostform · privat · Physiotherapie · Devices ·
-Norton / Stammblatt · Abstriche · Sonstiges
+Norton / Pflegestatus · Abstriche · Sonstiges
+
+Nicht auf der Tafel, nur im Übergabezettel: Diagnosen · Neurologie · Katecholamine
 
 ### Herkunft der Auswahlwerte
 
@@ -86,7 +89,7 @@ Ein Eintrag aus Spalte J im Feld Patientenname (z. B. `gesperrt` oder `OP`) besc
 den Bettplatz statt eines Patienten: Er wird kursiv dargestellt und färbt die Zeile ein.
 
 Ohne Vorgabe in der Datenquelle: Pflegekraft und Sonstiges (Freitext),
-Norton / Stammblatt (zwei Ankreuzfelder) sowie Abstriche (Datum des nächsten
+Norton / Pflegestatus (zwei Ankreuzfelder) sowie Abstriche (Datum des nächsten
 Screenings).
 
 Die Spalten **K** (1, 2, 3) und **L** (N, S, V) der Datenquelle sind noch keiner
@@ -101,7 +104,7 @@ Spalte der Tafel zugeordnet.
 | Freitext mit Klappliste | Patientenname, Telefon | frei tippen oder über `▾` bzw. Alt + Pfeil nach unten die vollständige Liste öffnen |
 | Datum | Abstriche | Klick öffnet Dialog mit Datumsfeld und den Schaltflächen „nächster Montag“, „übernächster Montag“ und „löschen“ |
 | Keimliste | Isolation | Klick öffnet Dialog; Häkchen = bestätigt, zusätzlich „V. a.“ = Verdacht |
-| Ankreuzfeld | privat, Norton / Stammblatt | direkt anklicken |
+| Ankreuzfeld | privat, Norton / Pflegestatus | direkt anklicken; „Norton“ setzt zusätzlich den nächsten Termin |
 | Freitext | Pflegekraft, Sonstiges | direkt tippen |
 
 ## Funktionen
@@ -136,11 +139,25 @@ Spalte der Tafel zugeordnet.
   hervorgehoben und im Kopfbereich gezählt. Ist mindestens ein Screening fällig, wird die
   Kennzahl **Screening fällig** im Kopf rot hinterlegt
 - **Fehlende Pflichtangaben**: Bei einem belegten Bettplatz prüft die Tafel **Kostform**,
-  **Devices**, **Norton / Stammblatt** und **Abstriche**; fehlt eine Angabe, wird die Zelle
+  **Devices**, **Norton / Pflegestatus** und **Abstriche**; fehlt eine Angabe, wird die Zelle
   dezent rot unterlegt und nennt im Zeigertext die fehlende Angabe. `keins` bei den Devices
-  gilt als Angabe, Norton / Stammblatt erst mit beiden Häkchen. Eine angekündigte Aufnahme
+  gilt als Angabe, Norton / Pflegestatus erst mit beiden Häkchen. Eine angekündigte Aufnahme
   (grüner Pfeil) sowie `gesperrt` oder `Reinigung` werden nicht angemahnt; der Ausdruck bleibt
   ohne Färbung
+- **Norton-Skala mit Fälligkeit**: Das Häkchen `Norton` gilt als „heute erhoben“ und setzt den
+  nächsten Termin – ab Werk in sieben Tagen, einstellbar unter Allgemein. Er steht als Marke
+  hinter den Häkchen, wird rot, sobald er erreicht ist, und lässt sich per Klick ändern
+- **Werte in Klammern** (`(INV)`, `(CiCa)` …) stehen für geplant, beendet oder nur zeitweise
+  und werden gestrichelt umrandet – dieselbe Lesart wie beim Verdacht in der Spalte Isolation.
+  Derselbe Wert mit **und** ohne Klammern zugleich ist ein Widerspruch: Die Zelle erhält einen
+  roten Rahmen mit Erklärung im Zeigertext. Geprüft wird jede Mehrfachauswahl
+- **Übergabezettel** (Schaltfläche oben, in den Einstellungen ein- und ausblendbar): je
+  belegtem Bettplatz Diagnosen als Freitext sowie Neurologie und Katecholamine als
+  Mehrfachauswahl. Diese Angaben erscheinen **nicht auf der Tafel**, werden aber mitgespeichert,
+  mit gesichert und mit exportiert; „Bettplatz räumen“ löscht sie mit. Gedruckt wird ein eigenes
+  Blatt (A4 quer) mit Bettplatz, Patient, Isolation und den drei Angaben – bei langen Diagnosen
+  auf zwei Blättern statt beschnitten. Die Auswahllisten stehen in den Einstellungen unter
+  „Neurologie“ und „Katecholamine“
 - **Tastatur**: Navigation durch die Tabelle mit den Pfeiltasten, Zeilenwechsel mit der
   Eingabetaste (mit Umschalt aufwärts). In Textfeldern wechseln Links und Rechts erst am
   Anfang bzw. Ende des Textes die Zelle. Auswahlfelder werden über die Anfangsbuchstaben
@@ -189,7 +206,7 @@ Spalte der Tafel zugeordnet.
   weiterhin als belegt
 - **Sichtschutz**: Nach der eingestellten Zeit ohne Eingabe (Voreinstellung 120 Sekunden)
   werden **alle patientenbezogenen Spalten** – Patientenname bis Sonstiges, also auch Kostform,
-  privat, Physiotherapie, Devices, Norton / Stammblatt und Abstriche – sowie die beiden
+  privat, Physiotherapie, Devices, Norton / Pflegestatus und Abstriche – sowie die beiden
   Textfelder unter der Tafel
   unkenntlich gemacht. Jede Mausbewegung oder Taste hebt das auf; die Schaltfläche
   „Datenschutz“ schaltet sofort um und bleibt dann bis zu einem Klick oder Tastendruck
@@ -333,7 +350,7 @@ Alle 20 Spalten passen auf einem 1920 px breiten Bildschirm ohne Querscrollen ne
 auf schmaleren Geräten bleiben Anwesenheitsstatus und Bettplatz beim Scrollen stehen.
 
 Spaltenköpfe und Zellinhalte sind mittig ausgerichtet; Ausnahme sind die beiden
-Ankreuzfelder unter „Norton / Stammblatt“, die linksbündig untereinander stehen.
+Ankreuzfelder unter „Norton / Pflegestatus“, die linksbündig untereinander stehen.
 
 Fünf Spalten richten sich in der Breite nach ihrem Inhalt: gemessen werden der längste
 Statuswert, die längste Bettbezeichnung sowie der längste Eintrag unter Patientenname

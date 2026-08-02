@@ -4,6 +4,26 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.9.0
+
+- **Übergabezettel**: neue Schaltfläche in der Werkzeugleiste. Je belegtem Bettplatz lassen
+  sich Diagnosen (Freitext), Neurologie und Katecholamine (beides Mehrfachauswahl) erfassen.
+  Diese Angaben erscheinen **nicht** auf der Tafel, werden aber mitgespeichert, mit gesichert
+  und mit exportiert – beim nächsten Öffnen stehen sie wieder bereit. Gedruckt wird ein
+  eigenes Blatt mit Bettplatz, Patient, Isolation und den drei Angaben. Die Auswahllisten
+  stehen in den Einstellungen unter „Neurologie" und „Katecholamine", die Schaltfläche selbst
+  lässt sich unter „Allgemein" ein- und ausblenden
+- **Norton-Skala mit Fälligkeit**: Das Häkchen „Norton“ setzt den nächsten Termin – ab Werk
+  in sieben Tagen, einstellbar unter „Allgemein“. Er steht als Marke hinter den Häkchen und
+  wird rot, sobald er erreicht ist; von Hand änderbar über einen Klick darauf
+- **„Stammblatt" heißt jetzt „Pflegestatus"**; vorhandene Häkchen werden übernommen
+- **Werte in Klammern gestrichelt**: `(INV)`, `(CiCa)` und alle weiteren Klammerwerte werden
+  wie ein Verdacht in der Spalte Isolation gestrichelt umrandet – geplant, beendet oder nur
+  zeitweise ist damit auf einen Blick vom laufenden Verfahren zu unterscheiden
+- **Plausibilitätsprüfung**: Derselbe Wert mit und ohne Klammern zugleich – etwa `INV` und
+  `(INV)` – wird als Widerspruch markiert. Gilt für jede Mehrfachauswahl, nicht nur die
+  Beatmungsform
+
 ## 2.8.1
 
 Vorbereitung der Auslieferung.

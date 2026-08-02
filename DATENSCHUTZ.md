@@ -22,15 +22,22 @@ Angaben, die dafür gebraucht werden.
 **Patientenbezogen** – je Bettplatz: Name, Fachdisziplin, Anwesenheitsstatus, Beatmungsform,
 Kreislaufunterstützung, Dialyse, Isolation einschließlich Verdachtskennzeichen, TTM,
 Intervention, Therapielimitierung, Telefon, Kostform, Privatstatus, Physiotherapie, Devices,
-Norton / Stammblatt, Datum des nächsten Abstrichs, Sonstiges. Bei Verstorbenen zusätzlich
+Norton / Pflegestatus, Datum des nächsten Abstrichs, Sonstiges. Bei Verstorbenen zusätzlich
 das Kreuz und der Todeszeitpunkt.
 
-Isolation, Beatmung, Dialyse und Therapielimitierung sind **Gesundheitsdaten** im Sinne von
-Art. 9 DSGVO. Die Verarbeitung stützt sich auf Art. 9 Abs. 2 lit. h DSGVO in Verbindung mit
-⟨landesrechtliche Grundlage, z. B. Krankenhausgesetz des Landes⟩.
+**Übergabezettel** – je Bettplatz zusätzlich Diagnosen (Freitext), neurologischer Status und
+laufende Katecholamine. Diese drei Angaben erscheinen **nicht auf der Tafel**; sie sind nur
+über die Schaltfläche „Übergabezettel“ sichtbar und stehen auf dem zugehörigen Ausdruck.
+Gespeichert werden sie wie die übrigen Angaben. Die Funktion lässt sich in den Einstellungen
+vollständig abschalten; dann werden keine solchen Angaben erhoben.
 
-**Nicht erfasst** – bewusst: Geburtsdatum, Fallnummer, Adresse, Diagnosen, Befunde,
-Medikation, Angehörige.
+Isolation, Beatmung, Dialyse, Therapielimitierung sowie die Angaben des Übergabezettels sind
+**Gesundheitsdaten** im Sinne von Art. 9 DSGVO. Die Verarbeitung stützt sich auf Art. 9
+Abs. 2 lit. h DSGVO in Verbindung mit ⟨landesrechtliche Grundlage, z. B. Krankenhausgesetz
+des Landes⟩.
+
+**Nicht erfasst** – bewusst: Geburtsdatum, Fallnummer, Adresse, Befunde, Medikation
+(ausgenommen die vier Katecholamine des Übergabezettels), Angehörige.
 
 **Beschäftigtenbezogen**: Pflegekraft je Bettplatz, Schichtleitung, Blutzuständigkeit,
 Notfallequipment, jeweils mit Telefonnummer. Dazu ein technischer Änderungszeitstempel je
@@ -54,20 +61,23 @@ Schlüssel: `belegungstafel.intensiv.v1`, `.einstellungen`, `.theme`, `.sicherun
 | Export JSON / CSV | vollständiger Bestand, Klarnamen | von Hand |
 | Ausdruck „Drucken" | Name, Bettplatz, Fachdisziplin, Isolation, Intervention, Therapielimitierung, Telefon, Pflegekraft | von Hand |
 | Ausdruck „Druck Physio" | Bettplatz, Name, Fachdisziplin, **Isolation**, Telefon, Pflegekraft | von Hand |
+| Ausdruck „Übergabezettel" | Bettplatz, Name, Fachdisziplin, **Isolation, Diagnosen, Neurologie, Katecholamine** | von Hand |
 | Statistik-Export (CSV) | ausschließlich Zahlen je Schicht, **keine Personendaten** | von Hand |
 | `js/vorgaben.js` | ausschließlich Einstellungen, **keine Personendaten** | von Hand |
 
 Ablageort der Sicherungen: ⟨Ordner eintragen⟩. Er muss auf die Station beschränkt sein; der
 Download-Ordner des Browsers ist dafür nicht geeignet.
 
-Beide Ausdrucke tragen eine Fußzeile mit Druckzeitpunkt und dem Hinweis auf die Entsorgung
-im Datenschutzbehälter.
+Alle Ausdrucke tragen eine Fußzeile mit Druckzeitpunkt und dem Hinweis auf die Entsorgung
+im Datenschutzbehälter. Der Übergabezettel ist von ihnen der empfindlichste – er enthält
+Diagnosen im Klartext und sollte die Station nicht verlassen.
 
 ## 4. Aufbewahrung und Löschung
 
 | Bestand | Frist |
 |---|---|
 | Tafel | Der Bettplatz wird beim Verlegen oder Entlassen geräumt; danach ist der Eintrag fort |
+| Übergabezettel | dieselben Angaben je Bettplatz; „Bettplatz räumen“ löscht sie mit |
 | Sicherungen | je Tag eine Datei, ältere werden automatisch gelöscht – eingestellt sind ⟨n⟩ Dateien, Voreinstellung 7 |
 | Verlauf | letzte 20 Schritte, nur im Arbeitsspeicher, endet mit dem Schließen der Seite |
 | Statistik | Zahlen ohne Personenbezug, Aufbewahrung nach Einstellung ⟨n⟩ Tage |
@@ -135,9 +145,16 @@ beschränkten Rechten und kurze Aufbewahrung.
 **Keine Anbindung an KIS oder PDMS.** Die Tafel liest nichts aus anderen Systemen; alle
 Angaben werden von der Schicht eingetragen. Damit entsteht kein weiterer Datenfluss.
 
+**Diagnosen nur im Übergabezettel, nicht auf der Tafel.** Für die Übergabe zwischen zwei
+Schichten werden Diagnosen, neurologischer Status und laufende Katecholamine gebraucht; auf
+dem dauerhaft sichtbaren Bildschirm am Stützpunkt haben sie nichts zu suchen. Beides ist
+deshalb getrennt: Die Angaben sind nur im eigenen Fenster und auf dem eigenen Ausdruck zu
+sehen, und die Funktion lässt sich abschalten, wenn die Station sie nicht nutzt.
+
 **Kein Medizinprodukt.** Die Tafel dient der Organisation der Schicht, nicht der Diagnose
 oder Therapie. Sie zeigt keine Gerätedaten an und trifft keine Aussagen, auf die hin
-behandelt wird.
+behandelt wird. Der Übergabezettel gibt wieder, was in der Patientenakte steht; er tritt
+nicht an deren Stelle und ist keine Dokumentation.
 
 ## 8. Was noch offen ist
 
