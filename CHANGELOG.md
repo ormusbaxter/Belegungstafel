@@ -4,6 +4,17 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.9.1
+
+- **Übergabezettel erweitert**: Das Blatt führt jetzt zusätzlich **Beatmungsform,
+  Kreislaufunterstützung, Nierenersatz, Isolation und Therapielimitierung** aus der Tafel mit;
+  ganz rechts bleibt je Patient ein leeres Feld für das Kürzel der **übernehmenden
+  Pflegekraft**
+- Unter der Tabelle stehen nun die **geplanten Aufnahmen** (mit Zeilen zum Ergänzen von Hand),
+  daneben **Schichtleitung, Blutzuständigkeit und Notfallequipment** und rechts die
+  **Diensttelefone** mit je einer Linie für die Person, die das Gerät übernimmt. Die Liste
+  entspricht den Vorschlägen der Spalte Telefon und wird in den Einstellungen gepflegt
+
 ## 2.9.0
 
 - **Übergabezettel**: neue Schaltfläche in der Werkzeugleiste. Je belegtem Bettplatz lassen

@@ -154,7 +154,13 @@ gleich('und steht wieder im Fenster',
 await page.click('#handoverClose');
 
 /* Das Blatt: nur belegte Plätze, Tafel ausgeblendet */
-await page.evaluate(() => uebergabeBlattAufbauen());
+await page.evaluate(() => {
+  state.station.aufnahmen = 'Herr Beispiel, ACH, gegen 14 Uhr';
+  state.station.schichtleitung = 'Schmidt';
+  state.station.schichtleitungTel = '4286';
+  state.beds['2'].beatmung = ['INV'];
+  uebergabeBlattAufbauen();
+});
 await page.evaluate(() => document.body.classList.add('uebergabe-druck'));
 await page.emulateMedia({ media: 'print' });
 await page.waitForTimeout(200);
@@ -163,10 +169,36 @@ pruefe('Blatt im Ausdruck sichtbar', await sichtbar('.handoversheet'));
 pruefe('Tafel im Ausdruck ausgeblendet', !(await sichtbar('.tablewrap')));
 pruefe('Fußzeile bleibt', await sichtbar('.printfoot'));
 const spalten = await page.$$eval('.handoversheet th', ths => ths.map(t => t.textContent));
-gleich('Spalten des Blattes', spalten.join(' | '), 'Bett | Patient | Diagnosen | Neurologie | Katecholamine');
+gleich('Spalten des Blattes', spalten.join(' | '),
+  'Bett | Patient | Beatmung | Kreislauf | Nierenersatz | Isolation | Limitierung | ' +
+  'Diagnosen | Neurologie | Katecholamine | übernimmt');
 gleich('eine Zeile je belegtem Bettplatz',
   await page.$$eval('.handoversheet tbody tr', rs => rs.length), 3);
 enthaelt('Diagnose steht auf dem Blatt', await page.textContent('.handoversheet'), 'Sepsis bei Pneumonie');
+
+/* Angaben aus der Tafel werden übernommen */
+gleich('Beatmung aus der Tafel',
+  await page.textContent('.handoversheet tbody tr:nth-child(3) .sheet-beatmung'), 'INV');
+/* Der Klammerwert aus dem Test weiter oben steht unverändert auf dem Blatt. */
+gleich('Nierenersatz aus der Tafel',
+  await page.textContent('.handoversheet tbody tr:nth-child(3) .sheet-dialyse'), '(CiCa)');
+gleich('Feld für die Übernahme bleibt leer',
+  await page.textContent('.handoversheet tbody tr:nth-child(1) .sheet-uebernahme'), '');
+
+/* Fußteil: Aufnahmen, Zuständigkeiten, Telefone */
+enthaelt('geplante Aufnahmen auf dem Blatt',
+  await page.textContent('.sheetbox-aufnahmen'), 'Herr Beispiel');
+pruefe('Platz zum Ergänzen',
+  await page.$$eval('.sheetbox-aufnahmen .sheetnoteline', ls => ls.length) >= 4);
+const rollen = await page.$$eval('.sheetbox-schicht .sheetrolelabel', ls => ls.map(l => l.textContent));
+gleich('drei Zuständigkeiten', rollen.join(' | '),
+  'Schichtleitung | Blutzuständigkeit | Notfallequipment');
+enthaelt('mit den Angaben der Schicht', await page.textContent('.sheetbox-schicht'), 'Schmidt');
+const nummern = await page.$$eval('.sheetphonenr', ns => ns.map(n => n.textContent));
+gleich('alle acht Diensttelefone', nummern.join(', '),
+  '4149, 4117, 4719, 4880, 4881, 4882, 4883, 4212');
+gleich('je Telefon eine Schreiblinie',
+  await page.$$eval('.sheetphoneline', ls => ls.length), 8);
 await page.emulateMedia({ media: 'screen' });
 await page.evaluate(() => document.body.classList.remove('uebergabe-druck'));
 

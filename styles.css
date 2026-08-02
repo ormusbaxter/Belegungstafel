@@ -1581,22 +1581,81 @@ body.saver-on { overflow: hidden; }
   /* Lange Diagnosen dürfen auf ein zweites Blatt laufen – abschneiden wäre
      hier falsch. Die Kopfzeile wiederholt sich dann. */
   .handoversheet thead { display: table-header-group; }
-  .handoversheet th { font-size: 3mm; text-align: center; }
-  .handoversheet td { height: var(--uebergabe-row, 14mm); font-size: 3.4mm; }
+  .handoversheet th { font-size: 2.6mm; text-align: center; }
+  .handoversheet td { height: var(--uebergabe-row, 14mm); font-size: 3mm; }
   .handoversheet .sheetbed {
-    width: 8%;
-    font-size: 5mm;
+    font-size: 4.6mm;
     font-weight: 700;
     text-align: center;
   }
-  .handoversheet .sheetpatient { width: 20%; }
-  .handoversheet .sheet-diagnosen { width: 33%; }
-  .handoversheet .sheet-neuro { width: 21%; }
-  .handoversheet .sheet-katecholamine { width: 18%; }
-  .handoversheet .sheetname { font-weight: 700; font-size: 3.8mm; }
-  .handoversheet .sheetmetaline { font-size: 3mm; }
-  .handoversheet .sheetiso { font-size: 3mm; font-weight: 700; }
+  /* Elf Spalten auf A4 quer: die kurzen Kürzel schmal, Diagnosen breit, ganz
+     rechts ein leeres Feld für das Kürzel der übernehmenden Pflegekraft. */
+  .handoversheet .sheet-bed { width: 4.5%; }
+  .handoversheet .sheet-patient { width: 11%; }
+  .handoversheet .sheet-beatmung { width: 6.5%; }
+  .handoversheet .sheet-kreislauf { width: 7%; }
+  .handoversheet .sheet-dialyse { width: 6.5%; }
+  .handoversheet .sheet-isolation { width: 9.5%; font-weight: 700; }
+  .handoversheet .sheet-limitierung { width: 6.5%; }
+  .handoversheet .sheet-diagnosen { width: 19%; }
+  .handoversheet .sheet-neuro { width: 12%; }
+  .handoversheet .sheet-katecholamine { width: 10.5%; }
+  .handoversheet .sheet-uebernahme { width: 7%; }
+  .handoversheet th.sheet-isolation { font-weight: 700; }
+  .handoversheet .sheetname { font-weight: 700; font-size: 3.4mm; }
+  .handoversheet .sheetmetaline { font-size: 2.8mm; }
   .handoversheet tr { page-break-inside: avoid; }
+
+  /* Fußteil: Aufnahmen, Zuständigkeiten, Telefonübernahme nebeneinander */
+  .handoversheet .sheetfoot {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.15fr;
+    gap: 3mm;
+    margin-top: 3mm;
+    page-break-inside: avoid;
+  }
+  .handoversheet .sheetbox { border: 1px solid #000; padding: 1.5mm 2mm; }
+  .handoversheet .sheetbox h3 {
+    margin: 0 0 1.5mm;
+    font-size: 2.8mm;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+  }
+  .handoversheet .sheetnote { font-size: 3mm; }
+  .handoversheet .sheetnoteline {
+    min-height: 5mm;
+    border-bottom: 1px dotted #666;
+  }
+  .handoversheet .sheetrole {
+    display: grid;
+    grid-template-columns: 30mm 1fr 14mm;
+    gap: 1mm;
+    min-height: 5.5mm;
+    align-items: end;
+    font-size: 3mm;
+  }
+  .handoversheet .sheetrolelabel { font-size: 2.6mm; }
+  .handoversheet .sheetrolename,
+  .handoversheet .sheetroletel {
+    border-bottom: 1px dotted #666;
+    font-weight: 700;
+  }
+  .handoversheet .sheetphones {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 3mm;
+  }
+  .handoversheet .sheetphone {
+    display: grid;
+    grid-template-columns: 9mm 1fr 16mm;
+    gap: 1mm;
+    align-items: end;
+    min-height: 5.5mm;
+    font-size: 3mm;
+  }
+  .handoversheet .sheetphonenr { font-weight: 700; }
+  .handoversheet .sheetphonelabel { font-size: 2.6mm; }
+  .handoversheet .sheetphoneline { border-bottom: 1px dotted #666; }
 
   /* Fußzeile – auf beiden Blättern, deshalb außerhalb der Physio-Regeln */
   .printfoot {

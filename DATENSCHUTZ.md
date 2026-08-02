@@ -61,7 +61,7 @@ Schlüssel: `belegungstafel.intensiv.v1`, `.einstellungen`, `.theme`, `.sicherun
 | Export JSON / CSV | vollständiger Bestand, Klarnamen | von Hand |
 | Ausdruck „Drucken" | Name, Bettplatz, Fachdisziplin, Isolation, Intervention, Therapielimitierung, Telefon, Pflegekraft | von Hand |
 | Ausdruck „Druck Physio" | Bettplatz, Name, Fachdisziplin, **Isolation**, Telefon, Pflegekraft | von Hand |
-| Ausdruck „Übergabezettel" | Bettplatz, Name, Fachdisziplin, **Isolation, Diagnosen, Neurologie, Katecholamine** | von Hand |
+| Ausdruck „Übergabezettel" | Bettplatz, Name, Fachdisziplin, **Isolation, Beatmung, Kreislauf, Nierenersatz, Therapielimitierung, Diagnosen, Neurologie, Katecholamine**, dazu geplante Aufnahmen und die Zuständigkeiten der Schicht | von Hand |
 | Statistik-Export (CSV) | ausschließlich Zahlen je Schicht, **keine Personendaten** | von Hand |
 | `js/vorgaben.js` | ausschließlich Einstellungen, **keine Personendaten** | von Hand |
 

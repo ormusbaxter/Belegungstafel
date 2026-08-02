@@ -154,10 +154,15 @@ Spalte der Tafel zugeordnet.
 - **Übergabezettel** (Schaltfläche oben, in den Einstellungen ein- und ausblendbar): je
   belegtem Bettplatz Diagnosen als Freitext sowie Neurologie und Katecholamine als
   Mehrfachauswahl. Diese Angaben erscheinen **nicht auf der Tafel**, werden aber mitgespeichert,
-  mit gesichert und mit exportiert; „Bettplatz räumen“ löscht sie mit. Gedruckt wird ein eigenes
-  Blatt (A4 quer) mit Bettplatz, Patient, Isolation und den drei Angaben – bei langen Diagnosen
-  auf zwei Blättern statt beschnitten. Die Auswahllisten stehen in den Einstellungen unter
-  „Neurologie“ und „Katecholamine“
+  mit gesichert und mit exportiert; „Bettplatz räumen“ löscht sie mit. Die Auswahllisten stehen
+  in den Einstellungen unter „Neurologie“ und „Katecholamine“.
+  Gedruckt wird ein eigenes Blatt (A4 quer) mit elf Spalten: Bettplatz, Patient, **Beatmung,
+  Kreislauf, Nierenersatz, Isolation, Therapielimitierung** aus der Tafel, dazu Diagnosen,
+  Neurologie, Katecholamine und ganz rechts ein leeres Feld für das Kürzel der **übernehmenden
+  Pflegekraft**. Unter der Tabelle die **geplanten Aufnahmen** mit Platz zum Ergänzen, die drei
+  **Zuständigkeiten der Schicht** und eine Liste der **Diensttelefone** mit je einer Linie, wer
+  sie übernimmt. Bei langen Diagnosen läuft das Blatt auf eine zweite Seite mit wiederholter
+  Kopfzeile, statt den Text zu beschneiden
 - **Tastatur**: Navigation durch die Tabelle mit den Pfeiltasten, Zeilenwechsel mit der
   Eingabetaste (mit Umschalt aufwärts). In Textfeldern wechseln Links und Rechts erst am
   Anfang bzw. Ende des Textes die Zelle. Auswahlfelder werden über die Anfangsbuchstaben
