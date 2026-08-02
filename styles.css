@@ -1060,7 +1060,32 @@ html[data-theme="dark"] .pwerror { color: var(--iso); }
 /* Übergabezettel: je belegtem Bettplatz ein Block mit den drei Angaben,
    die nicht auf der Tafel stehen. */
 .dlg.dlg-handover { width: min(980px, 96vw); }
-.handoverlist { max-height: 62vh; overflow: auto; display: flex; flex-direction: column; gap: 10px; }
+
+/* Zuständigkeiten der Schicht, oberhalb der Bettplätze */
+.handoverstation {
+  padding: 8px 10px 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: var(--panel-2);
+  margin-bottom: 10px;
+}
+.handoverstation h3 { margin: 0 0 2px; font-size: 13px; }
+.handoverstation .panehint { margin: 0 0 8px; }
+.handoverroles { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 6px 14px; }
+.handoverrole { display: grid; grid-template-columns: 110px 1fr 96px; gap: 8px; align-items: center; }
+.handoverrole input {
+  padding: 5px 7px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  min-width: 0;
+}
+.handoverrole .handovertel { font-variant-numeric: tabular-nums; }
+
+.handoverlist { max-height: 52vh; overflow: auto; display: flex; flex-direction: column; gap: 10px; }
 .handoverbed {
   padding: 8px 10px;
   border: 1px solid var(--line-soft);
@@ -1581,26 +1606,41 @@ body.saver-on { overflow: hidden; }
   /* Lange Diagnosen dürfen auf ein zweites Blatt laufen – abschneiden wäre
      hier falsch. Die Kopfzeile wiederholt sich dann. */
   .handoversheet thead { display: table-header-group; }
-  .handoversheet th { font-size: 2.6mm; text-align: center; }
+  /* Die Beschriftungen sind für die schmalen Spalten zu lang; sie werden
+     silbengerecht getrennt (die Seite ist als deutsch ausgezeichnet) statt
+     mitten im Wort umgebrochen. */
+  .handoversheet th {
+    font-size: 2.6mm;
+    text-align: center;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
   .handoversheet td { height: var(--uebergabe-row, 14mm); font-size: 3mm; }
   .handoversheet .sheetbed {
     font-size: 4.6mm;
     font-weight: 700;
     text-align: center;
   }
-  /* Elf Spalten auf A4 quer: die kurzen Kürzel schmal, Diagnosen breit, ganz
-     rechts ein leeres Feld für das Kürzel der übernehmenden Pflegekraft. */
-  .handoversheet .sheet-bed { width: 4.5%; }
-  .handoversheet .sheet-patient { width: 11%; }
-  .handoversheet .sheet-beatmung { width: 6.5%; }
-  .handoversheet .sheet-kreislauf { width: 7%; }
-  .handoversheet .sheet-dialyse { width: 6.5%; }
-  .handoversheet .sheet-isolation { width: 9.5%; font-weight: 700; }
-  .handoversheet .sheet-limitierung { width: 6.5%; }
-  .handoversheet .sheet-diagnosen { width: 19%; }
-  .handoversheet .sheet-neuro { width: 12%; }
-  .handoversheet .sheet-katecholamine { width: 10.5%; }
-  .handoversheet .sheet-uebernahme { width: 7%; }
+  /* Zwölf Spalten auf A4 quer. Bettplatz, Beatmung, Nierenersatz und
+     Limitierung tragen nur kurze Kürzel und bekommen deshalb die knappste
+     Breite, die ihre Werte zulassen; der gewonnene Platz geht an die beiden
+     handschriftlichen Spalten rechts. */
+  /* Die Breiten müssen sich gegen die allgemeine Druckregel der Tafel
+     durchsetzen (dort width: auto !important) – daher ebenfalls !important. */
+  .handoversheet .sheet-bed { width: 3.5% !important; }
+  .handoversheet .sheet-patient { width: 10% !important; }
+  .handoversheet .sheet-beatmung { width: 5% !important; }
+  .handoversheet .sheet-kreislauf { width: 6% !important; }
+  .handoversheet .sheet-dialyse { width: 4.5% !important; }
+  .handoversheet .sheet-isolation { width: 9% !important; font-weight: 700; }
+  .handoversheet .sheet-limitierung { width: 5% !important; }
+  /* Die Diagnosen sind der Kern des Zettels und bekommen den meisten Platz;
+     sie sollen in zwei Zeilen stehen, nicht in fünf. */
+  .handoversheet .sheet-diagnosen { width: 21% !important; }
+  .handoversheet .sheet-neuro { width: 10.5% !important; }
+  .handoversheet .sheet-katecholamine { width: 9% !important; }
+  .handoversheet .sheet-uebernahme { width: 6% !important; }
+  .handoversheet .sheet-notizen { width: 10.5% !important; }
   .handoversheet th.sheet-isolation { font-weight: 700; }
   .handoversheet .sheetname { font-weight: 700; font-size: 3.4mm; }
   .handoversheet .sheetmetaline { font-size: 2.8mm; }

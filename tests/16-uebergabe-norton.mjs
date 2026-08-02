@@ -119,6 +119,21 @@ await page.click('#btnHandover');
 await page.waitForTimeout(300);
 pruefe('Fenster öffnet', await page.isVisible('#handoverDlg'));
 
+/* Zuständigkeiten stehen im Fenster an erster Stelle und sind kein Pflichtfeld */
+gleich('Überschrift des ersten Blocks', await page.textContent('#handoverStation h3'), 'Zuständigkeit');
+const rollenfelder = await page.$$eval('#handoverStation .handoverlabel', ls => ls.map(l => l.textContent));
+gleich('drei Zuständigkeiten im Fenster', rollenfelder.join(' | '),
+  'Schichtleitung | Blutzuständigkeit | Notfallequipment');
+await page.fill('#handoverStation .handoverrole:first-child input', 'Nachtwey');
+await page.fill('#handoverStation .handoverrole:first-child .handovertel', '4286');
+await page.waitForTimeout(400);
+gleich('Eingabe landet in den Stationsdaten',
+  await page.evaluate(() => state.station.schichtleitung), 'Nachtwey');
+gleich('und erscheint auch unter der Tafel',
+  await page.inputValue('.stationfield.sf-schichtleitung .sf-name'), 'Nachtwey');
+gleich('leere Felder bleiben leer',
+  await page.evaluate(() => state.station.notfall), '');
+
 const bloecke = await page.$$eval('.handoverbed .handoverbednr', ns => ns.map(n => n.textContent));
 /* 1 a trägt nur ein Norton-Häkchen und gilt damit nicht als belegt. */
 gleich('nur belegte Bettplätze', bloecke.join(','), '0 a,0 b,2');
@@ -168,10 +183,11 @@ const sichtbar = sel => page.locator(sel).evaluate(e => getComputedStyle(e).disp
 pruefe('Blatt im Ausdruck sichtbar', await sichtbar('.handoversheet'));
 pruefe('Tafel im Ausdruck ausgeblendet', !(await sichtbar('.tablewrap')));
 pruefe('Fußzeile bleibt', await sichtbar('.printfoot'));
-const spalten = await page.$$eval('.handoversheet th', ths => ths.map(t => t.textContent));
+const spalten = await page.$$eval('.handoversheet th',
+  ths => ths.map(t => t.textContent.replace(/­/g, '')));
 gleich('Spalten des Blattes', spalten.join(' | '),
   'Bett | Patient | Beatmung | Kreislauf | Nierenersatz | Isolation | Limitierung | ' +
-  'Diagnosen | Neurologie | Katecholamine | übernimmt');
+  'Diagnosen | Neurologie | Katecholamine | übernimmt | Notizen');
 gleich('eine Zeile je belegtem Bettplatz',
   await page.$$eval('.handoversheet tbody tr', rs => rs.length), 3);
 enthaelt('Diagnose steht auf dem Blatt', await page.textContent('.handoversheet'), 'Sepsis bei Pneumonie');
@@ -184,6 +200,24 @@ gleich('Nierenersatz aus der Tafel',
   await page.textContent('.handoversheet tbody tr:nth-child(3) .sheet-dialyse'), '(CiCa)');
 gleich('Feld für die Übernahme bleibt leer',
   await page.textContent('.handoversheet tbody tr:nth-child(1) .sheet-uebernahme'), '');
+gleich('Notizspalte bleibt leer',
+  await page.textContent('.handoversheet tbody tr:nth-child(1) .sheet-notizen'), '');
+
+/* Die kurzen Spalten sind schmaler als die Diagnosen – die allgemeinen
+   Druckregeln der Tafel dürfen die Breiten nicht überschreiben. */
+const breiten = await page.evaluate(() => {
+  const mm = sel => document.querySelector('.handoversheet thead ' + sel)
+    .getBoundingClientRect().width;
+  return { bett: mm('.sheet-bed'), beatmung: mm('.sheet-beatmung'), dialyse: mm('.sheet-dialyse'),
+           limit: mm('.sheet-limitierung'), diagnosen: mm('.sheet-diagnosen'),
+           notizen: mm('.sheet-notizen') };
+});
+pruefe('Bettplatz schmal', breiten.bett < breiten.diagnosen / 3, Math.round(breiten.bett));
+pruefe('Beatmung schmal', breiten.beatmung < breiten.diagnosen / 3, Math.round(breiten.beatmung));
+pruefe('Nierenersatz schmal', breiten.dialyse < breiten.diagnosen / 3, Math.round(breiten.dialyse));
+pruefe('Limitierung schmal', breiten.limit < breiten.diagnosen / 3, Math.round(breiten.limit));
+pruefe('Notizen breit genug zum Schreiben', breiten.notizen > breiten.beatmung * 1.5,
+  Math.round(breiten.notizen));
 
 /* Fußteil: Aufnahmen, Zuständigkeiten, Telefone */
 enthaelt('geplante Aufnahmen auf dem Blatt',

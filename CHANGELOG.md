@@ -4,6 +4,22 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.9.2
+
+Ausdruck des Übergabezettels, nach Rückmeldung aus der Station.
+
+- **Bettplatz, Beatmung, Nierenersatz und Limitierung** auf die knappste Breite gesetzt, die
+  ihre Kürzel zulassen; der gewonnene Platz geht an die Diagnosen und an eine **neue letzte
+  Spalte „Notizen"** zum handschriftlichen Ergänzen
+- **Schichtleitung, Blutzuständigkeit und Notfallequipment** lassen sich jetzt im Fenster
+  „Übergabezettel" an erster Stelle eintragen – dieselben Angaben wie unter der Tafel, kein
+  Pflichtfeld. Was leer bleibt, lässt der Ausdruck zum Eintragen von Hand frei
+- „Zuständig in der Schicht" heißt auf dem Blatt jetzt **„Zuständigkeit"**,
+  „Telefone – wer übernimmt?" nur noch **„Telefone"**
+- behoben: Die allgemeinen Druckregeln der Tafel überschrieben die Spaltenbreiten des
+  Blattes – alle zwölf Spalten waren gleich breit, und der Zettel brauchte dadurch schon bei
+  sechs Patienten zwei Seiten
+
 ## 2.9.1
 
 - **Übergabezettel erweitert**: Das Blatt führt jetzt zusätzlich **Beatmungsform,

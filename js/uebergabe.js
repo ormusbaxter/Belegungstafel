@@ -13,11 +13,11 @@
 /* Angaben, die das Blatt aus der Tafel übernimmt. Sie werden nur wiedergegeben;
    geändert werden sie in der Tabelle. */
 const UEBERGABE_TAFEL = [
-  { key: 'beatmung',     label: 'Beatmung' },
+  { key: 'beatmung',     label: 'Beat­mung' },
   { key: 'kreislauf',    label: 'Kreislauf' },
-  { key: 'dialyse',      label: 'Nierenersatz' },
+  { key: 'dialyse',      label: 'Nieren­ersatz' },
   { key: 'isolation',    label: 'Isolation' },
-  { key: 'limitierung',  label: 'Limitierung' }
+  { key: 'limitierung',  label: 'Limi­tierung' }
 ];
 
 function uebergabeButtonZeigen() {
@@ -35,7 +35,61 @@ function oeffneUebergabe() {
   $('#handoverDlg').showModal();
 }
 
+/* Zuständigkeiten der Schicht – dieselben Angaben wie unter der Tafel.
+   Sie stehen hier am Anfang, weil sie bei der Übergabe zuerst geklärt werden;
+   Pflicht sind sie nicht. Bleiben sie leer, lässt das Blatt die Zeilen frei. */
+function renderUebergabeStation() {
+  const box = $('#handoverStation');
+  box.replaceChildren();
+  box.appendChild(el('h3', null, 'Zuständigkeit'));
+  const hinweis = el('p', 'panehint',
+    'Gilt für die ganze Station und steht auch unter der Tafel. Was hier leer bleibt, ' +
+    'lässt der Ausdruck zum Eintragen von Hand frei.');
+  box.appendChild(hinweis);
+
+  const gitter = el('div', 'handoverroles');
+  for (const feld of STATION_FIELDS) {
+    const zeile = el('div', 'handoverrole');
+    zeile.appendChild(el('span', 'handoverlabel', feld.label));
+
+    const name = el('input');
+    name.type = 'text';
+    name.placeholder = feld.placeholder;
+    name.value = state.station[feld.key];
+    name.setAttribute('aria-label', feld.label);
+    name.addEventListener('input', () => {
+      state.station[feld.key] = name.value;
+      spiegelStation(feld.key, 'sf-name', name.value);
+      save();
+    });
+
+    const tel = el('input', 'handovertel');
+    tel.type = 'tel';
+    tel.placeholder = 'Telefon';
+    tel.value = state.station[feld.key + 'Tel'];
+    tel.setAttribute('aria-label', feld.label + ' – Telefon');
+    tel.addEventListener('input', () => {
+      state.station[feld.key + 'Tel'] = tel.value;
+      spiegelStation(feld.key, 'sf-tel', tel.value);
+      save();
+    });
+
+    zeile.appendChild(name);
+    zeile.appendChild(tel);
+    gitter.appendChild(zeile);
+  }
+  box.appendChild(gitter);
+}
+
+/* Die Felder unter der Tafel zeigen dieselben Werte; sie werden mitgeführt,
+   ohne die ganze Leiste neu aufzubauen (das würde den Fokus kosten). */
+function spiegelStation(key, klasse, wert) {
+  const feld = document.querySelector('.stationfield.sf-' + key + ' .' + klasse);
+  if (feld && feld.value !== wert) feld.value = wert;
+}
+
 function renderUebergabe() {
+  renderUebergabeStation();
   const liste = $('#handoverList');
   liste.replaceChildren();
   const betten = uebergabeBetten();
@@ -132,7 +186,8 @@ function uebergabeBlattAufbauen() {
     { key: 'patient', label: 'Patient' },
     ...UEBERGABE_TAFEL,
     ...UEBERGABE_FIELDS,
-    { key: 'uebernahme', label: 'übernimmt' }
+    { key: 'uebernahme', label: 'über­nimmt' },
+    { key: 'notizen', label: 'Notizen' }
   ];
   for (const spalte of spalten) kopfzeile.appendChild(el('th', 'sheet-' + spalte.key, spalte.label));
   thead.appendChild(kopfzeile);
@@ -142,9 +197,9 @@ function uebergabeBlattAufbauen() {
   for (const bed of betten) {
     const data = state.beds[bed.id];
     const tr = el('tr');
-    tr.appendChild(el('td', 'sheetbed', bed.label));
+    tr.appendChild(el('td', 'sheet-bed sheetbed', bed.label));
 
-    const patient = el('td', 'sheetpatient');
+    const patient = el('td', 'sheet-patient sheetpatient');
     patient.appendChild(el('div', 'sheetname', data.name || '–'));
     if (data.disziplin) patient.appendChild(el('div', 'sheetmetaline', data.disziplin));
     tr.appendChild(patient);
@@ -161,8 +216,10 @@ function uebergabeBlattAufbauen() {
         Array.isArray(wert) ? wert.join(', ') : wert));
     }
 
-    /* Leer: Hier trägt die übernehmende Pflegekraft ihr Kürzel von Hand ein. */
+    /* Beide leer: Kürzel der übernehmenden Pflegekraft und Platz für
+       handschriftliche Notizen während der Übergabe. */
     tr.appendChild(el('td', 'sheet-uebernahme'));
+    tr.appendChild(el('td', 'sheet-notizen'));
     body.appendChild(tr);
   }
   tabelle.appendChild(body);
@@ -199,7 +256,7 @@ function uebergabeFussAufbauen() {
   fuss.appendChild(aufnahmen);
 
   const schicht = el('div', 'sheetbox sheetbox-schicht');
-  schicht.appendChild(el('h3', null, 'Zuständig in der Schicht'));
+  schicht.appendChild(el('h3', null, 'Zuständigkeit'));
   for (const feld of STATION_FIELDS) {
     const zeile = el('div', 'sheetrole');
     zeile.appendChild(el('span', 'sheetrolelabel', feld.label));
@@ -210,7 +267,7 @@ function uebergabeFussAufbauen() {
   fuss.appendChild(schicht);
 
   const telefone = el('div', 'sheetbox sheetbox-telefone');
-  telefone.appendChild(el('h3', null, 'Telefone – wer übernimmt?'));
+  telefone.appendChild(el('h3', null, 'Telefone'));
   const gitter = el('div', 'sheetphones');
   /* Dieselbe Liste wie die Vorschläge der Spalte Telefon; sie wird in den
      Einstellungen gepflegt. */
