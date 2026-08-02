@@ -76,9 +76,15 @@ Vier Dinge kann die Vorgabedatei nicht mitbringen:
       Berechtigung dafür hängt am Browserprofil und lässt sich nicht mitliefern. Der Ordner
       muss auf die Station beschränkt sein – die Dateien enthalten alle Namen im Klartext.
 - [ ] **Zoom** auf den tatsächlichen Monitor einstellen (Einstellungen → Allgemein).
-- [ ] **Beide Ausdrucke auf dem echten Drucker prüfen** – „Drucken" und „Druck Physio".
-      A4 quer, eine Seite. Die Seitenränder des Druckerdialogs sind je Rechner
+- [ ] **Alle Ausdrucke auf dem echten Drucker prüfen** – „Drucken", „Druck Physio" und
+      „Übergabezettel". A4 quer. Die Seitenränder des Druckerdialogs sind je Rechner
       voreingestellt und können das einseitige Layout kippen.
+- [ ] **Kopfzeile des Übergabezettels ansehen:** Erscheinen alle zwölf Symbole, oder stehen
+      dort leere Kästchen? Drei von ihnen – Lunge, Niere und Hirn – stammen aus einer neueren
+      Unicode-Fassung und fehlen in älteren Windows-Schriften. Der Rechner ist ohne Netz und
+      bekommt keine Schriftaktualisierungen. Fällt es auf: in `js/uebergabe.js` in der Tabelle
+      `SYMBOLE` die betroffenen Zeichen austauschen (etwa `≈` für Beatmung, `⚗` für
+      Nierenersatz, `⚡` für Neurologie) – eine Zeile je Spalte.
 - [ ] **Fassung kontrollieren:** Hilfe öffnen, unten steht die Nummer. So ist später
       beantwortbar, was auf welchem Rechner läuft.
 

@@ -4,6 +4,22 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.9.3
+
+Ausdruck des Übergabezettels.
+
+- Die Spalte **Notizen** bringt jetzt den Text aus der Tafelspalte **Sonstiges** mit und
+  lässt darunter Platz zum handschriftlichen Ergänzen
+- Im Kasten **Zuständigkeit** steht darunter die **Bettenzahl**: die maximale Zahl zuzüglich
+  Notbett und die zurzeit belegten Plätze. Ohne Eintrag bleibt eine Linie zum Ausfüllen
+- Die Spalten sind mit **Symbolen** überschrieben statt mit Wörtern – 🛏 👤 🫁 ♥ 🫘 ☣ ⊘ ⚕ 🧠
+  💉 ✍ ✎. Die Kopfzeile wird dadurch einzeilig, der gewonnene Platz geht an die Zeilen. Am
+  Bildschirm nennt der Zeigertext die Spalte weiterhin im Klartext
+
+  Lunge, Niere und Hirn stammen aus einer neueren Unicode-Fassung und können auf älteren
+  Windows-Schriften als leeres Kästchen erscheinen. `INSTALLATION.md` führt das als Prüfpunkt
+  beim Testdruck; der Austausch gegen ältere Zeichen ist eine Zeile in `js/uebergabe.js`
+
 ## 2.9.2
 
 Ausdruck des Übergabezettels, nach Rückmeldung aus der Station.

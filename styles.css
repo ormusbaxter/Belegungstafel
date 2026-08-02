@@ -1606,14 +1606,16 @@ body.saver-on { overflow: hidden; }
   /* Lange Diagnosen dürfen auf ein zweites Blatt laufen – abschneiden wäre
      hier falsch. Die Kopfzeile wiederholt sich dann. */
   .handoversheet thead { display: table-header-group; }
-  /* Die Beschriftungen sind für die schmalen Spalten zu lang; sie werden
-     silbengerecht getrennt (die Seite ist als deutsch ausgezeichnet) statt
-     mitten im Wort umgebrochen. */
+  /* Die Kopfzeile trägt Symbole statt Wörter. Die monochrome Symbolschrift
+     steht vor der Emoji-Schrift, damit die Zeichen, die es dort als Umriss
+     gibt, schwarzweiß gedruckt werden. */
   .handoversheet th {
-    font-size: 2.6mm;
+    font-size: 4mm;
+    line-height: 1.1;
     text-align: center;
-    hyphens: auto;
-    -webkit-hyphens: auto;
+    font-family: "Segoe UI Symbol", "Noto Sans Symbols 2", "Segoe UI Emoji", sans-serif;
+    font-variant-emoji: text;
+    white-space: nowrap;
   }
   .handoversheet td { height: var(--uebergabe-row, 14mm); font-size: 3mm; }
   .handoversheet .sheetbed {
@@ -1642,7 +1644,8 @@ body.saver-on { overflow: hidden; }
   .handoversheet .sheet-uebernahme { width: 6% !important; }
   .handoversheet .sheet-notizen { width: 10.5% !important; }
   .handoversheet th.sheet-isolation { font-weight: 700; }
-  .handoversheet .sheetname { font-weight: 700; font-size: 3.4mm; }
+  /* Namen werden am Leerzeichen umbrochen, nicht mitten im Wort. */
+  .handoversheet .sheetname { font-weight: 700; font-size: 3.4mm; overflow-wrap: normal; }
   .handoversheet .sheetmetaline { font-size: 2.8mm; }
   .handoversheet tr { page-break-inside: avoid; }
 
@@ -1675,6 +1678,26 @@ body.saver-on { overflow: hidden; }
     font-size: 3mm;
   }
   .handoversheet .sheetrolelabel { font-size: 2.6mm; }
+
+  /* Bettenzahl unter den Zuständigkeiten */
+  .handoversheet .sheetbeds {
+    display: grid;
+    grid-template-columns: 30mm auto auto 1fr;
+    gap: 1.5mm;
+    align-items: baseline;
+    margin-top: 1.5mm;
+    padding-top: 1.5mm;
+    border-top: 1px solid #000;
+    font-size: 3mm;
+  }
+  .handoversheet .sheetbedslabel { font-size: 2.6mm; }
+  .handoversheet .sheetbedsvalue { font-size: 4mm; font-weight: 700; }
+  .handoversheet .sheetbedsvalue.leer {
+    min-width: 10mm;
+    border-bottom: 1px dotted #666;
+  }
+  .handoversheet .sheetbedsplus { font-size: 3mm; }
+  .handoversheet .sheetbedsbelegt { text-align: right; }
   .handoversheet .sheetrolename,
   .handoversheet .sheetroletel {
     border-bottom: 1px dotted #666;

@@ -173,6 +173,8 @@ await page.evaluate(() => {
   state.station.aufnahmen = 'Herr Beispiel, ACH, gegen 14 Uhr';
   state.station.schichtleitung = 'Schmidt';
   state.station.schichtleitungTel = '4286';
+  state.station.maxBetten = '12';
+  state.beds['0a'].sonstiges = 'Angehörige informiert';
   state.beds['2'].beatmung = ['INV'];
   uebergabeBlattAufbauen();
 });
@@ -183,11 +185,33 @@ const sichtbar = sel => page.locator(sel).evaluate(e => getComputedStyle(e).disp
 pruefe('Blatt im Ausdruck sichtbar', await sichtbar('.handoversheet'));
 pruefe('Tafel im Ausdruck ausgeblendet', !(await sichtbar('.tablewrap')));
 pruefe('Fußzeile bleibt', await sichtbar('.printfoot'));
-const spalten = await page.$$eval('.handoversheet th',
-  ths => ths.map(t => t.textContent.replace(/­/g, '')));
+/* Die Kopfzeile trägt Symbole; der Klartext steht im title. */
+const spalten = await page.$$eval('.handoversheet th', ths => ths.map(t => t.title));
 gleich('Spalten des Blattes', spalten.join(' | '),
-  'Bett | Patient | Beatmung | Kreislauf | Nierenersatz | Isolation | Limitierung | ' +
-  'Diagnosen | Neurologie | Katecholamine | übernimmt | Notizen');
+  'Bettplatz | Patient | Beatmung | Kreislauf | Nierenersatz | Isolation | ' +
+  'Therapielimitierung | Diagnosen | Neurologie | Katecholamine | ' +
+  'übernehmende Pflegekraft | Sonstiges und Notizen');
+const zeichen = await page.$$eval('.handoversheet th', ths => ths.map(t => t.textContent));
+gleich('je Spalte genau ein Symbol', zeichen.length, 12);
+pruefe('keine Wortbeschriftung mehr', !zeichen.some(t => /[A-Za-zÄÖÜäöü]/.test(t)),
+  zeichen.join(' '));
+/* Fehlt eine Glyphe, rendert der Browser ein Ersatzkästchen von der Breite des
+   nicht vergebenen Zeichens U+10FFFD. Das sichert den Prüfbrowser ab – auf dem
+   Stationsrechner bleibt der Blick auf den Testdruck (INSTALLATION.md). */
+const fehlend = await page.evaluate(() => {
+  const probe = document.createElement('span');
+  const kopf = document.querySelector('.handoversheet th');
+  probe.style.cssText = 'position:fixed;left:-9999px;font:' + getComputedStyle(kopf).font;
+  document.body.appendChild(probe);
+  const breite = t => { probe.textContent = t; return probe.getBoundingClientRect().width; };
+  const tofu = breite('\u{10FFFD}');
+  const treffer = [...document.querySelectorAll('.handoversheet th')]
+    .filter(th => Math.abs(breite(th.textContent) - tofu) < 0.5)
+    .map(th => th.title);
+  probe.remove();
+  return treffer;
+});
+gleich('alle Symbole haben eine Glyphe', fehlend.join(', '), '');
 gleich('eine Zeile je belegtem Bettplatz',
   await page.$$eval('.handoversheet tbody tr', rs => rs.length), 3);
 enthaelt('Diagnose steht auf dem Blatt', await page.textContent('.handoversheet'), 'Sepsis bei Pneumonie');
@@ -200,8 +224,9 @@ gleich('Nierenersatz aus der Tafel',
   await page.textContent('.handoversheet tbody tr:nth-child(3) .sheet-dialyse'), '(CiCa)');
 gleich('Feld für die Übernahme bleibt leer',
   await page.textContent('.handoversheet tbody tr:nth-child(1) .sheet-uebernahme'), '');
-gleich('Notizspalte bleibt leer',
-  await page.textContent('.handoversheet tbody tr:nth-child(1) .sheet-notizen'), '');
+gleich('Notizspalte übernimmt Sonstiges',
+  await page.textContent('.handoversheet tbody tr:nth-child(1) .sheet-notizen'),
+  'Angehörige informiert');
 
 /* Die kurzen Spalten sind schmaler als die Diagnosen – die allgemeinen
    Druckregeln der Tafel dürfen die Breiten nicht überschreiben. */
@@ -228,6 +253,10 @@ const rollen = await page.$$eval('.sheetbox-schicht .sheetrolelabel', ls => ls.m
 gleich('drei Zuständigkeiten', rollen.join(' | '),
   'Schichtleitung | Blutzuständigkeit | Notfallequipment');
 enthaelt('mit den Angaben der Schicht', await page.textContent('.sheetbox-schicht'), 'Schmidt');
+gleich('Bettenzahl im selben Kasten',
+  await page.textContent('.sheetbeds .sheetbedsvalue'), '12');
+enthaelt('mit dem Zusatz für das Notbett', await page.textContent('.sheetbeds'), '+ 1');
+enthaelt('und den belegten Plätzen', await page.textContent('.sheetbeds'), 'belegt 3');
 const nummern = await page.$$eval('.sheetphonenr', ns => ns.map(n => n.textContent));
 gleich('alle acht Diensttelefone', nummern.join(', '),
   '4149, 4117, 4719, 4880, 4881, 4882, 4883, 4212');

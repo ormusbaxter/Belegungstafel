@@ -160,11 +160,15 @@ Spalte der Tafel zugeordnet.
   an erster Stelle; es sind dieselben Felder wie unter der Tafel und kein Pflichtfeld.
   Gedruckt wird ein eigenes Blatt (A4 quer) mit zwölf Spalten: Bettplatz, Patient, **Beatmung,
   Kreislauf, Nierenersatz, Isolation, Therapielimitierung** aus der Tafel, dazu Diagnosen,
-  Neurologie, Katecholamine und rechts zwei leere Spalten – für das Kürzel der **übernehmenden
-  Pflegekraft** und für **Notizen** von Hand. Unter der Tabelle die **geplanten Aufnahmen** mit
-  Platz zum Ergänzen, die **Zuständigkeit** (leer gelassene Felder bleiben zum Ausfüllen frei)
-  und die **Telefone** mit je einer Linie, wer sie übernimmt. Bei langen Diagnosen läuft das
-  Blatt auf eine zweite Seite mit wiederholter Kopfzeile, statt den Text zu beschneiden
+  Neurologie, Katecholamine und rechts zwei Spalten für die Hand – ein leeres Feld für das
+  Kürzel der **übernehmenden Pflegekraft** und **Notizen**, die den Text aus **Sonstiges**
+  mitbringen und darunter Platz zum Ergänzen lassen. Die Spalten sind mit **Symbolen**
+  überschrieben (🛏 👤 🫁 ♥ 🫘 ☣ ⊘ ⚕ 🧠 💉 ✍ ✎), damit die Kopfzeile einzeilig bleibt; der
+  Klartext steht im Zeigertext. Unter der Tabelle die **geplanten Aufnahmen** mit Platz zum
+  Ergänzen, die **Zuständigkeit** samt **Bettenzahl** (X + 1 und die belegten Plätze; leer
+  gelassene Felder bleiben zum Ausfüllen frei) und die **Telefone** mit je einer Linie, wer
+  sie übernimmt. Bei langen Diagnosen läuft das Blatt auf eine zweite Seite mit wiederholter
+  Kopfzeile, statt den Text zu beschneiden
 - **Tastatur**: Navigation durch die Tabelle mit den Pfeiltasten, Zeilenwechsel mit der
   Eingabetaste (mit Umschalt aufwärts). In Textfeldern wechseln Links und Rechts erst am
   Anfang bzw. Ende des Textes die Zelle. Auswahlfelder werden über die Anfangsbuchstaben

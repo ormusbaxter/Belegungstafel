@@ -10,14 +10,42 @@
  */
 'use strict';
 
+/* Kopfzeile des Blattes: Die Spalten sind mit Symbolen beschriftet, nicht mit
+ * Wörtern – das spart die zweite Kopfzeile und damit Platz für die Zeilen.
+ * Der Klartext bleibt als title am th erhalten; er druckt nicht, hilft aber am
+ * Bildschirm und der Vorlesefunktion.
+ *
+ * Jedes Zeichen trägt die Textvariante U+FE0E, damit der Browser es als Schrift
+ * und nicht als buntes Emoji setzt – dieselbe Vorkehrung wie bei den Pfeilen der
+ * ersten Spalte. Bei den drei anatomischen Zeichen (Lunge, Niere, Hirn) gibt es
+ * keine monochrome Form; sie stammen aus Unicode 13/14 und fehlen in älteren
+ * Schriftfassungen. Der Testdruck auf dem Stationsrechner prüft das, siehe
+ * INSTALLATION.md.
+ */
+const VS = '︎';
+const SYMBOLE = {
+  bed:           '\u{1F6CF}' + VS,   /* Bett */
+  patient:       '\u{1F464}' + VS,   /* Patient */
+  beatmung:      '\u{1FAC1}' + VS,   /* Lunge */
+  kreislauf:     '♥' + VS,      /* Herz */
+  dialyse:       '\u{1FAD8}' + VS,   /* Niere */
+  isolation:     '☣' + VS,      /* Biohazard */
+  limitierung:   '⊘' + VS,      /* durchgestrichener Kreis */
+  diagnosen:     '⚕' + VS,      /* Äskulapstab */
+  neuro:         '\u{1F9E0}' + VS,   /* Hirn */
+  katecholamine: '\u{1F489}' + VS,   /* Spritze */
+  uebernahme:    '✍' + VS,      /* schreibende Hand */
+  notizen:       '✎' + VS       /* Bleistift */
+};
+
 /* Angaben, die das Blatt aus der Tafel übernimmt. Sie werden nur wiedergegeben;
    geändert werden sie in der Tabelle. */
 const UEBERGABE_TAFEL = [
-  { key: 'beatmung',     label: 'Beat­mung' },
+  { key: 'beatmung',     label: 'Beatmung' },
   { key: 'kreislauf',    label: 'Kreislauf' },
-  { key: 'dialyse',      label: 'Nieren­ersatz' },
+  { key: 'dialyse',      label: 'Nierenersatz' },
   { key: 'isolation',    label: 'Isolation' },
-  { key: 'limitierung',  label: 'Limi­tierung' }
+  { key: 'limitierung',  label: 'Therapielimitierung' }
 ];
 
 function uebergabeButtonZeigen() {
@@ -182,14 +210,19 @@ function uebergabeBlattAufbauen() {
   const thead = el('thead');
   const kopfzeile = el('tr');
   const spalten = [
-    { key: 'bed', label: 'Bett' },
+    { key: 'bed', label: 'Bettplatz' },
     { key: 'patient', label: 'Patient' },
     ...UEBERGABE_TAFEL,
     ...UEBERGABE_FIELDS,
-    { key: 'uebernahme', label: 'über­nimmt' },
-    { key: 'notizen', label: 'Notizen' }
+    { key: 'uebernahme', label: 'übernehmende Pflegekraft' },
+    { key: 'notizen', label: 'Sonstiges und Notizen' }
   ];
-  for (const spalte of spalten) kopfzeile.appendChild(el('th', 'sheet-' + spalte.key, spalte.label));
+  for (const spalte of spalten) {
+    const th = el('th', 'sheet-' + spalte.key, SYMBOLE[spalte.key] || spalte.label);
+    th.title = spalte.label;
+    th.setAttribute('aria-label', spalte.label);
+    kopfzeile.appendChild(th);
+  }
   thead.appendChild(kopfzeile);
   tabelle.appendChild(thead);
 
@@ -216,10 +249,11 @@ function uebergabeBlattAufbauen() {
         Array.isArray(wert) ? wert.join(', ') : wert));
     }
 
-    /* Beide leer: Kürzel der übernehmenden Pflegekraft und Platz für
-       handschriftliche Notizen während der Übergabe. */
+    /* Leer für das Kürzel der übernehmenden Pflegekraft. */
     tr.appendChild(el('td', 'sheet-uebernahme'));
-    tr.appendChild(el('td', 'sheet-notizen'));
+    /* Bemerkungen aus der Spalte Sonstiges; darunter bleibt Platz, um während
+       der Übergabe von Hand zu ergänzen. */
+    tr.appendChild(el('td', 'sheet-notizen', tafelText('sonstiges', data)));
     body.appendChild(tr);
   }
   tabelle.appendChild(body);
@@ -264,6 +298,19 @@ function uebergabeFussAufbauen() {
     zeile.appendChild(el('span', 'sheetroletel', state.station[feld.key + 'Tel'] || ''));
     schicht.appendChild(zeile);
   }
+
+  /* Bettenzahl: dieselbe Darstellung wie im Kopf der Tafel – die maximal
+     betreibbaren Plätze zuzüglich Notbett. Ohne Eintrag bleibt eine Linie. */
+  const betten = el('div', 'sheetbeds');
+  betten.appendChild(el('span', 'sheetbedslabel', 'Bettenzahl'));
+  const zahl = String(state.station.maxBetten || '').trim();
+  const wert = el('span', 'sheetbedsvalue', zahl);
+  if (!zahl) wert.classList.add('leer');
+  betten.appendChild(wert);
+  betten.appendChild(el('span', 'sheetbedsplus', '+ 1'));
+  betten.appendChild(el('span', 'sheetbedsbelegt',
+    'belegt ' + uebergabeBetten().length));
+  schicht.appendChild(betten);
   fuss.appendChild(schicht);
 
   const telefone = el('div', 'sheetbox sheetbox-telefone');
@@ -291,8 +338,9 @@ function uebergabeDrucken() {
   if (!zeilen && !confirm('Zurzeit ist kein Bettplatz belegt. Trotzdem drucken?')) return;
   /* Die Zeilenhöhe richtet sich nach der Zahl der Patienten, damit das Blatt
      gefüllt wird und bei voller Station trotzdem lesbar bleibt. Für den
-     Fußteil mit Aufnahmen, Zuständigkeiten und Telefonen bleiben rund 35 mm. */
-  const hoehe = Math.min(20, Math.max(7, 112 / Math.max(1, zeilen)));
+     Fußteil mit Aufnahmen, Zuständigkeiten und Telefonen bleiben rund 35 mm.
+     Die Kopfzeile aus Symbolen ist einzeilig und gibt etwas Höhe zurück. */
+  const hoehe = Math.min(20, Math.max(7, 118 / Math.max(1, zeilen)));
   document.documentElement.style.setProperty('--uebergabe-row', hoehe.toFixed(1) + 'mm');
   document.body.classList.add('uebergabe-druck');
   window.print();
