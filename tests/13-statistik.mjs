@@ -77,6 +77,23 @@ const summen = await page.$$eval('#statsSummary tbody tr',
 gleich('Mittelwerte je Schicht und gesamt', summen.length, 4);
 enthaelt('Mittelwert über alles', summen[3], '4,7');
 
+/* ---- Auslastung: belegte Betten je maximal betreibbarem Platz ---- */
+const kopfDetail = await page.$$eval('#statsTable thead th', ts => ts.map(t => t.textContent));
+pruefe('Spalte in der Einzeltabelle', kopfDetail.includes('Ausl. %'), kopfDetail.join(' | '));
+const kopfSummen = await page.$$eval('#statsSummary thead th', ts => ts.map(t => t.textContent));
+pruefe('Spalte in den Mittelwerten', kopfSummen.includes('Auslastung (%)'), kopfSummen.join(' | '));
+/* Frühdienst: 4 von 12 Plätzen = 33,3 % */
+const frueh = zeilen.find(z => z.includes('Frühdienst'));
+enthaelt('Auslastung der Schicht berechnet', frueh, '|33,3|');
+/* Mittel über 4, 5 und 5 Betten bei je 12 Plätzen = 38,9 % */
+enthaelt('Mittelwert der Auslastung', summen[3], '38,9');
+
+/* Ohne eingetragene Bettenzahl bleibt die Spalte leer statt 0 */
+const ohneMax = await page.evaluate(() => auslastung({ belegt: 4, max: null }));
+gleich('ohne Bettenzahl kein Wert', ohneMax, null);
+gleich('Notbett ergibt über 100 %',
+  await page.evaluate(() => Math.round(auslastung({ belegt: 13, max: 12 }))), 108);
+
 /* CSV */
 const download = page.waitForEvent('download', { timeout: 8000 });
 await page.click('#statsCsv');
@@ -84,7 +101,8 @@ const datei = await download;
 const { readFile } = await import('node:fs/promises');
 const csv = await readFile(await datei.path(), 'utf8');
 enthaelt('CSV mit Kopfzeile', csv, '"Datum";"Schicht";"Beginn"');
-enthaelt('CSV enthält den Frühdienst', csv, '"Frühdienst";"06:00";"4";"12";"2";"2";"1"');
+enthaelt('CSV enthält den Frühdienst', csv, '"Frühdienst";"06:00";"4";"12";"33,3";"2";"2";"1"');
+enthaelt('CSV nennt die Auslastung im Kopf', csv, '"Auslastung (%)"');
 pruefe('keine Patientennamen in der Auswertung', !csv.includes('"A"') && !csv.includes('gesperrt'));
 await page.click('#statsClose');
 keineFehler(page);

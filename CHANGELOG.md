@@ -4,6 +4,18 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.11.0
+
+- **Auslastung (%)** als neue Spalte in beiden Tabellen der Statistik und in der CSV-Ausgabe:
+  belegte Plätze geteilt durch die maximale Bettenzahl, ohne das Notbett im Nenner. War es
+  belegt, steht dort folglich mehr als 100 % – eine Überbelegung soll sichtbar bleiben und
+  nicht rechnerisch verschwinden. Ohne eingetragene Bettenzahl bleibt die Spalte leer
+
+  Der Wert wird bei jeder Anzeige gerechnet und nicht gespeichert; er steht damit auch für
+  früher erfasste Schichten zur Verfügung
+- die Kopfzeilen der Statistiktabellen brechen um, statt bei acht Kennzahlen abgeschnitten
+  zu werden
+
 ## 2.10.2
 
 - Der Hinweis auf die eingeschränkte Zugangsstufe im Einstellungsfenster entfällt; die

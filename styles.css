@@ -1124,7 +1124,7 @@ html[data-theme="dark"] .pwerror { color: var(--iso); }
 /* Das Blatt selbst erscheint nur im Ausdruck. */
 .handoversheet { display: none; }
 
-.dlg.dlg-stats { width: min(940px, 96vw); }
+.dlg.dlg-stats { width: min(1020px, 96vw); }
 .statsbar {
   display: flex;
   flex-wrap: wrap;
@@ -1144,6 +1144,9 @@ html[data-theme="dark"] .pwerror { color: var(--iso); }
 .statsbar button { padding: 4px 12px; font-size: 12.5px; }
 .statsinfo { margin: 0 0 10px; }
 .statssummary { margin-bottom: 14px; }
+/* Beide Tabellen dürfen breiter werden als das Fenster und scrollen dann
+   waagerecht – sonst quetscht der Tabellensatz die Kopfzeilen ab. */
+.statssummary { overflow-x: auto; }
 .statstable { max-height: 46vh; overflow: auto; }
 .statstab {
   width: 100%;
@@ -1164,6 +1167,11 @@ html[data-theme="dark"] .pwerror { color: var(--iso); }
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: .4px;
+  /* Mit der Spalte Auslastung stehen acht Kennzahlen nebeneinander; die
+     Beschriftungen brechen dann lieber um, als abgeschnitten zu werden.
+     Die Werte selbst bleiben einzeilig. */
+  white-space: normal;
+  vertical-align: bottom;
   color: var(--ink-soft);
   border-bottom: 1.5px solid var(--line);
 }

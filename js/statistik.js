@@ -147,7 +147,8 @@ function statistikErfassen(zeit) {
 /* ------------------------------------------------------------------ *
  * Auswertung
  * ------------------------------------------------------------------ */
-/* Feldname, ausführliche Beschriftung, kurze Beschriftung für die Tabelle */
+/* Gespeicherte Kennzahlen: Feldname, ausführliche Beschriftung, kurze
+   Beschriftung für die Tabelle. Was hier steht, liegt so im Speicher. */
 const STATS_FELDER = [
   ['belegt', 'belegte Betten', 'belegt'],
   ['max', 'max. Bettenzahl', 'max.'],
@@ -155,6 +156,36 @@ const STATS_FELDER = [
   ['beatmung', 'Beatmungen', 'Beatmung'],
   ['dialyse', 'Dialysen', 'Dialyse']
 ];
+
+/* Auslastung der Schicht in Prozent.
+ *
+ * Nenner ist die maximale Bettenzahl ohne das Notbett – so, wie sie im Kopf
+ * der Tafel eingetragen ist. War das Notbett belegt, steht hier folglich mehr
+ * als 100 %; das ist gewollt, denn eine Überbelegung soll sichtbar bleiben
+ * und nicht rechnerisch verschwinden. Ohne eingetragene Bettenzahl bleibt die
+ * Spalte leer, statt eine Zahl zu erfinden.
+ */
+function auslastung(eintrag) {
+  const belegt = eintrag.belegt;
+  const max = eintrag.max;
+  if (!Number.isFinite(belegt) || !Number.isFinite(max) || max <= 0) return null;
+  return belegt / max * 100;
+}
+
+/* Spalten der Auswertung: die gespeicherten Kennzahlen, dazu die aus ihnen
+   berechnete Auslastung hinter der Bettenzahl. Sie wird nicht mitgespeichert –
+   dadurch steht sie auch für früher erfasste Schichten zur Verfügung. */
+const STATS_SPALTEN = [
+  ...STATS_FELDER.slice(0, 2),
+  ['auslastung', 'Auslastung (%)', 'Ausl. %', auslastung],
+  ...STATS_FELDER.slice(2)
+];
+
+/* Wert einer Spalte für einen Eintrag – gespeichert oder gerechnet. */
+function spaltenWert(spalte, eintrag) {
+  const [feld, , , rechner] = spalte;
+  return rechner ? rechner(eintrag) : eintrag[feld];
+}
 
 let statistikZeitraum = 30;   /* Tage; 0 = alles */
 
@@ -167,9 +198,12 @@ function statistikZeitraumDaten() {
   return daten.filter(e => e.datum >= ab);
 }
 
-/* Mittelwert einer Kennzahl; leere Angaben bleiben außen vor. */
-function mittel(liste, feld) {
-  const werte = liste.map(e => e[feld]).filter(v => typeof v === 'number' && Number.isFinite(v));
+/* Mittelwert einer Spalte; leere Angaben bleiben außen vor. Bei der Auslastung
+   wird über die Werte der einzelnen Schichten gemittelt – wie bei den übrigen
+   Spalten auch, nicht über die Summen. */
+function mittel(liste, spalte) {
+  const werte = liste.map(e => spaltenWert(spalte, e))
+    .filter(v => typeof v === 'number' && Number.isFinite(v));
   if (!werte.length) return null;
   return werte.reduce((a, b) => a + b, 0) / werte.length;
 }
@@ -217,7 +251,7 @@ function renderStatistikSummen(daten) {
   const kopf = el('tr');
   kopf.appendChild(el('th', null, 'Mittelwerte'));
   kopf.appendChild(el('th', 'num', 'Schichten'));
-  for (const [, label] of STATS_FELDER) kopf.appendChild(el('th', 'num', label));
+  for (const [, label] of STATS_SPALTEN) kopf.appendChild(el('th', 'num', label));
   tabelle.appendChild(el('thead')).appendChild(kopf);
 
   const body = el('tbody');
@@ -228,8 +262,8 @@ function renderStatistikSummen(daten) {
     const tr = el('tr', gruppe.summe ? 'summe' : null);
     tr.appendChild(el('td', null, gruppe.name));
     tr.appendChild(el('td', 'num', String(gruppe.liste.length)));
-    for (const [feld] of STATS_FELDER) {
-      tr.appendChild(el('td', 'num', zahl(mittel(gruppe.liste, feld), 1)));
+    for (const spalte of STATS_SPALTEN) {
+      tr.appendChild(el('td', 'num', zahl(mittel(gruppe.liste, spalte), 1)));
     }
     body.appendChild(tr);
   }
@@ -251,7 +285,7 @@ function renderStatistikTabelle(daten) {
   const kopf = el('tr');
   kopf.appendChild(el('th', null, 'Datum'));
   kopf.appendChild(el('th', null, 'Schicht'));
-  for (const [, , kurz] of STATS_FELDER) kopf.appendChild(el('th', 'num', kurz));
+  for (const [, , kurz] of STATS_SPALTEN) kopf.appendChild(el('th', 'num', kurz));
   kopf.appendChild(el('th', 'num', 'erfasst'));
   tabelle.appendChild(el('thead')).appendChild(kopf);
 
@@ -260,7 +294,11 @@ function renderStatistikTabelle(daten) {
     const tr = el('tr');
     tr.appendChild(el('td', null, fullDate(eintrag.datum)));
     tr.appendChild(el('td', null, eintrag.name || schichtName(eintrag.schicht)));
-    for (const [feld] of STATS_FELDER) tr.appendChild(el('td', 'num', zahl(eintrag[feld])));
+    for (const spalte of STATS_SPALTEN) {
+      /* Die gerechnete Auslastung mit einer Nachkommastelle, die gezählten
+         Kennzahlen als ganze Zahl. */
+      tr.appendChild(el('td', 'num', zahl(spaltenWert(spalte, eintrag), spalte[3] ? 1 : 0)));
+    }
     tr.appendChild(el('td', 'num', timeStr(new Date(eintrag.zeit))));
     body.appendChild(tr);
   }
@@ -272,12 +310,18 @@ function renderStatistikTabelle(daten) {
 function statistikCsv() {
   /* Auch hier über csvFeld: Die Schichtbezeichnungen sind frei wählbar. */
   const esc = csvFeld;
-  const kopf = ['Datum', 'Schicht', 'Beginn', ...STATS_FELDER.map(([, label]) => label), 'erfasst um'];
+  const kopf = ['Datum', 'Schicht', 'Beginn', ...STATS_SPALTEN.map(([, label]) => label), 'erfasst um'];
   const zeilen = statistikZeitraumDaten().map(e => [
     e.datum,
     e.name || schichtName(e.schicht),
     e.start || '',
-    ...STATS_FELDER.map(([feld]) => (e[feld] === null || e[feld] === undefined ? '' : e[feld])),
+    ...STATS_SPALTEN.map(spalte => {
+      const wert = spaltenWert(spalte, e);
+      if (wert === null || wert === undefined) return '';
+      /* Dezimalkomma, damit die Tabellenkalkulation die Auslastung als Zahl
+         liest und nicht als Text. */
+      return spalte[3] ? wert.toFixed(1).replace('.', ',') : wert;
+    }),
     timeStr(new Date(e.zeit))
   ].map(esc).join(';'));
   download('belegungstafel-statistik-' + stamp() + '.csv',

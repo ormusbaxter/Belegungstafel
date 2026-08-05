@@ -283,9 +283,13 @@ Spalte der Tafel zugeordnet.
 - **Export/Import** als JSON (Belegung, Angaben zur Schicht und Einstellungen) sowie
   CSV-Export für Excel
 - **Statistik je Schicht** über die runde Schaltfläche unten rechts (über der Hilfe; ihre
-  Sichtbarkeit ist einstellbar): je Schicht **belegte Betten, maximale Bettenzahl, Isolationen
-  (bestätigt oder Verdacht), Beatmungen und Dialysen**, dazu Mittelwerte je Schichtart und
-  gesamt sowie ein CSV-Export. Die Tafel legt dafür in einstellbarem Abstand (ab Werk 15 min)
+  Sichtbarkeit ist einstellbar): je Schicht **belegte Betten, maximale Bettenzahl,
+  Auslastung (%), Isolationen (bestätigt oder Verdacht), Beatmungen und Dialysen**, dazu
+  Mittelwerte je Schichtart und gesamt sowie ein CSV-Export. Die **Auslastung** ist der
+  Anteil der belegten an den maximal betreibbaren Plätzen – ohne das Notbett im Nenner, ein
+  belegtes Notbett ergibt also mehr als 100 %. Sie wird bei jeder Anzeige gerechnet und nicht
+  gespeichert, steht damit auch für früher erfasste Schichten zur Verfügung; ohne eingetragene
+  Bettenzahl bleibt sie leer. Die Tafel legt dafür in einstellbarem Abstand (ab Werk 15 min)
   eine Momentaufnahme ab und ordnet sie der laufenden Schicht zu; eine spätere Aufnahme ersetzt
   die frühere derselben Schicht. Gezählt werden nur belegte Bettplätze; `gesperrt` und
   `Reinigung` bleiben außen vor, ebenso die externe Dialyse (sie steht als Intervention
