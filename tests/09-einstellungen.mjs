@@ -31,8 +31,6 @@ await page.waitForSelector('#settingsDlg[open]', { timeout: 5000 });
 pruefe('erstes Passwort öffnet', await page.isVisible('#settingsDlg'));
 const wenige = await page.$$eval('#settingsTabs .tab', ts => ts.map(t => t.textContent));
 gleich('nur zwei Reiter', wenige.join(' | '), 'Allgemein | Bildschirmschoner');
-pruefe('Hinweis auf die Stufe erscheint', await page.isVisible('#settingsLevel'));
-enthaelt('mit Angabe des Grundes', await page.textContent('#settingsLevel'), 'zweite Passwort');
 /* Der Bildschirmschoner bleibt änderbar */
 await page.click('#settingsTabs .tab:text-is("Bildschirmschoner")');
 await page.waitForTimeout(150);
@@ -46,7 +44,6 @@ await page.fill('#pwInput', 'Twist114');
 await page.click('#pwForm button[type=submit]');
 await page.waitForSelector('#settingsDlg[open]', { timeout: 5000 });
 pruefe('zweites Passwort öffnet', await page.isVisible('#settingsDlg'));
-pruefe('kein Hinweis bei vollem Zugang', !(await page.isVisible('#settingsLevel')));
 
 const reiter = await page.$$eval('#settingsTabs .tab', ts => ts.map(t => t.textContent));
 pruefe('Daten nur mit vollem Zugang', reiter.includes('Daten'));

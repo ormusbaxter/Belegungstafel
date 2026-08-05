@@ -4,6 +4,11 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.10.2
+
+- Der Hinweis auf die eingeschränkte Zugangsstufe im Einstellungsfenster entfällt; die
+  beiden verfügbaren Reiter sprechen für sich
+
 ## 2.10.1
 
 - Die **Einstellungspasswörter stehen nicht mehr im Klartext** in den Dateien, sondern als

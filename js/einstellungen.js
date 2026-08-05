@@ -106,7 +106,6 @@ function renderTabs() {
     box.appendChild(btn);
   }
   $('#settingsReset').hidden = activeTab === 'allgemein' || activeTab === 'daten';
-  $('#settingsLevel').hidden = vollerZugriff();
 }
 
 function renderPane() {
