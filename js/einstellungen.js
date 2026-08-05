@@ -20,12 +20,45 @@ let activeTab = 'allgemein';
  *             Import und „Tafel leeren“.
  *
  * Der Schutz verhindert versehentliches Verstellen auf dem Stationsrechner;
- * er ersetzt keine Zugriffskontrolle, da beide Passwörter im Quelltext der
- * Seite stehen. Wer sie umgehen will, kann das – darum geht es hier nicht. */
-const SETTINGS_PASSWORDS = {
-  'Vinzenz1': 'einfach',
-  'Twist114': 'voll'
-};
+ * eine Zugriffskontrolle ersetzt er nicht.
+ *
+ * Die Passwörter stehen nicht im Klartext hier, sondern als PBKDF2-Ableitung
+ * mit eigenem Salt. Das hebt die Hürde von „Datei öffnen und mitlesen“ auf
+ * „Prüfung im Quelltext ausbauen oder das Passwort durchprobieren“ – mehr
+ * nicht. Wer die Dateien ändern kann, kommt weiterhin hinein; dagegen hilft
+ * allein der Schreibschutz des Anwendungsordners (siehe INSTALLATION.md).
+ *
+ * Neue Passwörter erzeugt `node werkzeuge/passwort.mjs <stufe> "<passwort>"`.
+ */
+const PBKDF2_RUNDEN = 600000;
+const SETTINGS_ZUGANG = [
+  { stufe: 'einfach',
+    salt: '3542d98a44b097bf0d27d08505dc6c07',
+    hash: '20d51ebf30ceff74052435074a10a684a6c95c412c41d2b17dfb097f5b71fcc3' },
+  { stufe: 'voll',
+    salt: '75fb3eccc28cc7ae8cc900c52e1c41d1',
+    hash: '6a6964434ba937859e62788847451c93bda07641f32e7700e90735e30cedc79e' }
+];
+
+const hexBytes = hex => Uint8Array.from(hex.match(/../g).map(p => parseInt(p, 16)));
+const alsHex = puffer => [...new Uint8Array(puffer)]
+  .map(b => b.toString(16).padStart(2, '0')).join('');
+
+/* Welche Stufe öffnet dieses Passwort? Leer, wenn keine. */
+async function pruefeZugang(eingabe) {
+  if (!window.crypto || !window.crypto.subtle) {
+    throw new Error('Dieser Browser stellt keine Prüffunktion bereit (crypto.subtle).');
+  }
+  const roh = new TextEncoder().encode(String(eingabe).normalize('NFC'));
+  const key = await crypto.subtle.importKey('raw', roh, 'PBKDF2', false, ['deriveBits']);
+  for (const eintrag of SETTINGS_ZUGANG) {
+    const bits = await crypto.subtle.deriveBits({
+      name: 'PBKDF2', salt: hexBytes(eintrag.salt), iterations: PBKDF2_RUNDEN, hash: 'SHA-256'
+    }, key, 256);
+    if (alsHex(bits) === eintrag.hash) return eintrag.stufe;
+  }
+  return '';
+}
 
 /* Reiter, die mit der einfachen Stufe offenstehen */
 const EINFACHE_REITER = ['allgemein', 'schoner'];
@@ -1114,15 +1147,30 @@ function resetCategory() {
 function initSettings() {
   $('#btnSettings').addEventListener('click', askPassword);
   $('#pwCancel').addEventListener('click', () => $('#pwDlg').close());
-  $('#pwForm').addEventListener('submit', event => {
-    const stufe = SETTINGS_PASSWORDS[$('#pwInput').value];
-    if (!stufe) {
-      event.preventDefault();
+  /* Die Prüfung rechnet und ist damit asynchron; das Formular schließt sich
+     deshalb nicht mehr von selbst, sondern erst nach dem Ergebnis. */
+  $('#pwForm').addEventListener('submit', async event => {
+    event.preventDefault();
+    const feld = $('#pwInput');
+    const knopf = $('#pwForm button[type=submit]');
+    knopf.disabled = true;
+    let stufe = '';
+    try {
+      stufe = await pruefeZugang(feld.value);
+    } catch (err) {
+      $('#pwError').textContent = err.message;
       $('#pwError').hidden = false;
-      $('#pwInput').select();
+      knopf.disabled = false;
       return;
     }
-    $('#pwInput').value = '';
+    knopf.disabled = false;
+    if (!stufe) {
+      $('#pwError').textContent = 'Passwort nicht richtig.';
+      $('#pwError').hidden = false;
+      feld.select();
+      return;
+    }
+    feld.value = '';
     $('#pwDlg').close();
     openSettings(stufe);
   });

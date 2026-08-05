@@ -6,6 +6,7 @@
 # CHANGELOG zum Nachschlagen.
 
 tests/          export-ignore
+werkzeuge/      export-ignore
 logo.svg        export-ignore
 DATENSCHUTZ.md  export-ignore
 INSTALLATION.md export-ignore

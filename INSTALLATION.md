@@ -85,6 +85,10 @@ Vier Dinge kann die Vorgabedatei nicht mitbringen:
       bekommt keine Schriftaktualisierungen. Fällt es auf: in `js/uebergabe.js` in der Tabelle
       `SYMBOLE` die betroffenen Zeichen austauschen (etwa `≈` für Beatmung, `⚗` für
       Nierenersatz, `⚡` für Neurologie) – eine Zeile je Spalte.
+- [ ] **Einstellungen einmal öffnen** – mit beiden Passwörtern. Die Prüfung nutzt
+      `crypto.subtle`; fehlt die Funktion in der installierten Browserfassung, meldet der
+      Dialog das im Klartext, und die Einstellungen bleiben zu. Dann hilft nur eine neuere
+      Browserfassung.
 - [ ] **Fassung kontrollieren:** Hilfe öffnen, unten steht die Nummer. So ist später
       beantwortbar, was auf welchem Rechner läuft.
 

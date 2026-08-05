@@ -188,13 +188,16 @@ Spalte der Tafel zugeordnet.
   Verschieben, „Tafel leeren“ und Import; das Zurücknehmen selbst wird ebenfalls erfasst.
   Der Verlauf liegt nur im Arbeitsspeicher und endet mit dem Neuladen der Seite
 - **Einstellungen** über das Zahnrad unten rechts, geschützt durch eine Passwortabfrage mit
-  **zwei Stufen** (`SETTINGS_PASSWORDS` in `js/einstellungen.js`): Das erste Passwort öffnet
+  **zwei Stufen** (`SETTINGS_ZUGANG` in `js/einstellungen.js`): Das erste Passwort öffnet
   nur **Allgemein** und **Bildschirmschoner** – Sichtschutz, Zoom, Nachtansicht, Diaschau,
   also das, was im Dienst gebraucht wird. Das zweite Passwort gibt alle Reiter frei,
   einschließlich Bettplätzen, Spaltenköpfen, Auswahllisten, Statistik und dem Bereich Daten
   mit Export, Import und „Tafel leeren“. Mit der einfachen Stufe erscheinen die übrigen
-  Reiter gar nicht erst. Der Schutz verhindert versehentliches
-  Verstellen, ersetzt aber keine Zugriffskontrolle, da beide Passwörter im Quelltext der Seite stehen: Beschriftung der Spaltenköpfe,
+  Reiter gar nicht erst. Die Passwörter liegen als **PBKDF2-Ableitung** mit eigenem Salt vor
+  (600 000 Runden, SHA-256), nicht im Klartext; neue erzeugt
+  `node werkzeuge/passwort.mjs <einfach|voll> "<Passwort>"`. Das verhindert das bloße
+  Mitlesen, ersetzt aber keine Zugriffskontrolle – wer die Dateien ändern kann, baut die
+  Prüfung aus. Inhalt der Einstellungen: Beschriftung der Spaltenköpfe,
   Bezeichnung, Reihenfolge und Anzahl der **Bettplätze** sowie Bearbeiten der Auswahllisten
   für Anwesenheitsstatus, Patientenname, Fachdisziplinen, Beatmungsformen, Kreislaufunterstützung, Dialyse, Isolation,
   Interventionen, Therapielimitierung, Kostformen, Physiotherapie, der Telefonvorschläge

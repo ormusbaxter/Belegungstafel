@@ -98,8 +98,11 @@ damit der Zugangsschutz des Rechners, nicht der der Anwendung.
 Vor dem Einstellungsfenster stehen zwei Passwörter: eines öffnet nur Allgemein und
 Bildschirmschoner, eines alle Einstellungen einschließlich Export, Import und „Tafel leeren“.
 Die Abstufung verhindert versehentliches Verstellen und hält die eingreifenden Bereiche von
-der laufenden Schicht fern. Beide Passwörter stehen im Quelltext der Seite und sind
-**kein Zugriffsschutz** – das ist beabsichtigt und darf nicht anders dargestellt werden.
+der laufenden Schicht fern. Die Passwörter sind als PBKDF2-Ableitung hinterlegt, nicht im
+Klartext; aus den Dateien lassen sie sich also nicht ablesen. Ein **Zugriffsschutz ist das
+dennoch nicht**: Wer die Dateien der Anwendung ändern kann, entfernt die Prüfung. Das darf
+nicht anders dargestellt werden – der wirksame Schutz bleibt der Schreibschutz des Ordners
+und die Anmeldung am Rechner.
 
 Zwei Eigenschaften des Betriebs von der Festplatte gehören dazu:
 

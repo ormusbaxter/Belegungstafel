@@ -10,14 +10,24 @@ const page = await neueSeite(browser);
 await page.click('#btnSettings');
 await page.fill('#pwInput', 'falsch');
 await page.click('#pwForm button[type=submit]');
-await page.waitForTimeout(150);
+/* Die Prüfung ist asynchron: Sie leitet den Schlüssel erst ab. */
+await page.waitForSelector('#pwError:not([hidden])', { timeout: 5000 });
 pruefe('falsches Passwort öffnet nicht', !(await page.isVisible('#settingsDlg')));
 pruefe('Fehlermeldung erscheint', await page.isVisible('#pwError'));
+gleich('mit der erwarteten Meldung', await page.textContent('#pwError'), 'Passwort nicht richtig.');
+
+/* Die Passwörter stehen nicht im Klartext im Quelltext */
+const klartext = await page.evaluate(() =>
+  typeof SETTINGS_ZUGANG === 'object' &&
+  JSON.stringify(SETTINGS_ZUGANG).includes('Vinzenz1'));
+pruefe('kein Passwort im Klartext hinterlegt', klartext === false);
+gleich('stattdessen zwei Ableitungen',
+  await page.evaluate(() => SETTINGS_ZUGANG.map(e => e.stufe).join(',')), 'einfach,voll');
 
 /* Einfache Stufe: nur Allgemein und Bildschirmschoner */
 await page.fill('#pwInput', 'Vinzenz1');
 await page.click('#pwForm button[type=submit]');
-await page.waitForTimeout(200);
+await page.waitForSelector('#settingsDlg[open]', { timeout: 5000 });
 pruefe('erstes Passwort öffnet', await page.isVisible('#settingsDlg'));
 const wenige = await page.$$eval('#settingsTabs .tab', ts => ts.map(t => t.textContent));
 gleich('nur zwei Reiter', wenige.join(' | '), 'Allgemein | Bildschirmschoner');
@@ -34,7 +44,7 @@ await page.waitForTimeout(150);
 await page.click('#btnSettings');
 await page.fill('#pwInput', 'Twist114');
 await page.click('#pwForm button[type=submit]');
-await page.waitForTimeout(200);
+await page.waitForSelector('#settingsDlg[open]', { timeout: 5000 });
 pruefe('zweites Passwort öffnet', await page.isVisible('#settingsDlg'));
 pruefe('kein Hinweis bei vollem Zugang', !(await page.isVisible('#settingsLevel')));
 

@@ -4,6 +4,18 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.10.1
+
+- Die **Einstellungspasswörter stehen nicht mehr im Klartext** in den Dateien, sondern als
+  PBKDF2-Ableitung mit eigenem Salt (600 000 Runden, SHA-256, geprüft über `crypto.subtle`).
+  Ein Blick in `js/einstellungen.js` verrät sie damit nicht mehr. Neue Passwörter erzeugt
+  `node werkzeuge/passwort.mjs <einfach|voll> "<Passwort>"`; das Werkzeug gehört nicht zum
+  Auslieferungsarchiv
+
+  Das hebt die Hürde von „Datei öffnen und mitlesen" auf „Prüfung ausbauen oder Passwort
+  durchprobieren". Ein Zugriffsschutz wird daraus nicht: Wer die Dateien ändern kann, kommt
+  weiterhin hinein. Dagegen hilft allein der Schreibschutz des Anwendungsordners
+
 ## 2.10.0
 
 - **Zwei Stufen beim Zugang zu den Einstellungen.** Das erste Passwort öffnet nur

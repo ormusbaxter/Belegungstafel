@@ -108,6 +108,8 @@ export async function oeffneEinstellungen(page, reiter, passwort) {
   await page.click('#btnSettings');
   await page.fill('#pwInput', passwort || 'Twist114');
   await page.click('#pwForm button[type=submit]');
+  /* Die Passwortprüfung rechnet (PBKDF2) und braucht einen Augenblick. */
+  await page.waitForSelector('#settingsDlg[open]', { timeout: 5000 });
   await page.waitForTimeout(150);
   if (reiter) {
     await page.click(`#settingsTabs .tab:text-is("${reiter}")`);
