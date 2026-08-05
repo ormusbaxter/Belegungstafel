@@ -187,9 +187,14 @@ Spalte der Tafel zugeordnet.
   werden Feldeingaben (mehrere Tastendrücke im selben Feld gelten als ein Schritt), Räumen,
   Verschieben, „Tafel leeren“ und Import; das Zurücknehmen selbst wird ebenfalls erfasst.
   Der Verlauf liegt nur im Arbeitsspeicher und endet mit dem Neuladen der Seite
-- **Einstellungen** über das Zahnrad unten rechts, geschützt durch eine Passwortabfrage
-  (Passwort in `js/einstellungen.js` als `SETTINGS_PASSWORD`; der Schutz verhindert versehentliches
-  Verstellen, ersetzt aber keine Zugriffskontrolle, da er im Quelltext der Seite steht): Beschriftung der Spaltenköpfe,
+- **Einstellungen** über das Zahnrad unten rechts, geschützt durch eine Passwortabfrage mit
+  **zwei Stufen** (`SETTINGS_PASSWORDS` in `js/einstellungen.js`): Das erste Passwort öffnet
+  nur **Allgemein** und **Bildschirmschoner** – Sichtschutz, Zoom, Nachtansicht, Diaschau,
+  also das, was im Dienst gebraucht wird. Das zweite Passwort gibt alle Reiter frei,
+  einschließlich Bettplätzen, Spaltenköpfen, Auswahllisten, Statistik und dem Bereich Daten
+  mit Export, Import und „Tafel leeren“. Mit der einfachen Stufe erscheinen die übrigen
+  Reiter gar nicht erst. Der Schutz verhindert versehentliches
+  Verstellen, ersetzt aber keine Zugriffskontrolle, da beide Passwörter im Quelltext der Seite stehen: Beschriftung der Spaltenköpfe,
   Bezeichnung, Reihenfolge und Anzahl der **Bettplätze** sowie Bearbeiten der Auswahllisten
   für Anwesenheitsstatus, Patientenname, Fachdisziplinen, Beatmungsformen, Kreislaufunterstützung, Dialyse, Isolation,
   Interventionen, Therapielimitierung, Kostformen, Physiotherapie, der Telefonvorschläge
@@ -415,6 +420,7 @@ Drei Punkte, die dabei leicht übersehen werden:
   Dateien, ältere werden gelöscht
 - Beide **Ausdrucke** tragen eine Fußzeile mit Druckzeitpunkt und dem Hinweis auf den
   Datenschutzbehälter – besonders das Physio-Blatt verlässt die Station
-- Das **Passwort** vor den Einstellungen schützt vor versehentlichem Verstellen, nicht vor
-  Zugriff. Es steht im Quelltext. Der wirksame Schutz ist die Bildschirmsperre des
-  Arbeitsplatzes
+- Die **Passwörter** vor den Einstellungen schützen vor versehentlichem Verstellen, nicht vor
+  Zugriff. Sie stehen im Quelltext. Die zweite Stufe hält die eingreifenden Bereiche – Daten,
+  Bettplätze, Listen – von der laufenden Schicht fern, ersetzt aber keine Zugriffskontrolle.
+  Der wirksame Schutz ist die Bildschirmsperre des Arbeitsplatzes

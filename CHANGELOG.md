@@ -4,6 +4,18 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.10.0
+
+- **Zwei Stufen beim Zugang zu den Einstellungen.** Das erste Passwort öffnet nur
+  **Allgemein** und **Bildschirmschoner** – Sichtschutz, Zoom, Nachtansicht, Norton-Abstand,
+  Diaschau –, also das, was im Dienst gebraucht wird; die übrigen Reiter erscheinen dabei
+  gar nicht. Das zweite Passwort gibt alles frei, einschließlich Bettplätzen, Spaltenköpfen,
+  Auswahllisten, Statistik und dem Bereich Daten mit Export, Import und „Tafel leeren“.
+  Bei der einfachen Stufe nennt ein Hinweis im Fenster, was fehlt und warum
+
+  Die Abstufung soll versehentliches Verstellen im Dienst verhindern. Ein Zugriffsschutz ist
+  sie nicht: Beide Passwörter stehen weiterhin im Quelltext der Seite
+
 ## 2.9.3
 
 Ausdruck des Übergabezettels.

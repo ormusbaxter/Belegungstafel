@@ -101,10 +101,12 @@ export async function setzeEinstellungen(page, einstellungen, thema) {
   await page.waitForTimeout(300);
 }
 
-/* Einstellungsdialog öffnen (mit Passwort) und einen Reiter wählen. */
-export async function oeffneEinstellungen(page, reiter) {
+/* Einstellungsdialog öffnen und einen Reiter wählen. Ohne Angabe wird das
+   Passwort der vollen Stufe verwendet, damit alle Reiter offenstehen;
+   'Vinzenz1' öffnet die eingeschränkte Stufe. */
+export async function oeffneEinstellungen(page, reiter, passwort) {
   await page.click('#btnSettings');
-  await page.fill('#pwInput', 'Vinzenz1');
+  await page.fill('#pwInput', passwort || 'Twist114');
   await page.click('#pwForm button[type=submit]');
   await page.waitForTimeout(150);
   if (reiter) {

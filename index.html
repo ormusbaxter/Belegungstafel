@@ -405,6 +405,23 @@
     </section>
 
     <section>
+      <h3>Zugang zu den Einstellungen</h3>
+      <p>Das Zahnrad unten rechts fragt nach einem Passwort. Es gibt <b>zwei</b>:</p>
+      <ul>
+        <li>Das <b>erste</b> öffnet <b>Allgemein</b> und <b>Bildschirmschoner</b> – Sichtschutz,
+          Größe der Darstellung, Tag-/Nachtansicht, Norton-Abstand, Übergabezettel-Schaltfläche
+          und die Inhalte der Diaschau. Das ist, was im Dienst gebraucht wird. Die übrigen
+          Reiter erscheinen dabei gar nicht.</li>
+        <li>Das <b>zweite</b> gibt alles frei: Bettplätze, Spaltenköpfe, sämtliche
+          Auswahllisten, die Statistik und den Bereich <b>Daten</b> mit Export, Import,
+          Sicherung und „Tafel leeren“.</li>
+      </ul>
+      <p>Der Unterschied soll verhindern, dass im Dienst versehentlich etwas verstellt wird,
+        das die ganze Station betrifft. Ein Zugriffsschutz ist es nicht – beide Passwörter
+        stehen im Quelltext der Seite.</p>
+    </section>
+
+    <section>
       <h3>Übergabezettel</h3>
       <p>Für die Übergabe zwischen zwei Schichten werden Angaben gebraucht, die auf dem
         dauerhaft sichtbaren Bildschirm nichts zu suchen haben. Die Schaltfläche
@@ -541,7 +558,8 @@
 <!-- Passwortabfrage vor den Einstellungen -->
 <dialog id="pwDlg" class="dlg dlg-pw">
   <h2>Einstellungen</h2>
-  <p class="dlgsub">Die Einstellungen sind durch ein Passwort geschützt.</p>
+  <p class="dlgsub">Die Einstellungen sind durch ein Passwort geschützt. Es gibt zwei: eines
+    für Allgemein und Bildschirmschoner, eines für alle Einstellungen.</p>
   <form method="dialog" id="pwForm">
     <label class="pwrow">
       <span>Passwort</span>
@@ -560,6 +578,9 @@
 <dialog id="settingsDlg" class="dlg dlg-settings">
   <h2>Einstellungen</h2>
   <p class="dlgsub">Die Einstellungen gelten für diesen Arbeitsplatz und werden mit exportiert.</p>
+  <p class="levelhint" id="settingsLevel" hidden>Eingeschränkter Zugang: Es lassen sich
+    <b>Allgemein</b> und <b>Bildschirmschoner</b> ändern. Für Bettplätze, Spaltenköpfe,
+    Auswahllisten, Statistik und Daten wird das zweite Passwort gebraucht.</p>
   <div class="settingsbody">
     <nav class="settingstabs" id="settingsTabs" aria-label="Kategorien"></nav>
     <section class="settingspane" id="settingsPane"></section>

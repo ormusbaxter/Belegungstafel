@@ -11,10 +11,28 @@
 let draft = null;
 let activeTab = 'allgemein';
 
-/* Zugang zu den Einstellungen. Der Schutz verhindert versehentliches
-   Verstellen auf dem Stationsrechner; er ersetzt keine Zugriffskontrolle,
-   da das Passwort im Quelltext der Seite steht. */
-const SETTINGS_PASSWORD = 'Vinzenz1';
+/* Zugang zu den Einstellungen, zwei Stufen:
+ *
+ *   einfach – Allgemein und Bildschirmschoner. Das ist, was im Dienst
+ *             gebraucht wird: Sichtschutz, Zoom, Nachtansicht, Diaschau.
+ *   voll    – alle Einstellungen, also auch Bettplätze, Spaltenköpfe,
+ *             Auswahllisten, Statistik und der Bereich Daten mit Export,
+ *             Import und „Tafel leeren“.
+ *
+ * Der Schutz verhindert versehentliches Verstellen auf dem Stationsrechner;
+ * er ersetzt keine Zugriffskontrolle, da beide Passwörter im Quelltext der
+ * Seite stehen. Wer sie umgehen will, kann das – darum geht es hier nicht. */
+const SETTINGS_PASSWORDS = {
+  'Vinzenz1': 'einfach',
+  'Twist114': 'voll'
+};
+
+/* Reiter, die mit der einfachen Stufe offenstehen */
+const EINFACHE_REITER = ['allgemein', 'schoner'];
+
+let rechte = 'einfach';
+const vollerZugriff = () => rechte === 'voll';
+const reiterErlaubt = key => vollerZugriff() || EINFACHE_REITER.includes(key);
 
 function askPassword() {
   const dlg = $('#pwDlg');
@@ -24,7 +42,8 @@ function askPassword() {
   $('#pwInput').focus();
 }
 
-function openSettings() {
+function openSettings(stufe) {
+  rechte = stufe === 'voll' ? 'voll' : 'einfach';
   draft = copy(settings);
   activeTab = 'allgemein';
   renderTabs();
@@ -45,12 +64,16 @@ function renderTabs() {
     { key: 'daten', label: 'Daten' }
   ];
   for (const tab of tabs) {
+    /* Mit der einfachen Stufe erscheinen die übrigen Reiter gar nicht erst –
+       so ist von vornherein klar, was sich ändern lässt. */
+    if (!reiterErlaubt(tab.key)) continue;
     const btn = el('button', 'tab' + (tab.key === activeTab ? ' active' : ''), tab.label);
     btn.type = 'button';
     btn.addEventListener('click', () => { activeTab = tab.key; renderTabs(); renderPane(); });
     box.appendChild(btn);
   }
   $('#settingsReset').hidden = activeTab === 'allgemein' || activeTab === 'daten';
+  $('#settingsLevel').hidden = vollerZugriff();
 }
 
 function renderPane() {
@@ -1092,7 +1115,8 @@ function initSettings() {
   $('#btnSettings').addEventListener('click', askPassword);
   $('#pwCancel').addEventListener('click', () => $('#pwDlg').close());
   $('#pwForm').addEventListener('submit', event => {
-    if ($('#pwInput').value !== SETTINGS_PASSWORD) {
+    const stufe = SETTINGS_PASSWORDS[$('#pwInput').value];
+    if (!stufe) {
       event.preventDefault();
       $('#pwError').hidden = false;
       $('#pwInput').select();
@@ -1100,7 +1124,7 @@ function initSettings() {
     }
     $('#pwInput').value = '';
     $('#pwDlg').close();
-    openSettings();
+    openSettings(stufe);
   });
   $('#settingsSave').addEventListener('click', commitSettings);
   $('#settingsCancel').addEventListener('click', () => $('#settingsDlg').close());

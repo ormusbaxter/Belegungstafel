@@ -6,19 +6,41 @@ testName('Einstellungen');
 const browser = await browserStarten();
 const page = await neueSeite(browser);
 
-/* ---- Passwortschutz ---- */
+/* ---- Passwortschutz, zwei Stufen ---- */
 await page.click('#btnSettings');
 await page.fill('#pwInput', 'falsch');
 await page.click('#pwForm button[type=submit]');
 await page.waitForTimeout(150);
 pruefe('falsches Passwort öffnet nicht', !(await page.isVisible('#settingsDlg')));
 pruefe('Fehlermeldung erscheint', await page.isVisible('#pwError'));
+
+/* Einfache Stufe: nur Allgemein und Bildschirmschoner */
 await page.fill('#pwInput', 'Vinzenz1');
 await page.click('#pwForm button[type=submit]');
 await page.waitForTimeout(200);
-pruefe('richtiges Passwort öffnet', await page.isVisible('#settingsDlg'));
+pruefe('erstes Passwort öffnet', await page.isVisible('#settingsDlg'));
+const wenige = await page.$$eval('#settingsTabs .tab', ts => ts.map(t => t.textContent));
+gleich('nur zwei Reiter', wenige.join(' | '), 'Allgemein | Bildschirmschoner');
+pruefe('Hinweis auf die Stufe erscheint', await page.isVisible('#settingsLevel'));
+enthaelt('mit Angabe des Grundes', await page.textContent('#settingsLevel'), 'zweite Passwort');
+/* Der Bildschirmschoner bleibt änderbar */
+await page.click('#settingsTabs .tab:text-is("Bildschirmschoner")');
+await page.waitForTimeout(150);
+pruefe('Bildschirmschoner bedienbar', await page.isVisible('#settingsPane .slidebar'));
+await page.click('#settingsCancel');
+await page.waitForTimeout(150);
+
+/* Volle Stufe: alle Reiter */
+await page.click('#btnSettings');
+await page.fill('#pwInput', 'Twist114');
+await page.click('#pwForm button[type=submit]');
+await page.waitForTimeout(200);
+pruefe('zweites Passwort öffnet', await page.isVisible('#settingsDlg'));
+pruefe('kein Hinweis bei vollem Zugang', !(await page.isVisible('#settingsLevel')));
 
 const reiter = await page.$$eval('#settingsTabs .tab', ts => ts.map(t => t.textContent));
+pruefe('Daten nur mit vollem Zugang', reiter.includes('Daten'));
+pruefe('Bettplätze nur mit vollem Zugang', reiter.includes('Bettplätze'));
 gleich('Reiter in der erwarteten Reihenfolge', reiter.slice(0, 7).join(' | '),
   'Allgemein | Bildschirmschoner | Statistik | Spaltenköpfe | Bettplätze | ' +
   'Anwesenheitsstatus | Patientenname');

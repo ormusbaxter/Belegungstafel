@@ -95,9 +95,11 @@ findet.
 Jede Person, die sich am Windows-Konto des Arbeitsplatzes anmelden kann. Der Schutz ist
 damit der Zugangsschutz des Rechners, nicht der der Anwendung.
 
-Das Passwort vor dem Einstellungsfenster verhindert versehentliches Verstellen. Es steht im
-Quelltext der Seite und ist **kein Zugriffsschutz** – das ist beabsichtigt und darf nicht
-anders dargestellt werden.
+Vor dem Einstellungsfenster stehen zwei Passwörter: eines öffnet nur Allgemein und
+Bildschirmschoner, eines alle Einstellungen einschließlich Export, Import und „Tafel leeren“.
+Die Abstufung verhindert versehentliches Verstellen und hält die eingreifenden Bereiche von
+der laufenden Schicht fern. Beide Passwörter stehen im Quelltext der Seite und sind
+**kein Zugriffsschutz** – das ist beabsichtigt und darf nicht anders dargestellt werden.
 
 Zwei Eigenschaften des Betriebs von der Festplatte gehören dazu:
 
