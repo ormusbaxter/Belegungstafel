@@ -4,6 +4,25 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.12.0
+
+Ausdruck des Übergabezettels.
+
+- **Alle Bettplätze** stehen auf dem Blatt, auch die freien: Die Übergabe kann die Tafel
+  Zeile für Zeile durchgehen und einen leeren Platz als solchen bestätigen
+- **Diagnosen** stehen jetzt direkt hinter dem Patientennamen, vor den Verfahren
+- **Nierenersatz** ist breit genug für `CVVHD`, auch in Klammern, ohne Umbruch
+- die Fußzeile aller Ausdrucke endet auf „nach Dienstende Entsorgung in Datenmüll!"
+- **Das Blatt passt auf eine Seite.** Vor dem Druck wird es unsichtbar eingehängt, vermessen
+  und die Schriftgröße so gewählt, dass alles hineingeht – bei leerer Tafel 3,6 mm, bei voller
+  Station knapp 2,6 mm. Unter 2,1 mm wird nicht verkleinert; treffen dreizehn sehr lange
+  Diagnosen zusammen, läuft das Blatt lieber auf eine zweite Seite, als unlesbar zu werden
+
+  Dafür stehen die Stilregeln des Blattes jetzt außerhalb von `@media print` – nur so lässt
+  sich seine Höhe vor dem Druck messen. Name und Fachdisziplin stehen nebeneinander statt
+  untereinander, die Telefonliste vierspaltig statt zweispaltig; beides gibt der Tabelle Höhe
+  zurück und damit Schriftgröße
+
 ## 2.11.0
 
 - **Auslastung (%)** als neue Spalte in beiden Tabellen der Statistik und in der CSV-Ausgabe:

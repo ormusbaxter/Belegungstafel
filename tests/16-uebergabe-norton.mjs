@@ -188,8 +188,8 @@ pruefe('Fußzeile bleibt', await sichtbar('.printfoot'));
 /* Die Kopfzeile trägt Symbole; der Klartext steht im title. */
 const spalten = await page.$$eval('.handoversheet th', ths => ths.map(t => t.title));
 gleich('Spalten des Blattes', spalten.join(' | '),
-  'Bettplatz | Patient | Beatmung | Kreislauf | Nierenersatz | Isolation | ' +
-  'Therapielimitierung | Diagnosen | Neurologie | Katecholamine | ' +
+  'Bettplatz | Patient | Diagnosen | Beatmung | Kreislauf | Nierenersatz | Isolation | ' +
+  'Therapielimitierung | Neurologie | Katecholamine | ' +
   'übernehmende Pflegekraft | Sonstiges und Notizen');
 const zeichen = await page.$$eval('.handoversheet th', ths => ths.map(t => t.textContent));
 gleich('je Spalte genau ein Symbol', zeichen.length, 12);
@@ -212,16 +212,22 @@ const fehlend = await page.evaluate(() => {
   return treffer;
 });
 gleich('alle Symbole haben eine Glyphe', fehlend.join(', '), '');
-gleich('eine Zeile je belegtem Bettplatz',
-  await page.$$eval('.handoversheet tbody tr', rs => rs.length), 3);
+/* Das Blatt führt alle Bettplätze, auch die freien – die Übergabe geht die
+   Tafel Zeile für Zeile durch. */
+gleich('eine Zeile je Bettplatz', await page.$$eval('.handoversheet tbody tr', rs => rs.length), 13);
+gleich('freie Plätze sind gekennzeichnet',
+  await page.$$eval('.handoversheet tbody tr.frei', rs => rs.length), 10);
+enthaelt('Kopfzeile nennt die Belegung', await page.textContent('.handoversheet .sheetmeta'),
+  '3 von 13 Bettplätzen belegt');
 enthaelt('Diagnose steht auf dem Blatt', await page.textContent('.handoversheet'), 'Sepsis bei Pneumonie');
 
 /* Angaben aus der Tafel werden übernommen */
+/* Bett 2 ist der fünfte Platz der Tafel. */
 gleich('Beatmung aus der Tafel',
-  await page.textContent('.handoversheet tbody tr:nth-child(3) .sheet-beatmung'), 'INV');
+  await page.textContent('.handoversheet tbody tr:nth-child(5) .sheet-beatmung'), 'INV');
 /* Der Klammerwert aus dem Test weiter oben steht unverändert auf dem Blatt. */
 gleich('Nierenersatz aus der Tafel',
-  await page.textContent('.handoversheet tbody tr:nth-child(3) .sheet-dialyse'), '(CiCa)');
+  await page.textContent('.handoversheet tbody tr:nth-child(5) .sheet-dialyse'), '(CiCa)');
 gleich('Feld für die Übernahme bleibt leer',
   await page.textContent('.handoversheet tbody tr:nth-child(1) .sheet-uebernahme'), '');
 gleich('Notizspalte übernimmt Sonstiges',
@@ -239,7 +245,19 @@ const breiten = await page.evaluate(() => {
 });
 pruefe('Bettplatz schmal', breiten.bett < breiten.diagnosen / 3, Math.round(breiten.bett));
 pruefe('Beatmung schmal', breiten.beatmung < breiten.diagnosen / 3, Math.round(breiten.beatmung));
-pruefe('Nierenersatz schmal', breiten.dialyse < breiten.diagnosen / 3, Math.round(breiten.dialyse));
+/* Nierenersatz ist bewusst breiter: CVVHD muss ohne Umbruch hineinpassen. */
+const cvvhd = await page.evaluate(() => {
+  state.beds['0a'].dialyse = 'CVVHD';
+  uebergabeBlattAufbauen();
+  uebergabeEinpassen();
+  document.querySelector('#handoverSheet').classList.add('messen');
+  const zelle = document.querySelector('.handoversheet tbody tr .sheet-dialyse');
+  const platzt = zelle.scrollWidth > zelle.clientWidth + 1;
+  document.querySelector('#handoverSheet').classList.remove('messen');
+  return { text: zelle.textContent, platzt };
+});
+gleich('CVVHD steht in der Zelle', cvvhd.text, 'CVVHD');
+pruefe('CVVHD passt ohne Umbruch', !cvvhd.platzt);
 pruefe('Limitierung schmal', breiten.limit < breiten.diagnosen / 3, Math.round(breiten.limit));
 pruefe('Notizen breit genug zum Schreiben', breiten.notizen > breiten.beatmung * 1.5,
   Math.round(breiten.notizen));
@@ -262,6 +280,42 @@ gleich('alle acht Diensttelefone', nummern.join(', '),
   '4149, 4117, 4719, 4880, 4881, 4882, 4883, 4212');
 gleich('je Telefon eine Schreiblinie',
   await page.$$eval('.sheetphoneline', ls => ls.length), 8);
+
+/* Einpassung: Das Blatt verkleinert die Schrift so weit, dass alle
+   Bettplätze auf eine Seite passen – aber nicht unter die Lesbarkeitsgrenze. */
+const einpassen = (langeNamen, langeDiagnosen) => page.evaluate(([lang, diag]) => {
+  BEDS.forEach(bed => Object.assign(state.beds[bed.id], {
+    name: lang ? 'Schmidt-Hohenlohe, Maximiliane' : 'Mustermann, Max',
+    status: '●', disziplin: 'ACH', beatmung: ['INV'], dialyse: 'CVVHD',
+    isolation: [{ v: 'MRSA', s: 'bestaetigt' }], limitierung: ['DNR', 'DNI'],
+    diagnosen: diag
+      ? 'Sepsis bei ambulant erworbener Pneumonie, COPD GOLD III, Niereninsuffizienz'
+      : 'Sepsis bei Pneumonie',
+    neuro: ['sediert', 'RASS -4'], katecholamine: ['Norepinephrin'] }));
+  buildBody();
+  uebergabeBlattAufbauen();
+  const schrift = uebergabeEinpassen();
+  const blatt = document.querySelector('#handoverSheet');
+  blatt.classList.add('messen');
+  const hoehe = blatt.getBoundingClientRect().height / 96 * 25.4;
+  const ueberlauf = [...blatt.querySelectorAll('td')]
+    .filter(td => td.scrollHeight > td.clientHeight + 1).length;
+  blatt.classList.remove('messen');
+  return { schrift, hoehe, ueberlauf };
+}, [langeNamen, langeDiagnosen]);
+
+const voll = await einpassen(false, false);
+pruefe('volle Station passt auf eine Seite', voll.hoehe <= 188,
+  voll.hoehe.toFixed(0) + ' mm von 188 mm');
+pruefe('dabei lesbare Schrift', voll.schrift >= 2.4, voll.schrift + ' mm');
+gleich('kein Inhalt läuft aus einer Zelle', voll.ueberlauf, 0);
+
+/* Im Ausnahmefall – dreizehn sehr lange Namen und Diagnosen zugleich – wird
+   die Schrift nicht ins Unlesbare getrieben; dann läuft das Blatt lieber
+   über. Geprüft wird, dass die Grenze hält und nichts abgeschnitten wird. */
+const extrem = await einpassen(true, true);
+pruefe('Untergrenze der Schrift wird eingehalten', extrem.schrift >= 2.1, extrem.schrift + ' mm');
+gleich('auch dort kein abgeschnittener Inhalt', extrem.ueberlauf, 0);
 await page.emulateMedia({ media: 'screen' });
 await page.evaluate(() => document.body.classList.remove('uebergabe-druck'));
 

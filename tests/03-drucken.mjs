@@ -22,7 +22,7 @@ gleich('gedruckte Spalten', sichtbareSpalten.join(' | '),
 const versteckt = sel => page.locator(sel).evaluate(e => getComputedStyle(e).display === 'none');
 pruefe('Fußzeile im Druck', !(await versteckt('.printfoot')));
 const fuss = await page.evaluate(() => { druckfussSetzen(); return document.querySelector('#printFoot').textContent; });
-enthaelt('Fußzeile nennt den Datenschutzbehälter', fuss, 'Datenschutzbehälter');
+enthaelt('Fußzeile nennt die Entsorgung', fuss, 'Entsorgung in Datenmüll!');
 enthaelt('Fußzeile nennt den Druckzeitpunkt', fuss, 'gedruckt am');
 pruefe('Bedienleiste nicht im Druck', await versteckt('.tools'));
 pruefe('Zahnrad nicht im Druck', await versteckt('.gear'));

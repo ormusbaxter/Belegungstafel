@@ -191,75 +191,84 @@ function uebergabeAuswahl(bed, feld, data) {
 
 /* ------------------------------------------------------------------ *
  * Ausdruck
- * Ein eigenes Blatt: nur belegte Bettplätze, je Platz eine Zeile mit
- * Bettplatz, Name, Fachdisziplin und den drei Angaben der Übergabe.
+ * Ein eigenes Blatt mit allen Bettplätzen – auch den freien, damit die
+ * Übergabe die Tafel Zeile für Zeile durchgehen kann und ein leerer Platz
+ * als solcher bestätigt wird.
  * ------------------------------------------------------------------ */
+
+/* Spalten des Blattes in ihrer Reihenfolge. Jede weiß, wie ihre Zelle
+   gefüllt wird; Kopfzeile und Zeilen laufen dadurch über dieselbe Liste. */
+function blattSpalten() {
+  const [diagnosen, ...weitere] = UEBERGABE_FIELDS;
+  const ausFeld = feld => data => {
+    const wert = data[feld.key];
+    return Array.isArray(wert) ? wert.join(', ') : wert;
+  };
+  return [
+    { key: 'bed', label: 'Bettplatz', zelle: (data, bed) => bed.label, klasse: 'sheetbed' },
+    { key: 'patient', label: 'Patient', knoten: patientenZelle },
+    /* Die Diagnosen stehen direkt hinter dem Namen. */
+    { key: diagnosen.key, label: diagnosen.label, zelle: ausFeld(diagnosen) },
+    /* Angaben aus der Tafel – hier nur wiedergegeben, geändert werden sie
+       dort. Die Isolation steht fett, sie bestimmt das Vorgehen am Bett. */
+    ...UEBERGABE_TAFEL.map(spalte => ({
+      key: spalte.key, label: spalte.label, zelle: data => tafelText(spalte.key, data)
+    })),
+    ...weitere.map(feld => ({ key: feld.key, label: feld.label, zelle: ausFeld(feld) })),
+    /* Leer für das Kürzel der übernehmenden Pflegekraft. */
+    { key: 'uebernahme', label: 'übernehmende Pflegekraft', zelle: () => '' },
+    /* Bemerkungen aus der Spalte Sonstiges; darunter bleibt Platz zum
+       Ergänzen von Hand. */
+    { key: 'notizen', label: 'Sonstiges und Notizen', zelle: data => tafelText('sonstiges', data) }
+  ];
+}
+
+function patientenZelle(data) {
+  const zelle = el('td', 'sheet-patient sheetpatient');
+  zelle.appendChild(el('span', 'sheetname', data.name || '–'));
+  if (data.disziplin) zelle.appendChild(el('span', 'sheetmetaline', data.disziplin));
+  return zelle;
+}
+
 function uebergabeBlattAufbauen() {
   const blatt = $('#handoverSheet');
   blatt.replaceChildren();
-  const betten = uebergabeBetten();
+  const belegte = uebergabeBetten().length;
 
   const kopf = el('div', 'sheethead');
   kopf.appendChild(el('span', 'sheettitle', 'Übergabe'));
   kopf.appendChild(el('span', 'sheetmeta',
     fullDate(isoToday()) + ' · ' + timeStr(new Date()) + ' Uhr · ' +
-    betten.length + (betten.length === 1 ? ' belegter Bettplatz' : ' belegte Bettplätze')));
+    belegte + ' von ' + BEDS.length + ' Bettplätzen belegt'));
   blatt.appendChild(kopf);
 
+  const spalten = blattSpalten();
   const tabelle = el('table', 'sheettable');
-  const thead = el('thead');
   const kopfzeile = el('tr');
-  const spalten = [
-    { key: 'bed', label: 'Bettplatz' },
-    { key: 'patient', label: 'Patient' },
-    ...UEBERGABE_TAFEL,
-    ...UEBERGABE_FIELDS,
-    { key: 'uebernahme', label: 'übernehmende Pflegekraft' },
-    { key: 'notizen', label: 'Sonstiges und Notizen' }
-  ];
   for (const spalte of spalten) {
     const th = el('th', 'sheet-' + spalte.key, SYMBOLE[spalte.key] || spalte.label);
     th.title = spalte.label;
     th.setAttribute('aria-label', spalte.label);
     kopfzeile.appendChild(th);
   }
-  thead.appendChild(kopfzeile);
-  tabelle.appendChild(thead);
+  tabelle.appendChild(el('thead')).appendChild(kopfzeile);
 
   const body = el('tbody');
-  for (const bed of betten) {
+  for (const bed of BEDS) {
     const data = state.beds[bed.id];
-    const tr = el('tr');
-    tr.appendChild(el('td', 'sheet-bed sheetbed', bed.label));
-
-    const patient = el('td', 'sheet-patient sheetpatient');
-    patient.appendChild(el('div', 'sheetname', data.name || '–'));
-    if (data.disziplin) patient.appendChild(el('div', 'sheetmetaline', data.disziplin));
-    tr.appendChild(patient);
-
-    /* Angaben aus der Tafel – hier nur wiedergegeben, geändert werden sie
-       dort. Die Isolation steht fett, sie bestimmt das Vorgehen am Bett. */
-    for (const spalte of UEBERGABE_TAFEL) {
-      tr.appendChild(el('td', 'sheet-' + spalte.key, tafelText(spalte.key, data)));
+    const tr = el('tr', isOccupied(data) ? null : 'frei');
+    for (const spalte of spalten) {
+      tr.appendChild(spalte.knoten
+        ? spalte.knoten(data, bed)
+        : el('td', 'sheet-' + spalte.key + (spalte.klasse ? ' ' + spalte.klasse : ''),
+             spalte.zelle(data, bed)));
     }
-
-    for (const feld of UEBERGABE_FIELDS) {
-      const wert = data[feld.key];
-      tr.appendChild(el('td', 'sheet-' + feld.key,
-        Array.isArray(wert) ? wert.join(', ') : wert));
-    }
-
-    /* Leer für das Kürzel der übernehmenden Pflegekraft. */
-    tr.appendChild(el('td', 'sheet-uebernahme'));
-    /* Bemerkungen aus der Spalte Sonstiges; darunter bleibt Platz, um während
-       der Übergabe von Hand zu ergänzen. */
-    tr.appendChild(el('td', 'sheet-notizen', tafelText('sonstiges', data)));
     body.appendChild(tr);
   }
   tabelle.appendChild(body);
   blatt.appendChild(tabelle);
   blatt.appendChild(uebergabeFussAufbauen());
-  return betten.length;
+  return BEDS.length;
 }
 
 /* Wert einer Tafelspalte als Text für das Blatt */
@@ -333,15 +342,55 @@ function uebergabeFussAufbauen() {
   return fuss;
 }
 
+/* Höhe eines Elements in Millimetern (96 dpi sind die Rechengrundlage des
+   Browsers für physische Einheiten). */
+function hoeheMm(knoten) {
+  return knoten.getBoundingClientRect().height / 96 * 25.4;
+}
+
+/* Das Blatt auf eine Seite bringen.
+ *
+ * Es soll immer alle Bettplätze zeigen und trotzdem einseitig bleiben. Wie
+ * viel Platz die Zeilen brauchen, hängt aber an der Länge der Diagnosen und
+ * lässt sich nicht vorausberechnen. Deshalb wird das Blatt kurz unsichtbar
+ * in der Breite einer A4-Seite eingehängt, gemessen und die Schrift so lange
+ * verkleinert, bis es passt – dasselbe Vorgehen wie beim Einpassen der
+ * Hinweistexte im Bildschirmschoner.
+ */
+const BLATT_HOEHE_MM = 188;      /* A4 quer, 7 mm Rand, abzüglich Fußzeile */
+const BLATT_SCHRIFT_MM = 3.6;    /* Ausgangsgröße – bei wenig Inhalt bleibt es dabei */
+const BLATT_SCHRIFT_MIN = 2.1;   /* darunter wird es unlesbar; dann lieber zwei Seiten */
+
+function uebergabeEinpassen() {
+  const blatt = $('#handoverSheet');
+  const wurzel = document.documentElement;
+  const setze = (name, wert) => wurzel.style.setProperty(name, wert);
+
+  /* Zeilenhöhe: Der Rest der Seite, gleichmäßig auf die Bettplätze verteilt,
+     nach unten begrenzt, damit sich in die leeren Spalten schreiben lässt. */
+  setze('--uebergabe-row', Math.min(16, Math.max(6, 120 / Math.max(1, BEDS.length))).toFixed(1) + 'mm');
+
+  let schrift = BLATT_SCHRIFT_MM;
+  setze('--uebergabe-schrift', schrift + 'mm');
+  blatt.classList.add('messen');
+  for (let schritt = 0; schritt < 40; schritt++) {
+    if (hoeheMm(blatt) <= BLATT_HOEHE_MM) break;
+    const kleiner = Math.round(schrift * 0.96 * 100) / 100;
+    /* Unter die Lesbarkeitsgrenze wird nicht verkleinert – dann läuft das
+       Blatt lieber auf eine zweite Seite. */
+    if (kleiner < BLATT_SCHRIFT_MIN) break;
+    schrift = kleiner;
+    setze('--uebergabe-schrift', schrift + 'mm');
+  }
+  /* Reicht die Schrift allein nicht, geben die Zeilen ihre Mindesthöhe auf. */
+  if (hoeheMm(blatt) > BLATT_HOEHE_MM) setze('--uebergabe-row', '0mm');
+  blatt.classList.remove('messen');
+  return schrift;
+}
+
 function uebergabeDrucken() {
-  const zeilen = uebergabeBlattAufbauen();
-  if (!zeilen && !confirm('Zurzeit ist kein Bettplatz belegt. Trotzdem drucken?')) return;
-  /* Die Zeilenhöhe richtet sich nach der Zahl der Patienten, damit das Blatt
-     gefüllt wird und bei voller Station trotzdem lesbar bleibt. Für den
-     Fußteil mit Aufnahmen, Zuständigkeiten und Telefonen bleiben rund 35 mm.
-     Die Kopfzeile aus Symbolen ist einzeilig und gibt etwas Höhe zurück. */
-  const hoehe = Math.min(20, Math.max(7, 118 / Math.max(1, zeilen)));
-  document.documentElement.style.setProperty('--uebergabe-row', hoehe.toFixed(1) + 'mm');
+  uebergabeBlattAufbauen();
+  uebergabeEinpassen();
   document.body.classList.add('uebergabe-druck');
   window.print();
   setTimeout(() => document.body.classList.remove('uebergabe-druck'), 1000);

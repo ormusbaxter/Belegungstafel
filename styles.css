@@ -1588,146 +1588,6 @@ body.saver-on { overflow: hidden; }
   body.uebergabe-druck .notes { display: none !important; }
   body.uebergabe-druck .handoversheet { display: block; }
 
-  .handoversheet .sheethead {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    padding-bottom: 2mm;
-    border-bottom: 1.5px solid #000;
-  }
-  .handoversheet .sheettitle { font-size: 5mm; font-weight: 700; }
-  .handoversheet .sheetmeta { font-size: 3mm; }
-
-  .handoversheet .sheettable {
-    width: 100%;
-    margin-top: 2mm;
-    table-layout: fixed;
-    border-collapse: collapse;
-  }
-  .handoversheet th,
-  .handoversheet td {
-    border: 1px solid #000;
-    padding: 1mm 1.5mm;
-    vertical-align: top;
-    text-align: left;
-    overflow-wrap: break-word;
-  }
-  /* Lange Diagnosen dürfen auf ein zweites Blatt laufen – abschneiden wäre
-     hier falsch. Die Kopfzeile wiederholt sich dann. */
-  .handoversheet thead { display: table-header-group; }
-  /* Die Kopfzeile trägt Symbole statt Wörter. Die monochrome Symbolschrift
-     steht vor der Emoji-Schrift, damit die Zeichen, die es dort als Umriss
-     gibt, schwarzweiß gedruckt werden. */
-  .handoversheet th {
-    font-size: 4mm;
-    line-height: 1.1;
-    text-align: center;
-    font-family: "Segoe UI Symbol", "Noto Sans Symbols 2", "Segoe UI Emoji", sans-serif;
-    font-variant-emoji: text;
-    white-space: nowrap;
-  }
-  .handoversheet td { height: var(--uebergabe-row, 14mm); font-size: 3mm; }
-  .handoversheet .sheetbed {
-    font-size: 4.6mm;
-    font-weight: 700;
-    text-align: center;
-  }
-  /* Zwölf Spalten auf A4 quer. Bettplatz, Beatmung, Nierenersatz und
-     Limitierung tragen nur kurze Kürzel und bekommen deshalb die knappste
-     Breite, die ihre Werte zulassen; der gewonnene Platz geht an die beiden
-     handschriftlichen Spalten rechts. */
-  /* Die Breiten müssen sich gegen die allgemeine Druckregel der Tafel
-     durchsetzen (dort width: auto !important) – daher ebenfalls !important. */
-  .handoversheet .sheet-bed { width: 3.5% !important; }
-  .handoversheet .sheet-patient { width: 10% !important; }
-  .handoversheet .sheet-beatmung { width: 5% !important; }
-  .handoversheet .sheet-kreislauf { width: 6% !important; }
-  .handoversheet .sheet-dialyse { width: 4.5% !important; }
-  .handoversheet .sheet-isolation { width: 9% !important; font-weight: 700; }
-  .handoversheet .sheet-limitierung { width: 5% !important; }
-  /* Die Diagnosen sind der Kern des Zettels und bekommen den meisten Platz;
-     sie sollen in zwei Zeilen stehen, nicht in fünf. */
-  .handoversheet .sheet-diagnosen { width: 21% !important; }
-  .handoversheet .sheet-neuro { width: 10.5% !important; }
-  .handoversheet .sheet-katecholamine { width: 9% !important; }
-  .handoversheet .sheet-uebernahme { width: 6% !important; }
-  .handoversheet .sheet-notizen { width: 10.5% !important; }
-  .handoversheet th.sheet-isolation { font-weight: 700; }
-  /* Namen werden am Leerzeichen umbrochen, nicht mitten im Wort. */
-  .handoversheet .sheetname { font-weight: 700; font-size: 3.4mm; overflow-wrap: normal; }
-  .handoversheet .sheetmetaline { font-size: 2.8mm; }
-  .handoversheet tr { page-break-inside: avoid; }
-
-  /* Fußteil: Aufnahmen, Zuständigkeiten, Telefonübernahme nebeneinander */
-  .handoversheet .sheetfoot {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1.15fr;
-    gap: 3mm;
-    margin-top: 3mm;
-    page-break-inside: avoid;
-  }
-  .handoversheet .sheetbox { border: 1px solid #000; padding: 1.5mm 2mm; }
-  .handoversheet .sheetbox h3 {
-    margin: 0 0 1.5mm;
-    font-size: 2.8mm;
-    text-transform: uppercase;
-    letter-spacing: .3px;
-  }
-  .handoversheet .sheetnote { font-size: 3mm; }
-  .handoversheet .sheetnoteline {
-    min-height: 5mm;
-    border-bottom: 1px dotted #666;
-  }
-  .handoversheet .sheetrole {
-    display: grid;
-    grid-template-columns: 30mm 1fr 14mm;
-    gap: 1mm;
-    min-height: 5.5mm;
-    align-items: end;
-    font-size: 3mm;
-  }
-  .handoversheet .sheetrolelabel { font-size: 2.6mm; }
-
-  /* Bettenzahl unter den Zuständigkeiten */
-  .handoversheet .sheetbeds {
-    display: grid;
-    grid-template-columns: 30mm auto auto 1fr;
-    gap: 1.5mm;
-    align-items: baseline;
-    margin-top: 1.5mm;
-    padding-top: 1.5mm;
-    border-top: 1px solid #000;
-    font-size: 3mm;
-  }
-  .handoversheet .sheetbedslabel { font-size: 2.6mm; }
-  .handoversheet .sheetbedsvalue { font-size: 4mm; font-weight: 700; }
-  .handoversheet .sheetbedsvalue.leer {
-    min-width: 10mm;
-    border-bottom: 1px dotted #666;
-  }
-  .handoversheet .sheetbedsplus { font-size: 3mm; }
-  .handoversheet .sheetbedsbelegt { text-align: right; }
-  .handoversheet .sheetrolename,
-  .handoversheet .sheetroletel {
-    border-bottom: 1px dotted #666;
-    font-weight: 700;
-  }
-  .handoversheet .sheetphones {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0 3mm;
-  }
-  .handoversheet .sheetphone {
-    display: grid;
-    grid-template-columns: 9mm 1fr 16mm;
-    gap: 1mm;
-    align-items: end;
-    min-height: 5.5mm;
-    font-size: 3mm;
-  }
-  .handoversheet .sheetphonenr { font-weight: 700; }
-  .handoversheet .sheetphonelabel { font-size: 2.6mm; }
-  .handoversheet .sheetphoneline { border-bottom: 1px dotted #666; }
 
   /* Fußzeile – auf beiden Blättern, deshalb außerhalb der Physio-Regeln */
   .printfoot {
@@ -1806,3 +1666,188 @@ body.saver-on { overflow: hidden; }
   body.physio-druck th.col-telefon,   body.physio-druck td.col-telefon   { width: 13% !important; }
   body.physio-druck th.col-pflege,    body.physio-druck td.col-pflege    { width: 13% !important; }
 }
+
+
+/* ------------------------------------------------------------------ *
+ * Übergabezettel – Gestaltung des Blattes
+ *
+ * Steht bewusst außerhalb von @media print: Vor dem Druck wird das Blatt
+ * kurz unsichtbar eingehängt und vermessen, damit die Schriftgröße so
+ * gewählt werden kann, dass alles auf eine Seite passt – siehe
+ * uebergabeEinpassen() in js/uebergabe.js. Sichtbar ist es nur im Ausdruck.
+ * ------------------------------------------------------------------ */
+/* Messstellung: eingehängt, aber außerhalb des Sichtfelds, in der Breite
+   einer A4-Seite quer abzüglich der Ränder. */
+.handoversheet.messen {
+  display: block;
+  position: fixed;
+  left: -30000px;
+  top: 0;
+  width: 283mm;
+}
+
+.handoversheet .sheethead {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 2mm;
+  border-bottom: 1.5px solid #000;
+}
+.handoversheet .sheettitle { font-size: 5mm; font-weight: 700; }
+.handoversheet .sheetmeta { font-size: 3mm; }
+
+.handoversheet .sheettable {
+  width: 100%;
+  margin-top: 2mm;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+.handoversheet th,
+.handoversheet td {
+  border: 1px solid #000;
+  padding: 1mm 1.5mm;
+  vertical-align: top;
+  text-align: left;
+  overflow-wrap: break-word;
+}
+.handoversheet thead { display: table-header-group; }
+/* Die Kopfzeile trägt Symbole statt Wörter. Die monochrome Symbolschrift
+   steht vor der Emoji-Schrift, damit die Zeichen, die es dort als Umriss
+   gibt, schwarzweiß gedruckt werden. */
+.handoversheet th {
+  font-size: calc(var(--uebergabe-schrift, 3mm) * 1.3);
+  line-height: 1.1;
+  text-align: center;
+  font-family: "Segoe UI Symbol", "Noto Sans Symbols 2", "Segoe UI Emoji", sans-serif;
+  font-variant-emoji: text;
+  white-space: nowrap;
+}
+.handoversheet td {
+  height: var(--uebergabe-row, 14mm);
+  font-size: var(--uebergabe-schrift, 3mm);
+}
+.handoversheet .sheetbed {
+  font-size: calc(var(--uebergabe-schrift, 3mm) * 1.35);
+  font-weight: 700;
+  text-align: center;
+  /* „0 a“ darf nicht umbrechen – ein Umbruch hier zieht die ganze Zeile in
+     die Höhe und kostet über die Tabelle hinweg mehrere Schriftgrade. */
+  white-space: nowrap;
+}
+/* Zwölf Spalten auf A4 quer. Bettplatz, Beatmung, Nierenersatz und
+   Limitierung tragen nur kurze Kürzel und bekommen deshalb die knappste
+   Breite, die ihre Werte zulassen; der gewonnene Platz geht an die beiden
+   handschriftlichen Spalten rechts. */
+/* Die Breiten müssen sich gegen die allgemeine Druckregel der Tafel
+   durchsetzen (dort width: auto !important) – daher ebenfalls !important. */
+.handoversheet .sheet-bed { width: 4.5% !important; }
+.handoversheet .sheet-patient { width: 10% !important; }
+/* Die Diagnosen stehen direkt hinter dem Namen und bekommen den meisten
+   Platz; sie sollen in zwei Zeilen stehen, nicht in fünf. */
+.handoversheet .sheet-diagnosen { width: 19% !important; }
+.handoversheet .sheet-beatmung { width: 5% !important; }
+.handoversheet .sheet-kreislauf { width: 6% !important; }
+/* Breit genug für CVVHD, auch in Klammern, ohne Umbruch. */
+.handoversheet .sheet-dialyse { width: 7% !important; white-space: nowrap; }
+.handoversheet .sheet-isolation { width: 8.5% !important; font-weight: 700; }
+.handoversheet .sheet-limitierung { width: 5% !important; }
+.handoversheet .sheet-neuro { width: 10% !important; }
+.handoversheet .sheet-katecholamine { width: 8.5% !important; }
+.handoversheet .sheet-uebernahme { width: 6% !important; }
+.handoversheet .sheet-notizen { width: 10.5% !important; }
+.handoversheet th.sheet-isolation { font-weight: 700; }
+/* Name und Fachdisziplin stehen in einer Zeile nebeneinander, nicht
+   untereinander: Bei dreizehn Bettplätzen spart das über die ganze Tabelle
+   eine Textzeile je Patient und damit spürbar Schriftgröße.
+   Namen werden am Leerzeichen umbrochen, nicht mitten im Wort. */
+.handoversheet .sheetname {
+  font-weight: 700;
+  font-size: calc(var(--uebergabe-schrift, 3mm) * 1.1);
+  overflow-wrap: normal;
+}
+.handoversheet .sheetname,
+.handoversheet .sheetmetaline { display: inline; }
+.handoversheet .sheetmetaline {
+  font-size: calc(var(--uebergabe-schrift, 3mm) * 0.9);
+  white-space: nowrap;
+}
+/* Kein Flex auf der Zelle: Das hebelt die Zellhöhe der Tabelle aus und der
+   Inhalt läuft über den Rand. Name und Kürzel fließen als Inline-Elemente. */
+.handoversheet .sheetmetaline::before { content: " "; }
+.handoversheet tr { page-break-inside: avoid; }
+
+/* Fußteil: Aufnahmen, Zuständigkeiten, Telefonübernahme nebeneinander */
+.handoversheet .sheetfoot {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.4fr;
+  gap: 3mm;
+  margin-top: 3mm;
+  page-break-inside: avoid;
+}
+.handoversheet .sheetbox { border: 1px solid #000; padding: 1.5mm 2mm; }
+.handoversheet .sheetbox h3 {
+  margin: 0 0 1.5mm;
+  font-size: 2.8mm;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+.handoversheet .sheetnote { font-size: 3mm; }
+.handoversheet .sheetnoteline {
+  min-height: 5mm;
+  border-bottom: 1px dotted #666;
+}
+.handoversheet .sheetrole {
+  display: grid;
+  grid-template-columns: 30mm 1fr 14mm;
+  gap: 1mm;
+  min-height: 5.5mm;
+  align-items: end;
+  font-size: 3mm;
+}
+.handoversheet .sheetrolelabel { font-size: 2.6mm; }
+
+/* Bettenzahl unter den Zuständigkeiten */
+.handoversheet .sheetbeds {
+  display: grid;
+  grid-template-columns: 30mm auto auto 1fr;
+  gap: 1.5mm;
+  align-items: baseline;
+  margin-top: 1.5mm;
+  padding-top: 1.5mm;
+  border-top: 1px solid #000;
+  font-size: 3mm;
+}
+.handoversheet .sheetbedslabel { font-size: 2.6mm; }
+.handoversheet .sheetbedsvalue { font-size: 4mm; font-weight: 700; }
+.handoversheet .sheetbedsvalue.leer {
+  min-width: 10mm;
+  border-bottom: 1px dotted #666;
+}
+.handoversheet .sheetbedsplus { font-size: 3mm; }
+.handoversheet .sheetbedsbelegt { text-align: right; }
+.handoversheet .sheetrolename,
+.handoversheet .sheetroletel {
+  border-bottom: 1px dotted #666;
+  font-weight: 700;
+}
+/* Vier Spalten statt zwei: Die acht Telefone stehen dadurch in zwei Zeilen
+   statt in vier, was dem Tabellenteil rund 15 mm Höhe zurückgibt. */
+.handoversheet .sheetphones {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0 2mm;
+}
+.handoversheet .sheetphone {
+  display: grid;
+  grid-template-columns: 8mm 1fr;
+  grid-template-areas: "nr label" "linie linie";
+  gap: 0 1mm;
+  align-items: end;
+  font-size: 2.8mm;
+}
+.handoversheet .sheetphonenr { grid-area: nr; }
+.handoversheet .sheetphonelabel { grid-area: label; }
+.handoversheet .sheetphoneline { grid-area: linie; min-height: 4.5mm; }
+.handoversheet .sheetphonenr { font-weight: 700; }
+.handoversheet .sheetphonelabel { font-size: 2.6mm; }
+.handoversheet .sheetphoneline { border-bottom: 1px dotted #666; }

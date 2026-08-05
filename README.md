@@ -158,17 +158,21 @@ Spalte der Tafel zugeordnet.
   in den Einstellungen unter „Neurologie“ und „Katecholamine“.
   Die **Zuständigkeit** – Schichtleitung, Blutzuständigkeit, Notfallequipment – steht im Fenster
   an erster Stelle; es sind dieselben Felder wie unter der Tafel und kein Pflichtfeld.
-  Gedruckt wird ein eigenes Blatt (A4 quer) mit zwölf Spalten: Bettplatz, Patient, **Beatmung,
-  Kreislauf, Nierenersatz, Isolation, Therapielimitierung** aus der Tafel, dazu Diagnosen,
-  Neurologie, Katecholamine und rechts zwei Spalten für die Hand – ein leeres Feld für das
-  Kürzel der **übernehmenden Pflegekraft** und **Notizen**, die den Text aus **Sonstiges**
-  mitbringen und darunter Platz zum Ergänzen lassen. Die Spalten sind mit **Symbolen**
-  überschrieben (🛏 👤 🫁 ♥ 🫘 ☣ ⊘ ⚕ 🧠 💉 ✍ ✎), damit die Kopfzeile einzeilig bleibt; der
-  Klartext steht im Zeigertext. Unter der Tabelle die **geplanten Aufnahmen** mit Platz zum
-  Ergänzen, die **Zuständigkeit** samt **Bettenzahl** (X + 1 und die belegten Plätze; leer
-  gelassene Felder bleiben zum Ausfüllen frei) und die **Telefone** mit je einer Linie, wer
-  sie übernimmt. Bei langen Diagnosen läuft das Blatt auf eine zweite Seite mit wiederholter
-  Kopfzeile, statt den Text zu beschneiden
+  Gedruckt wird ein eigenes Blatt (A4 quer) mit **allen Bettplätzen**, auch den freien, in
+  zwölf Spalten: Bettplatz, Patient, **Diagnosen**, dann **Beatmung, Kreislauf, Nierenersatz,
+  Isolation, Therapielimitierung** aus der Tafel, dazu Neurologie, Katecholamine und rechts
+  zwei Spalten für die Hand – ein leeres Feld für das Kürzel der **übernehmenden Pflegekraft**
+  und **Notizen**, die den Text aus **Sonstiges** mitbringen und darunter Platz zum Ergänzen
+  lassen. Die Spalten sind mit **Symbolen** überschrieben (🛏 👤 ⚕ 🫁 ♥ 🫘 ☣ ⊘ 🧠 💉 ✍ ✎),
+  damit die Kopfzeile einzeilig bleibt; der Klartext steht im Zeigertext. Unter der Tabelle
+  die **geplanten Aufnahmen** mit Platz zum Ergänzen, die **Zuständigkeit** samt
+  **Bettenzahl** (X + 1 und die belegten Plätze; leer gelassene Felder bleiben zum Ausfüllen
+  frei) und die **Telefone** mit je einer Linie, wer sie übernimmt.
+  Das Blatt **passt auf eine Seite**: Vor dem Druck wird es unsichtbar vermessen und die
+  Schriftgröße so gewählt, dass alles hineingeht (`uebergabeEinpassen` in `js/uebergabe.js`) –
+  bei leerer Tafel 3,6 mm, bei voller Station knapp 2,6 mm. Unter 2,1 mm wird nicht
+  verkleinert; treffen dreizehn sehr lange Diagnosen zusammen, läuft das Blatt lieber auf eine
+  zweite Seite
 - **Tastatur**: Navigation durch die Tabelle mit den Pfeiltasten, Zeilenwechsel mit der
   Eingabetaste (mit Umschalt aufwärts). In Textfeldern wechseln Links und Rechts erst am
   Anfang bzw. Ende des Textes die Zelle. Auswahlfelder werden über die Anfangsbuchstaben

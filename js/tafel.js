@@ -352,7 +352,7 @@ function druckfussSetzen() {
   $('#printFoot').textContent = 'Belegungstafel Intensivstation' +
     (INSTANZ ? ' (' + INSTANZ + ')' : '') +
     ' · gedruckt am ' + fullDate(isoToday()) + ' um ' + timeStr(jetzt) + ' Uhr' +
-    ' · Enthält Patientendaten – nach Dienstende in den Datenschutzbehälter';
+    ' · Enthält Patientendaten – nach Dienstende Entsorgung in Datenmüll!';
 }
 
 function physioDrucken() {
