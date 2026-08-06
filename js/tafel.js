@@ -473,14 +473,32 @@ function init() {
     const field = $(selector);
     field.addEventListener('input', () => { state.station[key] = field.value; save(); });
   }
+  /* Während des Tippens bleibt stehen, was eingegeben wurde – nur der Kopf
+     zeigt an, dass die Zahl nicht plausibel ist. Zurechtgerückt wird erst,
+     wenn das Feld verlassen wird; sonst schriebe die Prüfung mitten in die
+     laufende Eingabe hinein. */
   $('#maxBetten').addEventListener('input', event => {
     state.station.maxBetten = event.target.value;
     updateMaxTitle();
     save();
   });
+  $('#maxBetten').addEventListener('change', event => {
+    const zahl = maxBettenZahl(event.target.value);
+    const korrigiert = zahl !== null && !maxBettenPlausibel(zahl);
+    if (korrigiert) event.target.value = String(maxBettenKlemmen(zahl));
+    state.station.maxBetten = event.target.value;
+    updateMaxTitle();
+    save();
+    if (!korrigiert) return;
+    /* Erst schreiben, dann melden – sonst überschreibt die Speichermeldung
+       den Hinweis nach einem Augenblick wieder. */
+    writeNow();
+    setSaveState('Maximale Bettenzahl auf ' + event.target.value + ' gesetzt – möglich sind ' +
+      MAX_BETTEN_MIN + ' bis ' + MAX_BETTEN_MAX + ' Bettplätze zuzüglich Notbett');
+  });
   $('#meldestatus').addEventListener('change', event => {
-    state.station.meldestatus = event.target.value;
-    $('#meldeCard').dataset.melde = event.target.value;
+    state.station.meldestatus = meldeWert(event.target.value);
+    $('#meldeCard').dataset.melde = state.station.meldestatus;
     save();
   });
   $('#btnPrint').addEventListener('click', () => window.print());

@@ -165,11 +165,14 @@ function setPhysioRowHeight() {
   const hoehe = Math.min(30, Math.max(9, platz / Math.max(2, zeilen + 1)));
   document.documentElement.style.setProperty('--physio-row', hoehe.toFixed(1) + 'mm');
 
-  /* Die Namensspalte nimmt 28 % der 283 mm Satzbreite ein. Namen sind
-     unterschiedlich lang; jede Zeile bekommt deshalb ihr eigenes Maß – ein
-     abgeschnittener Name wäre für die Runde wertlos, und kurze Namen sollen
-     trotzdem so groß wie möglich stehen. */
-  const spalte = 283 * 0.28 - 5;
+  /* Die Namensspalte nimmt PHYSIO_NAME_ANTEIL der 283 mm Satzbreite ein –
+     derselbe Anteil steht als Breite in styles.css. Abgezogen werden die
+     Innenabstände der Zelle (2 mm je Seite) und des Feldes (1,5 mm links),
+     dazu 1,5 mm Luft: Der letzte Buchstabe soll nicht am Strich kleben.
+     Namen sind unterschiedlich lang; jede Zeile bekommt deshalb ihr eigenes
+     Maß – ein abgeschnittener Name wäre für die Runde wertlos, und kurze
+     Namen sollen trotzdem so groß wie möglich stehen. */
+  const spalte = 283 * PHYSIO_NAME_ANTEIL - 7;
   const schrift = '700 10px "Segoe UI", Roboto, system-ui, sans-serif';
   const gross = hoehe * 0.44;
   document.documentElement.style.setProperty('--physio-name', gross.toFixed(2) + 'mm');
@@ -180,6 +183,23 @@ function setPhysioRowHeight() {
     const passend = breit > 0 ? Math.min(gross, spalte / breit) : gross;
     tr.style.setProperty('--physio-name', Math.max(3, passend).toFixed(2) + 'mm');
   }
+
+  /* Die übrigen festen Spalten tragen kurze, aber nicht beliebig kurze
+     Werte: „KARD“, eine vierstellige Nummer, „S. Gertzen“, „Rücksprache“.
+     Jede bekommt ihre eigene Schriftgröße aus ihrer Breite und ihrem
+     längsten Eintrag; bei wenigen Zeilen bremst das die sonst sehr große
+     Schrift, damit nichts abgeschnitten wird. */
+  const wertSchrift = '400 10px "Segoe UI", Roboto, system-ui, sans-serif';
+  const zelle = hoehe * 0.40;
+  for (const [key, anteil] of PHYSIO_WERT_SPALTEN) {
+    const werte = belegte.map(bed => String(state.beds[bed.id][key] || '')).filter(Boolean);
+    const breit = widestText(werte, wertSchrift) / 10;
+    const platz = 283 * anteil - 6.5;
+    const passend = breit > 0 ? Math.min(zelle, platz / breit) : zelle;
+    document.documentElement.style.setProperty('--physio-' + key,
+      Math.max(3, passend).toFixed(2) + 'mm');
+  }
+
   return zeilen;
 }
 
@@ -938,12 +958,24 @@ function renderStats() {
     : 'Kein Screening fällig';
 }
 
-/* Maximale Bettenzahl: x regulär betreibbare Plätze zuzüglich Notbett */
+/* Maximale Bettenzahl: x regulär betreibbare Plätze zuzüglich Notbett.
+   Plausibel sind MAX_BETTEN_MIN bis MAX_BETTEN_MAX; ein Wert daneben wird
+   im Kopf hervorgehoben und beim Verlassen des Feldes zurechtgerückt. */
 function updateMaxTitle() {
-  const value = parseInt(state.station.maxBetten, 10);
-  $('#maxCard').title = Number.isFinite(value)
-    ? 'Maximal ' + value + ' Bettplätze zuzüglich Notbett, insgesamt ' + (value + 1)
-    : 'Maximale Bettenzahl zuzüglich Notbett';
+  const karte = $('#maxCard');
+  const feld = $('#maxBetten');
+  const roh = String(state.station.maxBetten).trim();
+  const value = maxBettenZahl(roh);
+  const spanne = MAX_BETTEN_MIN + ' bis ' + MAX_BETTEN_MAX;
+  const unplausibel = roh !== '' && !maxBettenPlausibel(value);
+
+  karte.classList.toggle('unplausibel', unplausibel);
+  feld.setAttribute('aria-invalid', unplausibel ? 'true' : 'false');
+  karte.title = unplausibel
+    ? 'Nur ' + spanne + ' Bettplätze sind möglich – das Notbett kommt als „+ 1“ hinzu'
+    : maxBettenPlausibel(value)
+      ? 'Maximal ' + value + ' Bettplätze zuzüglich Notbett, insgesamt ' + (value + 1)
+      : 'Maximale Bettenzahl zuzüglich Notbett (' + spanne + ')';
 }
 
 /* Meldestatus und die Angaben zur Schicht */

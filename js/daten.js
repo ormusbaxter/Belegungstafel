@@ -304,7 +304,9 @@ function emptyBed() {
 let state = load();
 
 function emptyStation() {
-  return Object.fromEntries(STATION_KEYS.map(key => [key, '']));
+  const station = Object.fromEntries(STATION_KEYS.map(key => [key, '']));
+  station.meldestatus = MELDE_VORGABE;
+  return station;
 }
 
 function mergeStation(target, source) {
@@ -312,6 +314,8 @@ function mergeStation(target, source) {
   for (const key of STATION_KEYS) {
     if (typeof source[key] === 'string') target[key] = source[key];
   }
+  /* Ältere Stände kannten den Leerwert „–“; er wird auf grün gebracht. */
+  target.meldestatus = meldeWert(target.meldestatus);
 }
 
 function load() {

@@ -219,6 +219,14 @@ body {
 .stat-max input::-webkit-inner-spin-button { appearance: none; margin: 0; }
 .plusone { font-size: 15px; font-weight: 700; color: var(--ink-soft); }
 
+/* Unplausible Bettenzahl – wie der Widerspruch in der Tabelle als Rahmen:
+   Es fehlt nichts, die Zahl passt nur nicht. Beim Verlassen des Feldes wird
+   sie zurechtgerückt, die Markierung verschwindet damit von selbst. */
+.stat-max.unplausibel input {
+  border-color: var(--melde-rot);
+  box-shadow: inset 0 0 0 1px var(--melde-rot);
+}
+
 /* Meldestatus */
 .stat-melde { padding: 3px 8px 5px; }
 .stat-melde select {
@@ -1603,7 +1611,7 @@ body.saver-on { overflow: hidden; }
   :focus, :focus-visible { outline: none !important; }
 
   /* ---------------- Blatt für die Physiotherapie ----------------
-     Nur belegte Bettplätze, sechs Spalten, alles so groß wie es die
+     Nur belegte Bettplätze, sieben Spalten, alles so groß wie es die
      Zeilenzahl zulässt. Alle Maße leiten sich von --physio-row ab, das
      physioDrucken() vor dem Druck aus der Zahl der Zeilen berechnet. */
   body.physio-druck .stats,
@@ -1613,6 +1621,10 @@ body.saver-on { overflow: hidden; }
   body.physio-druck .col-status,
   body.physio-druck .col-intervention,
   body.physio-druck .col-limitierung { display: none !important; }
+
+  /* Die Spalte Physiotherapie gehört nur auf dieses Blatt – auf dem
+     gewöhnlichen Ausdruck bleibt sie ausgeblendet. */
+  body.physio-druck .col-physio { display: table-cell !important; }
 
   body.physio-druck .printtag { display: block; }
 
@@ -1629,9 +1641,12 @@ body.saver-on { overflow: hidden; }
   body.physio-druck .printfoot { font-size: 3.2mm; }
   body.physio-druck .clock { font-size: 3.2mm; margin-top: 0.5mm; }
 
+  /* Die Kopfzeile wächst mit der Zeilenhöhe, aber nur bis 3,6 mm: Bei drei
+     Patienten stünde „Bettplatz“ sonst in drei Zeilen übereinander. Gelesen
+     werden ohnehin die Werte darunter. */
   body.physio-druck thead th {
     padding: 1mm 2mm;
-    font-size: calc(var(--physio-row, 12mm) * .26);
+    font-size: min(calc(var(--physio-row, 12mm) * .26), 3.6mm);
     border-bottom-width: 2px;
   }
   /* Der Inhalt bleibt in seiner Spalte, auch wenn er lang ist. */
@@ -1653,18 +1668,37 @@ body.saver-on { overflow: hidden; }
     font-size: calc(var(--physio-row, 12mm) * .40);
   }
   body.physio-druck td.col-name input { font-size: var(--physio-name, 5mm); }
+  /* Fachdisziplin, Telefon, Pflegekraft und Physiotherapie: je Spalte ein
+     Maß, gewonnen aus ihrer Breite und ihrem längsten Wert – siehe
+     setPhysioRowHeight(). */
+  body.physio-druck td.col-disziplin select {
+    font-size: var(--physio-disziplin, calc(var(--physio-row, 12mm) * .40));
+  }
+  body.physio-druck td.col-telefon input {
+    font-size: var(--physio-telefon, calc(var(--physio-row, 12mm) * .40));
+  }
+  body.physio-druck td.col-pflege input {
+    font-size: var(--physio-pflege, calc(var(--physio-row, 12mm) * .40));
+  }
+  body.physio-druck td.col-physio select {
+    font-size: var(--physio-physio, calc(var(--physio-row, 12mm) * .40));
+  }
   body.physio-druck .bedlabel { font-size: calc(var(--physio-row, 12mm) * .50); }
   body.physio-druck .chip,
   body.physio-druck .chip.styled,
   body.physio-druck .chip-verdacht {
     font-size: calc(var(--physio-row, 12mm) * .34);
   }
-  body.physio-druck th.col-bed,       body.physio-druck td.col-bed       { width: 14% !important; }
-  body.physio-druck th.col-name,      body.physio-druck td.col-name      { width: 28% !important; }
-  body.physio-druck th.col-disziplin, body.physio-druck td.col-disziplin { width: 12% !important; }
-  body.physio-druck th.col-isolation, body.physio-druck td.col-isolation { width: 20% !important; }
-  body.physio-druck th.col-telefon,   body.physio-druck td.col-telefon   { width: 13% !important; }
-  body.physio-druck th.col-pflege,    body.physio-druck td.col-pflege    { width: 13% !important; }
+  /* Bettplatz, Fachdisziplin und Telefon tragen kurze Werte und geben
+     Breite ab; Pflegekraft und Physiotherapie brauchen sie für „S. Gertzen“
+     und „Rücksprache“, die sonst abgeschnitten würden. */
+  body.physio-druck th.col-bed,       body.physio-druck td.col-bed       { width: 10% !important; }
+  body.physio-druck th.col-name,      body.physio-druck td.col-name      { width: 25% !important; }
+  body.physio-druck th.col-disziplin, body.physio-druck td.col-disziplin {  width: 9% !important; }
+  body.physio-druck th.col-isolation, body.physio-druck td.col-isolation { width: 18% !important; }
+  body.physio-druck th.col-telefon,   body.physio-druck td.col-telefon   {  width: 9% !important; }
+  body.physio-druck th.col-pflege,    body.physio-druck td.col-pflege    { width: 14% !important; }
+  body.physio-druck th.col-physio,    body.physio-druck td.col-physio    { width: 15% !important; }
 }
 
 

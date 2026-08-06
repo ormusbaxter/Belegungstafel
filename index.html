@@ -35,15 +35,14 @@
     </div>
     <div class="stat stat-max" id="maxCard">
       <span class="statval">
-        <input type="number" id="maxBetten" min="0" max="99" step="1" placeholder="–"
-               aria-label="Maximale Bettenzahl ohne Notbett">
+        <input type="number" id="maxBetten" min="1" max="12" step="1" placeholder="–"
+               aria-label="Maximale Bettenzahl ohne Notbett (1 bis 12)">
         <span class="plusone">+ 1</span>
       </span>
       <span class="statlabel">max. Bettenzahl</span>
     </div>
     <div class="stat stat-melde" id="meldeCard">
       <select id="meldestatus" aria-label="Meldestatus">
-        <option value="">–</option>
         <option value="grün">grün</option>
         <option value="gelb">gelb</option>
         <option value="rot">rot</option>
@@ -86,11 +85,11 @@
       </svg>
       Druck Physio
     </button>
-    <button type="button" id="btnPrint" class="iconbtn" title="Tafel drucken">
+    <button type="button" id="btnPrint" class="iconbtn" title="Blatt für die Visite drucken – ganze Tafel, A4 quer">
       <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
         <path fill="currentColor" d="M17 3H7v4h10V3Zm2 6H5a3 3 0 0 0-3 3v5h4v4h12v-4h4v-5a3 3 0 0 0-3-3Zm-3 10H8v-5h8v5Zm3-6.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>
       </svg>
-      Drucken
+      Druck Visite
     </button>
     <button type="button" id="btnTheme" title="Hell / Dunkel">◐<span class="themelabel" id="themeLabel"></span></button>
     <input type="file" id="fileInput" accept="application/json" hidden>
@@ -235,6 +234,13 @@
           beschreibt den Bettplatz statt eines Patienten: Er wird kursiv dargestellt, färbt die
           Zeile grau und zählt nie als belegt – auch dann nicht, wenn noch ein Status oder eine
           Fachdisziplin eingetragen ist.</li>
+        <li><b>max. Bettenzahl</b> nimmt <b>1 bis 12</b> regulär betreibbare Plätze auf; das
+          Notbett kommt als festes <b>+ 1</b> hinzu. Eine Zahl außerhalb dieser Spanne wird
+          <b>rot umrandet</b> und beim Verlassen des Feldes auf die nächstgelegene zulässige
+          gesetzt – ein Zahlendreher soll nicht unbemerkt in die Auslastung der Statistik
+          eingehen. Das Feld darf leer bleiben; die Auslastung entfällt dann.</li>
+        <li><b>Meldestatus</b> kennt nur <b>grün</b>, <b>gelb</b> und <b>rot</b> – eine leere
+          Angabe gibt es nicht. Eine Tafel ohne Meldung beginnt bei grün.</li>
         <li><b>Screening fällig</b> zählt die Bettplätze, deren Screening-Datum erreicht oder
           überschritten ist. Ist mindestens eines fällig, wird die Kennzahl im Kopf
           <b>rot hinterlegt</b>, bis alle Termine erledigt oder neu gesetzt sind.</li>
@@ -393,7 +399,7 @@
       <p>Alle Eingaben bleiben <b>lokal auf diesem Rechner</b> im Browser gespeichert; es werden
         keine Daten an einen Server übertragen. Mehrere geöffnete Fenster desselben Rechners
         werden abgeglichen, andere Arbeitsplätze sehen die Tafel jedoch nicht.</p>
-      <p><b>Drucken</b> gibt eine Seite <b>A4 quer in Schwarzweiß</b> aus. Der Ausdruck enthält
+      <p><b>Druck Visite</b> gibt eine Seite <b>A4 quer in Schwarzweiß</b> aus. Der Ausdruck enthält
         oben die belegten Betten, die maximale Bettenzahl und den Meldestatus, darunter eine
         verkürzte Tabelle: Anwesenheitsstatus, Bettplatz, Name, Fachdisziplin, Isolation,
         Intervention, Therapielimitierung, Telefon und Pflegekraft – dazu eine breite Spalte
@@ -478,8 +484,8 @@
       <h3>Blatt für die Physiotherapie</h3>
       <p>Die Schaltfläche <b>Druck Physio</b> oben rechts gibt ein eigenes Blatt aus, das nur
         enthält, was für die Runde der Physiotherapie gebraucht wird: <b>Bettplatz,
-        Patientenname, Fachdisziplin, Isolation, Telefon und Pflegekraft</b> – ebenfalls
-        A4 quer in Schwarzweiß.</p>
+        Patientenname, Fachdisziplin, Isolation, Telefon, Pflegekraft und
+        Physiotherapie</b> – ebenfalls A4 quer in Schwarzweiß.</p>
       <ul>
         <li>Aufgeführt werden nur <b>belegte Bettplätze</b>. Freie Plätze und solche, die als
           <b>gesperrt</b> oder <b>Reinigung</b> geführt werden, erscheinen nicht.</li>
@@ -488,7 +494,7 @@
         <li>Ein besonders langer Name wird nur in seiner eigenen Zeile kleiner gesetzt, damit er
           vollständig lesbar bleibt.</li>
       </ul>
-      <p>Der gewöhnliche Ausdruck über <b>Drucken</b> bleibt davon unberührt.</p>
+      <p>Der gewöhnliche Ausdruck über <b>Druck Visite</b> bleibt davon unberührt.</p>
     </section>
 
     <section>
@@ -512,6 +518,10 @@
           gerechnet und steht deshalb auch für früher erfasste Schichten zur Verfügung.</li>
         <li>Die <b>externe Dialyse</b> zählt nicht mit – sie wird als Intervention
           „ext. Dial.“ geführt, nicht in der Spalte Dialyse.</li>
+        <li><b>Werte in Klammern zählen nicht</b>: <b>(INV)</b>, <b>(NIV)</b> oder
+          <b>(CiCa)</b> stehen für geplant, beendet oder nur zeitweise – gezählt wird bei
+          <b>Beatmungen</b> und <b>Dialysen</b> allein das laufende Verfahren. Ein Bettplatz
+          mit <b>(INV)</b> und <b>NIV</b> zählt als eine Beatmung.</li>
         <li>Die Auswertung enthält <b>keine Patientendaten</b>, nur Zahlen.</li>
       </ul>
       <p class="warn">Erfasst wird nur, solange die Tafel geöffnet ist. Bleibt der Rechner

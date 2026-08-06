@@ -4,6 +4,41 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.13.0
+
+Fünf Anpassungen aus dem Stationsbetrieb.
+
+- **Die Spalte Physiotherapie steht auf dem Physio-Blatt.** Sie war die einzige Angabe, die
+  für die Runde gebraucht wird und auf dem eigens dafür gedruckten Blatt fehlte; die
+  Verordnung musste bisher aus der Tafel abgeschrieben werden. Die sechs bisherigen Spalten
+  geben ihr die Breite ab
+
+  Dabei fiel auf, dass die festen Spalten bei wenigen Patienten überliefen: Die Schrift
+  richtete sich allein nach der Zeilenhöhe, und die wächst, je leerer die Station ist – bei
+  drei Patienten stand ein `K…` statt `KARD` auf dem Blatt. **Fachdisziplin, Telefon,
+  Pflegekraft und Physiotherapie bekommen deshalb je Spalte ein eigenes Maß**, gewonnen aus
+  ihrer Breite und ihrem längsten Eintrag. Die Kopfzeile wächst nur noch bis 3,6 mm, statt
+  „Bettplatz“ in drei Zeilen übereinander zu setzen
+- **„Drucken“ heißt jetzt „Druck Visite“** – dieselbe Ausgabe, aber ein Name, der sie von
+  „Druck Physio“ und dem Übergabezettel unterscheidet
+- **Der Meldestatus kennt nur noch grün, gelb und rot.** Der Leerwert „–“ entfällt: Eine
+  Station ohne Meldestatus gibt es im Dienst nicht, wer nichts meldet, meldet grün. Ältere
+  Stände ohne Angabe werden beim Einlesen auf grün gebracht
+- **Plausibilitätsprüfung der maximalen Bettenzahl**: Zulässig sind **1 bis 12** regulär
+  betreibbare Plätze, das Notbett kommt als festes „+ 1“ hinzu. Während der Eingabe bleibt
+  stehen, was getippt wurde, und wird nur rot umrandet; beim Verlassen des Feldes wird die
+  Zahl auf die nächstgelegene zulässige gesetzt. Eine unplausible Zahl geht nicht in die
+  Statistik ein – sie stünde sonst als Nenner der Auslastung im Weg. Leer bleibt erlaubt und
+  lässt die Auslastung entfallen. Die Grenzen stehen als `MAX_BETTEN_MIN` und
+  `MAX_BETTEN_MAX` in `js/konfiguration.js`
+- **Beatmungen und Dialysen zählen in der Statistik nur als laufendes Verfahren.** Ein Wert
+  in Klammern – `(INV)`, `(NIV)`, `(CiCa)` – bedeutet geplant, beendet oder nur zeitweise und
+  bleibt außen vor; dieselbe Lesart wie überall sonst auf der Tafel. Ein Bettplatz mit
+  `(INV)` und `NIV` zählt als eine Beatmung, einer mit ausschließlich `(INV)` gar nicht
+- neue Prüfung `tests/17-kopfbereich.mjs` für Meldestatus und Bettenzahl; das Physio-Blatt
+  wird jetzt in der Breite eines A4-Blattes quer geprüft und nicht mehr in einem breiteren
+  Fenster, in dem den Spalten Platz zur Verfügung stand, den der Drucker nicht hat
+
 ## 2.12.1
 
 Übergabezettel, aus dem Stationsbetrieb.

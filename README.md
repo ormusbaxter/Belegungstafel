@@ -123,7 +123,13 @@ Spalte der Tafel zugeordnet.
   den Einstellungen hinterlegt sind; `gesperrt` oder `Reinigung` im Feld Patientenname zählt
   nie), maximale Bettenzahl als Eingabefeld mit
   festem Zusatz „+ 1“ für das Notbett, Meldestatus als farbiges Auswahlfeld
-  (grün / gelb / rot) und Anzahl der fälligen Screenings
+  (grün / gelb / rot, ohne Leerwert – eine neue Tafel beginnt bei grün) und Anzahl der
+  fälligen Screenings
+- **Plausibilitätsprüfung der Bettenzahl**: Zulässig sind 1 bis 12 regulär betreibbare
+  Plätze (`MAX_BETTEN_MIN` / `MAX_BETTEN_MAX` in `js/konfiguration.js`); das Notbett kommt
+  als „+ 1“ hinzu. Während der Eingabe wird eine Zahl daneben nur rot umrandet, beim
+  Verlassen des Feldes auf die nächstgelegene zulässige gesetzt. Eine unplausible Zahl geht
+  nicht in die Statistik ein; leer bleibt erlaubt und lässt die Auslastung entfallen
 - **Angaben zur Schicht** – Schichtleitung, Blutzuständigkeit und Notfallequipment mit
   jeweils zugehöriger Telefonnummer – **unter der Tabelle**, zwischen Tafel und den
   Textfeldern. Der Kopfbereich bleibt dadurch schmal, und es sind mehr Bettplätze ohne
@@ -283,15 +289,16 @@ Spalte der Tafel zugeordnet.
   gespeicherten Wert wieder her. Die sichtbare Höhe der Tabelle rechnet den Zoom mit ein, und
   ab einem Kopfbereich von mehr als zwei Fünfteln der Bildschirmhöhe läuft dieser nicht mehr
   mit, damit die Tabelle nutzbar bleibt
-- **Bedienleiste** oben rechts: „Datenschutz“, „Diaschau“ und „Drucken“ mit Symbol sowie die
-  Umschaltung der Tag-/Nachtansicht. Export, Import und „Tafel leeren“ stehen in den Einstellungen
-  unter „Daten“
+- **Bedienleiste** oben rechts: „Datenschutz“, „Diaschau“, „Übergabezettel“, „Druck Physio“
+  und „Druck Visite“ mit Symbol sowie die Umschaltung der Tag-/Nachtansicht. Export, Import
+  und „Tafel leeren“ stehen in den Einstellungen unter „Daten“
 - **Bettplatz räumen** über das `×` in der Bettspalte
 - **Export/Import** als JSON (Belegung, Angaben zur Schicht und Einstellungen) sowie
   CSV-Export für Excel
 - **Statistik je Schicht** über die runde Schaltfläche unten rechts (über der Hilfe; ihre
   Sichtbarkeit ist einstellbar): je Schicht **belegte Betten, maximale Bettenzahl,
-  Auslastung (%), Isolationen (bestätigt oder Verdacht), Beatmungen und Dialysen**, dazu
+  Auslastung (%), Isolationen (bestätigt oder Verdacht), Beatmungen und Dialysen** (beide
+  nur als laufendes Verfahren – Klammerwerte wie `(INV)` oder `(CiCa)` zählen nicht), dazu
   Mittelwerte je Schichtart und gesamt sowie ein CSV-Export. Die **Auslastung** ist der
   Anteil der belegten an den maximal betreibbaren Plätzen – ohne das Notbett im Nenner, ein
   belegtes Notbett ergibt also mehr als 100 %. Sie wird bei jeder Anzeige gerechnet und nicht
@@ -326,12 +333,16 @@ Spalte der Tafel zugeordnet.
   unverändert. Die aktive Kennung steht in den Einstellungen unter „Daten“
 - **Blatt für die Physiotherapie** über die Schaltfläche **Druck Physio**: eigener Ausdruck
   auf **A4 quer in Schwarzweiß** mit Bettplatz, Patientenname, Fachdisziplin, Isolation,
-  Telefon und Pflegekraft. Aufgeführt werden nur belegte Bettplätze – freie sowie `gesperrt`
-  und `Reinigung` entfallen. Zeilenhöhe und Schrift werden aus der Zahl der Zeilen berechnet
-  (`setPhysioRowHeight`), sodass bei wenigen Patienten sehr groß und bei voller Station immer
-  noch auf einer Seite gedruckt wird; ein besonders langer Name wird allein in seiner Zeile
-  verkleinert, damit er vollständig lesbar bleibt
-- **Druckansicht**: eine Seite **A4 quer in Schwarzweiß**. Oben stehen belegte Betten,
+  Telefon, Pflegekraft und Physiotherapie. Aufgeführt werden nur belegte Bettplätze – freie
+  sowie `gesperrt` und `Reinigung` entfallen. Zeilenhöhe und Schrift werden aus der Zahl der
+  Zeilen berechnet (`setPhysioRowHeight`), sodass bei wenigen Patienten sehr groß und bei
+  voller Station immer noch auf einer Seite gedruckt wird; ein besonders langer Name wird
+  allein in seiner Zeile verkleinert, damit er vollständig lesbar bleibt. Fachdisziplin,
+  Telefon, Pflegekraft und Physiotherapie erhalten je Spalte ein eigenes Maß aus ihrer
+  Breite und ihrem längsten Eintrag – sonst stünde bei drei Patienten ein `K…` statt `KARD`
+  auf dem Blatt
+- **Druckansicht** über die Schaltfläche **Druck Visite**: eine Seite
+  **A4 quer in Schwarzweiß**. Oben stehen belegte Betten,
   maximale Bettenzahl und Meldestatus (ausgeschrieben), darunter eine verkürzte Tabelle mit
   Anwesenheitsstatus, Bettplatz, Patientenname, Fachdisziplin, Isolation, Intervention,
   Therapielimitierung, Telefon und Pflegekraft, ergänzt um eine breite Spalte **Notizen**;
@@ -342,7 +353,7 @@ Spalte der Tafel zugeordnet.
 
 ## Prüfungen
 
-Im Ordner `tests/` liegen neun Testdateien, die die Tafel in einem echten Browser bedienen
+Im Ordner `tests/` liegen siebzehn Testdateien, die die Tafel in einem echten Browser bedienen
 (Chromium über Playwright) und das Ergebnis prüfen – Zählung, Pfeile, Ausdruck, Zoom,
 Bildschirmschoner, Tag-/Nachtansicht, Verlauf, Sicherung und Einstellungen. Jede meldet
 Skript- und Konsolenfehler als Fehlschlag.

@@ -76,7 +76,7 @@ Vier Dinge kann die Vorgabedatei nicht mitbringen:
       Berechtigung dafür hängt am Browserprofil und lässt sich nicht mitliefern. Der Ordner
       muss auf die Station beschränkt sein – die Dateien enthalten alle Namen im Klartext.
 - [ ] **Zoom** auf den tatsächlichen Monitor einstellen (Einstellungen → Allgemein).
-- [ ] **Alle Ausdrucke auf dem echten Drucker prüfen** – „Drucken", „Druck Physio" und
+- [ ] **Alle Ausdrucke auf dem echten Drucker prüfen** – „Druck Visite", „Druck Physio" und
       „Übergabezettel". A4 quer. Die Seitenränder des Druckerdialogs sind je Rechner
       voreingestellt und können das einseitige Layout kippen.
 - [ ] **Kopfzeile des Übergabezettels ansehen:** Erscheinen alle zwölf Symbole, oder stehen
