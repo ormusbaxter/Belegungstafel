@@ -157,7 +157,9 @@ Spalte der Tafel zugeordnet.
   mit gesichert und mit exportiert; „Bettplatz räumen“ löscht sie mit. Die Auswahllisten stehen
   in den Einstellungen unter „Neurologie“ und „Katecholamine“.
   Die **Zuständigkeit** – Schichtleitung, Blutzuständigkeit, Notfallequipment – steht im Fenster
-  an erster Stelle; es sind dieselben Felder wie unter der Tafel und kein Pflichtfeld.
+  an erster Stelle und meint die *kommende* Schicht: Die Felder beginnen bei jedem Aufruf leer,
+  gelten nur für diesen Zettel und ändern die gleichnamigen Angaben unter der Tafel nicht. Sie
+  werden nicht gespeichert und sind kein Pflichtfeld.
   Gedruckt wird ein eigenes Blatt (A4 quer) mit **allen Bettplätzen**, auch den freien, in
   zwölf Spalten: Bettplatz, Patient, **Diagnosen**, dann **Beatmung, Kreislauf, Nierenersatz,
   Isolation, Therapielimitierung** aus der Tafel, dazu Neurologie, Katecholamine und rechts
@@ -167,7 +169,8 @@ Spalte der Tafel zugeordnet.
   damit die Kopfzeile einzeilig bleibt; der Klartext steht im Zeigertext. Unter der Tabelle
   die **geplanten Aufnahmen** mit Platz zum Ergänzen, die **Zuständigkeit** samt
   **Bettenzahl** (X + 1 und die belegten Plätze; leer gelassene Felder bleiben zum Ausfüllen
-  frei) und die **Telefone** mit je einer Linie, wer sie übernimmt.
+  frei) und die **Telefone** mit je einer Linie, wer sie übernimmt – nur die Nummern, ohne die
+  Bezeichnung der Geräte.
   Das Blatt **passt auf eine Seite**: Vor dem Druck wird es unsichtbar vermessen und die
   Schriftgröße so gewählt, dass alles hineingeht (`uebergabeEinpassen` in `js/uebergabe.js`) –
   bei leerer Tafel 3,6 mm, bei voller Station knapp 2,6 mm. Unter 2,1 mm wird nicht

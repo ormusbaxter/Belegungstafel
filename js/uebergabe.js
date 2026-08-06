@@ -59,21 +59,30 @@ function uebergabeBetten() {
 }
 
 function oeffneUebergabe() {
+  /* Jede Übergabe beginnt bei der Zuständigkeit von vorn. */
+  uebergabeSchicht = {};
   renderUebergabe();
   $('#handoverDlg').showModal();
 }
 
-/* Zuständigkeiten der Schicht – dieselben Angaben wie unter der Tafel.
-   Sie stehen hier am Anfang, weil sie bei der Übergabe zuerst geklärt werden;
-   Pflicht sind sie nicht. Bleiben sie leer, lässt das Blatt die Zeilen frei. */
+/* Zuständigkeiten für den Zettel.
+ *
+ * Bei der Übergabe wird eingetragen, wer die *kommende* Schicht übernimmt –
+ * nicht, wer sie gerade hat. Die Felder starten deshalb bei jedem Aufruf leer
+ * und sind von den gleichnamigen Angaben unter der Tafel getrennt: Sie ändern
+ * dort nichts und werden nicht gespeichert. Was leer bleibt, lässt das Blatt
+ * als Linie zum Ausfüllen von Hand frei.
+ */
+let uebergabeSchicht = {};
+
 function renderUebergabeStation() {
   const box = $('#handoverStation');
   box.replaceChildren();
   box.appendChild(el('h3', null, 'Zuständigkeit'));
-  const hinweis = el('p', 'panehint',
-    'Gilt für die ganze Station und steht auch unter der Tafel. Was hier leer bleibt, ' +
-    'lässt der Ausdruck zum Eintragen von Hand frei.');
-  box.appendChild(hinweis);
+  box.appendChild(el('p', 'panehint',
+    'Für den Zettel: wer die kommende Schicht übernimmt. Die Felder beginnen leer und ' +
+    'ändern nichts an den Angaben unter der Tafel. Was leer bleibt, lässt der Ausdruck ' +
+    'zum Eintragen von Hand frei.'));
 
   const gitter = el('div', 'handoverroles');
   for (const feld of STATION_FIELDS) {
@@ -83,37 +92,22 @@ function renderUebergabeStation() {
     const name = el('input');
     name.type = 'text';
     name.placeholder = feld.placeholder;
-    name.value = state.station[feld.key];
+    name.value = uebergabeSchicht[feld.key] || '';
     name.setAttribute('aria-label', feld.label);
-    name.addEventListener('input', () => {
-      state.station[feld.key] = name.value;
-      spiegelStation(feld.key, 'sf-name', name.value);
-      save();
-    });
+    name.addEventListener('input', () => { uebergabeSchicht[feld.key] = name.value; });
 
     const tel = el('input', 'handovertel');
     tel.type = 'tel';
     tel.placeholder = 'Telefon';
-    tel.value = state.station[feld.key + 'Tel'];
+    tel.value = uebergabeSchicht[feld.key + 'Tel'] || '';
     tel.setAttribute('aria-label', feld.label + ' – Telefon');
-    tel.addEventListener('input', () => {
-      state.station[feld.key + 'Tel'] = tel.value;
-      spiegelStation(feld.key, 'sf-tel', tel.value);
-      save();
-    });
+    tel.addEventListener('input', () => { uebergabeSchicht[feld.key + 'Tel'] = tel.value; });
 
     zeile.appendChild(name);
     zeile.appendChild(tel);
     gitter.appendChild(zeile);
   }
   box.appendChild(gitter);
-}
-
-/* Die Felder unter der Tafel zeigen dieselben Werte; sie werden mitgeführt,
-   ohne die ganze Leiste neu aufzubauen (das würde den Fokus kosten). */
-function spiegelStation(key, klasse, wert) {
-  const feld = document.querySelector('.stationfield.sf-' + key + ' .' + klasse);
-  if (feld && feld.value !== wert) feld.value = wert;
 }
 
 function renderUebergabe() {
@@ -303,8 +297,8 @@ function uebergabeFussAufbauen() {
   for (const feld of STATION_FIELDS) {
     const zeile = el('div', 'sheetrole');
     zeile.appendChild(el('span', 'sheetrolelabel', feld.label));
-    zeile.appendChild(el('span', 'sheetrolename', state.station[feld.key] || ''));
-    zeile.appendChild(el('span', 'sheetroletel', state.station[feld.key + 'Tel'] || ''));
+    zeile.appendChild(el('span', 'sheetrolename', uebergabeSchicht[feld.key] || ''));
+    zeile.appendChild(el('span', 'sheetroletel', uebergabeSchicht[feld.key + 'Tel'] || ''));
     schicht.appendChild(zeile);
   }
 
@@ -327,12 +321,12 @@ function uebergabeFussAufbauen() {
   const gitter = el('div', 'sheetphones');
   /* Dieselbe Liste wie die Vorschläge der Spalte Telefon; sie wird in den
      Einstellungen gepflegt. */
+  /* Nur die Nummern: Wofür ein Gerät zuständig ist, weiß die Schicht; auf dem
+     Zettel zählt allein, wer es übernimmt. */
   for (const eintrag of COL_BY_KEY.telefon.options) {
     const zeile = el('div', 'sheetphone');
     zeile.appendChild(el('span', 'sheetphonenr',
       typeof eintrag === 'string' ? eintrag : eintrag.value));
-    zeile.appendChild(el('span', 'sheetphonelabel',
-      typeof eintrag === 'string' ? '' : eintrag.label || ''));
     zeile.appendChild(el('span', 'sheetphoneline'));
     gitter.appendChild(zeile);
   }

@@ -43,6 +43,10 @@ des Landes⟩.
 Notfallequipment, jeweils mit Telefonnummer. Dazu ein technischer Änderungszeitstempel je
 Bettplatz und ein Verlauf der letzten 20 Änderungen, beide ohne Angabe einer Person.
 
+Die gleichnamigen Angaben im Fenster des Übergabezettels nennen die *kommende* Schicht. Sie
+gelten allein für den Ausdruck, werden **nicht gespeichert** und sind mit dem Schließen der
+Seite fort.
+
 ## 2. Wo die Daten liegen
 
 Ausschließlich im `localStorage` des Browserprofils des jeweiligen Arbeitsplatzes, als

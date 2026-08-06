@@ -1837,17 +1837,17 @@ body.saver-on { overflow: hidden; }
   grid-template-columns: repeat(4, 1fr);
   gap: 0 2mm;
 }
+/* Ohne die Bezeichnung passen Nummer und Schreiblinie nebeneinander in eine
+   Zeile; der Kasten wird dadurch noch einmal um vier Zeilenhöhen flacher. */
 .handoversheet .sheetphone {
   display: grid;
   grid-template-columns: 8mm 1fr;
-  grid-template-areas: "nr label" "linie linie";
   gap: 0 1mm;
   align-items: end;
   font-size: 2.8mm;
 }
-.handoversheet .sheetphonenr { grid-area: nr; }
-.handoversheet .sheetphonelabel { grid-area: label; }
-.handoversheet .sheetphoneline { grid-area: linie; min-height: 4.5mm; }
 .handoversheet .sheetphonenr { font-weight: 700; }
-.handoversheet .sheetphonelabel { font-size: 2.6mm; }
-.handoversheet .sheetphoneline { border-bottom: 1px dotted #666; }
+.handoversheet .sheetphoneline {
+  min-height: 4.5mm;
+  border-bottom: 1px dotted #666;
+}

@@ -124,15 +124,16 @@ gleich('Überschrift des ersten Blocks', await page.textContent('#handoverStatio
 const rollenfelder = await page.$$eval('#handoverStation .handoverlabel', ls => ls.map(l => l.textContent));
 gleich('drei Zuständigkeiten im Fenster', rollenfelder.join(' | '),
   'Schichtleitung | Blutzuständigkeit | Notfallequipment');
+gleich('bei Aufruf leer',
+  await page.inputValue('#handoverStation .handoverrole:first-child input'), '');
 await page.fill('#handoverStation .handoverrole:first-child input', 'Nachtwey');
 await page.fill('#handoverStation .handoverrole:first-child .handovertel', '4286');
 await page.waitForTimeout(400);
-gleich('Eingabe landet in den Stationsdaten',
-  await page.evaluate(() => state.station.schichtleitung), 'Nachtwey');
-gleich('und erscheint auch unter der Tafel',
-  await page.inputValue('.stationfield.sf-schichtleitung .sf-name'), 'Nachtwey');
-gleich('leere Felder bleiben leer',
-  await page.evaluate(() => state.station.notfall), '');
+/* Die Angabe gilt der kommenden Schicht und ist von der Tafel getrennt. */
+gleich('Eingabe ändert die Stationsdaten nicht',
+  await page.evaluate(() => state.station.schichtleitung), '');
+gleich('und erscheint nicht unter der Tafel',
+  await page.inputValue('.stationfield.sf-schichtleitung .sf-name'), '');
 
 const bloecke = await page.$$eval('.handoverbed .handoverbednr', ns => ns.map(n => n.textContent));
 /* 1 a trägt nur ein Norton-Häkchen und gilt damit nicht als belegt. */
@@ -166,6 +167,12 @@ await page.click('#btnHandover');
 await page.waitForTimeout(300);
 gleich('und steht wieder im Fenster',
   await page.inputValue('.handoverbed:first-child textarea >> nth=0'), 'Sepsis bei Pneumonie');
+/* Die Zuständigkeit dagegen beginnt bei jedem Aufruf von vorn. */
+gleich('Zuständigkeit beim nächsten Aufruf wieder leer',
+  await page.inputValue('#handoverStation .handoverrole:first-child input'), '');
+await page.fill('#handoverStation .handoverrole:first-child input', 'Nachtwey');
+await page.fill('#handoverStation .handoverrole:first-child .handovertel', '4286');
+await page.waitForTimeout(300);
 await page.click('#handoverClose');
 
 /* Das Blatt: nur belegte Plätze, Tafel ausgeblendet */
@@ -270,7 +277,9 @@ pruefe('Platz zum Ergänzen',
 const rollen = await page.$$eval('.sheetbox-schicht .sheetrolelabel', ls => ls.map(l => l.textContent));
 gleich('drei Zuständigkeiten', rollen.join(' | '),
   'Schichtleitung | Blutzuständigkeit | Notfallequipment');
-enthaelt('mit den Angaben der Schicht', await page.textContent('.sheetbox-schicht'), 'Schmidt');
+enthaelt('mit den Angaben aus dem Fenster', await page.textContent('.sheetbox-schicht'), 'Nachtwey');
+pruefe('und nicht mit denen unter der Tafel',
+  !(await page.textContent('.sheetbox-schicht')).includes('Schmidt'));
 gleich('Bettenzahl im selben Kasten',
   await page.textContent('.sheetbeds .sheetbedsvalue'), '12');
 enthaelt('mit dem Zusatz für das Notbett', await page.textContent('.sheetbeds'), '+ 1');
@@ -280,6 +289,11 @@ gleich('alle acht Diensttelefone', nummern.join(', '),
   '4149, 4117, 4719, 4880, 4881, 4882, 4883, 4212');
 gleich('je Telefon eine Schreiblinie',
   await page.$$eval('.sheetphoneline', ls => ls.length), 8);
+/* Nur die Nummern: die Bezeichnung der Geräte spart der Zettel sich. */
+gleich('ohne Bezeichnung der Telefone',
+  await page.$$eval('.sheetphonelabel', ls => ls.length), 0);
+pruefe('auch nicht als Text im Kasten',
+  !/Angio|Broncho/.test(await page.textContent('.sheetbox-telefone')));
 
 /* Einpassung: Das Blatt verkleinert die Schrift so weit, dass alle
    Bettplätze auf eine Seite passen – aber nicht unter die Lesbarkeitsgrenze. */

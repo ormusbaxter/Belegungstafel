@@ -4,6 +4,25 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.12.1
+
+Übergabezettel, aus dem Stationsbetrieb.
+
+- **Die Zuständigkeit im Vorbereitungsfenster beginnt bei jedem Aufruf leer.** Eingetragen
+  wird dort, wer die *kommende* Schicht übernimmt – das ist eine andere Angabe als die unter
+  der Tafel, die die *laufende* Schicht nennt. Die drei Felder sind deshalb von der Tafel
+  getrennt: eigene, nicht gespeicherte Werte allein für diesen Zettel, die unter der Tafel
+  nichts ändern
+
+  Das kehrt die Entscheidung aus 2.9.2 um („dieselben Felder wie unter der Tafel, keine
+  zweite Wahrheit“). Der Grund: Wären es dieselben Felder, müsste jeder Aufruf des Fensters
+  die Angaben der laufenden Schicht löschen, um leer zu starten – ein bloßer Blick auf den
+  Zettel würde Daten auf der Tafel vernichten
+- **Die Telefone stehen nur noch mit ihrer Nummer** auf dem Blatt, ohne Bezeichnung des
+  Geräts; wofür ein Gerät zuständig ist, weiß die Schicht. Nummer und Schreiblinie passen
+  dadurch nebeneinander in eine Zeile statt untereinander in zwei – der Kasten wird um vier
+  Zeilenhöhen flacher, was der Tabelle zugutekommt
+
 ## 2.12.0
 
 Ausdruck des Übergabezettels.
