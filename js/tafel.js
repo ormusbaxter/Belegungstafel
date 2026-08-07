@@ -355,6 +355,11 @@ function druckfussSetzen() {
     ' · Enthält Patientendaten – nach Dienstende Entsorgung in Datenmüll!';
 }
 
+function visiteDrucken() {
+  visiteEinpassen();
+  window.print();
+}
+
 function physioDrucken() {
   const zeilen = setPhysioRowHeight();
   if (!zeilen && !confirm('Zurzeit ist kein Bettplatz belegt. Trotzdem drucken?')) return;
@@ -453,7 +458,7 @@ function init() {
   initDragDrop();
   initKeyboardNav();
   initAutoSize();
-  setPrintRowHeight();
+  visiteEinpassen();
   initPrivacy();
   initSaver();
   initSettings();
@@ -483,7 +488,7 @@ function init() {
     $('#meldeCard').dataset.melde = event.target.value;
     save();
   });
-  $('#btnPrint').addEventListener('click', () => window.print());
+  $('#btnPrint').addEventListener('click', visiteDrucken);
   $('#btnPrintPhysio').addEventListener('click', physioDrucken);
   $('#btnTheme').addEventListener('click', cycleTheme);
 
@@ -518,7 +523,8 @@ function init() {
   /* Offene Eingaben sichern, bevor die Seite verlassen oder verdeckt wird */
   window.addEventListener('beforeprint', () => {
     wake();
-    setPrintRowHeight();
+    /* Auch bei Strg + P, nicht nur über die Schaltfläche. */
+    visiteEinpassen();
     druckfussSetzen();
   });
   /* Nach dem Druck gilt wieder die gewöhnliche Ansicht. */

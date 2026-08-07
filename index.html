@@ -86,11 +86,11 @@
       </svg>
       Druck Physio
     </button>
-    <button type="button" id="btnPrint" class="iconbtn" title="Tafel drucken">
+    <button type="button" id="btnPrint" class="iconbtn" title="Tafel für die Visite drucken – A4 quer, immer eine Seite">
       <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
         <path fill="currentColor" d="M17 3H7v4h10V3Zm2 6H5a3 3 0 0 0-3 3v5h4v4h12v-4h4v-5a3 3 0 0 0-3-3Zm-3 10H8v-5h8v5Zm3-6.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>
       </svg>
-      Drucken
+      Druck Visite
     </button>
     <button type="button" id="btnTheme" title="Hell / Dunkel">◐<span class="themelabel" id="themeLabel"></span></button>
     <input type="file" id="fileInput" accept="application/json" hidden>
@@ -393,13 +393,19 @@
       <p>Alle Eingaben bleiben <b>lokal auf diesem Rechner</b> im Browser gespeichert; es werden
         keine Daten an einen Server übertragen. Mehrere geöffnete Fenster desselben Rechners
         werden abgeglichen, andere Arbeitsplätze sehen die Tafel jedoch nicht.</p>
-      <p><b>Drucken</b> gibt eine Seite <b>A4 quer in Schwarzweiß</b> aus. Der Ausdruck enthält
+      <p><b>Druck Visite</b> gibt eine Seite <b>A4 quer in Schwarzweiß</b> aus. Der Ausdruck enthält
         oben die belegten Betten, die maximale Bettenzahl und den Meldestatus, darunter eine
         verkürzte Tabelle: Anwesenheitsstatus, Bettplatz, Name, Fachdisziplin, Isolation,
         Intervention, Therapielimitierung, Telefon und Pflegekraft – dazu eine breite Spalte
         <b>Notizen</b> für handschriftliche Vermerke. Unter der Tabelle stehen wie am
         Bildschirm die Schichtleitung und die Blutzuständigkeit mit Telefonnummer sowie die
-        geplanten Aufnahmen. Über das Zahnrad unten rechts
+        geplanten Aufnahmen.</p>
+      <p>Das Blatt bleibt <b>immer eine Seite</b>, gleich wie viele Bettplätze eingerichtet sind
+        und wie voll die Zellen stehen: Vor dem Druck rechnet die Tafel aus, wie viele Zeilen
+        jeder Bettplatz braucht, und verkleinert die Schrift so weit, bis alles hineingeht.
+        Reicht der Platz, werden die Zeilen gleichmäßig über das Blatt verteilt. Erst unterhalb
+        einer noch lesbaren Größe läuft der Ausdruck lieber auf eine zweite Seite.</p>
+      <p>Über das Zahnrad unten rechts
         stehen unter <b>Daten</b> Export (JSON oder CSV), Import und „Tafel leeren“ bereit; dort
         lassen sich auch Bettplätze, Spaltenköpfe und alle Auswahllisten anpassen.</p>
     </section>
@@ -488,7 +494,7 @@
         <li>Ein besonders langer Name wird nur in seiner eigenen Zeile kleiner gesetzt, damit er
           vollständig lesbar bleibt.</li>
       </ul>
-      <p>Der gewöhnliche Ausdruck über <b>Drucken</b> bleibt davon unberührt.</p>
+      <p>Der Ausdruck über <b>Druck Visite</b> bleibt davon unberührt.</p>
     </section>
 
     <section>

@@ -74,6 +74,70 @@ const alleSpalten = await page.$$eval('#thead th', ths => ths.length);
 gleich('am Bildschirm alle Spalten', alleSpalten, 21);
 pruefe('Notizspalte nur im Druck', await versteckt('#thead th.col-notizen'));
 
+/* ---- Eine Seite, unter allen Umständen ----
+   Der Ausdruck geht in den Visitenwagen; ein zweites Blatt fällt dort
+   heraus oder wird nicht mitgenommen. Geprüft wird deshalb am erzeugten
+   PDF, nicht an gerechneten Millimetern. */
+async function seiten() {
+  const { readFile, unlink } = await import('node:fs/promises');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const pfad = join(tmpdir(), 'visite-' + Date.now() + '.pdf');
+  await page.pdf({ path: pfad, format: 'A4', landscape: true });
+  const inhalt = (await readFile(pfad)).toString('latin1');
+  await unlink(pfad);
+  return (inhalt.match(/\/Type\s*\/Page[^s]/g) || []).length;
+}
+
+/* Eine volle Station mit langen Namen, vier Isolationen und drei
+   Limitierungen – der Fall, an dem der Ausdruck vorher zweiseitig wurde. */
+async function fuellen(anzahl, lang) {
+  await page.evaluate(([n, viel]) => {
+    if (n) {
+      settings.beds = [];
+      for (let i = 1; i <= n; i++) settings.beds.push({ id: 'b' + i, label: 'Bett ' + i });
+      BEDS = settings.beds;
+      state.beds = {};
+      BEDS.forEach(bed => { state.beds[bed.id] = emptyBed(); });
+      buildHead();
+    }
+    BEDS.forEach(bed => Object.assign(state.beds[bed.id], {
+      name: viel ? 'Schmidt-Hohenlohe-Waldenburg, Maximiliane' : 'Mustermann, Max',
+      status: '●', disziplin: 'KARD', intervention: 'CT',
+      isolation: viel
+        ? [{ v: 'MRSA', s: 'bestaetigt' }, { v: 'VRE', s: 'verdacht' },
+           { v: '3MRGN', s: 'bestaetigt' }, { v: 'C. diff.', s: 'verdacht' }]
+        : [{ v: 'MRSA', s: 'bestaetigt' }],
+      limitierung: ['DNR', 'DNI', 'DND'], telefon: '4149', pflege: 'M. Berger'
+    }));
+    state.station.aufnahmen = 'Herr Beispiel, ACH, gegen 14 Uhr';
+    buildBody();
+    druckfussSetzen();
+    return visiteEinpassen();
+  }, [anzahl, lang]);
+}
+
+await page.emulateMedia({ media: 'print' });
+gleich('leere Tafel auf einer Seite', await seiten(), 1);
+
+await fuellen(0, false);
+gleich('volle Station auf einer Seite', await seiten(), 1);
+
+await fuellen(0, true);
+gleich('auch mit langen Namen und vier Isolationen', await seiten(), 1);
+const klein = await page.evaluate(() => visiteEinpassen());
+pruefe('dabei lesbare Schrift', klein >= 5.5, klein + ' px');
+gleich('der lange Name wird nicht abgeschnitten',
+  await page.evaluate(() => {
+    const feld = document.querySelector('#tbody tr td.col-name input');
+    return feld.scrollWidth <= feld.clientWidth + 1;
+  }), true);
+
+await fuellen(26, true);
+gleich('auch 26 Bettplätze auf einer Seite', await seiten(), 1);
+
+await page.emulateMedia({ media: 'screen' });
+
 keineFehler(page);
 await browser.close();
 bilanz();

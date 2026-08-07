@@ -4,6 +4,33 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.13.0
+
+Ausdruck der Tafel.
+
+- **„Drucken" heißt jetzt „Druck Visite"** – wie „Druck Physio" und „Übergabezettel" nennt
+  die Schaltfläche damit den Anlass, nicht den Vorgang
+- **Der Ausdruck passt immer auf eine Seite A4 quer.** Vorher lief er bei voller Station mit
+  langen Namen und mehreren Isolationen auf zwei Seiten, bei mehr als 20 Bettplätzen auf drei
+
+  Zwei Ursachen, beide behoben. Die eine steckte im Stil: `.multicell` hält am Bildschirm
+  30 px Mindesthöhe bereit, damit sich die Mehrfachauswahl sicher anklicken lässt – im Druck
+  war das ein Boden, unter den keine Zeile kam. Die andere war die Rechnung: Die Zeilenhöhe
+  richtete sich allein nach der Zahl der Bettplätze, während die tatsächliche Höhe am Inhalt
+  hängt, denn für eine Tabellenzelle ist eine Höhenangabe nur ein Mindestmaß
+
+  Jetzt ist die Zeilenhöhe im Druck fest gedeckelt (`tbody td > *`), die Höhe der Tabelle
+  steht damit vorab fest. Die Schriftgröße wird davor so gewählt, dass der Inhalt hineingeht:
+  `visiteEinpassen()` rechnet je Bettplatz den Wortumbruch der schmalen Druckspalten nach und
+  verkleinert, bis die vollste Zeile passt – bei leerer Tafel 10,5 px, bei voller Station mit
+  langen Namen rund 8 px. Die eine Seite hängt damit nicht mehr an der Schätzung: Trifft sie
+  daneben, kostet das eine angeschnittene Zelle statt eines zweiten Blattes
+- ein **zu langer Patientenname** wird allein in seiner Zeile kleiner gesetzt, statt
+  abgeschnitten zu werden – dasselbe Vorgehen wie auf dem Physio-Blatt
+- `tests/03-drucken.mjs` prüft die Seitenzahl am erzeugten PDF, nicht an gerechneten
+  Millimetern: leere Tafel, volle Station, volle Station mit langen Namen und vier
+  Isolationen, und 26 Bettplätze
+
 ## 2.12.1
 
 Übergabezettel, aus dem Stationsbetrieb.

@@ -283,7 +283,7 @@ Spalte der Tafel zugeordnet.
   gespeicherten Wert wieder her. Die sichtbare Höhe der Tabelle rechnet den Zoom mit ein, und
   ab einem Kopfbereich von mehr als zwei Fünfteln der Bildschirmhöhe läuft dieser nicht mehr
   mit, damit die Tabelle nutzbar bleibt
-- **Bedienleiste** oben rechts: „Datenschutz“, „Diaschau“ und „Drucken“ mit Symbol sowie die
+- **Bedienleiste** oben rechts: „Datenschutz“, „Diaschau“ und „Druck Visite“ mit Symbol sowie die
   Umschaltung der Tag-/Nachtansicht. Export, Import und „Tafel leeren“ stehen in den Einstellungen
   unter „Daten“
 - **Bettplatz räumen** über das `×` in der Bettspalte
@@ -331,13 +331,22 @@ Spalte der Tafel zugeordnet.
   (`setPhysioRowHeight`), sodass bei wenigen Patienten sehr groß und bei voller Station immer
   noch auf einer Seite gedruckt wird; ein besonders langer Name wird allein in seiner Zeile
   verkleinert, damit er vollständig lesbar bleibt
-- **Druckansicht**: eine Seite **A4 quer in Schwarzweiß**. Oben stehen belegte Betten,
+- **Druck Visite** (Schaltfläche oben, früher „Drucken“): eine Seite **A4 quer in Schwarzweiß**. Oben stehen belegte Betten,
   maximale Bettenzahl und Meldestatus (ausgeschrieben), darunter eine verkürzte Tabelle mit
   Anwesenheitsstatus, Bettplatz, Patientenname, Fachdisziplin, Isolation, Intervention,
   Therapielimitierung, Telefon und Pflegekraft, ergänzt um eine breite Spalte **Notizen**;
   unter der Tabelle Schichtleitung und Blutzuständigkeit mit Telefonnummer sowie die
   geplanten Aufnahmen – dieselbe Anordnung wie am Bildschirm.
-  Die Zeilenhöhe richtet sich nach der Anzahl der Bettplätze, damit das Blatt gefüllt wird
+  Das Blatt bleibt **immer eine Seite**. Die Zeilenhöhe ergibt sich aus der Zahl der
+  Bettplätze und ist im Druck fest gedeckelt (`--print-row`, `visiteEinpassen` in
+  `js/tabelle.js`); die Höhe der Tabelle steht damit vorab fest, statt sich aus dem Inhalt zu
+  ergeben. Wie viel Text in diese Höhe passt, entscheidet die Schriftgröße: Vor dem Druck
+  wird für jeden Bettplatz der Wortumbruch der schmalen Druckspalten nachgerechnet und die
+  Schrift so weit verkleinert, bis die vollste Zeile hineingeht – bei leerer Tafel 10,5 px,
+  bei voller Station mit langen Namen und mehreren Isolationen rund 8 px. Ein zu langer
+  Patientenname wird allein in seiner Zeile kleiner gesetzt, statt abgeschnitten zu werden.
+  Geprüft wird das nicht an gerechneten Millimetern, sondern am erzeugten PDF
+  (`tests/03-drucken.mjs`), bis hinauf zu 26 Bettplätzen
 - Änderungen werden zwischen mehreren Browser-Tabs desselben Rechners abgeglichen
 
 ## Prüfungen

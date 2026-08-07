@@ -63,7 +63,7 @@ Schlüssel: `belegungstafel.intensiv.v1`, `.einstellungen`, `.theme`, `.sicherun
 |---|---|---|
 | Tägliche Sicherung (JSON) | vollständiger Bestand, Klarnamen | automatisch, wenn eingeschaltet |
 | Export JSON / CSV | vollständiger Bestand, Klarnamen | von Hand |
-| Ausdruck „Drucken" | Name, Bettplatz, Fachdisziplin, Isolation, Intervention, Therapielimitierung, Telefon, Pflegekraft | von Hand |
+| Ausdruck „Druck Visite" | Name, Bettplatz, Fachdisziplin, Isolation, Intervention, Therapielimitierung, Telefon, Pflegekraft | von Hand |
 | Ausdruck „Druck Physio" | Bettplatz, Name, Fachdisziplin, **Isolation**, Telefon, Pflegekraft | von Hand |
 | Ausdruck „Übergabezettel" | Bettplatz, Name, Fachdisziplin, **Isolation, Beatmung, Kreislauf, Nierenersatz, Therapielimitierung, Diagnosen, Neurologie, Katecholamine, Sonstiges**, dazu geplante Aufnahmen, die Zuständigkeiten der Schicht und die Bettenzahl | von Hand |
 | Statistik-Export (CSV) | ausschließlich Zahlen je Schicht, **keine Personendaten** | von Hand |

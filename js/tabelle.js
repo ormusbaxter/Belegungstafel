@@ -143,14 +143,124 @@ function autoSizeColumns() {
   for (const field of AUTO_TEXT) autoSizeText(field);
 }
 
-/* Zeilenhöhe für den Ausdruck: Die Tabelle soll das Blatt füllen, unabhängig
-   davon, wie viele Bettplätze eingerichtet sind. */
-function setPrintRowHeight() {
-  /* A4 quer abzüglich Kopfzeile, Tabellenkopf, Angaben zur Schicht,
-     geplanten Aufnahmen und Fußzeile. */
-  const platz = 144;
-  const hoehe = Math.min(14, Math.max(6.5, platz / Math.max(1, BEDS.length)));
-  document.documentElement.style.setProperty('--print-row', hoehe.toFixed(1) + 'mm');
+/* Einpassen des Visiten-Ausdrucks.
+ *
+ * Das Blatt soll immer eine Seite bleiben – gleich, wie viele Bettplätze
+ * eingerichtet sind und wie voll die Zellen stehen. Die Höhe einer Zeile
+ * ergibt sich aber erst aus ihrem Inhalt: Vier Isolationen und ein langer
+ * Name brauchen in der schmalen Druckspalte mehrere Zeilen, und eine feste
+ * Zeilenhöhe ist für eine Tabellenzelle nur ein Mindestmaß.
+ *
+ * Messen wie beim Übergabezettel geht hier nicht: Die Druckgestalt der Tafel
+ * steht in @media print und ist am Bildschirm nicht zu bekommen. Stattdessen
+ * wird die Breite jedes Zellinhalts mit den Schriftmaßen des Drucks gerechnet
+ * (`widestText`) und daraus die Zeilenzahl geschätzt. Passt die Summe nicht,
+ * wird die Schrift verkleinert und neu gerechnet.
+ */
+const VISITE_SATZ_MM = 283;      /* A4 quer abzüglich der Ränder */
+/* Platz für die Zeilen der Tabelle: A4 quer (196 mm zwischen den Rändern)
+   abzüglich Kopfzeile, Tabellenkopf, Angaben zur Schicht, geplanter Aufnahmen
+   und Fußzeile – zusammen rund 47 mm. Der Rest ist bewusst kleiner als die
+   Differenz: Auf dem Stationsrechner steht Segoe UI, hier eine Ersatzschrift,
+   und deren Maße gehen auseinander. */
+const VISITE_HOEHE_MM = 138;
+const VISITE_SCHRIFT_PX = 10.5;  /* Ausgangsgröße – bei wenig Inhalt bleibt es dabei */
+const VISITE_SCHRIFT_MIN = 5.5;  /* darunter wird es unlesbar; dann lieber zwei Seiten */
+const VISITE_FONT = '"Segoe UI", Roboto, system-ui, sans-serif';
+/* Breite der gedruckten Spalten in Prozent – dieselben Werte wie in styles.css.
+   Aufgeführt sind nur die Spalten, deren Inhalt umbrechen kann. Der
+   Patientenname fehlt mit Absicht: Er steht in einem Eingabefeld, und das
+   bricht nicht um, sondern schneidet ab – siehe visiteNamen(). */
+const VISITE_SPALTEN = { disziplin: 7, isolation: 12, intervention: 8,
+                         limitierung: 9, telefon: 7, pflege: 7 };
+const VISITE_NAME_PROZENT = 15;
+const mmZuPx = mm => mm / 25.4 * 96;
+
+/* Zeilen, die ein Text in einer Spalte dieser Breite belegt.
+   Nachgebildet ist der gierige Umbruch des Browsers: Ein Wort wandert erst
+   dann in die nächste Zeile, wenn es in der laufenden nicht mehr ganz Platz
+   findet. Der Umweg über die Zeichenzahl wäre zu grob – gerade „V. a. C.
+   diff.“ bricht früher um, als seine Gesamtbreite vermuten lässt. */
+function umbruchZeilen(text, breite, font) {
+  let zeilen = 1;
+  let belegt = 0;
+  for (const wort of text.split(' ')) {
+    const wortbreite = widestText([wort + ' '], font);
+    if (belegt > 0 && belegt + wortbreite > breite) {
+      zeilen++;
+      belegt = wortbreite;
+    } else {
+      belegt += wortbreite;
+    }
+  }
+  return zeilen;
+}
+
+/* Zeilen, die ein Bettplatz im Druck belegt */
+function visiteZeilen(data, schrift) {
+  let zeilen = 1;
+  for (const key in VISITE_SPALTEN) {
+    const text = tafelText(key, data);
+    if (!text) continue;
+    const font = (key === 'name' ? '700 ' : '') + schrift + 'px ' + VISITE_FONT;
+    /* Spaltenbreite abzüglich des Innenabstands von 2 × 3 px */
+    const platz = mmZuPx(VISITE_SATZ_MM * VISITE_SPALTEN[key] / 100) - 6;
+    zeilen = Math.max(zeilen, umbruchZeilen(text, Math.max(1, platz), font));
+  }
+  return zeilen;
+}
+
+/* Höhe einer Textzeile im Druck. Der Faktor liegt über der reinen
+   Schriftgröße, weil die Marken der Mehrfachauswahl als eigene Kästchen im
+   Fluss stehen und die Zeile auseinanderziehen; lieber etwas zu großzügig
+   rechnen als eine zweite Seite riskieren. */
+const visiteZeilenhoehe = schrift => schrift / 96 * 25.4 * 1.95 + 1;
+
+/* Die Zeilenhöhe wird fest vorgegeben und im Druck hart begrenzt – dieselbe
+ * Bauart wie beim Physio-Blatt. Damit steht die Höhe der Tabelle vorab fest
+ * (Zeilenzahl × Zeilenhöhe) und die eine Seite ist keine Schätzung mehr,
+ * sondern eine Eigenschaft des Blattes.
+ *
+ * Die Rechnung oben bestimmt dann nur noch die Schriftgröße: Sie wird so weit
+ * verkleinert, bis der Inhalt in diese Höhe passt. Trifft die Schätzung daneben,
+ * kostet das im schlimmsten Fall eine angeschnittene Zelle – nicht eine zweite
+ * Seite, die im Visitenwagen niemand sortiert.
+ */
+function visiteEinpassen() {
+  const zeilenhoehe = Math.min(14, VISITE_HOEHE_MM / Math.max(1, BEDS.length));
+  const hoechste = schrift => BEDS.reduce((mm, bed) =>
+    Math.max(mm, visiteZeilen(state.beds[bed.id], schrift) * visiteZeilenhoehe(schrift)), 0);
+
+  let schrift = VISITE_SCHRIFT_PX;
+  for (let schritt = 0; schritt < 40 && hoechste(schrift) > zeilenhoehe; schritt++) {
+    const kleiner = Math.round(schrift * 0.95 * 10) / 10;
+    /* Unter der Lesbarkeitsgrenze bringt Verkleinern nichts mehr; dann bleibt
+       es bei dieser Größe und die vollste Zelle wird angeschnitten. */
+    if (kleiner < VISITE_SCHRIFT_MIN) break;
+    schrift = kleiner;
+  }
+
+  const wurzel = document.documentElement.style;
+  wurzel.setProperty('--visite-schrift', schrift + 'px');
+  wurzel.setProperty('--print-row', zeilenhoehe.toFixed(2) + 'mm');
+  visiteNamen(schrift);
+  return schrift;
+}
+
+/* Der Patientenname steht in einem Eingabefeld und bricht nicht um – zu lang
+   heißt abgeschnitten, und ein halber Name ist für die Visite wertlos. Jede
+   Zeile bekommt deshalb ihr eigenes Maß, genau wie auf dem Physio-Blatt. */
+function visiteNamen(schrift) {
+  const spalte = mmZuPx(VISITE_SATZ_MM * VISITE_NAME_PROZENT / 100) - 8;
+  for (const bed of BEDS) {
+    const tr = document.querySelector(`tr[data-bed="${bed.id}"]`);
+    if (!tr) continue;
+    const name = (state.beds[bed.id] || {}).name || '';
+    const breit = widestText([name], '700 ' + schrift + 'px ' + VISITE_FONT);
+    const passend = breit > spalte ? schrift * spalte / breit : schrift;
+    tr.style.setProperty('--visite-name',
+      Math.max(VISITE_SCHRIFT_MIN, passend).toFixed(2) + 'px');
+  }
 }
 
 /* Das Blatt für die Physiotherapie führt nur belegte Bettplätze. Je weniger

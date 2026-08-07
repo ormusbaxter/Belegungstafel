@@ -265,14 +265,6 @@ function uebergabeBlattAufbauen() {
   return BEDS.length;
 }
 
-/* Wert einer Tafelspalte als Text für das Blatt */
-function tafelText(key, data) {
-  const col = COL_BY_KEY[key];
-  const wert = data[key];
-  if (col.type === 'germs') return wert.map(germLabel).join(', ');
-  return Array.isArray(wert) ? wert.join(', ') : String(wert || '');
-}
-
 /* Fußteil des Blattes: geplante Aufnahmen, die Zuständigkeiten der Schicht
    und die Übernahme der Diensttelefone. Die beiden letzten Blöcke sind zum
    Ausfüllen von Hand gedacht. */

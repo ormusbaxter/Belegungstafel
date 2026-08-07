@@ -22,7 +22,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.12.1';
+const VERSION = '2.13.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -250,6 +250,14 @@ function toGerm(entry, source) {
 
 function germLabel(entry) {
   return (entry.s === 'verdacht' ? 'V. a. ' : '') + entry.v;
+}
+
+/* Wert einer Tafelspalte als Text – so, wie ihn beide Ausdrucke zeigen. */
+function tafelText(key, data) {
+  const col = COL_BY_KEY[key];
+  const wert = data ? data[key] : null;
+  if (col.type === 'germs') return (wert || []).map(germLabel).join(', ');
+  return Array.isArray(wert) ? wert.join(', ') : String(wert || '');
 }
 
 /* Hinterlegter Stil einer Spalte, sonst null */

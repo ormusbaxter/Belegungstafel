@@ -1498,15 +1498,25 @@ body.saver-on { overflow: hidden; }
   }
   thead th {
     padding: 2px 3px;
-    font-size: 8px;
+    font-size: calc(var(--visite-schrift, 10.5px) * .76);
     letter-spacing: 0;
     text-align: center;
     border-bottom-width: 1.5px;
   }
+  /* Feste Zeilenhöhe mit hartem Deckel: Die Tabelle ist damit so hoch, wie
+     visiteEinpassen() es vorgibt, und das Blatt bleibt eine Seite – auch wenn
+     eine Zelle mehr Text trägt, als die Schätzung erwartet hat. */
+  thead th, tbody td { overflow: hidden; }
+  /* Der Deckel gehört an den Inhalt, nicht an die Zelle: Eine Tabellenzelle
+     nimmt `max-height` nicht an, ihre Höhe kommt vom höchsten Kind. */
+  tbody td > * {
+    max-height: calc(var(--print-row, 9mm) - 1mm);
+    overflow: hidden;
+  }
   tbody td {
     height: var(--print-row, 9mm);
     padding: 1px 3px;
-    font-size: 10.5px;
+    font-size: var(--visite-schrift, 10.5px);
     vertical-align: middle;
   }
   tbody tr:hover td, tbody tr:focus-within td { box-shadow: none !important; }
@@ -1525,25 +1535,40 @@ body.saver-on { overflow: hidden; }
   td input, td select, td textarea {
     border: none !important;
     padding: 0 !important;
-    font-size: 10.5px;
+    /* Ohne eigene Zeilenhöhe behalten Eingabefelder ein Eigenmaß, das bei
+       kleiner Schrift zum Boden der Zeilenhöhe wird. */
+    line-height: 1.1;
+    font-size: var(--visite-schrift, 10.5px);
     color: #000;
     text-align: center;
     overflow: visible;
   }
-  td.col-name input { font-weight: 700; text-align: left; }
-  .bedlabel { font-size: 12px; }
+  /* Eigenes Maß je Zeile: ein zu langer Name wird allein in seiner Zeile
+     kleiner gesetzt, statt abgeschnitten zu werden (visiteNamen). */
+  td.col-name input {
+    font-weight: 700;
+    text-align: left;
+    font-size: var(--visite-name, var(--visite-schrift, 10.5px));
+  }
+  .bedlabel { font-size: calc(var(--visite-schrift, 10.5px) * 1.14); }
   tr.st-aufnahme td.col-status select,
-  tr.st-verlegung td.col-status select { font-size: 15px; }
+  tr.st-verlegung td.col-status select { font-size: calc(var(--visite-schrift, 10.5px) * 1.43); }
   input::placeholder, textarea::placeholder { opacity: 0 !important; }
 
   /* Marken und Kennzeichen ohne Farbe */
   .chip, .chip.styled, .chip-verdacht, .datebadge {
     border: none !important;
     padding: 0 !important;
-    font-size: 10px;
+    font-size: calc(var(--visite-schrift, 10.5px) * .95);
     font-weight: 400;
   }
   .chip:not(:last-child)::after { content: ","; }
+  /* Die Mehrfachauswahl hält am Bildschirm eine Mindesthöhe bereit, damit sie
+     sich sicher anklicken lässt. Auf dem Blatt gibt es nichts zu klicken –
+     dort wären die 30 px ein Boden, unter den keine Zeile käme, und die
+     Einpassung liefe ins Leere. */
+  .multicell { min-height: 0; padding: 0; gap: 0 3px; }
+  td textarea { min-height: 0; }
   /* Pseudo-Elemente werden vom Stern nicht erfasst und brauchen eigene Regeln. */
   tr.has-iso td.col-bed .bedlabel::after,
   tr.has-verdacht td.col-bed .bedlabel::after {
@@ -1552,7 +1577,7 @@ body.saver-on { overflow: hidden; }
     border-radius: 3px;
     background: none !important;
     color: #000 !important;
-    font-size: 7px;
+    font-size: calc(var(--visite-schrift, 10.5px) * .67);
   }
   td.col-status::after, .chip::before, .datebadge::before { content: none !important; }
 
