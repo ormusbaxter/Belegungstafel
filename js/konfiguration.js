@@ -22,7 +22,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.13.0';
+const VERSION = '2.14.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -45,6 +45,19 @@ function istVerstorben(name) {
 /* Frühere Textkürzel werden beim Einlesen auf die Pfeile umgestellt. */
 const STATUS_LEGACY = { 'A >>>': ARROW_IN, 'A >>': ARROW_IN, '<<< V': ARROW_OUT, '<< V': ARROW_OUT };
 const COPYRIGHT = '\u00A9 2026 Oliver Becker';
+
+/* Bezeichnung der Tafel: Krankenhaus und Station stehen nebeneinander im
+   Seitenkopf und werden in den Einstellungen unter „Daten“ gepflegt. Die
+   ausgelieferten Werte sind die bisherige Beschriftung – so ändert sich für
+   eine vorhandene Tafel nichts, bis die Station ihre Namen einträgt. */
+const DEFAULT_NAMEN = { haus: 'Belegungstafel', station: 'Intensivstation' };
+const NAME_MAX = 60;
+
+/* Vollständige Bezeichnung für Ausdrucke, Bildschirmschoner und Fenstertitel */
+function tafelTitel() {
+  const namen = settings.namen || DEFAULT_NAMEN;
+  return [namen.haus, namen.station].map(t => String(t || '').trim()).filter(Boolean).join(' ');
+}
 
 /* ------------------------------------------------------------------ *
  * Bettplätze

@@ -19,6 +19,7 @@ const SETTINGS_KEY = 'belegungstafel.einstellungen' + KEY_SUFFIX;
 function grundEinstellungen() {
   return {
     version: 3,
+    namen: { ...DEFAULT_NAMEN },
     beds: copy(DEFAULT_BEDS),
     headers: {},
     options: copy(DEFAULT_OPTIONS),
@@ -106,6 +107,12 @@ function mergeSettings(target, source) {
       .filter(bed => bed && String(bed.label || '').trim())
       .map(bed => ({ id: String(bed.id || newBedId()), label: String(bed.label).trim() }));
     if (beds.length) target.beds = beds;
+  }
+  if (source.namen && typeof source.namen === 'object') {
+    for (const key of ['haus', 'station']) {
+      if (typeof source.namen[key] !== 'string') continue;
+      target.namen[key] = source.namen[key].trim().slice(0, NAME_MAX);
+    }
   }
   if (source.headers && typeof source.headers === 'object') {
     for (const col of COLUMNS) {
@@ -234,6 +241,7 @@ function syncBeds() {
 
 function applySettings() {
   BEDS = settings.beds;
+  applyNamen();
   for (const col of COLUMNS) {
     const custom = settings.headers[col.key];
     col.label = custom !== undefined && custom.trim() ? custom : DEFAULT_HEADS[col.key].label;
@@ -247,6 +255,20 @@ function applySettings() {
   saverDelay = settings.screensaver.on ? settings.screensaver.seconds : 0;
   applyZoom(settings.zoom);
   applyTheme();
+}
+
+/* Krankenhaus und Station in den Seitenkopf und in den Fenstertitel. Ein leer
+   gelassenes Feld verschwindet, statt eine Lücke zu hinterlassen. */
+function applyNamen() {
+  const setze = (sel, text) => {
+    const node = $(sel);
+    if (!node) return;
+    node.textContent = text;
+    node.hidden = !text;
+  };
+  setze('.brandhaus', String(settings.namen.haus || '').trim());
+  setze('.brandstation', String(settings.namen.station || '').trim());
+  document.title = tafelTitel() || 'Belegungstafel';
 }
 
 /* Vergrößerung der Tafel. Der Wert steuert die CSS-Eigenschaft zoom von

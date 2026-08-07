@@ -4,6 +4,20 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.14.0
+
+- **Krankenhaus und Station lassen sich benennen** – zwei Felder in den Einstellungen unter
+  „Daten“. Sie ersetzen die feste Beschriftung neben dem Logo: das Haus als Titel, die Station
+  daneben in leichterer Schrift
+
+  Beide gelten zugleich für den Fenstertitel, den Kopf des Bildschirmschoners, die Fußzeile
+  jedes Ausdrucks und die Kopfzeile der CSV-Ausgabe. Diese vier Stellen trugen die Bezeichnung
+  bisher jede für sich im Quelltext; sie kommt jetzt aus `tafelTitel()`. Ein leer gelassenes
+  Feld entfällt, statt eine Lücke zu hinterlassen
+
+  Ausgeliefert wird weiterhin „Belegungstafel Intensivstation“ – für eine vorhandene Tafel
+  ändert sich nichts, bis die Station ihre Namen einträgt
+
 ## 2.13.0
 
 Ausdruck der Tafel.

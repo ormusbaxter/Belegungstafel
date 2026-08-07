@@ -155,10 +155,12 @@ body {
   font-size: 20px;
   letter-spacing: .2px;
 }
-.brand h1 span {
+.brand h1 .brandstation {
   font-weight: 400;
   color: var(--ink-soft);
 }
+/* Ein leeres Feld soll keine Lücke hinterlassen. */
+.brand h1 span[hidden] { display: none; }
 .clock {
   margin: 2px 0 0;
   font-size: 12px;

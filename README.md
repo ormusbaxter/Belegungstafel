@@ -114,6 +114,13 @@ Spalte der Tafel zugeordnet.
   und wird nicht mitgedruckt. Mitgeliefert wird ein schlichtes Kreuzzeichen (`logo.png`,
   512 × 512 px mit Transparenz); die Quelle dazu liegt als `logo.svg` daneben – dort lassen
   sich Farbwert (`#E9450C`) und Strichstärke ändern, anschließend neu als PNG ausgeben
+- **Bezeichnung der Tafel**: **Krankenhaus** und **Station**, beide in den Einstellungen unter
+  „Daten“. Sie stehen nebeneinander im Seitenkopf neben dem Logo – das Haus als Titel, die
+  Station daneben in leichterer Schrift – und gelten zugleich für den Fenstertitel, den Kopf
+  des Bildschirmschoners, die Fußzeile jedes Ausdrucks und die CSV-Ausgabe (`tafelTitel()` in
+  `js/konfiguration.js`). Ein leer gelassenes Feld entfällt, statt eine Lücke zu hinterlassen.
+  Ausgeliefert wird die bisherige Beschriftung „Belegungstafel Intensivstation“, damit sich für
+  eine vorhandene Tafel nichts ändert
 - **Autospeicherung** in den `localStorage` des Browsers
 - **Farbkodierung** der Zeilen nach Anwesenheitsstatus (Aufnahme, belegt, NVK, außerhalb der
   Station, Verlegung, gesperrt), `ISO`-Kennzeichnung bei eingetragener Isolation,

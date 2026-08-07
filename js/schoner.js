@@ -238,7 +238,7 @@ function missingSlideNode(file) {
 
 function emptySlideNode() {
   const card = el('div', 'slide slide-text');
-  card.appendChild(el('h2', null, 'Belegungstafel Intensivstation'));
+  card.appendChild(el('h2', null, tafelTitel()));
   card.appendChild(el('p', null,
     'Für die Diaschau sind noch keine Inhalte freigegeben. Dateien (PDF, PNG, JPEG) ' +
     'gehören in den Ordner „slides“ neben der Tafel; eigene Hinweise lassen sich in den ' +

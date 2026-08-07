@@ -281,6 +281,20 @@ function timeField(value, onInput) {
   return field;
 }
 
+function textRow(label, value, platzhalter, onInput) {
+  const row = el('label', 'setrow');
+  row.appendChild(el('span', null, label));
+  const field = el('input');
+  field.type = 'text';
+  field.maxLength = NAME_MAX;
+  field.value = value;
+  field.placeholder = platzhalter;
+  field.addEventListener('input', () => onInput(field.value));
+  row.appendChild(field);
+  row.field = field;
+  return row;
+}
+
 function numberRow(label, value, limits, onInput) {
   const row = el('label', 'setrow');
   row.appendChild(el('span', null, label));
@@ -855,6 +869,7 @@ function renderBedEntries(list) {
 }
 
 function renderDataPane(pane) {
+  renderNamenBlock(pane);
   pane.appendChild(el('h3', null, 'Daten'));
   pane.appendChild(el('p', 'panehint',
     'Export und Import umfassen die Belegung, die Angaben zur Schicht und die Einstellungen. ' +
@@ -889,6 +904,21 @@ function renderDataPane(pane) {
   renderVorgabeBlock(pane);
   renderBackupBlock(pane);
   renderInstanzBlock(pane);
+}
+
+/* Bezeichnung der Tafel: Krankenhaus und Station im Seitenkopf */
+function renderNamenBlock(pane) {
+  pane.appendChild(el('h3', null, 'Bezeichnung der Tafel'));
+  pane.appendChild(el('p', 'panehint',
+    'Beides steht nebeneinander im Seitenkopf: das Krankenhaus als Titel neben dem Logo, ' +
+    'die Station daneben in leichterer Schrift. Die Angaben erscheinen auch im Fenstertitel, ' +
+    'im Kopf des Bildschirmschoners, in der Fußzeile jedes Ausdrucks und in der CSV-Ausgabe. ' +
+    'Ein leer gelassenes Feld entfällt, statt eine Lücke zu hinterlassen.'));
+
+  pane.appendChild(textRow('Krankenhaus', draft.namen.haus, 'z. B. Klinikum Musterstadt',
+    value => { draft.namen.haus = value; }));
+  pane.appendChild(textRow('Station', draft.namen.station, 'z. B. Intensivstation 2',
+    value => { draft.namen.station = value; }));
 }
 
 /* Vorgabe der Station: js/vorgaben.js erzeugen */

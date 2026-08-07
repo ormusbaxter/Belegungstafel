@@ -109,6 +109,40 @@ gleich('Seitenfeld nur beim Dateieintrag', seitenfelder.join(','), 'true,false')
 await page.click('#settingsCancel');
 keineFehler(page);
 
+/* ---- Bezeichnung der Tafel: Krankenhaus und Station ---- */
+await oeffneEinstellungen(page, 'Daten');
+gleich('beide Felder unter Daten',
+  await page.$$eval('#settingsPane .setrow span',
+    ss => ss.map(s => s.textContent).filter(t => /Krankenhaus|Station/.test(t)).join(' | ')),
+  'Krankenhaus | Station');
+await page.fill('#settingsPane .setrow:has(span:text-is("Krankenhaus")) input',
+  'Klinikum Musterstadt');
+await page.fill('#settingsPane .setrow:has(span:text-is("Station")) input', 'Intensiv 2');
+await page.click('#settingsSave');
+await page.waitForTimeout(300);
+
+gleich('Krankenhaus steht neben dem Logo',
+  await page.textContent('.brandhaus'), 'Klinikum Musterstadt');
+gleich('Station daneben', await page.textContent('.brandstation'), 'Intensiv 2');
+gleich('und im Fenstertitel', await page.title(), 'Klinikum Musterstadt Intensiv 2');
+enthaelt('Fußzeile der Ausdrucke nennt beides',
+  await page.evaluate(() => { druckfussSetzen(); return $('#printFoot').textContent; }),
+  'Klinikum Musterstadt Intensiv 2');
+
+await page.reload();
+await page.waitForTimeout(400);
+gleich('bleibt nach dem Neuladen stehen',
+  await page.textContent('.brandhaus'), 'Klinikum Musterstadt');
+
+/* Ein leeres Feld soll keine Lücke hinterlassen. */
+await oeffneEinstellungen(page, 'Daten');
+await page.fill('#settingsPane .setrow:has(span:text-is("Station")) input', '');
+await page.click('#settingsSave');
+await page.waitForTimeout(300);
+pruefe('leere Station wird ausgeblendet', await page.isHidden('.brandstation'));
+gleich('der Titel führt dann nur das Haus', await page.title(), 'Klinikum Musterstadt');
+keineFehler(page);
+
 /* ---- Ordner einlesen über einen Webserver ---- */
 const server = await serverStarten(8321);
 const online = await neueSeite(browser, { url: server.url });
