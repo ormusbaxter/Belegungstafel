@@ -4,6 +4,18 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.20.2
+
+- **Das Kennzeichen `ISO` steht unter der Bettbezeichnung statt daneben.** Nebeneinander
+  schob es die Zahl aus der Mitte, und die Spalte hielt 32 px Zusatzbreite bereit, sobald
+  irgendwo eine Isolation eingetragen war. Sie ist jetzt 55 statt 87 px breit; die gewonnene
+  Breite geht an die Spalte Sonstiges
+
+  Die Zeilenhöhe bleibt unverändert: Sie richtet sich ohnehin nach der Spalte
+  Norton / Pflegestatus, die zwei Zeilen führt
+- **Im Ausdruck bleibt es daneben.** Dort ist die Zeilenhöhe fest gedeckelt, damit das Blatt
+  auf eine Seite passt – eine zweite Zeile in der Bettspalte würde abgeschnitten
+
 ## 2.20.1
 
 - **Eine einzelne Marke stand vier Pixel zu hoch.** Betroffen war jede Zelle der

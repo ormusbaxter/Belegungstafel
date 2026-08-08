@@ -148,7 +148,9 @@ Spalte der Tafel zugeordnet.
   Verdacht geführt (z. B. MRSA bestätigt und Verdacht auf VRE). Bestätigte Keime erscheinen
   als gefüllte, Verdachtsfälle als gestrichelte Marke mit vorangestelltem `V. a.`.
   Am Bettplatz steht `ISO`, sobald ein Keim bestätigt ist, und `ISO?`, solange nur
-  Verdachtsfälle eingetragen sind
+  Verdachtsfälle eingetragen sind – **unter** der Bettbezeichnung, nicht daneben. Die Spalte
+  braucht dadurch keine 32 px Zusatzbreite, und die Zahl bleibt mittig. Im Ausdruck steht das
+  Kennzeichen weiterhin daneben, weil die Zeilenhöhe dort fest gedeckelt ist
 - **Abstriche**: nur das Datum des nächsten Screenings, wahlweise über die Schaltflächen
   „nächster Montag“ und „übernächster Montag“; ein fälliges oder überfälliges Datum wird rot
   hervorgehoben und im Kopfbereich gezählt. Ist mindestens ein Screening fällig, wird die

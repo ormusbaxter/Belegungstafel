@@ -39,6 +39,43 @@ await page.waitForTimeout(400);
 gleich('nach dem Neuladen', await belegt(), '1 / 13');
 gleich('Name blieb erhalten', await page.inputValue('tr[data-bed="1a"] td.col-name input'), 'gesperrt');
 
+/* ---- Das Kennzeichen ISO steht unter der Bettbezeichnung ---- */
+await page.evaluate(() => {
+  Object.assign(state.beds['4a'], { name: 'Iso, Ida', status: '●',
+    isolation: [{ v: 'MRSA', s: 'bestaetigt' }] });
+  Object.assign(state.beds['4b'], { name: 'Ohne, Otto', status: '●', disziplin: 'INT' });
+  buildBody();
+});
+await page.waitForTimeout(300);
+
+const isolage = await page.evaluate(() => {
+  const label = document.querySelector('tr[data-bed="4a"] .bedlabel');
+  const zelle = document.querySelector('tr[data-bed="4a"] td.col-bed');
+  const marke = getComputedStyle(label, '::after');
+  /* Die Bezeichnung steht im Textknoten, das Kennzeichen im ::after. Ein
+     Spaltenkasten setzt beide untereinander. */
+  const bereich = document.createRange();
+  bereich.selectNodeContents(label);
+  const text = bereich.getBoundingClientRect();
+  const ganz = label.getBoundingClientRect();
+  return {
+    richtung: getComputedStyle(label).flexDirection,
+    /* Das Kennzeichen liegt unterhalb des Textes, nicht rechts daneben. */
+    unterhalb: Math.round(ganz.bottom - text.bottom) > 6,
+    breiter: Math.round(ganz.width - text.width),
+    inhalt: marke.content,
+    passtInDieZelle: ganz.bottom <= zelle.getBoundingClientRect().bottom + 1
+  };
+});
+gleich('die Bettzelle setzt untereinander', isolage.richtung, 'column');
+pruefe('das Kennzeichen steht unter der Bezeichnung', isolage.unterhalb);
+pruefe('und nicht daneben', isolage.breiter <= 4, isolage.breiter + ' px breiter als der Text');
+pruefe('es bleibt in der Zelle', isolage.passtInDieZelle);
+
+const breiteMitIso = await page.evaluate(() =>
+  Math.round(document.querySelector('tr[data-bed="4a"] td.col-bed').getBoundingClientRect().width));
+pruefe('die Spalte bleibt schmal', breiteMitIso < 70, breiteMitIso + ' px');
+
 /* ---- Alle Zellinhalte stehen auf einer Höhe ---- */
 await page.evaluate(() => {
   Object.assign(state.beds['3'], {

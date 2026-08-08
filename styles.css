@@ -489,7 +489,7 @@ td.col-isolation .chip-verdacht:not(.styled) {
 }
 tr.has-iso td.col-bed .bedlabel::after {
   content: "ISO";
-  margin-left: 5px;
+  margin-top: 2px;
   padding: 1px 4px;
   border-radius: 4px;
   background: var(--iso);
@@ -606,6 +606,14 @@ tr.dragging { opacity: .45; }
 .dragghost table { width: 100%; min-width: 0; table-layout: fixed; }
 tbody tr.dragover td { box-shadow: inset 0 2px 0 var(--accent), inset 0 -2px 0 var(--accent); }
 .bedlabel {
+  /* Spalte statt Zeile: Das Kennzeichen ISO steht unter der Bettbezeichnung,
+     nicht daneben. Nebeneinander brauchte die Spalte 32 px mehr Breite, und
+     die Zahl rückte aus der Mitte. Im Ausdruck bleibt es daneben – dort ist
+     die Höhe knapper als die Breite (siehe @media print). */
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.05;
   font-size: 17px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -1711,8 +1719,12 @@ body.saver-on { overflow: hidden; }
   .multicell { min-height: 0; padding: 0; gap: 0 3px; }
   td textarea { min-height: 0; }
   /* Pseudo-Elemente werden vom Stern nicht erfasst und brauchen eigene Regeln. */
+  /* Im Ausdruck steht das Kennzeichen wieder neben der Zahl: Die Zeilenhöhe
+     ist dort fest gedeckelt, eine zweite Zeile würde abgeschnitten. */
+  .bedlabel { display: inline; }
   tr.has-iso td.col-bed .bedlabel::after,
   tr.has-verdacht td.col-bed .bedlabel::after {
+    margin-left: 3px;
     padding: 0 2px;
     border: 1px solid #000;
     border-radius: 3px;

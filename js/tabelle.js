@@ -134,11 +134,12 @@ function autoSizeColumns() {
   setColumnWidth(document.querySelector('#thead th.col-status'),
     Math.max(46, Math.ceil(status) + 30));
 
-  /* Platz für das Kennzeichen ISO nur, wenn eine Isolation eingetragen ist. */
-  const iso = BEDS.some(bed => state.beds[bed.id] && state.beds[bed.id].isolation.length) ? 32 : 0;
+  /* Das Kennzeichen ISO steht unter der Bezeichnung und braucht deshalb keine
+     eigene Breite mehr – nur noch genug, dass „ISO?“ hineinpasst. Das deckt
+     die Untergrenze von 52 px ab. */
   const beds = widestText(BEDS.map(bed => bed.label), getComputedStyle(label).font);
   setColumnWidth(document.querySelector('#thead th.col-bed'),
-    Math.max(52, Math.ceil(beds) + 34 + iso));
+    Math.max(52, Math.ceil(beds) + 34));
 
   for (const field of AUTO_TEXT) autoSizeText(field);
 }
