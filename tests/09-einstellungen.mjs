@@ -145,6 +145,57 @@ gleich('die letzte Berechtigung bleibt bestehen',
 await page.click('#settingsSave');
 await page.waitForTimeout(300);
 
+/* ---- Berechtigungen für einzelne Unterpunkte ---- */
+await oeffneEinstellungen(page, 'Berechtigungen');
+const teile = await page.$$eval('.rechteliste .rechteteil span:first-of-type',
+  ss => ss.map(s => s.textContent));
+gleich('Unterpunkte von Allgemein, Statistik und Daten', teile.length, 14);
+pruefe('darunter die Norton-Skala', teile.includes('Norton-Skala'));
+gleich('ab Werk ist nichts gesperrt',
+  await page.evaluate(() => settings.rechte.gesperrt.length), 0);
+/* :text-is ist eine Playwright-Auswahl, kein CSS – deshalb über den Locator
+   und nicht über querySelector im Browser. */
+pruefe('Unterpunkte eines gesperrten Reiters sind ausgegraut',
+  await page.isDisabled('.rechteliste .rechteteil:has(span:text-is("Schichten")) input'));
+
+/* Zwei Punkte aus Allgemein wegnehmen */
+for (const t of ['Norton-Skala', 'Rechte Maustaste']) {
+  await page.click(`.rechteliste .rechteteil:has(span:text-is("${t}")) input`);
+  await page.waitForTimeout(100);
+}
+await page.click('#settingsSave');
+await page.waitForTimeout(300);
+gleich('beide Sperren gespeichert',
+  await page.evaluate(() => settings.rechte.gesperrt.join(',')),
+  'allgemein.norton,allgemein.kontextmenue');
+
+/* Die einfache Stufe sieht sie nicht mehr – und die Nummern rücken auf */
+await oeffneEinstellungen(page, null, 'Vinzenz1');
+const bloecke = await page.$$eval('#settingsPane h3', hs => hs.map(h => h.textContent));
+gleich('einfache Stufe: fünf statt sieben Punkte', bloecke.length, 5);
+gleich('lückenlos durchnummeriert', bloecke.join(' | '),
+  '1. Sichtschutz | 2. Bildschirmschoner | 3. Tag- und Nachtansicht | ' +
+  '4. Größe der Darstellung | 5. Übergabezettel');
+await page.click('#settingsCancel');
+await page.waitForTimeout(200);
+
+/* Die volle Stufe sieht weiterhin alles */
+await oeffneEinstellungen(page, 'Allgemein');
+gleich('volle Stufe unverändert sieben Punkte',
+  await page.$$eval('#settingsPane h3', hs => hs.length), 7);
+await page.click('#settingsCancel');
+await page.waitForTimeout(200);
+
+/* Sperren wieder aufheben, damit die folgenden Prüfungen den vollen Reiter sehen */
+await oeffneEinstellungen(page, 'Berechtigungen');
+for (const t of ['Norton-Skala', 'Rechte Maustaste']) {
+  await page.click(`.rechteliste .rechteteil:has(span:text-is("${t}")) input`);
+  await page.waitForTimeout(100);
+}
+await page.click('#settingsSave');
+await page.waitForTimeout(300);
+keineFehler(page);
+
 /* ---- Rechte Maustaste ---- */
 const menue = () => page.evaluate(() => {
   const treffer = ziel => {

@@ -134,7 +134,10 @@ Neue Passwörter erzeugt `node werkzeuge/passwort.mjs <einfach|voll> "<Passwort>
 
 **Was die erste Stufe sehen darf, ist einstellbar:** Reiter **Berechtigungen** (nur mit dem
 zweiten Passwort). Ein Häkchen je Reiter, ab Werk Allgemein und Bildschirmschoner. Der Reiter
-Berechtigungen steht dort selbst nie zur Wahl, und mindestens einer muss offenbleiben.
+Berechtigungen steht dort selbst nie zur Wahl, und mindestens einer muss offenbleiben. Eingerückt
+darunter stehen die **Unterpunkte**, die sich einzeln wegnehmen lassen – etwa der Norton-Abstand
+unter Allgemein oder „Export, Import, Tafel leeren“ unter Daten. Weggenommen wird einzeln, nicht
+einzeln erteilt: Ein freigegebener Reiter ist ganz offen, bis auf die ausgenommenen Punkte.
 
 ### Vorgabe der Station
 

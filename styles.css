@@ -882,6 +882,9 @@ tr:hover .clearbed, .clearbed:focus-visible { opacity: 1; }
 }
 /* Berechtigungen: eine Zeile je Reiter, Hinweise dahinter */
 .rechteliste { display: flex; flex-direction: column; gap: 2px; margin: 6px 0 10px; }
+.rechteteil { margin-left: 26px; }
+.rechteteil span { font-size: 12.5px; color: var(--ink-soft); }
+.rechteteil input:disabled + span { opacity: .5; }
 .rechtewarn { margin-left: 8px; font-size: 12px; color: var(--ink-soft); }
 
 .dataactions { display: flex; flex-direction: column; gap: 12px; }

@@ -232,6 +232,11 @@ Spalte der Tafel zugeordnet.
   also das, was im Dienst gebraucht wird. **Welche** Reiter das sind, legt die volle Stufe im
   Reiter **Berechtigungen** fest (ab Werk Allgemein und Bildschirmschoner); der Reiter
   Berechtigungen selbst steht dort nie zur Wahl, und mindestens einer muss offenbleiben.
+  Zusätzlich lassen sich **einzelne Unterpunkte wegnehmen** – die sieben Blöcke unter
+  Allgemein, die zwei unter Statistik und die fünf unter Daten (`REITER_TEILE` in
+  `js/konfiguration.js`). Gesperrt wird einzeln, nicht einzeln freigegeben: Wer einen Reiter
+  öffnet, öffnet ihn ganz, bis auf die genannten Ausnahmen. Die Nummerierung unter Allgemein
+  rückt dabei auf, sodass keine Lücken entstehen.
   Das zweite Passwort gibt alle Reiter frei,
   einschließlich Bettplätzen, Spaltenköpfen, Auswahllisten, Statistik und dem Bereich Daten
   mit Export, Import und „Tafel leeren“. Mit der einfachen Stufe erscheinen die übrigen

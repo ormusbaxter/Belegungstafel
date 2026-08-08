@@ -22,7 +22,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.19.0';
+const VERSION = '2.20.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -556,6 +556,42 @@ const DEFAULT_KONTEXTMENUE = false;   /* false = unterdrücken */
    legt das in den Einstellungen unter „Berechtigungen“ fest; hier steht, was
    ohne eigene Angabe gilt. */
 const DEFAULT_RECHTE = { einfach: ['allgemein', 'schoner'] };
+
+/* Unterpunkte, deren Berechtigung sich einzeln steuern lässt.
+ *
+ * Was hier nicht steht, gehört untrennbar zu seinem Reiter. Gesperrt wird
+ * einzeln (settings.rechte.gesperrt), nicht einzeln freigegeben: Wer einen
+ * Reiter freigibt, gibt ihn ganz frei – bis auf die Punkte, die er ausnimmt.
+ * So bleibt die Vorgabe leer, und ein später hinzukommender Punkt geht nicht
+ * unbemerkt verloren. */
+const REITER_TEILE = {
+  allgemein: [
+    { key: 'sichtschutz',  label: 'Sichtschutz' },
+    { key: 'schoner',      label: 'Bildschirmschoner (Ein/Aus und Zeit)' },
+    { key: 'theme',        label: 'Automatische Tag-/Nachtansicht' },
+    { key: 'zoom',         label: 'Größe der Darstellung' },
+    { key: 'norton',       label: 'Norton-Skala' },
+    { key: 'uebergabe',    label: 'Übergabezettel-Schaltfläche' },
+    { key: 'kontextmenue', label: 'Rechte Maustaste' }
+  ],
+  statistik: [
+    { key: 'erfassung', label: 'Erfassung, Abstand, Aufbewahrung' },
+    { key: 'schichten', label: 'Schichten' }
+  ],
+  daten: [
+    { key: 'namen',     label: 'Bezeichnung der Tafel' },
+    { key: 'austausch', label: 'Export, Import, Tafel leeren' },
+    { key: 'vorgabe',   label: 'Vorgabe der Station' },
+    { key: 'sicherung', label: 'Automatische Sicherung' },
+    { key: 'kennung',   label: 'Kennung der Tafel' }
+  ]
+};
+
+/* Alle sperrbaren Unterpunkte als „reiter.teil“ */
+function alleTeile() {
+  return Object.entries(REITER_TEILE).flatMap(([reiter, teile]) =>
+    teile.map(teil => reiter + '.' + teil.key));
+}
 
 /* Reiter, die niemals an die einfache Stufe gehen: Über „Berechtigungen“
    könnte sie sich sonst selbst alles freischalten. */

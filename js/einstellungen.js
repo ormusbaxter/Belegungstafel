@@ -65,6 +65,13 @@ const vollerZugriff = () => rechte === 'voll';
 /* Welche Reiter die einfache Stufe sieht, legt die volle Stufe unter
    „Berechtigungen“ fest. */
 const reiterErlaubt = key => vollerZugriff() || settings.rechte.einfach.includes(key);
+/* Einzelne Unterpunkte lassen sich zusätzlich sperren. Freigegeben ist, was
+   nicht ausdrücklich gesperrt wurde – wer einen Reiter öffnet, öffnet ihn
+   ganz, bis auf die genannten Ausnahmen. */
+const teilErlaubt = (reiter, teil) =>
+  vollerZugriff() || !settings.rechte.gesperrt.includes(reiter + '.' + teil);
+
+const KEIN_PUNKT = 'Für diesen Bereich ist nichts freigegeben.';
 
 function askPassword() {
   const dlg = $('#pwDlg');
@@ -333,22 +340,34 @@ function numberRow(label, value, limits, onInput) {
 }
 
 function renderGeneralPane(pane) {
-  pane.appendChild(el('h3', null, '1. Sichtschutz'));
-  pane.appendChild(el('p', 'panehint',
+  /* Jeder Punkt ist einzeln sperrbar. Gesperrte Blöcke werden zwar gebaut,
+     aber nicht eingehängt – so bleibt der Code der Blöcke unberührt. Die
+     Nummerierung zählt nur, was zu sehen ist. */
+  let nr = 0;
+  const abschnitt = (teil, ueberschrift) => {
+    const kasten = el('div', 'setblock');
+    if (!teilErlaubt('allgemein', teil)) return kasten;
+    kasten.appendChild(el('h3', null, ++nr + '. ' + ueberschrift));
+    pane.appendChild(kasten);
+    return kasten;
+  };
+  let ziel = el('div');
+  ziel = abschnitt('sichtschutz', 'Sichtschutz');
+  ziel.appendChild(el('p', 'panehint',
     'Blendet die patientenbezogenen Angaben aus, wenn eine Zeit lang keine Eingabe erfolgt.'));
 
   const time = numberRow('Zeit ohne Eingabe', draft.privacy.seconds, { min: 5, max: 3600, step: 5 },
     value => { draft.privacy.seconds = value; });
   time.field.disabled = !draft.privacy.on;
 
-  pane.appendChild(checkRow('Sichtschutz aktiv', draft.privacy.on, on => {
+  ziel.appendChild(checkRow('Sichtschutz aktiv', draft.privacy.on, on => {
     draft.privacy.on = on;
     time.field.disabled = !on;
   }));
-  pane.appendChild(time);
+  ziel.appendChild(time);
 
-  pane.appendChild(el('h3', null, '2. Bildschirmschoner'));
-  pane.appendChild(el('p', 'panehint',
+  ziel = abschnitt('schoner', 'Bildschirmschoner');
+  ziel.appendChild(el('p', 'panehint',
     'Startet nach der eingestellten Zeit ohne Eingabe eine Diaschau aus den Inhalten unter ' +
     '„Bildschirmschoner“. Unabhängig davon lässt sich die Schau jederzeit über die ' +
     'Schaltfläche im Seitenkopf starten; jede Eingabe beendet sie wieder.'));
@@ -357,14 +376,14 @@ function renderGeneralPane(pane) {
     { min: SAVER_MIN, max: 3600, step: 10 }, value => { draft.screensaver.seconds = value; });
   saverTime.field.disabled = !draft.screensaver.on;
 
-  pane.appendChild(checkRow('Bildschirmschoner aktiv', draft.screensaver.on, on => {
+  ziel.appendChild(checkRow('Bildschirmschoner aktiv', draft.screensaver.on, on => {
     draft.screensaver.on = on;
     saverTime.field.disabled = !on;
   }));
-  pane.appendChild(saverTime);
+  ziel.appendChild(saverTime);
 
-  pane.appendChild(el('h3', null, '3. Tag- und Nachtansicht'));
-  pane.appendChild(el('p', 'panehint',
+  ziel = abschnitt('theme', 'Tag- und Nachtansicht');
+  ziel.appendChild(el('p', 'panehint',
     'Mit dieser Option schaltet die Schaltfläche ◐ im Seitenkopf durch drei Zustände: ' +
     '„Auto“, dunkel und hell. Im Zustand Auto – erkennbar an der Beschriftung neben dem ' +
     'Symbol – stellt sich die Tafel nach der Uhrzeit ein. Ohne diese Option schaltet die ' +
@@ -387,18 +406,18 @@ function renderGeneralPane(pane) {
   });
   nightRow.appendChild(nightBack);
 
-  pane.appendChild(checkRow('Automatische Tag-/Nachtansicht', draft.autoTheme, on => {
+  ziel.appendChild(checkRow('Automatische Tag-/Nachtansicht', draft.autoTheme, on => {
     draft.autoTheme = on;
     for (const field of [from, to, nightBack]) field.disabled = !on;
   }));
-  pane.appendChild(nightRow);
+  ziel.appendChild(nightRow);
   for (const field of [from, to, nightBack]) field.disabled = !draft.autoTheme;
-  pane.appendChild(el('p', 'panehint',
+  ziel.appendChild(el('p', 'panehint',
     'Zeitspanne, in der die Tafel im Zustand „Auto“ dunkel dargestellt wird; sie darf über ' +
     'Mitternacht reichen. Der Wechsel erfolgt im laufenden Betrieb.'));
 
-  pane.appendChild(el('h3', null, '4. Größe der Darstellung'));
-  pane.appendChild(el('p', 'panehint',
+  ziel = abschnitt('zoom', 'Größe der Darstellung');
+  ziel.appendChild(el('p', 'panehint',
     'Vergrößert oder verkleinert die ganze Tafel – Kopfbereich, Tabelle und die Textfelder ' +
     'darunter – passend zu Monitor und Auflösung. Die Änderung ist sofort im Hintergrund zu ' +
     'sehen und gilt erst mit „Übernehmen“ dauerhaft. Dialoge, Hilfe, Bildschirmschoner und ' +
@@ -432,34 +451,35 @@ function renderGeneralPane(pane) {
     applyZoom(100);
   });
   row.appendChild(back);
-  pane.appendChild(row);
+  ziel.appendChild(row);
 
-  pane.appendChild(el('h3', null, '5. Norton-Skala'));
-  pane.appendChild(el('p', 'panehint',
+  ziel = abschnitt('norton', 'Norton-Skala');
+  ziel.appendChild(el('p', 'panehint',
     'Wird das Häkchen „Norton“ gesetzt, gilt die Skala als heute erhoben; die Tafel merkt ' +
     'sich den nächsten Termin und zeigt ihn hinter den Häkchen an. Ist er erreicht, wird er ' +
     'rot. Das Datum lässt sich je Bettplatz auch von Hand ändern.'));
-  pane.appendChild(numberRow('Erneut fällig nach', draft.norton.tage,
+  ziel.appendChild(numberRow('Erneut fällig nach', draft.norton.tage,
     { min: 1, max: 365, step: 1, unit: 'Tagen' }, value => { draft.norton.tage = value; }));
 
-  pane.appendChild(el('h3', null, '6. Übergabezettel'));
-  pane.appendChild(el('p', 'panehint',
+  ziel = abschnitt('uebergabe', 'Übergabezettel');
+  ziel.appendChild(el('p', 'panehint',
     'Blendet die Schaltfläche „Übergabezettel“ in der Werkzeugleiste ein. Dort werden ' +
     'Diagnosen, Neurologie und Katecholamine je Bettplatz erfasst – sie erscheinen nicht auf ' +
     'der Tafel, werden aber mitgespeichert. Die Auswahllisten für Neurologie und ' +
     'Katecholamine stehen in den gleichnamigen Reitern.'));
-  pane.appendChild(checkRow('Schaltfläche anzeigen', draft.uebergabe.button,
+  ziel.appendChild(checkRow('Schaltfläche anzeigen', draft.uebergabe.button,
     on => { draft.uebergabe.button = on; }));
 
-  pane.appendChild(el('h3', null, '7. Rechte Maustaste'));
-  pane.appendChild(el('p', 'panehint',
+  ziel = abschnitt('kontextmenue', 'Rechte Maustaste');
+  ziel.appendChild(el('p', 'panehint',
     'Das Kontextmenü des Browsers klappt bei einem Fehlklick auf die Tafel auf und bietet ' +
     'Einträge wie „Neu laden“ oder „Seitenquelltext anzeigen“, die im Dienst niemand ' +
     'braucht. In Eingabefeldern bleibt es immer erreichbar – dort hängen die Vorschläge der ' +
     'Rechtschreibprüfung und das Einfügen per Maus daran. Tastenkürzel wie F12 oder Strg + R ' +
     'lassen sich damit nicht abstellen; dafür ist der Kioskbetrieb des Browsers zuständig.'));
-  pane.appendChild(checkRow('Kontextmenü der rechten Maustaste zulassen', draft.kontextmenue,
+  ziel.appendChild(checkRow('Kontextmenü der rechten Maustaste zulassen', draft.kontextmenue,
     on => { draft.kontextmenue = on; }));
+  if (!nr) pane.appendChild(el('p', 'panehint', KEIN_PUNKT));
 }
 
 /* Beschriftung der Spaltenköpfe */
@@ -749,56 +769,71 @@ function renderSlideEntries(list, status) {
 /* Statistik: Erfassung, Schichten, Aufbewahrung */
 function renderStatistikPane(pane) {
   const stat = draft.statistik;
+  /* Zwei Blöcke, einzeln sperrbar: die Erfassung und die Schichten. Die drei
+     Schaltflächen am Ende – Auswertung öffnen, Daten löschen – gehören zur
+     Erfassung. */
+  const erfassung = teilErlaubt('statistik', 'erfassung');
+  const schichten = teilErlaubt('statistik', 'schichten');
+  if (!erfassung && !schichten) {
+    pane.appendChild(el('p', 'panehint', KEIN_PUNKT));
+    return;
+  }
 
-  pane.appendChild(el('h3', null, 'Statistik je Schicht'));
-  pane.appendChild(el('p', 'panehint',
-    'Die Tafel legt in regelmäßigen Abständen eine Momentaufnahme ab: belegte Betten, ' +
-    'maximale Bettenzahl, Isolationen (bestätigt oder Verdacht), Beatmungen und Dialysen. ' +
-    'Jede Aufnahme gehört zu der Schicht, die gerade läuft, und ersetzt die vorherige ' +
-    'derselben Schicht – am Ende steht je Schicht der zuletzt gesehene Stand. Erfasst wird ' +
-    'nur, solange die Tafel geöffnet ist. Externe Dialysen zählen nicht mit, da sie als ' +
-    'Intervention „ext. Dial.“ geführt werden.'));
+  if (erfassung) {
+    pane.appendChild(el('h3', null, 'Statistik je Schicht'));
+    pane.appendChild(el('p', 'panehint',
+      'Die Tafel legt in regelmäßigen Abständen eine Momentaufnahme ab: belegte Betten, ' +
+      'maximale Bettenzahl, Isolationen (bestätigt oder Verdacht), Beatmungen und Dialysen. ' +
+      'Jede Aufnahme gehört zu der Schicht, die gerade läuft, und ersetzt die vorherige ' +
+      'derselben Schicht – am Ende steht je Schicht der zuletzt gesehene Stand. Erfasst wird ' +
+      'nur, solange die Tafel geöffnet ist. Externe Dialysen zählen nicht mit, da sie als ' +
+      'Intervention „ext. Dial.“ geführt werden.'));
 
-  const takt = numberRow('Abstand der Aufnahmen', stat.intervall,
-    { min: 1, max: 120, step: 1, unit: 'Minuten' }, value => { stat.intervall = value; });
-  const tage = numberRow('Aufbewahrung', stat.tage,
-    { min: 7, max: 3650, step: 1, unit: 'Tage' }, value => { stat.tage = value; });
+    const takt = numberRow('Abstand der Aufnahmen', stat.intervall,
+      { min: 1, max: 120, step: 1, unit: 'Minuten' }, value => { stat.intervall = value; });
+    const tage = numberRow('Aufbewahrung', stat.tage,
+      { min: 7, max: 3650, step: 1, unit: 'Tage' }, value => { stat.tage = value; });
 
-  pane.appendChild(checkRow('Erfassung aktiv', stat.on, on => {
-    stat.on = on;
-    takt.field.disabled = !on;
-    tage.field.disabled = !on;
-  }));
-  pane.appendChild(takt);
-  pane.appendChild(tage);
-  takt.field.disabled = !stat.on;
-  tage.field.disabled = !stat.on;
+    pane.appendChild(checkRow('Erfassung aktiv', stat.on, on => {
+      stat.on = on;
+      takt.field.disabled = !on;
+      tage.field.disabled = !on;
+    }));
+    pane.appendChild(takt);
+    pane.appendChild(tage);
+    takt.field.disabled = !stat.on;
+    tage.field.disabled = !stat.on;
 
-  pane.appendChild(checkRow('Schaltfläche in der Tafel zeigen', stat.button, on => {
-    stat.button = on;
-  }));
-  pane.appendChild(el('p', 'panehint',
-    'Die runde Schaltfläche unten rechts über der Hilfe öffnet die Auswertung. Ohne sie ' +
-    'bleibt die Erfassung bestehen, die Auswertung ist dann nur über diese Einstellungen ' +
-    'erreichbar.'));
+    pane.appendChild(checkRow('Schaltfläche in der Tafel zeigen', stat.button, on => {
+      stat.button = on;
+    }));
+    pane.appendChild(el('p', 'panehint',
+      'Die runde Schaltfläche unten rechts über der Hilfe öffnet die Auswertung. Ohne sie ' +
+      'bleibt die Erfassung bestehen, die Auswertung ist dann nur über diese Einstellungen ' +
+      'erreichbar.'));
+  }
 
-  pane.appendChild(el('h3', null, 'Schichten'));
-  pane.appendChild(el('p', 'panehint',
-    'Bezeichnung und Beginn jeder Schicht. Die Schichten schließen lückenlos aneinander an; ' +
-    'die letzte reicht über Mitternacht bis zum Beginn der ersten.'));
+  if (schichten) {
+    pane.appendChild(el('h3', null, 'Schichten'));
+    pane.appendChild(el('p', 'panehint',
+      'Bezeichnung und Beginn jeder Schicht. Die Schichten schließen lückenlos aneinander an; ' +
+      'die letzte reicht über Mitternacht bis zum Beginn der ersten.'));
 
-  const liste = el('div', 'entrylist');
-  pane.appendChild(liste);
-  renderSchichtEntries(liste);
-
-  const add = el('button', 'addentry', '+ Schicht hinzufügen');
-  add.type = 'button';
-  add.addEventListener('click', () => {
-    stat.schichten.push({ key: 'schicht' + Math.random().toString(36).slice(2, 7),
-                          name: '', start: '12:00' });
+    const liste = el('div', 'entrylist');
+    pane.appendChild(liste);
     renderSchichtEntries(liste);
-  });
-  pane.appendChild(add);
+
+    const add = el('button', 'addentry', '+ Schicht hinzufügen');
+    add.type = 'button';
+    add.addEventListener('click', () => {
+      stat.schichten.push({ key: 'schicht' + Math.random().toString(36).slice(2, 7),
+                            name: '', start: '12:00' });
+      renderSchichtEntries(liste);
+    });
+    pane.appendChild(add);
+  }
+
+  if (!erfassung) return;
 
   const zeigen = el('button', 'addentry', 'Auswertung öffnen');
   zeigen.type = 'button';
@@ -916,8 +951,12 @@ function renderRechtePane(pane) {
   for (const reiter of alleReiter()) {
     if (RECHTE_TABU.includes(reiter.key)) continue;
     const zeile = checkRow(reiter.label, liste.includes(reiter.key), an => {
-      if (an) { if (!liste.includes(reiter.key)) liste.push(reiter.key); }
-      else {
+      if (an) {
+        if (!liste.includes(reiter.key)) liste.push(reiter.key);
+        renderPane();
+        return;
+      }
+      {
         /* Ohne einen einzigen Reiter öffnete das erste Passwort ein leeres
            Fenster – dann lieber gar nichts wegnehmen. */
         if (liste.length <= 1) {
@@ -926,22 +965,51 @@ function renderRechtePane(pane) {
           return;
         }
         liste.splice(liste.indexOf(reiter.key), 1);
+        renderPane();
       }
     });
-    if (reiter.key === 'daten') {
-      zeile.appendChild(el('span', 'rechtewarn',
-        'enthält Export, Import und „Tafel leeren“'));
-    }
     box.appendChild(zeile);
+
+    /* Unterpunkte darunter, eingerückt. Sie greifen nur, solange der Reiter
+       selbst offensteht – ist er zu, sind sie ohne Wirkung und deshalb
+       gesperrt dargestellt. */
+    for (const teil of REITER_TEILE[reiter.key] || []) {
+      const schluessel = reiter.key + '.' + teil.key;
+      const unter = checkRow(teil.label, !draft.rechte.gesperrt.includes(schluessel), an => {
+        const i = draft.rechte.gesperrt.indexOf(schluessel);
+        if (an) { if (i >= 0) draft.rechte.gesperrt.splice(i, 1); }
+        else if (i < 0) draft.rechte.gesperrt.push(schluessel);
+      });
+      unter.classList.add('rechteteil');
+      unter.querySelector('input').disabled = !liste.includes(reiter.key);
+      if (schluessel === 'daten.austausch') {
+        unter.appendChild(el('span', 'rechtewarn', 'löscht und gibt Patientendaten heraus'));
+      }
+      box.appendChild(unter);
+    }
   }
   pane.appendChild(box);
   pane.appendChild(el('p', 'panehint',
+    'Eingerückt stehen die Unterpunkte eines Reiters; sie lassen sich einzeln wegnehmen. ' +
     'Der Reiter „Berechtigungen“ selbst steht nicht zur Wahl – er bleibt der vollen Stufe ' +
     'vorbehalten.'));
 }
 
 function renderDataPane(pane) {
-  renderNamenBlock(pane);
+  /* Reihenfolge wie gehabt; jeder Block ist einzeln sperrbar. */
+  const teil = key => teilErlaubt('daten', key);
+  if (teil('namen')) renderNamenBlock(pane);
+  if (teil('austausch')) renderAustauschBlock(pane);
+  if (teil('vorgabe')) renderVorgabeBlock(pane);
+  if (teil('sicherung')) renderBackupBlock(pane);
+  if (teil('kennung')) renderInstanzBlock(pane);
+  if (!REITER_TEILE.daten.some(t => teil(t.key))) {
+    pane.appendChild(el('p', 'panehint', KEIN_PUNKT));
+  }
+}
+
+/* Export, Import und „Tafel leeren“ */
+function renderAustauschBlock(pane) {
   pane.appendChild(el('h3', null, 'Daten'));
   pane.appendChild(el('p', 'panehint',
     'Export und Import umfassen die Belegung, die Angaben zur Schicht und die Einstellungen. ' +
@@ -973,9 +1041,6 @@ function renderDataPane(pane) {
   }, true);
 
   pane.appendChild(actions);
-  renderVorgabeBlock(pane);
-  renderBackupBlock(pane);
-  renderInstanzBlock(pane);
 }
 
 /* Bezeichnung der Tafel: Krankenhaus und Station im Seitenkopf */

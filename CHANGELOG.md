@@ -4,6 +4,25 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.20.0
+
+- **Auch einzelne Unterpunkte der Einstellungen lassen sich freigeben oder wegnehmen** – die
+  sieben Blöcke unter **Allgemein**, die zwei unter **Statistik** und die fünf unter **Daten**.
+  Im Reiter Berechtigungen stehen sie eingerückt unter ihrem Reiter; ist der Reiter selbst
+  nicht freigegeben, sind sie ausgegraut
+
+  Beispiel: Die Schicht darf Sichtschutz, Diaschau und Zoom stellen, aber nicht den Abstand
+  der Norton-Skala – oder sie darf unter Daten die Bezeichnung der Tafel ändern, ohne an
+  Export, Import und „Tafel leeren“ zu kommen
+
+  **Gesperrt wird einzeln, nicht einzeln freigegeben.** Wer einen Reiter öffnet, öffnet ihn
+  ganz, bis auf die ausgenommenen Punkte. Damit bleibt die Vorgabe leer, und ein später
+  hinzukommender Punkt geht nicht unbemerkt verloren
+- die **Nummerierung unter Allgemein rückt auf**: Fällt Punkt 5 weg, heißt der bisherige
+  Punkt 6 dann 5. Vorher standen die Nummern fest im Text
+- ist in einem Reiter kein einziger Punkt freigegeben, steht dort ein Hinweis statt einer
+  leeren Fläche
+
 ## 2.19.0
 
 - **Das Kontextmenü der rechten Maustaste wird unterdrückt** – abschaltbar unter

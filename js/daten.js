@@ -27,7 +27,7 @@ function grundEinstellungen() {
     styles: Object.fromEntries(OPTION_CATEGORIES.filter(hatStil).map(c => [c.key, {}])),
     privacy: { on: true, seconds: 120 },
     kontextmenue: DEFAULT_KONTEXTMENUE,
-    rechte: { einfach: [...DEFAULT_RECHTE.einfach] },
+    rechte: { einfach: [...DEFAULT_RECHTE.einfach], gesperrt: [] },
     screensaver: copy(DEFAULT_SAVER),
     zoom: 100,
     autoTheme: false,
@@ -144,6 +144,10 @@ function mergeSettings(target, source) {
     const erlaubt = alleReiter().map(t => t.key).filter(k => !RECHTE_TABU.includes(k));
     const liste = source.rechte.einfach.filter(k => erlaubt.includes(k));
     target.rechte.einfach = liste.length ? liste : [...DEFAULT_RECHTE.einfach];
+  }
+  if (source.rechte && Array.isArray(source.rechte.gesperrt)) {
+    const bekannt = alleTeile();
+    target.rechte.gesperrt = source.rechte.gesperrt.filter(k => bekannt.includes(k));
   }
   const zoom = parseInt(source.zoom, 10);
   if (Number.isFinite(zoom)) target.zoom = clampZoom(zoom);
