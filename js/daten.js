@@ -262,6 +262,15 @@ function applySettings() {
     else if (cat.key === 'melde') MELDE = settings.options.melde;
     else FIELD_BY_KEY[cat.key].options = settings.options[cat.key];
   }
+  /* Eine Tafel ohne Meldestatus – frisch aufgesetzt oder aus einer Datei ohne
+     dieses Feld – bekommt die erste Stufe, und zwar in den Daten und nicht nur
+     in der Anzeige. Sonst zeigte die Kachel eine Stufe, während Ausdruck und
+     Export das Feld leer ließen.
+     Ein bereits gesetzter Wert wird nicht angetastet, auch wenn er nicht mehr
+     in der Liste steht: Wer meldet, hat sich dabei etwas gedacht. */
+  if (state && state.station && !state.station.meldestatus) {
+    state.station.meldestatus = meldestatusVorgabe();
+  }
   privacyDelay = settings.privacy.on ? settings.privacy.seconds : 0;
   saverDelay = settings.screensaver.on ? settings.screensaver.seconds : 0;
   applyZoom(settings.zoom);

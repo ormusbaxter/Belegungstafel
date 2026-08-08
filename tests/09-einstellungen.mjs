@@ -111,7 +111,12 @@ keineFehler(page);
 
 /* ---- Meldestatus: Stufen und Farben aus den Einstellungen ---- */
 const stufen = () => page.$$eval('#meldestatus option', os => os.map(o => o.textContent));
-gleich('ausgelieferte Stufen', (await stufen()).join(' | '), '– | grün | gelb | rot');
+gleich('ausgelieferte Stufen', (await stufen()).join(' | '), 'grün | gelb | rot');
+gleich('eine frische Tafel trägt die erste Stufe',
+  await page.evaluate(() => state.station.meldestatus), 'grün');
+gleich('und zwar in den Daten, nicht nur in der Anzeige',
+  await page.evaluate(() => JSON.parse(
+    localStorage.getItem('belegungstafel.intensiv.v1')).station.meldestatus), 'grün');
 
 const kachel = () => page.evaluate(() => {
   const k = document.querySelector('#meldeCard');
@@ -134,7 +139,7 @@ await page.waitForTimeout(150);
 await page.click('#settingsSave');
 await page.waitForTimeout(400);
 
-gleich('neue Stufe steht zur Wahl', (await stufen()).join(' | '), '– | grün | gelb | rot | Abmeldung');
+gleich('neue Stufe steht zur Wahl', (await stufen()).join(' | '), 'grün | gelb | rot | Abmeldung');
 await page.selectOption('#meldestatus', 'Abmeldung');
 await page.waitForTimeout(300);
 const hell = await kachel();
@@ -160,6 +165,18 @@ gleich('entfernte, aber gesetzte Stufe bleibt wählbar',
 enthaelt('und steht weiter in der Liste', (await stufen()).join(' | '), 'Abmeldung');
 gleich('sie ist aber aus den Einstellungen fort',
   await page.evaluate(() => MELDE.map(m => m.value).join(',')), 'grün,gelb,rot');
+
+/* Die letzte Stufe lässt sich nicht entfernen – ohne leere Stufe stünde sonst
+   eine Auswahl ohne Einträge im Kopf. */
+await oeffneEinstellungen(page, 'Meldestatus');
+for (let i = 0; i < 3; i++) {
+  await page.click('#settingsPane .entry-melde:last-child .entrybtn.remove');
+  await page.waitForTimeout(120);
+}
+gleich('die letzte Stufe bleibt stehen',
+  await page.$$eval('#settingsPane .entry-melde', es => es.length), 1);
+await page.click('#settingsCancel');
+await page.waitForTimeout(200);
 keineFehler(page);
 
 /* ---- Bezeichnung der Tafel: Krankenhaus und Station ---- */

@@ -1132,14 +1132,14 @@ function updateMaxTitle() {
 
 /* Meldestatus: Stufen aus den Einstellungen, jede mit eigener Farbe.
  *
- * Ein gespeicherter Wert, der nicht mehr in der Liste steht, wird trotzdem
- * angeboten – sonst spränge die Tafel beim nächsten Aufbau still auf „–“ und
- * verlöre eine Angabe, die jemand bewusst gesetzt hat. */
+ * Eine leere Stufe gibt es nicht – die Tafel trägt immer einen Status. Ein
+ * gespeicherter Wert, der nicht mehr in der Liste steht, wird trotzdem
+ * angeboten: Sonst spränge die Tafel beim nächsten Aufbau still auf eine
+ * andere Stufe und meldete etwas, das niemand gewählt hat. */
 function renderMeldestatus() {
   const melde = $('#meldestatus');
   const gesetzt = state.station.meldestatus;
   melde.replaceChildren();
-  melde.appendChild(new Option('–', ''));
   for (const eintrag of MELDE) melde.appendChild(new Option(eintrag.value, eintrag.value));
   if (gesetzt && !meldeEintrag(gesetzt)) melde.appendChild(new Option(gesetzt, gesetzt));
   melde.value = gesetzt;

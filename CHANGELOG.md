@@ -4,6 +4,21 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.18.0
+
+- **Die leere Stufe „–“ des Meldestatus entfällt.** Die Tafel trägt damit immer einen Status;
+  die Auswahl führt nur noch die eingerichteten Stufen
+
+  Hat eine Tafel noch keinen – frisch aufgesetzt oder aus einer Datei ohne dieses Feld
+  eingelesen –, gilt die **erste Stufe der Liste**, und zwar in den Daten und nicht nur in der
+  Anzeige. Ohne das zeigte die Kachel eine Stufe, während Ausdruck und Export das Feld leer
+  ließen
+- ein **bereits gesetzter Wert wird dabei nicht angetastet**, auch wenn er nicht mehr in der
+  Liste steht. Er bliebe sonst nicht bloß unvollständig, sondern spränge still auf eine andere
+  Stufe – bei einer Angabe, die der Leitstelle gilt, die falsche Richtung
+- die **letzte verbleibende Stufe lässt sich nicht entfernen**; ohne leere Stufe stünde sonst
+  eine Auswahl ohne Einträge im Kopf der Tafel
+
 ## 2.17.0
 
 - **Die Kurzanleitung richtet sich nur noch an die Schicht.** Drei Abschnitte betrafen

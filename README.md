@@ -134,8 +134,11 @@ Spalte der Tafel zugeordnet.
   „Meldestatus“ – ausgeliefert grün, gelb und rot, ergänzbar und umbenennbar, **jede mit
   eigener Farbe** aus derselben Auswahl wie die übrigen Kategorien. Die Schriftfarbe rechnet
   die Tafel aus der Helligkeit (`lesbareSchrift()`), damit auch eine hell gewählte Stufe
-  lesbar bleibt; ohne Farbe bleibt die Kachel neutral. Ein gesetzter Wert, der später aus der
-  Liste entfernt wird, bleibt an der Tafel stehen und wählbar
+  lesbar bleibt; ohne Farbe bleibt die Kachel neutral. **Eine leere Stufe gibt es nicht** – die
+  Tafel trägt immer einen Status; hat sie noch keinen (frisch aufgesetzt oder aus einer Datei
+  ohne dieses Feld eingelesen), gilt die erste Stufe, und zwar in den Daten und nicht nur in
+  der Anzeige. Die letzte verbleibende Stufe lässt sich deshalb nicht entfernen. Ein gesetzter
+  Wert, der später aus der Liste fällt, bleibt an der Tafel stehen und wählbar
 - **Angaben zur Schicht** – Schichtleitung, Blutzuständigkeit und Notfallequipment mit
   jeweils zugehöriger Telefonnummer – **unter der Tabelle**, zwischen Tafel und den
   Textfeldern. Der Kopfbereich bleibt dadurch schmal, und es sind mehr Bettplätze ohne

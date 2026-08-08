@@ -175,6 +175,12 @@ function renderEntries(list, cat) {
       renderEntries(list, cat);
     }));
     const remove = moveButton('×', 'entfernen', () => {
+      /* Ohne leere Stufe braucht der Meldestatus mindestens eine Angabe –
+         sonst stünde im Kopf der Tafel eine Auswahl ohne Einträge. */
+      if (cat.kind === 'melde' && entries.length <= 1) {
+        alert('Mindestens eine Stufe des Meldestatus ist nötig.');
+        return;
+      }
       entries.splice(index, 1);
       renderEntries(list, cat);
     });

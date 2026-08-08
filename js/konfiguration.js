@@ -22,7 +22,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.17.0';
+const VERSION = '2.18.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -423,8 +423,9 @@ const OPTION_CATEGORIES = [
   { key: 'phones',       label: 'Telefonliste',           kind: 'phone',
     hint: 'Rufnummern im Infofeld unter der Tafel' },
   { key: 'melde',        label: 'Meldestatus',            kind: 'melde',
-    hint: 'Stufen im Kopf der Tafel, jede mit eigener Farbe. Die leere Stufe „–“ steht ' +
-          'immer voran und lässt sich nicht entfernen. Ohne Farbe bleibt die Kachel neutral.' }
+    hint: 'Stufen im Kopf der Tafel, jede mit eigener Farbe. Die erste Stufe gilt auf einer ' +
+          'frisch aufgesetzten Tafel; eine leere Stufe gibt es nicht. Ohne Farbe bleibt die ' +
+          'Kachel neutral.' }
 ];
 
 /* Kategorien, für die sich Farbe und Rahmen der Spalte einstellen lassen –
@@ -467,6 +468,12 @@ function lesbareSchrift(hex) {
    nicht (mehr) in der Liste steht. */
 function meldeEintrag(wert) {
   return MELDE.find(eintrag => eintrag.value === wert) || null;
+}
+
+/* Womit eine Tafel anfängt, die noch keinen Meldestatus trägt. Eine leere
+   Stufe gibt es nicht mehr, also gilt die erste der Liste. */
+function meldestatusVorgabe() {
+  return MELDE.length ? MELDE[0].value : '';
 }
 
 /* Feste Farbauswahl – vier neutrale Töne und sechs Farben je hell und kräftig */
