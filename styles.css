@@ -579,6 +579,19 @@ td.col-name input { font-weight: 600; }
 
 /* Ziehen und Ablegen */
 tr.dragging { opacity: .45; }
+/* Abbild der gezogenen Zeile. Es muss dargestellt werden, damit der Browser
+   es abbilden kann, darf aber nicht zu sehen sein: deshalb aus dem Bild
+   geschoben statt display:none. */
+.dragghost {
+  position: fixed;
+  top: -10000px;
+  left: -10000px;
+  pointer-events: none;
+  background: var(--panel);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .35);
+  opacity: .9;
+}
+.dragghost table { width: 100%; min-width: 0; table-layout: fixed; }
 tbody tr.dragover td { box-shadow: inset 0 2px 0 var(--accent), inset 0 -2px 0 var(--accent); }
 .bedlabel {
   font-size: 17px;

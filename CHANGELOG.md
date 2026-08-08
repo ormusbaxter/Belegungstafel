@@ -4,6 +4,18 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.14.1
+
+- **Beim Ziehen hängt die ganze Zeile am Zeiger**, nicht mehr nur die angefasste
+  Bettplatz-Zelle. Über dreizehn Zeilen und zwanzig Spalten hinweg war an der kleinen Zelle
+  nicht zu erkennen, welcher Patient gerade bewegt wird; jetzt ist das Abbild die vollständige
+  Zeile mit Namen, Verfahren und Kennzeichen, angefasst an der Stelle des Griffs
+
+  Der Browser bildet von sich aus nur das angefasste Element ab. Das Abbild wird deshalb
+  vorgegeben: ein Klon der Zeile in einer eigenen Tabelle mit den gemessenen Spaltenbreiten –
+  eine Zeile für sich hat kein Layout – und mit einzeln nachgezogenen Feldwerten, denn
+  `cloneNode` überträgt nur Attribute, nicht den eingetippten Stand
+
 ## 2.14.0
 
 - **Krankenhaus und Station lassen sich benennen** – zwei Felder in den Einstellungen unter

@@ -366,6 +366,66 @@ function buildRow(bed) {
   return tr;
 }
 
+/* Ziehbild: die ganze Zeile statt nur der Bettplatz-Zelle.
+ *
+ * Der Browser schießt beim Beginn des Ziehens ein Abbild des angefassten
+ * Elements – das wäre hier die kleine Bettplatz-Zelle. Ein Abbild der Zeile
+ * lässt sich vorgeben, es muss dafür aber sichtbar im Dokument stehen. Eine
+ * Zeile allein ist nicht darstellbar (ein tr ohne Tabelle hat kein Layout),
+ * deshalb wandert der Klon in eine eigene Tabelle mit den gemessenen
+ * Spaltenbreiten der Vorlage.
+ *
+ * cloneNode überträgt nur Attribute, nicht den Stand der Eingabefelder: Ein
+ * eingetippter Name steht in der Eigenschaft value, nicht im Attribut. Er
+ * würde im Abbild fehlen – gerade die Angabe, an der man die Zeile erkennt.
+ * Die Werte werden deshalb einzeln nachgezogen.
+ */
+function zeileAlsZiehbild(tr) {
+  const zellen = [...tr.children];
+  const ghost = el('div', 'dragghost');
+  /* Feste Gesamtbreite: Ohne sie träfe die Regel width:100% der Tabelle auf
+     einen Kasten ohne Bezugsbreite. */
+  ghost.style.width = (tr.getBoundingClientRect().width / zoomFactor).toFixed(1) + 'px';
+  /* Die Tabelle steht unter dem Bildschirmzoom; das Abbild muss ihn
+     mitbringen, sonst passen Schrift und Breiten nicht zusammen. */
+  ghost.style.zoom = String(zoomFactor);
+
+  const tabelle = el('table');
+  const body = el('tbody');
+  const klon = tr.cloneNode(true);
+  klon.classList.remove('dragging', 'dragover');
+  /* Das Räumen-Kreuz ist eine Schaltfläche, keine Angabe. */
+  for (const knopf of klon.querySelectorAll('.clearbed')) knopf.remove();
+
+  const quelle = tr.querySelectorAll('input, select, textarea');
+  const ziel = klon.querySelectorAll('input, select, textarea');
+  quelle.forEach((feld, i) => {
+    if (!ziel[i]) return;
+    if (feld.type === 'checkbox' || feld.type === 'radio') ziel[i].checked = feld.checked;
+    else ziel[i].value = feld.value;
+  });
+
+  /* Feste Breiten, damit der Klon außerhalb der Tabelle dieselbe Aufteilung
+     behält. Die gemessenen Werte enthalten den Zoom bereits. */
+  const hoehe = tr.getBoundingClientRect().height / zoomFactor;
+  klon.style.height = hoehe.toFixed(1) + 'px';
+  [...klon.children].forEach((td, i) => {
+    if (!zellen[i]) return;
+    const breite = zellen[i].getBoundingClientRect().width / zoomFactor;
+    if (breite) td.style.width = breite.toFixed(1) + 'px';
+    /* Die Ankreuzspalten sind höher als ihre Zeile; ohne Deckel würden sie
+       im Abbild oben herauslaufen. */
+    td.style.height = hoehe.toFixed(1) + 'px';
+    td.style.overflow = 'hidden';
+  });
+
+  body.appendChild(klon);
+  tabelle.appendChild(body);
+  ghost.appendChild(tabelle);
+  document.body.appendChild(ghost);
+  return ghost;
+}
+
 function buildField(bed, col, data) {
   switch (col.type) {
 
@@ -377,12 +437,26 @@ function buildField(bed, col, data) {
         dragSource = bed.id;
         event.dataTransfer.effectAllowed = 'move';
         event.dataTransfer.setData('text/plain', bed.id);
-        box.closest('tr').classList.add('dragging');
+        const tr = box.closest('tr');
+
+        /* Die ganze Zeile hängt am Zeiger, angefasst an der Stelle, an der
+           der Griff sitzt – so trägt man die Zeile an ihrer Bettplatz-Zelle. */
+        const bild = zeileAlsZiehbild(tr);
+        const rect = tr.getBoundingClientRect();
+        event.dataTransfer.setDragImage(bild,
+          Math.max(0, event.clientX - rect.left), Math.max(0, event.clientY - rect.top));
+        /* Das Abbild wird beim Aufruf geschossen, das Element darf danach
+           fort. Sofort entfernen kommt Chrome zuvor, deshalb im nächsten
+           Durchlauf. */
+        setTimeout(() => bild.remove(), 0);
+
+        tr.classList.add('dragging');
       });
       box.addEventListener('dragend', () => {
         dragSource = null;
         document.querySelectorAll('.dragging, .dragover')
           .forEach(node => node.classList.remove('dragging', 'dragover'));
+        for (const rest of document.querySelectorAll('.dragghost')) rest.remove();
       });
       box.appendChild(el('span', 'bedlabel', bed.label));
       const btn = el('button', 'clearbed', '×');

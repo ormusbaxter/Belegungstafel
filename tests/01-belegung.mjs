@@ -39,6 +39,63 @@ await page.waitForTimeout(400);
 gleich('nach dem Neuladen', await belegt(), '1 / 13');
 gleich('Name blieb erhalten', await page.inputValue('tr[data-bed="1a"] td.col-name input'), 'gesperrt');
 
+/* ---- Ziehbild: die ganze Zeile hängt am Zeiger, nicht nur die Bettzelle ---- */
+await page.evaluate(() => {
+  Object.assign(state.beds['2'], {
+    name: 'Mustermann, Maximilian', status: '●', disziplin: 'KARD',
+    beatmung: ['INV'], telefon: '4149', pflege: 'M. Berger'
+  });
+  buildBody();
+});
+await page.waitForTimeout(250);
+
+const bild = await page.evaluate(() => {
+  const tr = document.querySelector('tr[data-bed="2"]');
+  const ghost = zeileAlsZiehbild(tr);
+  const masse = ghost.getBoundingClientRect();
+  const zeile = tr.getBoundingClientRect();
+  const wert = sel => (ghost.querySelector(sel) || {}).value;
+  const ergebnis = {
+    zellen: ghost.querySelectorAll('td').length,
+    zellenOriginal: tr.children.length,
+    name: wert('td.col-name input'),
+    pflege: wert('td.col-pflege input'),
+    marken: [...ghost.querySelectorAll('.chip')].map(c => c.textContent).join(','),
+    kreuze: ghost.querySelectorAll('.clearbed').length,
+    breite: Math.round(masse.width) === Math.round(zeile.width),
+    hoehe: Math.round(masse.height) === Math.round(zeile.height)
+  };
+  ghost.remove();
+  return ergebnis;
+});
+gleich('Abbild trägt alle Zellen der Zeile', bild.zellen, bild.zellenOriginal);
+gleich('mit dem eingetippten Namen', bild.name, 'Mustermann, Maximilian');
+gleich('und der Pflegekraft', bild.pflege, 'M. Berger');
+gleich('Marken der Mehrfachauswahl', bild.marken, 'INV');
+gleich('ohne die Schaltfläche zum Räumen', bild.kreuze, 0);
+pruefe('so breit wie die Zeile', bild.breite);
+pruefe('und so hoch', bild.hoehe);
+
+/* Beim Ziehen wird das Abbild vorgegeben und danach wieder entfernt. */
+const zug = await page.evaluate(() => {
+  const tr = document.querySelector('tr[data-bed="2"]');
+  const dt = new DataTransfer();
+  let uebergeben = null;
+  dt.setDragImage = (node, x, y) => { uebergeben = { cls: node.className, x, y }; };
+  tr.querySelector('.bedcell').dispatchEvent(new DragEvent('dragstart', {
+    bubbles: true, dataTransfer: dt, clientX: 300, clientY: 200
+  }));
+  return { uebergeben, offen: document.querySelectorAll('.dragghost').length,
+           gezogen: tr.classList.contains('dragging') };
+});
+gleich('das Abbild wird dem Zug vorgegeben', zug.uebergeben && zug.uebergeben.cls, 'dragghost');
+pruefe('am Griff angefasst statt an der Ecke', zug.uebergeben.x > 0 && zug.uebergeben.y >= 0,
+  zug.uebergeben.x + '/' + zug.uebergeben.y);
+gleich('die Zeile ist als gezogen gekennzeichnet', zug.gezogen, true);
+await page.waitForTimeout(100);
+gleich('das Abbild bleibt nicht im Dokument zurück',
+  await page.$$eval('.dragghost', gs => gs.length), 0);
+
 keineFehler(page);
 await browser.close();
 bilanz();

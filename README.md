@@ -195,7 +195,11 @@ Spalte der Tafel zugeordnet.
   Verschieben per Ziehen und Ablegen, Kennzeichen und Zeilenfarben, Datenschutz,
   Bildschirmschoner sowie Speichern, Drucken und Austausch. Am Fuß stehen Fassung und Urheberhinweis
 - **Verschieben per Ziehen und Ablegen**: Bettplatz-Zelle greifen und auf einen anderen
-  Bettplatz ziehen. Ist das Ziel belegt, tauschen beide Plätze ihre Einträge
+  Bettplatz ziehen. Ist das Ziel belegt, tauschen beide Plätze ihre Einträge. Am Zeiger hängt
+  ein Abbild der **gesamten Zeile** statt nur der angefassten Zelle (`zeileAlsZiehbild()` in
+  `js/tabelle.js`): Der Klon wandert mit den gemessenen Spaltenbreiten in eine eigene Tabelle,
+  weil eine Zeile für sich kein Layout hat, und die Werte der Eingabefelder werden einzeln
+  nachgezogen – `cloneNode` überträgt nur Attribute, nicht den eingetippten Stand
 - **Verlauf**: Die letzten **20 Schritte** dieser Sitzung lassen sich zurücknehmen – über
   „Rückgängig“ in der Statuszeile, mit **Strg + Z** oder gezielt über „Verlauf …“. Erfasst
   werden Feldeingaben (mehrere Tastendrücke im selben Feld gelten als ein Schritt), Räumen,
