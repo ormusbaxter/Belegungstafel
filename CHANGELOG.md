@@ -4,6 +4,28 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.19.0
+
+- **Das Kontextmenü der rechten Maustaste wird unterdrückt** – abschaltbar unter
+  Einstellungen → Allgemein. Bei einem Fehlklick auf die Tafel klappte bisher das Browsermenü
+  auf, mit Einträgen wie „Neu laden“ oder „Seitenquelltext anzeigen“
+
+  **In Eingabefeldern bleibt es erreichbar.** Dort hängen die Vorschläge der
+  Rechtschreibprüfung und das Einfügen per Maus daran – pauschal geblockt hätte die Änderung
+  in den Freitextfeldern mehr genommen als gegeben
+
+  Ein Ersatz für den Kioskbetrieb ist das nicht: `F12`, `Strg + R`, `Strg + P` und das Menü
+  des Browsers reserviert dieser für sich, daran kommt eine Seite nicht heran
+- **Die volle Zugangsstufe legt fest, was die einfache ändern darf** – neuer Reiter
+  **Berechtigungen** mit einem Häkchen je Reiter. Bisher stand das als Liste im Quelltext
+  (`EINFACHE_REITER`), eine Änderung war eine Codeänderung
+
+  Zwei Grenzen sind eingebaut: Der Reiter **Berechtigungen selbst steht nie zur Wahl** – sonst
+  könnte sich die einfache Stufe darüber alles freischalten –, und **mindestens ein Reiter**
+  muss offenbleiben, sonst öffnete das erste Passwort ein leeres Fenster
+- die Liste aller Reiter steht jetzt an einer Stelle (`alleReiter()` in `js/konfiguration.js`)
+  statt im Aufbau der Leiste – Leiste und Berechtigungen können dadurch nicht auseinanderlaufen
+
 ## 2.18.0
 
 - **Die leere Stufe „–“ des Meldestatus entfällt.** Die Tafel trägt damit immer einen Status;

@@ -132,6 +132,10 @@ nur eine PBKDF2-Ableitung. **Ein Zugriffsschutz ist das trotzdem nicht:** Wer di
 
 Neue Passwörter erzeugt `node werkzeuge/passwort.mjs <einfach|voll> "<Passwort>"`.
 
+**Was die erste Stufe sehen darf, ist einstellbar:** Reiter **Berechtigungen** (nur mit dem
+zweiten Passwort). Ein Häkchen je Reiter, ab Werk Allgemein und Bildschirmschoner. Der Reiter
+Berechtigungen steht dort selbst nie zur Wahl, und mindestens einer muss offenbleiben.
+
 ### Vorgabe der Station
 
 Die Tafel wird mit Beispiellisten ausgeliefert. Ist sie einmal nach den Gepflogenheiten der

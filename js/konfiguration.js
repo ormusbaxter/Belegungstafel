@@ -22,7 +22,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.18.0';
+const VERSION = '2.19.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -541,6 +541,42 @@ const DEFAULT_UEBERGABE = { button: true };
 
 /* Nachtspanne der automatischen Tag-/Nachtansicht */
 const DEFAULT_NIGHT = { from: '19:00', to: '07:00' };
+
+/* Kontextmenü der rechten Maustaste.
+ *
+ * Auf dem Stationsrechner klappt es bei einem Fehlklick auf, mit Einträgen
+ * wie „Neu laden“ oder „Seitenquelltext anzeigen“, die dort niemand braucht.
+ * In Eingabefeldern bleibt es aber immer erreichbar – dort hängen die
+ * Vorschläge der Rechtschreibprüfung und das Einfügen per Maus daran.
+ * Ein Ersatz für den Kioskbetrieb ist das nicht: Tastenkürzel wie F12 oder
+ * Strg + R reserviert der Browser für sich. */
+const DEFAULT_KONTEXTMENUE = false;   /* false = unterdrücken */
+
+/* Reiter, die mit der einfachen Zugangsstufe offenstehen. Die volle Stufe
+   legt das in den Einstellungen unter „Berechtigungen“ fest; hier steht, was
+   ohne eigene Angabe gilt. */
+const DEFAULT_RECHTE = { einfach: ['allgemein', 'schoner'] };
+
+/* Reiter, die niemals an die einfache Stufe gehen: Über „Berechtigungen“
+   könnte sie sich sonst selbst alles freischalten. */
+const RECHTE_TABU = ['rechte'];
+
+/* Alle Reiter des Einstellungsfensters in ihrer Reihenfolge. Eine Liste für
+   beides: den Aufbau der Leiste und die Auswahl unter „Berechtigungen“.
+   Sie steht hier und nicht in einstellungen.js, weil daten.js sie beim Laden
+   der Einstellungen bereits braucht – und früher an der Reihe ist. */
+function alleReiter() {
+  return [
+    { key: 'allgemein', label: 'Allgemein' },
+    { key: 'schoner', label: 'Bildschirmschoner' },
+    { key: 'statistik', label: 'Statistik' },
+    { key: 'header', label: 'Spaltenköpfe' },
+    { key: 'betten', label: 'Bettplätze' },
+    ...OPTION_CATEGORIES.map(cat => ({ key: cat.key, label: cat.label })),
+    { key: 'daten', label: 'Daten' },
+    { key: 'rechte', label: 'Berechtigungen' }
+  ];
+}
 const CLOCK = /^([01]?\d|2[0-3]):[0-5]\d$/;
 const clockMinutes = value => {
   const parts = String(value).split(':');

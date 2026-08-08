@@ -880,6 +880,10 @@ tr:hover .clearbed, .clearbed:focus-visible { opacity: 1; }
   background-image: linear-gradient(45deg, transparent 44%, var(--danger) 44%,
                     var(--danger) 56%, transparent 56%);
 }
+/* Berechtigungen: eine Zeile je Reiter, Hinweise dahinter */
+.rechteliste { display: flex; flex-direction: column; gap: 2px; margin: 6px 0 10px; }
+.rechtewarn { margin-left: 8px; font-size: 12px; color: var(--ink-soft); }
+
 .dataactions { display: flex; flex-direction: column; gap: 12px; }
 .dataaction { display: flex; align-items: baseline; gap: 12px; }
 .dataaction button { min-width: 130px; }

@@ -229,7 +229,10 @@ Spalte der Tafel zugeordnet.
 - **Einstellungen** über das Zahnrad unten rechts, geschützt durch eine Passwortabfrage mit
   **zwei Stufen** (`SETTINGS_ZUGANG` in `js/einstellungen.js`): Das erste Passwort öffnet
   nur **Allgemein** und **Bildschirmschoner** – Sichtschutz, Zoom, Nachtansicht, Diaschau,
-  also das, was im Dienst gebraucht wird. Das zweite Passwort gibt alle Reiter frei,
+  also das, was im Dienst gebraucht wird. **Welche** Reiter das sind, legt die volle Stufe im
+  Reiter **Berechtigungen** fest (ab Werk Allgemein und Bildschirmschoner); der Reiter
+  Berechtigungen selbst steht dort nie zur Wahl, und mindestens einer muss offenbleiben.
+  Das zweite Passwort gibt alle Reiter frei,
   einschließlich Bettplätzen, Spaltenköpfen, Auswahllisten, Statistik und dem Bereich Daten
   mit Export, Import und „Tafel leeren“. Mit der einfachen Stufe erscheinen die übrigen
   Reiter gar nicht erst. Die Passwörter liegen als **PBKDF2-Ableitung** mit eigenem Salt vor
@@ -318,6 +321,11 @@ Spalte der Tafel zugeordnet.
 - **Bedienleiste** oben rechts: „Datenschutz“, „Diaschau“ und „Druck Visite“ mit Symbol sowie die
   Umschaltung der Tag-/Nachtansicht. Export, Import und „Tafel leeren“ stehen in den Einstellungen
   unter „Daten“
+- **Kontextmenü der rechten Maustaste**: unter Einstellungen → Allgemein abschaltbar (ab Werk
+  unterdrückt). **In Eingabefeldern bleibt es immer erreichbar** – dort hängen die Vorschläge
+  der Rechtschreibprüfung und das Einfügen per Maus daran. Tastenkürzel wie `F12` oder
+  `Strg + R` lassen sich damit nicht abstellen; dafür ist der Kioskbetrieb des Browsers
+  zuständig (siehe [INSTALLATION.md](INSTALLATION.md))
 - **Bettplatz räumen** über das `×` in der Bettspalte
 - **Export/Import** als JSON (Belegung, Angaben zur Schicht und Einstellungen) sowie
   CSV-Export für Excel

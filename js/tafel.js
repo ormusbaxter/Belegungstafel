@@ -486,6 +486,16 @@ function cycleTheme() {
   applyTheme();
 }
 
+/* Kontextmenü unterdrücken, außer in Eingabefeldern: Dort hängen die
+   Vorschläge der Rechtschreibprüfung und das Einfügen per Maus daran. */
+function initKontextmenue() {
+  document.addEventListener('contextmenu', event => {
+    if (settings.kontextmenue) return;
+    if (event.target.closest('input, textarea')) return;
+    event.preventDefault();
+  });
+}
+
 function init() {
   initLogo();
   initTheme();
@@ -496,6 +506,7 @@ function init() {
   renderPhones();
   renderStats();
   initHelp();
+  initKontextmenue();
   initDragDrop();
   initKeyboardNav();
   initAutoSize();

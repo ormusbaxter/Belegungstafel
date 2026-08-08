@@ -60,12 +60,11 @@ async function pruefeZugang(eingabe) {
   return '';
 }
 
-/* Reiter, die mit der einfachen Stufe offenstehen */
-const EINFACHE_REITER = ['allgemein', 'schoner'];
-
 let rechte = 'einfach';
 const vollerZugriff = () => rechte === 'voll';
-const reiterErlaubt = key => vollerZugriff() || EINFACHE_REITER.includes(key);
+/* Welche Reiter die einfache Stufe sieht, legt die volle Stufe unter
+   „Berechtigungen“ fest. */
+const reiterErlaubt = key => vollerZugriff() || settings.rechte.einfach.includes(key);
 
 function askPassword() {
   const dlg = $('#pwDlg');
@@ -87,16 +86,7 @@ function openSettings(stufe) {
 function renderTabs() {
   const box = $('#settingsTabs');
   box.replaceChildren();
-  const tabs = [
-    { key: 'allgemein', label: 'Allgemein' },
-    { key: 'schoner', label: 'Bildschirmschoner' },
-    { key: 'statistik', label: 'Statistik' },
-    { key: 'header', label: 'Spaltenköpfe' },
-    { key: 'betten', label: 'Bettplätze' },
-    ...OPTION_CATEGORIES,
-    { key: 'daten', label: 'Daten' }
-  ];
-  for (const tab of tabs) {
+  for (const tab of alleReiter()) {
     /* Mit der einfachen Stufe erscheinen die übrigen Reiter gar nicht erst –
        so ist von vornherein klar, was sich ändern lässt. */
     if (!reiterErlaubt(tab.key)) continue;
@@ -105,7 +95,7 @@ function renderTabs() {
     btn.addEventListener('click', () => { activeTab = tab.key; renderTabs(); renderPane(); });
     box.appendChild(btn);
   }
-  $('#settingsReset').hidden = activeTab === 'allgemein' || activeTab === 'daten';
+  $('#settingsReset').hidden = ['allgemein', 'daten', 'rechte'].includes(activeTab);
 }
 
 function renderPane() {
@@ -115,6 +105,7 @@ function renderPane() {
   if (activeTab === 'schoner') return renderSaverPane(pane);
   if (activeTab === 'statistik') return renderStatistikPane(pane);
   if (activeTab === 'daten') return renderDataPane(pane);
+  if (activeTab === 'rechte') return renderRechtePane(pane);
   if (activeTab === 'header') return renderHeaderPane(pane);
   if (activeTab === 'betten') return renderBedPane(pane);
 
@@ -459,6 +450,16 @@ function renderGeneralPane(pane) {
     'Katecholamine stehen in den gleichnamigen Reitern.'));
   pane.appendChild(checkRow('Schaltfläche anzeigen', draft.uebergabe.button,
     on => { draft.uebergabe.button = on; }));
+
+  pane.appendChild(el('h3', null, '7. Rechte Maustaste'));
+  pane.appendChild(el('p', 'panehint',
+    'Das Kontextmenü des Browsers klappt bei einem Fehlklick auf die Tafel auf und bietet ' +
+    'Einträge wie „Neu laden“ oder „Seitenquelltext anzeigen“, die im Dienst niemand ' +
+    'braucht. In Eingabefeldern bleibt es immer erreichbar – dort hängen die Vorschläge der ' +
+    'Rechtschreibprüfung und das Einfügen per Maus daran. Tastenkürzel wie F12 oder Strg + R ' +
+    'lassen sich damit nicht abstellen; dafür ist der Kioskbetrieb des Browsers zuständig.'));
+  pane.appendChild(checkRow('Kontextmenü der rechten Maustaste zulassen', draft.kontextmenue,
+    on => { draft.kontextmenue = on; }));
 }
 
 /* Beschriftung der Spaltenköpfe */
@@ -896,6 +897,47 @@ function renderBedEntries(list) {
     row.appendChild(remove);
     list.appendChild(row);
   });
+}
+
+/* Berechtigungen: Was die einfache Zugangsstufe ändern darf.
+ *
+ * Nur mit der vollen Stufe erreichbar – der Reiter steht selbst nie zur
+ * Wahl, sonst könnte sich die einfache Stufe darüber alles freischalten. */
+function renderRechtePane(pane) {
+  pane.appendChild(el('h3', null, 'Berechtigungen'));
+  pane.appendChild(el('p', 'panehint',
+    'Welche Reiter mit dem ersten Passwort offenstehen. Angehakt heißt: Die Schicht darf ' +
+    'diesen Bereich ändern. Alles Übrige erscheint dort gar nicht erst. Mit dem zweiten ' +
+    'Passwort ist ohnehin alles erreichbar.'));
+
+  const liste = draft.rechte.einfach;
+  const box = el('div', 'rechteliste');
+
+  for (const reiter of alleReiter()) {
+    if (RECHTE_TABU.includes(reiter.key)) continue;
+    const zeile = checkRow(reiter.label, liste.includes(reiter.key), an => {
+      if (an) { if (!liste.includes(reiter.key)) liste.push(reiter.key); }
+      else {
+        /* Ohne einen einzigen Reiter öffnete das erste Passwort ein leeres
+           Fenster – dann lieber gar nichts wegnehmen. */
+        if (liste.length <= 1) {
+          alert('Mindestens ein Reiter muss der einfachen Stufe offenstehen.');
+          renderPane();
+          return;
+        }
+        liste.splice(liste.indexOf(reiter.key), 1);
+      }
+    });
+    if (reiter.key === 'daten') {
+      zeile.appendChild(el('span', 'rechtewarn',
+        'enthält Export, Import und „Tafel leeren“'));
+    }
+    box.appendChild(zeile);
+  }
+  pane.appendChild(box);
+  pane.appendChild(el('p', 'panehint',
+    'Der Reiter „Berechtigungen“ selbst steht nicht zur Wahl – er bleibt der vollen Stufe ' +
+    'vorbehalten.'));
 }
 
 function renderDataPane(pane) {

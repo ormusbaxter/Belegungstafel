@@ -26,6 +26,8 @@ function grundEinstellungen() {
     /* Ein Stil je Spalte, nicht je Eintrag */
     styles: Object.fromEntries(OPTION_CATEGORIES.filter(hatStil).map(c => [c.key, {}])),
     privacy: { on: true, seconds: 120 },
+    kontextmenue: DEFAULT_KONTEXTMENUE,
+    rechte: { einfach: [...DEFAULT_RECHTE.einfach] },
     screensaver: copy(DEFAULT_SAVER),
     zoom: 100,
     autoTheme: false,
@@ -133,6 +135,15 @@ function mergeSettings(target, source) {
     target.privacy.on = source.privacy.on !== false;
     const seconds = parseInt(source.privacy.seconds, 10);
     if (Number.isFinite(seconds)) target.privacy.seconds = Math.min(3600, Math.max(5, seconds));
+  }
+  if (typeof source.kontextmenue === 'boolean') target.kontextmenue = source.kontextmenue;
+  if (source.rechte && Array.isArray(source.rechte.einfach)) {
+    /* Nur bekannte Reiter übernehmen, und niemals einen gesperrten. Eine
+       leere Liste würde der einfachen Stufe ein Fenster ohne Inhalt zeigen –
+       dann gilt wieder die Vorgabe. */
+    const erlaubt = alleReiter().map(t => t.key).filter(k => !RECHTE_TABU.includes(k));
+    const liste = source.rechte.einfach.filter(k => erlaubt.includes(k));
+    target.rechte.einfach = liste.length ? liste : [...DEFAULT_RECHTE.einfach];
   }
   const zoom = parseInt(source.zoom, 10);
   if (Number.isFinite(zoom)) target.zoom = clampZoom(zoom);

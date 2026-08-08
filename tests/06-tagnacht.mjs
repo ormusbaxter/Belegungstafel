@@ -24,7 +24,7 @@ gleich('keine Beschriftung', (await stand(tag)).label, '');
 /* ---- Option einschalten ---- */
 await oeffneEinstellungen(tag, 'Allgemein');
 const kaesten = await tag.$$('#settingsPane .setrow input[type=checkbox]');
-gleich('vier Kästchen unter Allgemein', kaesten.length, 4);
+gleich('fünf Kästchen unter Allgemein', kaesten.length, 5);
 gleich('Zeitfelder zunächst gesperrt',
   await tag.$$eval('.timefield', is => is.map(i => i.disabled).join(',')), 'true,true');
 await kaesten[2].check();

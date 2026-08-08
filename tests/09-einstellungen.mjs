@@ -109,6 +109,63 @@ gleich('Seitenfeld nur beim Dateieintrag', seitenfelder.join(','), 'true,false')
 await page.click('#settingsCancel');
 keineFehler(page);
 
+/* ---- Berechtigungen: was die einfache Stufe ändern darf ---- */
+await oeffneEinstellungen(page, 'Berechtigungen');
+const rechteZeilen = await page.$$eval('.rechteliste .setrow span:first-of-type',
+  ss => ss.map(s => s.textContent));
+pruefe('ein Kästchen je Reiter', rechteZeilen.length > 10, rechteZeilen.length + ' Reiter');
+pruefe('„Berechtigungen“ steht nicht zur Wahl', !rechteZeilen.includes('Berechtigungen'));
+gleich('ab Werk zwei Reiter frei',
+  await page.evaluate(() => settings.rechte.einfach.join(',')), 'allgemein,schoner');
+
+/* Statistik dazugeben */
+await page.click('.rechteliste .setrow:has(span:text-is("Statistik")) input');
+await page.click('#settingsSave');
+await page.waitForTimeout(300);
+gleich('neue Berechtigung gespeichert',
+  await page.evaluate(() => settings.rechte.einfach.join(',')), 'allgemein,schoner,statistik');
+
+/* Die einfache Stufe sieht den Reiter jetzt */
+await oeffneEinstellungen(page, null, 'Vinzenz1');
+gleich('einfache Stufe sieht drei Reiter',
+  (await page.$$eval('#settingsTabs .tab', ts => ts.map(t => t.textContent))).join(' | '),
+  'Allgemein | Bildschirmschoner | Statistik');
+await page.click('#settingsCancel');
+await page.waitForTimeout(200);
+
+/* Zurücknehmen, und die letzte Berechtigung lässt sich nicht entfernen */
+await oeffneEinstellungen(page, 'Berechtigungen');
+await page.click('.rechteliste .setrow:has(span:text-is("Statistik")) input');
+await page.click('.rechteliste .setrow:has(span:text-is("Bildschirmschoner")) input');
+await page.waitForTimeout(120);
+await page.click('.rechteliste .setrow:has(span:text-is("Allgemein")) input');
+await page.waitForTimeout(150);
+gleich('die letzte Berechtigung bleibt bestehen',
+  await page.evaluate(() => draft.rechte.einfach.join(',')), 'allgemein');
+await page.click('#settingsSave');
+await page.waitForTimeout(300);
+
+/* ---- Rechte Maustaste ---- */
+const menue = () => page.evaluate(() => {
+  const treffer = ziel => {
+    const ereignis = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+    document.querySelector(ziel).dispatchEvent(ereignis);
+    return !ereignis.defaultPrevented;
+  };
+  return { tabelle: treffer('#tbody tr:first-child td.col-bed'), feld: treffer('#noteInfos') };
+});
+let stand = await menue();
+pruefe('über der Tafel unterdrückt', !stand.tabelle);
+pruefe('im Textfeld erlaubt', stand.feld);
+
+await oeffneEinstellungen(page, 'Allgemein');
+await page.click('#settingsPane .setrow:has-text("Kontextmenü der rechten Maustaste") input');
+await page.click('#settingsSave');
+await page.waitForTimeout(300);
+stand = await menue();
+pruefe('eingeschaltet auch über der Tafel erlaubt', stand.tabelle);
+keineFehler(page);
+
 /* ---- Meldestatus: Stufen und Farben aus den Einstellungen ---- */
 const stufen = () => page.$$eval('#meldestatus option', os => os.map(o => o.textContent));
 gleich('ausgelieferte Stufen', (await stufen()).join(' | '), 'grün | gelb | rot');
