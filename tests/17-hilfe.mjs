@@ -61,7 +61,7 @@ pruefe('kein Abschnitt „Sicherung“', !titel.includes('Sicherung'));
 
 /* Was die Schicht braucht, steht weiterhin drin. */
 for (const abschnitt of ['Eingeben und ändern', 'Fehlende Angaben', 'Datenschutz',
-                         'Übergabezettel', 'Statistik je Schicht']) {
+                         'Übergabezettel', 'Blatt für die Physiotherapie']) {
   pruefe('Abschnitt „' + abschnitt + '“ vorhanden', titel.includes(abschnitt));
 }
 

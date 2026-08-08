@@ -4,6 +4,21 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.22.2
+
+Kürzungen in der Kurzanleitung, aus dem Stationsbetrieb.
+
+- entfallen: der Zusatz zu Schichtleitung/Blutzuständigkeit/Notfallequipment („gelten für die
+  ganze Station …“), die drei Absätze zu Zeilenfarben und Trennlinien unter „Kennzeichen und
+  Farben“, der Warnhinweis zum Touchscreen beim Ziehen und Ablegen, der Warnhinweis zur
+  Lebensdauer des Verlaufs sowie die sechs Aufzählungspunkte zur Einrichtung der Diaschau
+- der Hinweis auf die Fußzeile der Ausdrucke nennt jetzt kurz den **Datenmüll** statt den
+  Datenschutzbehälter samt Erklärung
+- das Kapitel **Statistik je Schicht** ist entfallen; die Kurzanleitung führt damit
+  13 Abschnitte statt 14
+
+Die Anwendung selbst ist unverändert – gestrichen wurde nur beschreibender Text.
+
 ## 2.22.1
 
 Zwei Fehler an den Trennlinien aus 2.21.0, beide aus dem Stationsbetrieb gemeldet.
