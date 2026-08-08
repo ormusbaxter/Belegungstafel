@@ -487,6 +487,22 @@ Arbeitsplatzes und stehen in [INSTALLATION.md](INSTALLATION.md):
 - **In `slides/` gehören nur geprüfte Dateien**, weil PDFs im Betrachter des Browsers
   angezeigt werden
 
+## Lizenz
+
+**MIT** – siehe [LICENSE](LICENSE). Nutzen, ändern, weitergeben und von Dritten pflegen lassen
+ist ausdrücklich erlaubt; beizulegen ist allein der Urheberrechtsvermerk. Die Software wird
+**ohne Gewähr** bereitgestellt – sie ist kein Medizinprodukt, die Verantwortung für den Betrieb
+liegt beim einsetzenden Haus (siehe [DATENSCHUTZ.md](DATENSCHUTZ.md)).
+
+Die Lizenz gehört in jeden Auslieferungsstand: `LICENSE` steht deshalb **nicht** in
+`.gitattributes` unter `export-ignore` und liegt im Archiv aus `release.sh` neben `index.html`.
+
+Für den Einsatz im Haus gehört daneben schriftlich festgehalten, dass die Tafel privat
+entstanden ist und welche Rechte das Haus erhält – § 69b UrhG weist die vermögensrechtlichen
+Befugnisse dem Arbeitgeber nur zu, wenn ein Programm in Wahrnehmung der Aufgaben oder nach
+seinen Anweisungen entsteht. Ohne diese Klärung bleibt offen, wer die Tafel künftig ändern
+lassen darf.
+
 ## Datenschutz
 
 Die Anwendung überträgt keine Daten. Sämtliche Eingaben verbleiben im Browser des

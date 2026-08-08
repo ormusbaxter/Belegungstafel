@@ -4,6 +4,19 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.22.3
+
+- **Lizenz ergänzt: MIT** (`LICENSE`, mit deutscher Lesefassung). Ohne Lizenzdatei galt
+  „alle Rechte vorbehalten" – das Haus hätte die Tafel formal weder ändern noch von einem
+  Dritten pflegen lassen dürfen, also genau die Abhängigkeit von einer Person, die eine
+  Übergabe auflösen soll
+- die Datei steht **nicht** unter `export-ignore` und liegt damit in jedem Auslieferungsstand
+  neben `index.html`
+- der Fuß der Kurzanleitung nennt sie mit: „© 2026 Oliver Becker · MIT-Lizenz". Damit steht
+  auf dem Stationsrechner selbst, unter welchen Bedingungen die Tafel läuft
+- `DATENSCHUTZ.md` führt Lizenz und die noch offene Rechteklärung nach § 69b UrhG als eigene
+  Zeile im Kopf
+
 ## 2.22.2
 
 Kürzungen in der Kurzanleitung, aus dem Stationsbetrieb.

@@ -13,6 +13,7 @@ Angaben, die dafür gebraucht werden.
 | Fassung | siehe `js/konfiguration.js`, `VERSION`, und `CHANGELOG.md` |
 | Zweck | Organisation der laufenden Schicht: Wer liegt auf welchem Bettplatz, welche Vorkehrungen sind zu treffen, wer ist zuständig |
 | Verantwortlich | ⟨Klinik, Abteilung⟩ |
+| Software | Belegungstafel, MIT-Lizenz (siehe `LICENSE`); Rechteklärung nach § 69b UrhG: ⟨Stand eintragen⟩ |
 | Fachlich zuständig | ⟨Stationsleitung⟩ |
 | Betrieb | ⟨Arbeitsplätze, auf denen die Tafel läuft – vollständig aufführen⟩ |
 | Ablösung von | bisherige Excel-Tabelle gleichen Inhalts |

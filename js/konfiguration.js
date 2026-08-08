@@ -22,7 +22,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.22.2';
+const VERSION = '2.22.3';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -44,7 +44,7 @@ function istVerstorben(name) {
 
 /* Frühere Textkürzel werden beim Einlesen auf die Pfeile umgestellt. */
 const STATUS_LEGACY = { 'A >>>': ARROW_IN, 'A >>': ARROW_IN, '<<< V': ARROW_OUT, '<< V': ARROW_OUT };
-const COPYRIGHT = '\u00A9 2026 Oliver Becker';
+const COPYRIGHT = '\u00A9 2026 Oliver Becker \u00B7 MIT-Lizenz';
 
 /* Bezeichnung der Tafel: Krankenhaus und Station stehen nebeneinander im
    Seitenkopf und werden in den Einstellungen unter „Daten“ gepflegt. Die
