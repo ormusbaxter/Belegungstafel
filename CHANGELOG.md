@@ -4,6 +4,19 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.20.1
+
+- **Eine einzelne Marke stand vier Pixel zu hoch.** Betroffen war jede Zelle der
+  Mehrfachauswahl – Beatmung, Kreislauf, Isolation, Therapielimitierung, Abstriche –, sobald
+  genau ein Eintrag darin stand: Der Text saß auf 17 statt auf 21 Pixel, während die
+  Auswahlfelder der Nachbarspalten auf 20 standen. Bei mehreren Einträgen fiel es nicht auf,
+  weil die Zeilen die Höhe ausfüllten
+
+  Ursache war die Voreinstellung `align-items: stretch` des Flex-Kastens: Die einzelne Marke
+  wurde über die volle Höhe des Feldes gezogen, und ihr Text stand oben in dem zu hohen
+  Kästchen. Mit `align-items: center` und `align-content: center` steht der Text jetzt auf
+  20 Pixel – genau wie die Auswahlfelder daneben
+
 ## 2.20.0
 
 - **Auch einzelne Unterpunkte der Einstellungen lassen sich freigeben oder wegnehmen** – die

@@ -712,6 +712,13 @@ tr:hover .clearbed, .clearbed:focus-visible { opacity: 1; }
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  /* Ohne diese beiden Angaben gilt „stretch“: Eine einzelne Marke wird über
+     die volle Höhe des Feldes gezogen, und ihr Text sitzt dann oben in dem
+     zu hohen Kästchen – rund vier Pixel über der Mitte, in der die Auswahl-
+     felder der Nachbarspalten stehen. align-items zentriert die Marke in
+     ihrer Zeile, align-content den Block aus mehreren Zeilen im Feld. */
+  align-items: center;
+  align-content: center;
   gap: 3px;
   width: 100%;
   min-height: 30px;

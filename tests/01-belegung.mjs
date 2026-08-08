@@ -39,6 +39,45 @@ await page.waitForTimeout(400);
 gleich('nach dem Neuladen', await belegt(), '1 / 13');
 gleich('Name blieb erhalten', await page.inputValue('tr[data-bed="1a"] td.col-name input'), 'gesperrt');
 
+/* ---- Alle Zellinhalte stehen auf einer Höhe ---- */
+await page.evaluate(() => {
+  Object.assign(state.beds['3'], {
+    name: 'Einzel, Eva', status: '●', disziplin: 'KARD',
+    beatmung: ['NIV'], kreislauf: ['ECMO'], dialyse: 'CiCa',
+    isolation: [{ v: 'VRE', s: 'bestaetigt' }], limitierung: ['DNR'],
+    /* macht die Zeile hoch – erst dann fällt eine Abweichung auf */
+    sonstiges: 'Eine lange Bemerkung, die über mehrere Zeilen läuft und die Zeile '
+      + 'deutlich höher macht, damit sich die Ausrichtung zeigt.'
+  });
+  buildBody();
+});
+await page.waitForTimeout(300);
+
+const hoehen = await page.evaluate(() => {
+  const zeile = document.querySelector('tr[data-bed="3"]');
+  const bezug = zeile.getBoundingClientRect();
+  const mitte = kasten => Math.round((kasten.top + kasten.bottom) / 2 - bezug.top);
+  /* Beim Text zählt, wo er wirklich steht – nicht, wo sein Kästchen sitzt.
+     Ein gedehntes Kästchen ist mittig, sein Text aber oben. */
+  const textMitte = sel => {
+    const bereich = document.createRange();
+    bereich.selectNodeContents(zeile.querySelector(sel));
+    return mitte(bereich.getBoundingClientRect());
+  };
+  return {
+    select: mitte(zeile.querySelector('td.col-dialyse select').getBoundingClientRect()),
+    beatmung: textMitte('td.col-beatmung .chip'),
+    kreislauf: textMitte('td.col-kreislauf .chip'),
+    isolation: textMitte('td.col-isolation .chip'),
+    limitierung: textMitte('td.col-limitierung .chip')
+  };
+});
+for (const spalte of ['beatmung', 'kreislauf', 'isolation', 'limitierung']) {
+  pruefe('einzelne Marke steht wie die Auswahlfelder: ' + spalte,
+    Math.abs(hoehen[spalte] - hoehen.select) <= 1,
+    hoehen[spalte] + ' px gegen ' + hoehen.select + ' px');
+}
+
 /* ---- Ziehbild: die ganze Zeile hängt am Zeiger, nicht nur die Bettzelle ---- */
 await page.evaluate(() => {
   Object.assign(state.beds['2'], {
