@@ -82,6 +82,7 @@ Zwei Dinge sind dabei zu beachten:
 | `14-datenschutz-verstorben.mjs` | Umfang des Sichtschutzes, Kreuz und dunkle Namenszelle |
 | `15-ausgaben-sicherheit.mjs` | Formeln in der CSV, Prüfung importierter Statistik, Freitext bleibt Text |
 | `16-uebergabe-norton.mjs` | Norton-Fälligkeit, Klammerwerte, Plausibilität, Übergabezettel |
+| `17-hilfe.mjs` | Kurzanleitung: Menü der Abschnitte, keine Inhalte für die Administration |
 
 `lib.mjs` enthält die gemeinsamen Hilfen: Browserstart, Prüfungen, das Setzen von
 Einstellungen ohne Umweg über den Dialog und einen kleinen Webserver für die Prüfungen,
@@ -89,7 +90,7 @@ die einen solchen voraussetzen.
 
 ## Eine Prüfung ergänzen
 
-Neue Datei nach dem Muster `17-name.mjs` anlegen:
+Neue Datei nach dem Muster `18-name.mjs` anlegen:
 
 ```js
 import { browserStarten, neueSeite, testName, gleich, keineFehler, bilanz } from './lib.mjs';

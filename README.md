@@ -204,9 +204,14 @@ Spalte der Tafel zugeordnet.
   Kastens auf, sind dadurch **immer gleich hoch** und lassen sich nicht von Hand ziehen – die
   Höhe kommt aus dem Platz. Rechts bleibt eine Gasse für die schwebenden Schaltflächen frei
 - **Hilfe** über den runden Fragezeichen-Knopf unten rechts, oberhalb des Zahnrads: eine
-  Kurzanleitung für die Bedienung der Tafel – Eingabe der Felder, Zählung der belegten Betten,
+  Kurzanleitung **für die Schicht** – Eingabe der Felder, Zählung der belegten Betten,
   Verschieben per Ziehen und Ablegen, Kennzeichen und Zeilenfarben, Datenschutz,
-  Bildschirmschoner sowie Speichern, Drucken und Austausch. Am Fuß stehen Fassung und Urheberhinweis
+  Bildschirmschoner, Ansicht und Größe, Drucken, Übergabezettel, Physio-Blatt und Statistik.
+  Links steht ein **Menü der Abschnitte**, das aus den Überschriften des Textes entsteht
+  (`helpMenueAufbauen()` in `js/tafel.js`) und beim Blättern mitwandert.
+  Was allein die Administration betrifft – Passwortstufen, Vorgabedatei, Sicherung, Kennung,
+  Export und Import –, steht **nicht** in der Hilfe, sondern in
+  [INSTALLATION.md](INSTALLATION.md). Am Fuß stehen Fassung und Urheberhinweis
 - **Verschieben per Ziehen und Ablegen**: Bettplatz-Zelle greifen und auf einen anderen
   Bettplatz ziehen. Ist das Ziel belegt, tauschen beide Plätze ihre Einträge. Am Zeiger hängt
   ein Abbild der **gesamten Zeile** statt nur der angefassten Zelle (`zeileAlsZiehbild()` in
@@ -375,7 +380,7 @@ Spalte der Tafel zugeordnet.
 
 ## Prüfungen
 
-Im Ordner `tests/` liegen **16 Testdateien**, die die Tafel in einem echten Browser bedienen
+Im Ordner `tests/` liegen **17 Testdateien**, die die Tafel in einem echten Browser bedienen
 (Chromium über Playwright) und das Ergebnis prüfen – Zählung, Pfeile, Ausdruck, Zoom,
 Bildschirmschoner, Tag-/Nachtansicht, Verlauf, Sicherung, Einstellungen, Pflichtangaben,
 Physio- und Visitendruck, Stationsvorgabe, Statistik, Sichtschutz, Sicherheit der Ausgaben

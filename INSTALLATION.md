@@ -108,6 +108,69 @@ Beide schreiben in denselben Speicher.
 
 ---
 
+## Hintergrund: drei Dinge, die nur die Administration betreffen
+
+Diese Erläuterungen standen bis 2.17.0 in der Kurzanleitung der Tafel. Dort haben sie nichts
+zu suchen – die Hilfe richtet sich an die Schicht.
+
+### Zugang zu den Einstellungen
+
+Das Zahnrad fragt nach einem Passwort; es gibt **zwei Stufen**:
+
+- Das **erste** öffnet nur **Allgemein** und **Bildschirmschoner** – Sichtschutz, Größe der
+  Darstellung, Tag-/Nachtansicht, Norton-Abstand, Übergabezettel-Schaltfläche und die Inhalte
+  der Diaschau. Das ist, was im Dienst gebraucht wird; die übrigen Reiter erscheinen dabei
+  gar nicht.
+- Das **zweite** gibt alles frei: Bettplätze, Spaltenköpfe, sämtliche Auswahllisten, den
+  Meldestatus, die Statistik und den Bereich **Daten** mit Bezeichnung der Tafel, Export,
+  Import, Sicherung und „Tafel leeren".
+
+Der Unterschied soll verhindern, dass im Dienst versehentlich etwas verstellt wird, das die
+ganze Station betrifft. Die Passwörter stehen nicht im Klartext in den Dateien, hinterlegt ist
+nur eine PBKDF2-Ableitung. **Ein Zugriffsschutz ist das trotzdem nicht:** Wer die Dateien
+ändern darf, kann die Abfrage entfernen. Dagegen hilft allein der Schreibschutz des Ordners.
+
+Neue Passwörter erzeugt `node werkzeuge/passwort.mjs <einfach|voll> "<Passwort>"`.
+
+### Vorgabe der Station
+
+Die Tafel wird mit Beispiellisten ausgeliefert. Ist sie einmal nach den Gepflogenheiten der
+Station eingerichtet, hält **Einstellungen → Daten → „Aktuelle Einstellungen als Vorgabe
+sichern"** diesen Stand als Datei `vorgaben.js` fest. Sie ersetzt die gleichnamige Datei im
+Ordner `js/`.
+
+Danach gilt:
+
+- Ein **neuer Arbeitsplatz** – oder ein Browser, dessen Daten gelöscht wurden – startet sofort
+  mit den Bettplätzen, Listen, Farben und Zeiten der Station.
+- **Kategorie zurücksetzen** im Einstellungsfenster führt auf diese Werte zurück, nicht mehr
+  auf die ausgelieferten Beispiele.
+- Auf einem bereits eingerichteten Arbeitsplatz ändert sich **nichts**: Was dort gespeichert
+  ist, hat Vorrang.
+
+Die Datei enthält **ausschließlich Einstellungen, keine Patientendaten**, und darf deshalb
+unbedenklich auf andere Rechner mitgenommen werden.
+
+### Sicherung und Kennung
+
+Die Tafel liegt ausschließlich im Browser dieses Rechners. Wird das Browserprofil zurückgesetzt
+oder der Rechner getauscht, ist alles verloren. Unter **Daten** lässt sich eine **tägliche
+Sicherung** einschalten:
+
+- **Ablage in einem Ordner**: einmalig „Ordner wählen …" anklicken und bestätigen – gern auf
+  einem Netzlaufwerk. Der Browser merkt sich die Freigabe, sie hängt aber am Browserprofil und
+  lässt sich nicht mitliefern.
+- **Ablage im Download-Ordner** des Browsers, falls kein Ordner gewählt werden kann. Als Ablage
+  für Klarnamen ist er nicht geeignet.
+- Wie viele Sicherungen aufgehoben werden, ist einstellbar; ältere entfernt die Tafel selbst.
+- **Jetzt sichern** schreibt sofort, unabhängig vom Tagesrhythmus.
+
+Unter **Kennung dieser Tafel** steht, unter welchem Namen diese Tafel ihre Daten führt
+(`data-instanz` in `index.html`). Sie ist nur wichtig, wenn auf einem Rechner **mehrere Kopien**
+liegen: Ohne eigene Kennung teilen sie sich denselben Speicher.
+
+---
+
 ## Was auf dem Rechner landet
 
 ```

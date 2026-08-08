@@ -4,6 +4,24 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.17.0
+
+- **Die Kurzanleitung richtet sich nur noch an die Schicht.** Drei Abschnitte betrafen
+  ausschließlich die Administration und sind entfallen: **Zugang zu den Einstellungen**
+  (Passwortstufen), **Vorgabe der Station** (`vorgaben.js` erzeugen und einlegen) und
+  **Sicherung** (Sicherungsordner, Aufbewahrung, Kennung der Tafel). Dazu gestrichen: Export,
+  Import und „Tafel leeren“ aus „Speichern, Drucken, Austausch“ – der Abschnitt heißt jetzt
+  **Drucken und Speichern** –, der Absatz über die Statistik-Einstellungen und der Hinweis auf
+  die Sicherungsdateien im Abschnitt Datenschutz
+
+  Verloren ist nichts: Alle drei stehen jetzt ausführlicher in `INSTALLATION.md` unter
+  „Hintergrund: drei Dinge, die nur die Administration betreffen“
+- **Die Hilfe hat ein Menü.** Links stehen die Abschnitte, ein Klick führt an die Stelle, und
+  beim Blättern wandert die Hervorhebung mit. Die Einträge entstehen aus den Überschriften des
+  Textes, nicht aus einer zweiten, von Hand gepflegten Liste – ein neuer Abschnitt erscheint
+  dadurch von selbst. Auf schmalen Schirmen steht das Menü über dem Text statt daneben
+- Der Hinweis auf die Fußzeile der Ausdrucke sprach von „beiden Ausdrucken“; es sind drei
+
 ## 2.16.0
 
 - **Der Meldestatus ist konfigurierbar.** Bisher standen die drei Stufen fest im Markup und

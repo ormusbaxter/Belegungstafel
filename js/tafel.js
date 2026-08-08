@@ -62,8 +62,49 @@ function initHelp() {
     list.appendChild(li);
   }
   $('#helpVersion').textContent = 'Version ' + VERSION + ' \u00B7 ' + COPYRIGHT;
+  helpMenueAufbauen();
   $('#btnHelp').addEventListener('click', () => $('#helpDlg').showModal());
   $('#helpClose').addEventListener('click', () => $('#helpDlg').close());
+}
+
+/* Menü der Kurzanleitung.
+ *
+ * Die Einträge entstehen aus den Überschriften des Textes, nicht aus einer
+ * zweiten, von Hand gepflegten Liste: Ein neuer Abschnitt erscheint dadurch
+ * von selbst, ein entfernter verschwindet. */
+function helpMenueAufbauen() {
+  const nav = $('#helpNav');
+  const body = $('#helpBody');
+  if (!nav || !body) return;
+
+  const abschnitte = [...body.querySelectorAll('section')].filter(a => a.querySelector('h3'));
+  const knoepfe = [];
+  const markiere = aktiv => knoepfe.forEach((knopf, i) =>
+    knopf.classList.toggle('active', i === aktiv));
+
+  abschnitte.forEach((abschnitt, i) => {
+    abschnitt.id = 'help-' + i;
+    const knopf = el('button', 'helplink', abschnitt.querySelector('h3').textContent);
+    knopf.type = 'button';
+    knopf.addEventListener('click', () => {
+      /* scrollIntoView bewegte auch den Dialog; hier wird allein der
+         Textbereich gescrollt. */
+      body.scrollTop = abschnitt.offsetTop - body.offsetTop;
+      markiere(i);
+    });
+    nav.appendChild(knopf);
+    knoepfe.push(knopf);
+  });
+
+  /* Beim Blättern wandert die Markierung mit: hervorgehoben wird der letzte
+     Abschnitt, dessen Beginn noch oberhalb der Lesekante liegt. */
+  body.addEventListener('scroll', () => {
+    const kante = body.scrollTop + body.offsetTop + 40;
+    let aktiv = 0;
+    abschnitte.forEach((abschnitt, i) => { if (abschnitt.offsetTop <= kante) aktiv = i; });
+    markiere(aktiv);
+  });
+  markiere(0);
 }
 
 /* ------------------------------------------------------------------ *

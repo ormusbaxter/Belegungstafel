@@ -169,7 +169,10 @@
 <!-- Hilfe -->
 <dialog id="helpDlg" class="dlg dlg-help">
   <h2>Belegungstafel – Kurzanleitung</h2>
-  <div class="helpbody">
+  <div class="helplayout">
+    <!-- Einträge baut helpMenueAufbauen() aus den Überschriften des Textes. -->
+    <nav class="helpnav" id="helpNav" aria-label="Abschnitte der Kurzanleitung"></nav>
+    <div class="helpbody" id="helpBody">
 
     <section>
       <h3>Eingeben und ändern</h3>
@@ -320,12 +323,10 @@
       <p>Die Schaltfläche <b>Datenschutz</b> oben rechts schaltet sofort um, etwa wenn Besuch die
         Station betritt; dieser Zustand bleibt bis zum nächsten Klick oder Tastendruck bestehen.
         Der Ausdruck bleibt immer vollständig lesbar.</p>
-      <p>Beide <b>Ausdrucke</b> tragen unten eine Zeile mit dem Druckzeitpunkt und dem Hinweis,
+      <p>Alle <b>Ausdrucke</b> tragen unten eine Zeile mit dem Druckzeitpunkt und dem Hinweis,
         dass das Blatt Patientendaten enthält und nach Dienstende in den Datenschutzbehälter
-        gehört – gedacht vor allem für das Physio-Blatt, das die Station verlässt.</p>
-      <p>Die <b>Sicherungsdateien</b> enthalten alle Namen im Klartext. Als Ablage gehört ein
-        Ordner gewählt, den nur die Station lesen kann; der Download-Ordner ist dafür nicht
-        geeignet. Voreingestellt sind sieben Dateien, ältere werden gelöscht.</p>
+        gehört – gedacht vor allem für das Physio-Blatt und den Übergabezettel, die die Station
+        verlassen.</p>
     </section>
 
     <section>
@@ -395,7 +396,7 @@
     </section>
 
     <section>
-      <h3>Speichern, Drucken, Austausch</h3>
+      <h3>Drucken und Speichern</h3>
       <p>Alle Eingaben bleiben <b>lokal auf diesem Rechner</b> im Browser gespeichert; es werden
         keine Daten an einen Server übertragen. Mehrere geöffnete Fenster desselben Rechners
         werden abgeglichen, andere Arbeitsplätze sehen die Tafel jedoch nicht.</p>
@@ -411,33 +412,6 @@
         jeder Bettplatz braucht, und verkleinert die Schrift so weit, bis alles hineingeht.
         Reicht der Platz, werden die Zeilen gleichmäßig über das Blatt verteilt. Erst unterhalb
         einer noch lesbaren Größe läuft der Ausdruck lieber auf eine zweite Seite.</p>
-      <p>Über das Zahnrad unten rechts
-        stehen unter <b>Daten</b> Export (JSON oder CSV), Import und „Tafel leeren“ bereit; dort
-        lassen sich auch Bettplätze, Spaltenköpfe und alle Auswahllisten anpassen.</p>
-      <p>Ebenfalls unter <b>Daten</b> steht die <b>Bezeichnung der Tafel</b>: <b>Krankenhaus</b>
-        und <b>Station</b>. Beide stehen nebeneinander im Seitenkopf neben dem Logo – das Haus
-        als Titel, die Station daneben in leichterer Schrift – und erscheinen außerdem im
-        Fenstertitel, im Kopf des Bildschirmschoners, in der Fußzeile jedes Ausdrucks und in
-        der CSV-Ausgabe. Ein leer gelassenes Feld entfällt, statt eine Lücke zu hinterlassen.</p>
-    </section>
-
-    <section>
-      <h3>Zugang zu den Einstellungen</h3>
-      <p>Das Zahnrad unten rechts fragt nach einem Passwort. Es gibt <b>zwei</b>:</p>
-      <ul>
-        <li>Das <b>erste</b> öffnet <b>Allgemein</b> und <b>Bildschirmschoner</b> – Sichtschutz,
-          Größe der Darstellung, Tag-/Nachtansicht, Norton-Abstand, Übergabezettel-Schaltfläche
-          und die Inhalte der Diaschau. Das ist, was im Dienst gebraucht wird. Die übrigen
-          Reiter erscheinen dabei gar nicht.</li>
-        <li>Das <b>zweite</b> gibt alles frei: Bettplätze, Spaltenköpfe, sämtliche
-          Auswahllisten, die Statistik und den Bereich <b>Daten</b> mit Export, Import,
-          Sicherung und „Tafel leeren“.</li>
-      </ul>
-      <p>Der Unterschied soll verhindern, dass im Dienst versehentlich etwas verstellt wird,
-        das die ganze Station betrifft. Die Passwörter selbst stehen nicht in den Dateien –
-        hinterlegt ist nur eine Ableitung, aus der sie sich nicht zurückrechnen lassen. Ein
-        Zugriffsschutz ist das trotzdem nicht: Wer die Dateien der Anwendung ändern darf,
-        kann die Abfrage entfernen. Dagegen hilft nur der Schreibschutz des Ordners.</p>
     </section>
 
     <section>
@@ -533,51 +507,9 @@
       </ul>
       <p class="warn">Erfasst wird nur, solange die Tafel geöffnet ist. Bleibt der Rechner
         während einer Schicht aus, fehlt diese Schicht in der Auswertung.</p>
-      <p>In den Einstellungen unter <b>Statistik</b> lassen sich die Erfassung ein- und
-        ausschalten, der Abstand der Aufnahmen, die Aufbewahrungsdauer, die Sichtbarkeit der
-        Schaltfläche sowie <b>Bezeichnung und Beginn der Schichten</b> festlegen.</p>
     </section>
 
-    <section>
-      <h3>Vorgabe der Station</h3>
-      <p>Die Tafel wird mit Beispiellisten ausgeliefert. Ist sie einmal nach den Gepflogenheiten
-        der Station eingerichtet, lässt sich dieser Stand als <b>Vorgabe</b> festhalten: In den
-        Einstellungen unter <b>Daten</b> erzeugt <b>„Aktuelle Einstellungen als Vorgabe sichern“</b>
-        die Datei <b>vorgaben.js</b>. Diese in den Ordner <b>js</b> neben die übrigen Dateien
-        legen (die dort liegende gleichnamige Datei ersetzen) und die Tafel neu laden.</p>
-      <p>Danach gilt:</p>
-      <ul>
-        <li>Ein <b>neuer Arbeitsplatz</b> – oder ein Browser, dessen Daten gelöscht wurden –
-          startet sofort mit Ihren Bettplätzen, Listen, Farben und Zeiten.</li>
-        <li><b>Kategorie zurücksetzen</b> im Einstellungsfenster führt auf Ihre Werte zurück,
-          nicht mehr auf die ausgelieferten Beispiele.</li>
-        <li>Auf einem bereits eingerichteten Arbeitsplatz ändert sich <b>nichts</b>: Was dort
-          gespeichert ist, hat Vorrang.</li>
-      </ul>
-      <p>Die Datei enthält <b>ausschließlich Einstellungen und keine Patientendaten</b>; sie darf
-        also unbedenklich kopiert und auf andere Rechner mitgenommen werden.</p>
-    </section>
-
-    <section>
-      <h3>Sicherung</h3>
-      <p>Die Tafel liegt ausschließlich im Browser dieses Rechners. Wird das Browserprofil
-        zurückgesetzt oder der Rechner getauscht, ist alles verloren. Unter <b>Daten</b> lässt
-        sich deshalb eine <b>tägliche Sicherung</b> einschalten: Die Tafel legt dann einmal am
-        Tag eine vollständige Datei ab, die sich über <b>Import</b> wieder einlesen lässt.</p>
-      <ul>
-        <li><b>Ablage in einem Ordner</b>: einmalig „Ordner wählen …“ anklicken und den Ordner
-          bestätigen – gern auf einem Netzlaufwerk. Der Browser merkt sich die Freigabe.</li>
-        <li><b>Ablage im Download-Ordner</b> des Browsers, falls kein Ordner gewählt werden
-          kann.</li>
-        <li>Wie viele Sicherungen aufgehoben werden, ist einstellbar; ältere entfernt die Tafel
-          selbst.</li>
-        <li><b>Jetzt sichern</b> schreibt sofort eine Sicherung, unabhängig vom Tagesrhythmus.</li>
-      </ul>
-      <p>Unter <b>Kennung dieser Tafel</b> steht, unter welchem Namen diese Tafel ihre Daten
-        führt. Sie ist nur wichtig, wenn auf einem Rechner <b>mehrere Kopien</b> der Tafel
-        liegen: Ohne eigene Kennung würden sie sich denselben Speicher teilen.</p>
-    </section>
-
+    </div>
   </div>
   <menu class="dlgmenu">
     <span class="version" id="helpVersion"></span>
