@@ -102,7 +102,24 @@ body {
   background: var(--bg);
   color: var(--ink);
   font: 14px/1.35 "Segoe UI", Roboto, system-ui, sans-serif;
+  /* Die Seite ist eine Spalte über die volle Bildschirmhöhe: Der Kopfbereich
+     nimmt, was er braucht, die Tabelle so viel sie hat, und der Block darunter
+     füllt den Rest. Auf einem hohen Monitor bleibt so kein Streifen leer, und
+     bei voller Station verdrängt die Tabelle die Textfelder nicht. */
+  display: flex;
+  flex-direction: column;
+  /* Feste Höhe, nicht bloß eine Mindesthöhe: Nur eine nach unten begrenzte
+     Spalte bringt die Tabelle dazu, nachzugeben, statt den Block darunter aus
+     dem Bild zu schieben.
+     Ohne Umrechnung des Zooms: Ein gezoomtes Glied meldet dem Elternknoten
+     bereits seine sichtbare Höhe. */
+  height: 100vh;
+  box-sizing: border-box;
 }
+
+/* Kopfbereich, Statuszeile und Stationsleiste geben nichts ab – sie sind
+   ohnehin flach, und gestaucht wären sie unleserlich. */
+.topbar, .savestate, .stationbar { flex: none; }
 
 .sr-only {
   position: absolute;
@@ -373,11 +390,12 @@ button.undo { margin-left: 10px; padding: 1px 9px; font-size: 11px; border-radiu
 .tablewrap {
   margin: 8px 18px 0;
   overflow: auto;
-  /* Sichtbare Höhe abzüglich Kopfbereich und Textfeldern; beide wachsen mit
-     dem Zoom, deshalb wird die Bildschirmhöhe durch den Zoom geteilt. Bei
-     starker Vergrößerung bleibt eine Mindesthöhe stehen – dann scrollt die
-     Seite statt die Tabelle zu verschwinden. */
-  max-height: max(220px, calc(100vh / var(--zoom) - 300px));
+  /* Nimmt ihre natürliche Höhe, gibt aber nach, wenn der Platz nicht reicht:
+     Dann scrollt die Tabelle in sich, statt den Block darunter zu verdrängen.
+     min-height sichert, dass immer ein paar Zeilen zu sehen sind – notfalls
+     scrollt die Seite. */
+  flex: 0 1 auto;
+  min-height: 220px;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -969,7 +987,15 @@ body.privacy .privacyhint { display: block; }
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   gap: 14px;
-  margin: 10px 18px 0;
+  /* Rechts bleibt eine Gasse für Statistik, Hilfe und Zahnrad frei. Die drei
+     schweben über der Seite; seit der Block die volle Resthöhe einnimmt,
+     lägen sie sonst über dem Textfeld für die Informationen. */
+  margin: 10px 74px 0 18px;
+  /* Füllt die Höhe, die Kopfbereich und Tabelle übrig lassen – gibt aber
+     selbst nichts ab (0 als Schrumpfwert). Sonst fiele der Block bei starker
+     Vergrößerung auf null zusammen, während die Textfelder darin weiter
+     ihren Platz beanspruchen. Reicht die Höhe nicht, scrollt die Seite. */
+  flex: 1 0 auto;
 }
 .note {
   padding: 8px 12px;
@@ -977,6 +1003,11 @@ body.privacy .privacyhint { display: block; }
   border: 1px solid var(--line);
   border-radius: 10px;
   min-width: 0;
+  /* Damit das Textfeld die Höhe des Kastens aufnehmen kann. Die drei Kästen
+     sind durch das Raster ohnehin gleich hoch, die Felder darin folgen. */
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 .note h2 {
   margin: 0 0 6px;
@@ -985,10 +1016,20 @@ body.privacy .privacyhint { display: block; }
   letter-spacing: .5px;
   color: var(--ink-soft);
   font-weight: 700;
+  /* Einzeilig: Bräche „Allgemeine Informationen“ um, stünde für sein Textfeld
+     eine Zeile weniger zur Verfügung als nebenan – die beiden Felder wären
+     verschieden hoch. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .note textarea {
   display: block;
   width: 100%;
+  /* Nimmt die Höhe seines Kastens auf; beide Felder sind dadurch gleich hoch,
+     ohne dass ein Maß gepflegt werden müsste. Nicht von Hand veränderbar –
+     die Höhe kommt aus dem Platz, nicht aus dem Ziehen an einer Ecke. */
+  flex: 1 1 auto;
   min-height: 58px;
   padding: 6px 9px;
   border: 1px solid var(--line);
@@ -997,7 +1038,7 @@ body.privacy .privacyhint { display: block; }
   color: var(--ink);
   font: inherit;
   font-size: 13.5px;
-  resize: vertical;
+  resize: none;
 }
 .note-phones ul {
   display: grid;

@@ -65,6 +65,52 @@ pruefe('Kopfbereich läuft nicht mehr mit',
 await setzeEinstellungen(page, { zoom: 5000 });
 gleich('zu großer Wert wird begrenzt', (await mass()).zoom, '3');
 
+/* ---- Der Block unter der Tafel füllt die Resthöhe ---- */
+await setzeEinstellungen(page, { zoom: 100 });
+
+const fussmass = () => page.evaluate(() => {
+  const h = sel => Math.round(document.querySelector(sel).getBoundingClientRect().height);
+  const felder = [...document.querySelectorAll('.note textarea')]
+    .map(t => Math.round(t.getBoundingClientRect().height));
+  const notes = document.querySelector('.notes').getBoundingClientRect();
+  const knopf = document.querySelector('.gear').getBoundingClientRect();
+  const kasten = document.querySelector('.note-aufnahmen').getBoundingClientRect();
+  return {
+    notes: h('.notes'),
+    felder,
+    /* Was im Kasten neben dem Textfeld noch Platz braucht: Überschrift und
+       Innenabstand. Bleibt es dabei, füllt das Feld den Rest. */
+    rand: Math.round(kasten.height - felder[0]),
+    resize: getComputedStyle(document.querySelector('#noteAufnahmen')).resize,
+    /* Abstand vom unteren Bildrand – der Block soll ihn ausfüllen. */
+    rest: Math.round(window.innerHeight - notes.bottom),
+    seiteScrollt: document.documentElement.scrollHeight > window.innerHeight + 2,
+    ueberdeckt: notes.right > knopf.left
+  };
+});
+
+const voll = await fussmass();
+gleich('beide Textfelder gleich hoch', voll.felder[0], voll.felder[1]);
+pruefe('das Feld füllt seinen Kasten aus', voll.rand < 45, voll.rand + ' px für Überschrift und Rand');
+gleich('nicht von Hand veränderbar', voll.resize, 'none');
+pruefe('der Block reicht bis nach unten', voll.rest <= 40, voll.rest + ' px Rest');
+pruefe('die Seite scrollt dabei nicht', !voll.seiteScrollt);
+pruefe('die schwebenden Schaltflächen liegen nicht darüber', !voll.ueberdeckt);
+
+/* Bei wenigen Bettplätzen bleibt mehr übrig – der Block nimmt es auf. */
+await page.evaluate(() => {
+  settings.beds = [{ id: 'b1', label: '1' }, { id: 'b2', label: '2' }];
+  BEDS = settings.beds;
+  state.beds = { b1: emptyBed(), b2: emptyBed() };
+  buildHead(); buildBody();
+});
+await page.waitForTimeout(300);
+const wenig = await fussmass();
+pruefe('kurze Tafel: der Block wächst mit', wenig.felder[0] > voll.felder[0],
+  voll.felder[0] + ' → ' + wenig.felder[0] + ' px');
+gleich('dabei weiter gleich hoch', wenig.felder[0], wenig.felder[1]);
+pruefe('und weiterhin ohne Seitenscrollen', !wenig.seiteScrollt);
+
 keineFehler(page);
 await browser.close();
 bilanz();

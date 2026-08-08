@@ -4,6 +4,24 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.15.0
+
+- **Der Block unter der Tafel füllt die verbleibende Höhe.** Bisher stand er in fester Höhe
+  unter der Tabelle; auf einem hohen Monitor blieb darunter ein leerer Streifen, und die
+  Textfelder waren 58 px hoch, gleich wie viel Platz da war
+
+  Die Seite ist jetzt eine Spalte über die volle Bildschirmhöhe: Kopfbereich und
+  Stationsleiste nehmen, was sie brauchen, die Tabelle so viel sie hat, und der Block darunter
+  bekommt den Rest. Wird der Platz knapp – viele Bettplätze, kleiner Bildschirm, starke
+  Vergrößerung –, gibt die Tabelle nach und scrollt in sich, statt den Block aus dem Bild zu
+  schieben. Bei dreizehn Bettplätzen auf 1080 Zeilen wachsen die Textfelder von 58 auf 162 px
+- **Die beiden Textfelder sind immer gleich hoch** und lassen sich nicht mehr von Hand ziehen.
+  Die Höhe kommt aus dem Platz, nicht aus dem Ziehen an einer Ecke. Damit sie gleich bleiben,
+  sind die Überschriften einzeilig gesetzt: Bräche „Allgemeine Informationen“ um, stünde
+  daneben eine Zeile mehr zur Verfügung
+- rechts bleibt eine Gasse für Statistik, Hilfe und Zahnrad frei – die drei schweben über der
+  Seite und lägen sonst über dem Textfeld für die Informationen
+
 ## 2.14.1
 
 - **Beim Ziehen hängt die ganze Zeile am Zeiger**, nicht mehr nur die angefasste

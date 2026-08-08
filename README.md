@@ -189,7 +189,11 @@ Spalte der Tafel zugeordnet.
   oder mit Alt + Pfeil nach unten geändert, damit die Pfeiltasten zum Navigieren frei bleiben
 - **Unter der Tafel**: Textfeld für geplante Aufnahmen, feste Rufnummernliste der Station
   und Textfeld für allgemeine Informationen; die beiden Textfelder werden mitgespeichert
-  und exportiert
+  und exportiert. Der Block **füllt die Höhe aus, die Kopfbereich und Tabelle übrig lassen**:
+  Die Seite ist eine Spalte über die volle Bildschirmhöhe, in der die Tabelle nachgibt und in
+  sich scrollt, sobald der Platz knapp wird. Die beiden Textfelder nehmen die Höhe ihres
+  Kastens auf, sind dadurch **immer gleich hoch** und lassen sich nicht von Hand ziehen – die
+  Höhe kommt aus dem Platz. Rechts bleibt eine Gasse für die schwebenden Schaltflächen frei
 - **Hilfe** über den runden Fragezeichen-Knopf unten rechts, oberhalb des Zahnrads: eine
   Kurzanleitung für die Bedienung der Tafel – Eingabe der Felder, Zählung der belegten Betten,
   Verschieben per Ziehen und Ablegen, Kennzeichen und Zeilenfarben, Datenschutz,
