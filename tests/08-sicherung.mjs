@@ -1,6 +1,6 @@
 /* Automatische Sicherung und Kennung der Tafel */
 import { browserStarten, neueSeite, setzeEinstellungen, oeffneEinstellungen,
-         testName, gleich, pruefe, enthaelt, keineFehler, bilanz } from './lib.mjs';
+         testName, gleich, pruefe, enthaelt, keineFehler, bilanz, TIMEOUT } from './lib.mjs';
 
 testName('Sicherung und Kennung');
 const browser = await browserStarten();
@@ -31,7 +31,7 @@ await oeffneEinstellungen(page, 'Daten');
 pruefe('Abschnitt Sicherung vorhanden',
   (await page.textContent('#settingsPane')).includes('Automatische Sicherung'));
 
-const download = page.waitForEvent('download', { timeout: 8000 });
+const download = page.waitForEvent('download', { timeout: TIMEOUT });
 await page.click('#settingsPane button:text-is("Jetzt sichern")');
 const datei = await download;
 pruefe('Sicherungsdatei wird abgelegt', /^belegungstafel-\d{8}-\d{4}\.json$/.test(datei.suggestedFilename()),

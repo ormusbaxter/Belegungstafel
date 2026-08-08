@@ -153,7 +153,11 @@ Spalte der Tafel zugeordnet.
   ohne Färbung
 - **Norton-Skala mit Fälligkeit**: Das Häkchen `Norton` gilt als „heute erhoben“ und setzt den
   nächsten Termin – ab Werk in sieben Tagen, einstellbar unter Allgemein. Er steht als Marke
-  hinter den Häkchen, wird rot, sobald er erreicht ist, und lässt sich per Klick ändern
+  **neben** dem Häkchen, wird rot, sobald er erreicht ist, und lässt sich per Klick ändern.
+  Neben statt darunter, damit die Zelle mit zwei statt drei Zeilen auskommt: Bei voller Station
+  mit überall gesetztem Norton war die Tabelle sonst 723 statt 601 px hoch und musste
+  entsprechend gescrollt werden. Die Spalte ist dafür 152 px breit; den Platz gibt **Sonstiges**
+  ab, das keine feste Breite hat
 - **Werte in Klammern** (`(INV)`, `(CiCa)` …) stehen für geplant, beendet oder nur zeitweise
   und werden gestrichelt umrandet – dieselbe Lesart wie beim Verdacht in der Spalte Isolation.
   Derselbe Wert mit **und** ohne Klammern zugleich ist ein Widerspruch: Die Zelle erhält einen

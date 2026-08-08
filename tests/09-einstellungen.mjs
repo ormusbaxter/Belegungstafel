@@ -1,6 +1,6 @@
 /* Einstellungen: Passwort, Listen, Bettplätze, Diaordner (mit und ohne Server) */
 import { browserStarten, neueSeite, oeffneEinstellungen, serverStarten,
-         testName, gleich, pruefe, enthaelt, keineFehler, bilanz } from './lib.mjs';
+         testName, gleich, pruefe, enthaelt, keineFehler, bilanz, TIMEOUT } from './lib.mjs';
 
 testName('Einstellungen');
 const browser = await browserStarten();
@@ -11,7 +11,7 @@ await page.click('#btnSettings');
 await page.fill('#pwInput', 'falsch');
 await page.click('#pwForm button[type=submit]');
 /* Die Prüfung ist asynchron: Sie leitet den Schlüssel erst ab. */
-await page.waitForSelector('#pwError:not([hidden])', { timeout: 5000 });
+await page.waitForSelector('#pwError:not([hidden])', { timeout: TIMEOUT });
 pruefe('falsches Passwort öffnet nicht', !(await page.isVisible('#settingsDlg')));
 pruefe('Fehlermeldung erscheint', await page.isVisible('#pwError'));
 gleich('mit der erwarteten Meldung', await page.textContent('#pwError'), 'Passwort nicht richtig.');
@@ -27,7 +27,7 @@ gleich('stattdessen zwei Ableitungen',
 /* Einfache Stufe: nur Allgemein und Bildschirmschoner */
 await page.fill('#pwInput', 'Vinzenz1');
 await page.click('#pwForm button[type=submit]');
-await page.waitForSelector('#settingsDlg[open]', { timeout: 5000 });
+await page.waitForSelector('#settingsDlg[open]', { timeout: TIMEOUT });
 pruefe('erstes Passwort öffnet', await page.isVisible('#settingsDlg'));
 const wenige = await page.$$eval('#settingsTabs .tab', ts => ts.map(t => t.textContent));
 gleich('nur zwei Reiter', wenige.join(' | '), 'Allgemein | Bildschirmschoner');
@@ -42,7 +42,7 @@ await page.waitForTimeout(150);
 await page.click('#btnSettings');
 await page.fill('#pwInput', 'Twist114');
 await page.click('#pwForm button[type=submit]');
-await page.waitForSelector('#settingsDlg[open]', { timeout: 5000 });
+await page.waitForSelector('#settingsDlg[open]', { timeout: TIMEOUT });
 pruefe('zweites Passwort öffnet', await page.isVisible('#settingsDlg'));
 
 const reiter = await page.$$eval('#settingsTabs .tab', ts => ts.map(t => t.textContent));

@@ -4,6 +4,20 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.15.1
+
+- **Das Fälligkeitsdatum der Norton-Skala steht neben dem Häkchen statt darunter.** Bei voller
+  Station mit überall gesetztem Norton kostete die Marke je Bettplatz eine dritte Zeile; die
+  Zeile war 51 statt 42 px hoch, die Tabelle 723 statt 601 px, und der sichtbare Ausschnitt
+  musste entsprechend weit gescrollt werden. Auf einem 1920 × 800 großen Ausschnitt sind jetzt
+  141 statt 263 px verdeckt
+- die Spalte **Norton / Pflegestatus** ist dafür 152 statt 92 px breit. Den Platz gibt
+  **Sonstiges** ab – die einzige Spalte ohne festes Maß, die auf jedem Bildschirm aufnimmt, was
+  übrig bleibt. Auf 1920 px behält sie 225 px
+- die Testdateien warten großzügiger auf Downloads und geöffnete Fenster, und ein Prozessorkern
+  bleibt beim gleichzeitigen Lauf frei. Ein Durchlauf war unter Volllast an einer knapp
+  bemessenen Wartezeit gescheitert, ohne dass an der Anwendung etwas fehlte
+
 ## 2.15.0
 
 - **Der Block unter der Tafel füllt die verbleibende Höhe.** Bisher stand er in fester Höhe

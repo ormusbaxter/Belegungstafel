@@ -2,7 +2,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { browserStarten, neueSeite, oeffneEinstellungen, APP_DIR,
-         testName, gleich, pruefe, enthaelt, keineFehler, bilanz } from './lib.mjs';
+         testName, gleich, pruefe, enthaelt, keineFehler, bilanz, TIMEOUT } from './lib.mjs';
 
 testName('Vorgabe der Station');
 const DATEI = join(APP_DIR, 'js', 'vorgaben.js');
@@ -36,7 +36,7 @@ try {
 
   await oeffneEinstellungen(page, 'Daten');
   pruefe('Abschnitt vorhanden', (await page.textContent('#settingsPane')).includes('Vorgabe der Station'));
-  const download = page.waitForEvent('download', { timeout: 8000 });
+  const download = page.waitForEvent('download', { timeout: TIMEOUT });
   await page.click('#settingsPane button:text-is("Aktuelle Einstellungen als Vorgabe sichern")');
   const datei = await download;
   gleich('Dateiname', datei.suggestedFilename(), 'vorgaben.js');

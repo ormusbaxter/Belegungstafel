@@ -45,7 +45,9 @@ const filter = args.filter((a, i) => !a.startsWith('-') && i !== jWert);
 
 const parallel = reihe ? 1
   : jIndex >= 0 ? Math.max(1, parseInt(args[jIndex + 1], 10) || 1)
-  : Math.min(4, Math.max(1, cpus().length));
+  /* Ein Kern bleibt frei: Jeder Test fährt einen eigenen Browser, und bei
+     voller Auslastung geraten zeitabhängige Prüfungen ins Rutschen. */
+  : Math.min(4, Math.max(1, cpus().length - 1));
 
 const vorhanden = (await readdir(TEST_DIR))
   .filter(name => /^\d\d-.*\.mjs$/.test(name))

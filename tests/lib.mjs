@@ -14,6 +14,14 @@ export const TEST_DIR = dirname(fileURLToPath(import.meta.url));
 export const APP_DIR = resolve(TEST_DIR, '..');
 export const APP_URL = 'file://' + join(APP_DIR, 'index.html');
 
+/* Geduld beim Warten auf Ereignisse – Download, geöffneter Dialog.
+ *
+ * Großzügig bemessen, weil mehrere Tests nebeneinander laufen: Auf einem
+ * ausgelasteten Rechner braucht die Passwortprüfung (PBKDF2) oder ein
+ * Download deutlich länger als im Leerlauf. Eine bestandene Prüfung wartet
+ * ohnehin nicht ab, ein knapper Wert erzeugt nur sprunghafte Fehlschläge. */
+export const TIMEOUT = 30000;
+
 /* Playwright kann im Projekt, global oder an einem eigenen Ort liegen. */
 export async function ladePlaywright() {
   const kandidaten = [
@@ -139,7 +147,7 @@ export async function oeffneEinstellungen(page, reiter, passwort) {
   await page.fill('#pwInput', passwort || 'Twist114');
   await page.click('#pwForm button[type=submit]');
   /* Die Passwortprüfung rechnet (PBKDF2) und braucht einen Augenblick. */
-  await page.waitForSelector('#settingsDlg[open]', { timeout: 5000 });
+  await page.waitForSelector('#settingsDlg[open]', { timeout: TIMEOUT });
   await page.waitForTimeout(150);
   if (reiter) {
     await page.click(`#settingsTabs .tab:text-is("${reiter}")`);

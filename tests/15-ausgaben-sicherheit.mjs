@@ -1,7 +1,7 @@
 /* Sicherheit der Ausgaben: Formeln in der CSV, Prüfung importierter Statistik,
    Freitext bleibt Text */
 import { browserStarten, neueSeite, testName, gleich, pruefe, enthaelt,
-         keineFehler, bilanz } from './lib.mjs';
+         keineFehler, bilanz, TIMEOUT } from './lib.mjs';
 
 testName('Sicherheit der Ausgaben');
 const browser = await browserStarten();
@@ -9,7 +9,7 @@ const page = await neueSeite(browser, { zeit: '2026-03-05T09:30:00' });
 
 /* Holt den Inhalt der Datei, die eine Ausgabe erzeugt. */
 async function ausgabe(aufruf) {
-  const laden = page.waitForEvent('download', { timeout: 8000 });
+  const laden = page.waitForEvent('download', { timeout: TIMEOUT });
   await page.evaluate(fn => window[fn](), aufruf);
   const datei = await laden;
   const { readFile } = await import('node:fs/promises');

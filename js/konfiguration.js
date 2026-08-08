@@ -22,7 +22,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.15.0';
+const VERSION = '2.15.1';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -206,7 +206,10 @@ const COLUMNS = [
        ein Fälligkeitsdatum; der Abstand dazu steht in den Einstellungen.
        „Stammblatt“ hieß der zweite Punkt bis Fassung 2.8.1. */
     key: 'norton', label: 'Norton / Pflegestatus', head: 'Norton /­Pflege­status',
-    type: 'checks', width: 92,
+    /* Breit genug, dass das Fälligkeitsdatum neben das erste Häkchen passt und
+       die Zelle mit zwei statt drei Zeilen auskommt. Den Platz gibt die Spalte
+       Sonstiges ab; sie hat keine feste Breite und nimmt auf, was übrig ist. */
+    type: 'checks', width: 152,
     options: ['Norton', 'Pflegestatus'],
     legacyValues: { Stammblatt: 'Pflegestatus' },
     due: 'Norton', dueKey: 'nortonFaellig', dueLabel: 'Norton erneut fällig'

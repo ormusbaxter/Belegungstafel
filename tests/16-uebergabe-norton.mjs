@@ -74,6 +74,53 @@ const in21 = await page.evaluate(() => {
 gleich('eingestellter Abstand gilt',
   await page.textContent('tr[data-bed="1a"] td.col-norton .duebadge'), in21);
 
+/* Die Marke steht neben dem Häkchen, nicht darunter: Bei voller Station mit
+   überall gesetztem Norton wuchs die Tabelle sonst um eine Zeile je Bettplatz. */
+await page.evaluate(() => {
+  /* Der Stand wird danach wiederhergestellt – die folgenden Prüfungen bauen
+     auf genau drei belegten Bettplätzen auf. */
+  window.__vorher = JSON.parse(JSON.stringify(state.beds));
+  BEDS.forEach(bed => Object.assign(state.beds[bed.id], {
+    name: 'Mustermann, Max', status: '\u25cf',
+    norton: ['Norton', 'Pflegestatus'], nortonFaellig: '2026-12-01'
+  }));
+  buildBody();
+});
+await page.waitForTimeout(300);
+
+const nortonlage = await page.evaluate(() => {
+  const zelle = document.querySelector('tr[data-bed="0a"] td.col-norton');
+  const haken = zelle.querySelectorAll('.checkscell label');
+  const marke = zelle.querySelector('.duebadge').getBoundingClientRect();
+  const erstes = haken[0].getBoundingClientRect();
+  const zweites = haken[1].getBoundingClientRect();
+  return {
+    /* Marke rechts vom ersten Häkchen und auf dessen Höhe */
+    rechtsDaneben: marke.left >= erstes.right,
+    aufHoeheDesErsten: marke.top < zweites.top,
+    /* und innerhalb der Spalte, nicht in die Nachbarspalte hinein */
+    imRahmen: Math.round(marke.right) <= Math.round(zelle.getBoundingClientRect().right),
+    zeile: Math.round(document.querySelector('tr[data-bed="0a"]').getBoundingClientRect().height)
+  };
+});
+pruefe('Fälligkeit steht neben dem Häkchen', nortonlage.rechtsDaneben);
+pruefe('und auf der Höhe von „Norton“', nortonlage.aufHoeheDesErsten);
+pruefe('sie bleibt in ihrer Spalte', nortonlage.imRahmen);
+
+/* Gegenprobe: ohne Fälligkeit ist die Zeile genauso hoch – die Marke kostet
+   keine eigene Zeile mehr. */
+const hoheZeile = nortonlage.zeile;
+const flacheZeile = await page.evaluate(() => {
+  BEDS.forEach(bed => { state.beds[bed.id].norton = []; state.beds[bed.id].nortonFaellig = ''; });
+  buildBody();
+  return Math.round(document.querySelector('tr[data-bed="0a"]').getBoundingClientRect().height);
+});
+gleich('die Fälligkeit kostet keine Zeilenhöhe', hoheZeile, flacheZeile);
+
+/* Stand von vor der Messung zurücksetzen */
+await page.evaluate(() => { state.beds = window.__vorher; buildBody(); });
+await page.waitForTimeout(300);
+
 /* ---- Punkt 3: Werte in Klammern gestrichelt ---- */
 await page.evaluate(() => {
   state.beds['2'].name = 'Klammer, Karl';

@@ -1,6 +1,6 @@
 /* Statistik je Schicht: Kennzahlen, Schichtzuordnung, Fenster, Einstellungen */
 import { browserStarten, neueSeite, oeffneEinstellungen, setzeEinstellungen,
-         testName, gleich, pruefe, enthaelt, keineFehler, bilanz } from './lib.mjs';
+         testName, gleich, pruefe, enthaelt, keineFehler, bilanz, TIMEOUT } from './lib.mjs';
 
 testName('Statistik je Schicht');
 const browser = await browserStarten();
@@ -95,7 +95,7 @@ gleich('Notbett ergibt über 100 %',
   await page.evaluate(() => Math.round(auslastung({ belegt: 13, max: 12 }))), 108);
 
 /* CSV */
-const download = page.waitForEvent('download', { timeout: 8000 });
+const download = page.waitForEvent('download', { timeout: TIMEOUT });
 await page.click('#statsCsv');
 const datei = await download;
 const { readFile } = await import('node:fs/promises');
