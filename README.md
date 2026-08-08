@@ -129,8 +129,13 @@ Spalte der Tafel zugeordnet.
   Anwesenheitsstatus **oder** eingetragener Fachdisziplin, unabhängig davon, welche Werte in
   den Einstellungen hinterlegt sind; `gesperrt` oder `Reinigung` im Feld Patientenname zählt
   nie), maximale Bettenzahl als Eingabefeld mit
-  festem Zusatz „+ 1“ für das Notbett, Meldestatus als farbiges Auswahlfeld
-  (grün / gelb / rot) und Anzahl der fälligen Screenings
+  festem Zusatz „+ 1“ für das Notbett, **Meldestatus** als farbige Kachel und Anzahl der
+  fälligen Screenings. Die Stufen des Meldestatus stehen in den Einstellungen unter
+  „Meldestatus“ – ausgeliefert grün, gelb und rot, ergänzbar und umbenennbar, **jede mit
+  eigener Farbe** aus derselben Auswahl wie die übrigen Kategorien. Die Schriftfarbe rechnet
+  die Tafel aus der Helligkeit (`lesbareSchrift()`), damit auch eine hell gewählte Stufe
+  lesbar bleibt; ohne Farbe bleibt die Kachel neutral. Ein gesetzter Wert, der später aus der
+  Liste entfernt wird, bleibt an der Tafel stehen und wählbar
 - **Angaben zur Schicht** – Schichtleitung, Blutzuständigkeit und Notfallequipment mit
   jeweils zugehöriger Telefonnummer – **unter der Tabelle**, zwischen Tafel und den
   Textfeldern. Der Kopfbereich bleibt dadurch schmal, und es sind mehr Bettplätze ohne

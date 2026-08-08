@@ -109,6 +109,59 @@ gleich('Seitenfeld nur beim Dateieintrag', seitenfelder.join(','), 'true,false')
 await page.click('#settingsCancel');
 keineFehler(page);
 
+/* ---- Meldestatus: Stufen und Farben aus den Einstellungen ---- */
+const stufen = () => page.$$eval('#meldestatus option', os => os.map(o => o.textContent));
+gleich('ausgelieferte Stufen', (await stufen()).join(' | '), '– | grün | gelb | rot');
+
+const kachel = () => page.evaluate(() => {
+  const k = document.querySelector('#meldeCard');
+  const s = getComputedStyle(k);
+  return { hintergrund: s.backgroundColor, schrift: s.color, faerbig: k.classList.contains('faerbig') };
+});
+await page.selectOption('#meldestatus', 'rot');
+await page.waitForTimeout(300);
+const rot = await kachel();
+gleich('gewählte Stufe färbt die Kachel', rot.hintergrund, 'rgb(198, 40, 40)');
+gleich('mit weißer Schrift darauf', rot.schrift, 'rgb(255, 255, 255)');
+
+/* Eine eigene Stufe mit heller Farbe – die Schrift muss dunkel werden. */
+await oeffneEinstellungen(page, 'Meldestatus');
+await page.click('#settingsPane .addentry');
+await page.fill('#settingsPane .entry-melde:last-child input', 'Abmeldung');
+/* Hellgelb ist das neunte Feld der Auswahl (das erste ist „Standard“). */
+await page.click('#settingsPane .entry-melde:last-child .swatch >> nth=8');
+await page.waitForTimeout(150);
+await page.click('#settingsSave');
+await page.waitForTimeout(400);
+
+gleich('neue Stufe steht zur Wahl', (await stufen()).join(' | '), '– | grün | gelb | rot | Abmeldung');
+await page.selectOption('#meldestatus', 'Abmeldung');
+await page.waitForTimeout(300);
+const hell = await kachel();
+gleich('helle Stufe bekommt dunkle Schrift', hell.schrift, 'rgb(18, 24, 31)');
+pruefe('und ist als gefärbt gekennzeichnet', hell.faerbig);
+
+/* Ohne Farbe bleibt die Kachel neutral. */
+await oeffneEinstellungen(page, 'Meldestatus');
+await page.click('#settingsPane .entry-melde:last-child .swatch.none');
+await page.waitForTimeout(150);
+await page.click('#settingsSave');
+await page.waitForTimeout(400);
+pruefe('Stufe ohne Farbe färbt nicht', !(await kachel()).faerbig);
+
+/* Ein gesetzter Wert überlebt das Entfernen aus der Liste. */
+await oeffneEinstellungen(page, 'Meldestatus');
+await page.click('#settingsPane .entry-melde:last-child .entrybtn.remove');
+await page.waitForTimeout(150);
+await page.click('#settingsSave');
+await page.waitForTimeout(400);
+gleich('entfernte, aber gesetzte Stufe bleibt wählbar',
+  await page.inputValue('#meldestatus'), 'Abmeldung');
+enthaelt('und steht weiter in der Liste', (await stufen()).join(' | '), 'Abmeldung');
+gleich('sie ist aber aus den Einstellungen fort',
+  await page.evaluate(() => MELDE.map(m => m.value).join(',')), 'grün,gelb,rot');
+keineFehler(page);
+
 /* ---- Bezeichnung der Tafel: Krankenhaus und Station ---- */
 await oeffneEinstellungen(page, 'Daten');
 gleich('beide Felder unter Daten',

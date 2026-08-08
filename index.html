@@ -43,12 +43,8 @@
       <span class="statlabel">max. Bettenzahl</span>
     </div>
     <div class="stat stat-melde" id="meldeCard">
-      <select id="meldestatus" aria-label="Meldestatus">
-        <option value="">–</option>
-        <option value="grün">grün</option>
-        <option value="gelb">gelb</option>
-        <option value="rot">rot</option>
-      </select>
+      <!-- Stufen kommen aus den Einstellungen (renderMeldestatus). -->
+      <select id="meldestatus" aria-label="Meldestatus"></select>
       <span class="statlabel">Meldestatus</span>
     </div>
     <div class="stat" id="screeningCard">
@@ -239,6 +235,12 @@
         <li><b>Screening fällig</b> zählt die Bettplätze, deren Screening-Datum erreicht oder
           überschritten ist. Ist mindestens eines fällig, wird die Kennzahl im Kopf
           <b>rot hinterlegt</b>, bis alle Termine erledigt oder neu gesetzt sind.</li>
+        <li>Der <b>Meldestatus</b> färbt seine Kachel in der Farbe der gewählten Stufe.
+          Ausgeliefert sind <b>grün</b>, <b>gelb</b> und <b>rot</b>; unter Einstellungen →
+          <b>Meldestatus</b> lassen sich Stufen ergänzen, umbenennen und mit einer eigenen
+          Farbe versehen. Die Schrift wird je nach Helligkeit hell oder dunkel gesetzt; ohne
+          Farbe bleibt die Kachel neutral. Eine Stufe, die aus der Liste entfernt wird, bleibt
+          an der Tafel stehen, solange sie dort gesetzt ist.</li>
       </ul>
     </section>
 

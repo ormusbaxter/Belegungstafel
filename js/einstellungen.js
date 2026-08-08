@@ -131,7 +131,10 @@ function renderPane() {
   const add = el('button', 'addentry', '+ Eintrag hinzufügen');
   add.type = 'button';
   add.addEventListener('click', () => {
-    draft.options[cat.key].push(cat.kind === 'phone' ? { value: '', label: '' } : '');
+    draft.options[cat.key].push(
+      cat.kind === 'phone' ? { value: '', label: '' }
+      : cat.kind === 'melde' ? { value: '', color: '' }
+      : '');
     renderEntries(list, cat);
     const inputs = list.querySelectorAll('input');
     if (inputs.length) inputs[inputs.length - (cat.kind === 'phone' ? 2 : 1)].focus();
@@ -144,11 +147,19 @@ function renderEntries(list, cat) {
   list.replaceChildren();
 
   entries.forEach((entry, index) => {
-    const row = el('div', 'entry' + (cat.kind === 'phone' ? ' entry-phone' : ''));
+    const row = el('div', 'entry' + (cat.kind === 'text' ? '' : ' entry-' + cat.kind));
+
+    /* Ansicht der fertigen Kachel; die Beschriftung schreibt hinein. */
+    const probe = cat.kind === 'melde' ? el('span', 'meldeprobe', entry.value || '–') : null;
 
     if (cat.kind === 'phone') {
       row.appendChild(entryInput(entry.value, 'Nummer', 'nr', value => { entry.value = value; }));
       row.appendChild(entryInput(entry.label, 'Bezeichnung', '', value => { entry.label = value; }));
+    } else if (cat.kind === 'melde') {
+      row.appendChild(entryInput(entry.value, 'Bezeichnung', '', value => {
+        entry.value = value;
+        probe.textContent = value || '–';
+      }));
     } else {
       row.appendChild(entryInput(entry, 'Bezeichnung', '', value => { entries[index] = value; }));
     }
@@ -169,6 +180,19 @@ function renderEntries(list, cat) {
     });
     remove.classList.add('remove');
     row.appendChild(remove);
+
+    /* Farbe je Stufe. Sie färbt die Kachel im Kopf der Tafel; die Schrift
+       ergibt sich aus ihrer Helligkeit, damit eine helle Stufe lesbar bleibt. */
+    if (probe) {
+      probe.style.background = entry.color || '';
+      probe.style.color = lesbareSchrift(entry.color) || '';
+      probe.classList.toggle('ohnefarbe', !entry.color);
+      row.appendChild(probe);
+      row.appendChild(paletteRow('Farbe', entry.color || '', farbe => {
+        entry.color = farbe;
+        renderEntries(list, cat);
+      }));
+    }
     list.appendChild(row);
   });
 
@@ -1094,10 +1118,17 @@ function renderInstanzBlock(pane) {
 function commitSettings() {
   /* Leere Einträge fallen weg, damit keine leeren Auswahlwerte entstehen. */
   for (const cat of OPTION_CATEGORIES) {
-    draft.options[cat.key] = cat.kind === 'phone'
-      ? draft.options[cat.key].filter(e => e.value.trim() || e.label.trim())
-          .map(e => ({ value: e.value.trim(), label: e.label.trim() }))
-      : draft.options[cat.key].map(e => e.trim()).filter(Boolean);
+    if (cat.kind === 'phone') {
+      draft.options[cat.key] = draft.options[cat.key]
+        .filter(e => e.value.trim() || e.label.trim())
+        .map(e => ({ value: e.value.trim(), label: e.label.trim() }));
+    } else if (cat.kind === 'melde') {
+      draft.options[cat.key] = draft.options[cat.key]
+        .filter(e => e.value.trim())
+        .map(e => ({ value: e.value.trim(), color: e.color || '' }));
+    } else {
+      draft.options[cat.key] = draft.options[cat.key].map(e => e.trim()).filter(Boolean);
+    }
   }
   draft.privacy.seconds = Math.min(3600, Math.max(5, draft.privacy.seconds || 120));
   draft.zoom = clampZoom(draft.zoom);
@@ -1142,6 +1173,9 @@ function commitSettings() {
   buildBody();
   renderPhones();
   renderStats();
+  /* Die Stufen des Meldestatus stehen jetzt in den Einstellungen – ohne
+     Neuaufbau bliebe die Kachel bei der alten Liste. */
+  renderStation();
   manualLock = false;
   setPrivacy(false);
   restartPrivacyTimer();

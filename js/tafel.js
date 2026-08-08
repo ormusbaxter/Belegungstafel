@@ -485,7 +485,9 @@ function init() {
   });
   $('#meldestatus').addEventListener('change', event => {
     state.station.meldestatus = event.target.value;
-    $('#meldeCard').dataset.melde = event.target.value;
+    /* Die Farbe hängt am gewählten Eintrag, nicht mehr an einem festen
+       Wortlaut – deshalb neu aufbauen statt ein Attribut zu setzen. */
+    renderMeldestatus();
     save();
   });
   $('#btnPrint').addEventListener('click', visiteDrucken);

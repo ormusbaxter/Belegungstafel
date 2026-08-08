@@ -1130,15 +1130,35 @@ function updateMaxTitle() {
     : 'Maximale Bettenzahl zuzüglich Notbett';
 }
 
+/* Meldestatus: Stufen aus den Einstellungen, jede mit eigener Farbe.
+ *
+ * Ein gespeicherter Wert, der nicht mehr in der Liste steht, wird trotzdem
+ * angeboten – sonst spränge die Tafel beim nächsten Aufbau still auf „–“ und
+ * verlöre eine Angabe, die jemand bewusst gesetzt hat. */
+function renderMeldestatus() {
+  const melde = $('#meldestatus');
+  const gesetzt = state.station.meldestatus;
+  melde.replaceChildren();
+  melde.appendChild(new Option('–', ''));
+  for (const eintrag of MELDE) melde.appendChild(new Option(eintrag.value, eintrag.value));
+  if (gesetzt && !meldeEintrag(gesetzt)) melde.appendChild(new Option(gesetzt, gesetzt));
+  melde.value = gesetzt;
+
+  const karte = $('#meldeCard');
+  const farbe = (meldeEintrag(gesetzt) || {}).color || '';
+  karte.style.background = farbe;
+  karte.style.borderColor = farbe;
+  karte.style.color = lesbareSchrift(farbe);
+  karte.classList.toggle('faerbig', Boolean(farbe));
+}
+
 /* Meldestatus und die Angaben zur Schicht */
 function renderStation() {
   const max = $('#maxBetten');
   max.value = state.station.maxBetten;
   updateMaxTitle();
 
-  const melde = $('#meldestatus');
-  melde.value = state.station.meldestatus;
-  $('#meldeCard').dataset.melde = state.station.meldestatus;
+  renderMeldestatus();
 
   const box = $('#stationbar');
   box.replaceChildren();

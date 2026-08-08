@@ -87,10 +87,19 @@ function mergeSettings(target, source) {
     if (cat.key === 'status' && !(source.version >= 3)) continue;
     const list = source.options && source.options[cat.key];
     if (!Array.isArray(list)) continue;
-    target.options[cat.key] = cat.kind === 'phone'
-      ? list.filter(e => e && (e.value || e.label))
-            .map(e => ({ value: String(e.value || ''), label: String(e.label || '') }))
-      : list.filter(e => typeof e === 'string' && e.trim()).map(String);
+    if (cat.kind === 'phone') {
+      target.options[cat.key] = list.filter(e => e && (e.value || e.label))
+        .map(e => ({ value: String(e.value || ''), label: String(e.label || '') }));
+    } else if (cat.kind === 'melde') {
+      /* Farbe nur übernehmen, wenn sie ein gültiger Wert ist – sonst bliebe
+         eine unbrauchbare Angabe in der Kachel stehen. */
+      target.options[cat.key] = list
+        .filter(e => e && String(e.value || '').trim())
+        .map(e => ({ value: String(e.value).trim(),
+                     color: HEX.test(e.color || '') ? e.color : '' }));
+    } else {
+      target.options[cat.key] = list.filter(e => typeof e === 'string' && e.trim()).map(String);
+    }
   }
   for (const cat of OPTION_CATEGORIES) {
     if (!hatStil(cat)) continue;
@@ -248,7 +257,9 @@ function applySettings() {
     col.head = custom !== undefined ? custom : DEFAULT_HEADS[col.key].head;
   }
   for (const cat of OPTION_CATEGORIES) {
+    /* Zwei Listen gehören zu keiner Spalte. */
     if (cat.key === 'phones') PHONES = settings.options.phones;
+    else if (cat.key === 'melde') MELDE = settings.options.melde;
     else FIELD_BY_KEY[cat.key].options = settings.options[cat.key];
   }
   privacyDelay = settings.privacy.on ? settings.privacy.seconds : 0;

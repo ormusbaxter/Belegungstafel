@@ -4,6 +4,29 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.16.0
+
+- **Der Meldestatus ist konfigurierbar.** Bisher standen die drei Stufen fest im Markup und
+  ihre Farben fest im Stil; die CSS-Regeln griffen auf den Wortlaut zu (`[data-melde="grün"]`).
+  Eine vierte Stufe hätte Änderungen an zwei Dateien verlangt
+
+  Jetzt ist es eine Kategorie wie die übrigen: Einstellungen → **Meldestatus**, Einträge
+  hinzufügen, umbenennen, sortieren, entfernen, Kategorie zurücksetzen. **Jede Stufe trägt
+  ihre eigene Farbe** aus derselben Auswahl wie die anderen Kategorien; eine Ansicht der
+  fertigen Kachel steht daneben. Die feste Kopplung an die Schreibweise entfällt damit
+- die **Schriftfarbe rechnet die Tafel aus der Helligkeit** der gewählten Farbe
+  (`lesbareSchrift()`). Sonst stünde eine hell gewählte Stufe weiß auf hell
+- ein **gesetzter Wert, der später aus der Liste fällt**, bleibt an der Tafel stehen und
+  wählbar – wie bei den Spaltenlisten auch. Ohne das spränge die Kachel beim nächsten Aufbau
+  still auf „–“
+- Zwei Stellen mussten mitgezogen werden, sonst wäre die Kachel stehen geblieben: das
+  Übernehmen der Einstellungen und der Umschalter im Kopf selbst. Beide bauen die Kachel
+  jetzt neu auf, statt ein Attribut zu setzen
+
+  **Hinweis zur Darstellung:** Die Farbe gilt in Tag- und Nachtansicht gleichermaßen. Die
+  bisherigen Stufen hatten je Ansicht einen eigenen Ton; das entfällt, wie schon bei den
+  Farben der übrigen Kategorien. Das ausgelieferte Rot ist dadurch `#c62828` statt `#b3261e`
+
 ## 2.15.1
 
 - **Das Fälligkeitsdatum der Norton-Skala steht neben dem Häkchen statt darunter.** Bei voller

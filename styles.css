@@ -28,9 +28,9 @@
   --st-gesperrt-bar: #5a6672;
   --iso: #c62828;
   --limit: #6a1b9a;
-  --melde-gruen: #2f7d32;
-  --melde-gelb: #d99a00;
-  --melde-rot: #b3261e;
+  /* Hervorhebung fälliger Screenings im Kopf. Die Farben des Meldestatus
+     stehen seit 2.16.0 in den Einstellungen, nicht mehr hier. */
+  --warnung: #b3261e;
   --pfeil-auf: #2f7d32;
   --pfeil-ab: #8e1c1c;
   --luecke: rgba(179, 38, 30, .10);
@@ -71,9 +71,7 @@ html[data-theme="dark"] {
   --st-gesperrt-bar: #7b8794;
   --iso: #ff6b6b;
   --limit: #c792ea;
-  --melde-gruen: #3f9e42;
-  --melde-gelb: #c58f10;
-  --melde-rot: #c0392b;
+  --warnung: #c0392b;
   --pfeil-auf: #5cb860;
   --pfeil-ab: #e46b6b;
   --luecke: rgba(228, 107, 107, .16);
@@ -215,7 +213,7 @@ body {
 .stat { min-width: 110px; }
 
 /* Fällige Screenings: der Kopfbereich hebt sie deutlich hervor. */
-.stat.faellig { background: var(--melde-rot); border-color: var(--melde-rot); }
+.stat.faellig { background: var(--warnung); border-color: var(--warnung); }
 .stat.faellig .statval { color: #fff; }
 .stat.faellig .statlabel { color: #fff; }
 
@@ -253,18 +251,14 @@ body {
   text-align: center;
   cursor: pointer;
 }
-.stat-melde[data-melde="grün"] { background: var(--melde-gruen); border-color: var(--melde-gruen); }
-.stat-melde[data-melde="gelb"] { background: var(--melde-gelb); border-color: var(--melde-gelb); }
-.stat-melde[data-melde="rot"]  { background: var(--melde-rot);  border-color: var(--melde-rot); }
-.stat-melde[data-melde="grün"] .statlabel,
-.stat-melde[data-melde="gelb"] .statlabel,
-.stat-melde[data-melde="rot"] .statlabel { color: #fff; }
-.stat-melde[data-melde="grün"] select,
-.stat-melde[data-melde="gelb"] select,
-.stat-melde[data-melde="rot"] select {
+/* Ist eine Stufe gewählt, hinterlegt ihre Farbe die ganze Kachel; Farbe und
+   Schriftfarbe setzt renderMeldestatus, weil sie aus den Einstellungen
+   kommen und nicht aus einer festen Liste von Werten. */
+.stat-melde.faerbig .statlabel { color: inherit; }
+.stat-melde.faerbig select {
   border-color: transparent;
   background: transparent;
-  color: #fff;
+  color: inherit;
 }
 .stat-melde select option { color: var(--ink); background: var(--panel); }
 
@@ -800,6 +794,22 @@ tr:hover .clearbed, .clearbed:focus-visible { opacity: 1; }
 .entry { display: grid; grid-template-columns: 1fr auto auto auto; gap: 4px; align-items: center; }
 .entry-phone { grid-template-columns: 78px 1fr auto auto auto; }
 .entry-header { grid-template-columns: 150px 1fr; }
+/* Meldestufe: Beschriftung und Schaltflächen in einer Zeile, darunter die
+   Ansicht der Kachel und die Farbauswahl über die ganze Breite. */
+.entry-melde .meldeprobe {
+  grid-column: 1 / -1;
+  justify-self: start;
+  min-width: 62px;
+  padding: 3px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+.entry-melde .meldeprobe.ohnefarbe { background: var(--panel); color: var(--ink-soft); }
+.entry-melde .palrow { grid-column: 1 / -1; }
+.entry-melde { padding-bottom: 6px; border-bottom: 1px solid var(--line-soft); }
 .headname { font-size: 12.5px; color: var(--ink-soft); }
 .entry input {
   padding: 5px 8px;

@@ -22,7 +22,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.15.1';
+const VERSION = '2.16.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -379,6 +379,21 @@ let PHONES = [
   { value: '4101', label: 'Hol- und Bringed.' }
 ];
 
+/* Meldestatus im Kopf der Tafel.
+ *
+ * Anders als die Spaltenlisten trägt hier jeder Eintrag seine eigene Farbe:
+ * Sie hinterlegt die Kachel. Die Schriftfarbe wird daraus gerechnet, damit
+ * eine hell gewählte Stufe nicht weiß auf weiß steht. Ohne Farbe bleibt die
+ * Kachel neutral wie im nicht gesetzten Zustand.
+ * Die Werte werden als Text gespeichert (state.station.meldestatus); ein
+ * Eintrag, der später aus der Liste fällt, bleibt an der Tafel stehen. */
+const DEFAULT_MELDE = [
+  { value: 'grün', color: '#2f7d32' },
+  { value: 'gelb', color: '#d99a00' },
+  { value: 'rot',  color: '#c62828' }
+];
+let MELDE = DEFAULT_MELDE.map(eintrag => ({ ...eintrag }));
+
 /* In den Einstellungen bearbeitbare Listen */
 const OPTION_CATEGORIES = [
   { key: 'status',       label: 'Anwesenheitsstatus',     kind: 'text' },
@@ -406,7 +421,10 @@ const OPTION_CATEGORIES = [
   { key: 'telefon',      label: 'Telefon (Spalte)',       kind: 'phone',
     hint: 'Vorschläge im Feld Telefon der Tabelle' },
   { key: 'phones',       label: 'Telefonliste',           kind: 'phone',
-    hint: 'Rufnummern im Infofeld unter der Tafel' }
+    hint: 'Rufnummern im Infofeld unter der Tafel' },
+  { key: 'melde',        label: 'Meldestatus',            kind: 'melde',
+    hint: 'Stufen im Kopf der Tafel, jede mit eigener Farbe. Die leere Stufe „–“ steht ' +
+          'immer voran und lässt sich nicht entfernen. Ohne Farbe bleibt die Kachel neutral.' }
 ];
 
 /* Kategorien, für die sich Farbe und Rahmen der Spalte einstellen lassen –
@@ -419,8 +437,12 @@ const copy = value => JSON.parse(JSON.stringify(value));
 const DEFAULT_HEADS = Object.fromEntries(COLUMNS.map(col =>
   [col.key, { label: col.label, head: 'head' in col ? col.head : col.label }]));
 
+/* Zwei Listen gehören zu keiner Spalte: die Rufnummern unter der Tafel und
+   die Stufen des Meldestatus im Kopf. */
+const OHNE_SPALTE = { phones: PHONES, melde: DEFAULT_MELDE };
+
 const DEFAULT_OPTIONS = Object.fromEntries(OPTION_CATEGORIES.map(cat =>
-  [cat.key, copy(cat.key === 'phones' ? PHONES : FIELD_BY_KEY[cat.key].options)]));
+  [cat.key, copy(OHNE_SPALTE[cat.key] || FIELD_BY_KEY[cat.key].options)]));
 
 /* Rahmenstile, die je Auswahlwert eingestellt werden können */
 const BORDER_STYLES = [
@@ -431,6 +453,21 @@ const BORDER_STYLES = [
   ['double', 'doppelt']
 ];
 const HEX = /^#[0-9a-f]{6}$/i;
+
+/* Schwarz oder Weiß – je nachdem, was auf der gewählten Farbe lesbar ist.
+   Gerechnet über die wahrgenommene Helligkeit (ITU-R BT.601), weil die
+   Farbauswahl von sehr hell bis sehr dunkel reicht. */
+function lesbareSchrift(hex) {
+  if (!HEX.test(hex || '')) return '';
+  const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+  return (r * 299 + g * 587 + b * 114) / 1000 > 140 ? '#12181f' : '#ffffff';
+}
+
+/* Eintrag des Meldestatus zu einem gespeicherten Wert – oder nichts, wenn er
+   nicht (mehr) in der Liste steht. */
+function meldeEintrag(wert) {
+  return MELDE.find(eintrag => eintrag.value === wert) || null;
+}
 
 /* Feste Farbauswahl – vier neutrale Töne und sechs Farben je hell und kräftig */
 const PALETTE = [
