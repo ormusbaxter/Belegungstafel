@@ -366,6 +366,18 @@ function renderGeneralPane(pane) {
   }));
   ziel.appendChild(time);
 
+  ziel = abschnitt('zeilenfarben', 'Farbige Zeilen');
+  ziel.appendChild(el('p', 'panehint',
+    'Hinterlegt jede Zeile in der Farbe ihres Anwesenheitsstatus – angekündigte Aufnahme, ' +
+    'belegt, NVK, außerhalb der Station, Verlegung, gesperrt. Ohne diese Option bleibt die ' +
+    'Tafel einfarbig; der Farbbalken am Zeilenanfang bleibt in beiden Fällen stehen, der ' +
+    'Status ist also weiter zu erkennen. Der Ausdruck ist ohnehin schwarzweiß.'));
+  ziel.appendChild(checkRow('Zeilen nach Status einfärben', draft.zeilenfarben, on => {
+    draft.zeilenfarben = on;
+    /* Sofort im Hintergrund sichtbar, wie beim Zoom. */
+    document.body.classList.toggle('ohne-zeilenfarben', !on);
+  }));
+
   ziel = abschnitt('schoner', 'Bildschirmschoner');
   ziel.appendChild(el('p', 'panehint',
     'Startet nach der eingestellten Zeit ohne Eingabe eine Diaschau aus den Inhalten unter ' +
@@ -887,7 +899,9 @@ function renderBedPane(pane) {
   pane.appendChild(el('h3', null, 'Bettplätze'));
   pane.appendChild(el('p', 'panehint',
     'Bezeichnung, Reihenfolge und Anzahl der Bettplätze. Ein umbenannter Bettplatz behält ' +
-    'seine Einträge; ein entfernter Bettplatz wird mit seinen Einträgen gelöscht.'));
+    'seine Einträge; ein entfernter Bettplatz wird mit seinen Einträgen gelöscht. ' +
+    'Das Kästchen hinter der Bezeichnung zieht eine kräftigere Linie unter den Bettplatz – ' +
+    'in der Vorgabe dort, wo ein Zimmer endet.'));
 
   const list = el('div', 'entrylist');
   pane.appendChild(list);
@@ -909,8 +923,15 @@ function renderBedEntries(list) {
   list.replaceChildren();
 
   beds.forEach((bed, index) => {
-    const row = el('div', 'entry');
+    const row = el('div', 'entry entry-bed');
     row.appendChild(entryInput(bed.label, 'Bezeichnung', '', value => { bed.label = value; }));
+
+    /* Kräftigere Linie unter diesem Bettplatz – in der Vorgabe dort, wo ein
+       Zimmer endet. */
+    const strich = checkRow('', bed.trenner === true, an => { bed.trenner = an; });
+    strich.classList.add('bedtrenner');
+    strich.title = 'Kräftigere Trennlinie unter diesem Bettplatz';
+    row.appendChild(strich);
     row.appendChild(moveButton('↑', 'nach oben', () => {
       if (index === 0) return;
       [beds[index - 1], beds[index]] = [beds[index], beds[index - 1]];

@@ -1,5 +1,6 @@
 /* Zählung der belegten Betten, Zeilenfarben, Bettplatz räumen */
-import { browserStarten, neueSeite, testName, gleich, pruefe, keineFehler, bilanz } from './lib.mjs';
+import { browserStarten, neueSeite, oeffneEinstellungen,
+         testName, gleich, pruefe, keineFehler, bilanz } from './lib.mjs';
 
 testName('Belegung und Zählung');
 const browser = await browserStarten();
@@ -38,6 +39,56 @@ await page.reload();
 await page.waitForTimeout(400);
 gleich('nach dem Neuladen', await belegt(), '1 / 13');
 gleich('Name blieb erhalten', await page.inputValue('tr[data-bed="1a"] td.col-name input'), 'gesperrt');
+
+/* ---- Kräftigere Linie zwischen den Zimmern ---- */
+const trenner = await page.$$eval('#tbody tr',
+  rs => rs.filter(r => r.classList.contains('trenner')).map(r => r.dataset.bed));
+gleich('Linie unter jedem Zimmerende', trenner.join(','), '0b,1b,2,3,4b,5,6b,7');
+const staerken = await page.evaluate(() => {
+  const dicke = bett => getComputedStyle(
+    document.querySelector(`tr[data-bed="${bett}"] td.col-bed`)).borderBottomWidth;
+  return { mit: dicke('0b'), ohne: dicke('0a') };
+});
+pruefe('die Linie ist kräftiger als die gewöhnliche',
+  parseFloat(staerken.mit) > parseFloat(staerken.ohne),
+  staerken.mit + ' gegen ' + staerken.ohne);
+
+/* Sie lässt sich je Bettplatz abwählen */
+await oeffneEinstellungen(page, 'Bettplätze');
+await page.uncheck('#settingsPane .entry-bed:nth-child(2) .bedtrenner input');
+await page.click('#settingsSave');
+await page.waitForTimeout(300);
+pruefe('abgewählte Linie verschwindet',
+  !(await page.evaluate(() =>
+    document.querySelector('tr[data-bed="0b"]').classList.contains('trenner'))));
+
+/* ---- Farbige Zeilen lassen sich abschalten ---- */
+await page.evaluate(() => {
+  Object.assign(state.beds['5'], { name: 'Bunt, Berta', status: 'NVK' });
+  buildBody();
+});
+await page.waitForTimeout(250);
+const farbe = () => page.evaluate(() =>
+  getComputedStyle(document.querySelector('tr[data-bed="5"]')).backgroundColor);
+const balken = () => page.evaluate(() => getComputedStyle(
+  document.querySelector('tr[data-bed="5"] td.col-status'), '::after').backgroundColor);
+const bunt = await farbe();
+const balkenBunt = await balken();
+
+await oeffneEinstellungen(page, 'Allgemein');
+await page.uncheck('#settingsPane .setrow:has-text("Zeilen nach Status einfärben") input');
+await page.click('#settingsSave');
+await page.waitForTimeout(300);
+pruefe('ohne Zeilenfarben ist die Zeile neutral', (await farbe()) !== bunt,
+  bunt + ' → ' + (await farbe()));
+gleich('der Farbbalken bleibt aber stehen', await balken(), balkenBunt);
+
+/* wieder einschalten für die folgenden Prüfungen */
+await oeffneEinstellungen(page, 'Allgemein');
+await page.check('#settingsPane .setrow:has-text("Zeilen nach Status einfärben") input');
+await page.click('#settingsSave');
+await page.waitForTimeout(300);
+gleich('eingeschaltet wieder farbig', await farbe(), bunt);
 
 /* ---- Das Kennzeichen ISO steht unter der Bettbezeichnung ---- */
 await page.evaluate(() => {

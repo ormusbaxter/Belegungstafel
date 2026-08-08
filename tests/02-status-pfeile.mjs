@@ -26,8 +26,11 @@ const zeile = id => page.locator(`tr[data-bed="${id}"]`).evaluate(e => e.classNa
 gleich('A >>> wird zum Pfeil nach rechts', await wert('0a'), PFEIL_AUF);
 gleich('<<< V wird zum Pfeil nach links', await wert('0b'), PFEIL_AB);
 gleich('auch die Kurzform A >>', await wert('1a'), PFEIL_AUF);
-gleich('Zeilenfarbe Aufnahme', await zeile('0a'), 'st-aufnahme');
-gleich('Zeilenfarbe Verlegung', await zeile('0b'), 'st-verlegung');
+/* Die Zeile trägt neben der Statusfarbe ggf. die Klasse „trenner“. */
+pruefe('Zeilenfarbe Aufnahme', (await zeile('0a')).split(' ').includes('st-aufnahme'),
+  await zeile('0a'));
+pruefe('Zeilenfarbe Verlegung', (await zeile('0b')).split(' ').includes('st-verlegung'),
+  await zeile('0b'));
 gleich('Aufnahme und Verlegung zählen mit', await page.textContent('#statBelegt'), '3 / 13');
 
 const stil = await page.locator('tr[data-bed="0a"] td.col-status select').evaluate(e => {

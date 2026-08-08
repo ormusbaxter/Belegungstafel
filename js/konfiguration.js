@@ -22,7 +22,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.20.2';
+const VERSION = '2.21.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -62,19 +62,22 @@ function tafelTitel() {
 /* ------------------------------------------------------------------ *
  * Bettplätze
  * ------------------------------------------------------------------ */
+/* trenner: kräftigere Linie unter diesem Bettplatz. Sie trennt die Zimmer –
+   zwischen den beiden Plätzen eines Zimmers (0 a / 0 b) steht keine. In den
+   Einstellungen ist sie je Bettplatz an- und abwählbar. */
 const DEFAULT_BEDS = [
   { id: '0a', label: '0 a' },
-  { id: '0b', label: '0 b' },
+  { id: '0b', label: '0 b', trenner: true },
   { id: '1a', label: '1 a' },
-  { id: '1b', label: '1 b' },
-  { id: '2',  label: '2'   },
-  { id: '3',  label: '3'   },
+  { id: '1b', label: '1 b', trenner: true },
+  { id: '2',  label: '2',   trenner: true },
+  { id: '3',  label: '3',   trenner: true },
   { id: '4a', label: '4 a' },
-  { id: '4b', label: '4 b' },
-  { id: '5',  label: '5'   },
+  { id: '4b', label: '4 b', trenner: true },
+  { id: '5',  label: '5',   trenner: true },
   { id: '6a', label: '6 a' },
-  { id: '6b', label: '6 b' },
-  { id: '7',  label: '7'   },
+  { id: '6b', label: '6 b', trenner: true },
+  { id: '7',  label: '7',   trenner: true },
   { id: '8',  label: '8'   }
 ];
 
@@ -552,6 +555,11 @@ const DEFAULT_NIGHT = { from: '19:00', to: '07:00' };
  * Strg + R reserviert der Browser für sich. */
 const DEFAULT_KONTEXTMENUE = false;   /* false = unterdrücken */
 
+/* Hintergrundfarbe der Zeilen nach Anwesenheitsstatus. Abschaltbar für
+   Stationen, denen die Tafel zu bunt ist; der Farbbalken am Zeilenanfang
+   bleibt dabei stehen, der Status ist also weiter zu erkennen. */
+const DEFAULT_ZEILENFARBEN = true;
+
 /* Reiter, die mit der einfachen Zugangsstufe offenstehen. Die volle Stufe
    legt das in den Einstellungen unter „Berechtigungen“ fest; hier steht, was
    ohne eigene Angabe gilt. */
@@ -567,6 +575,7 @@ const DEFAULT_RECHTE = { einfach: ['allgemein', 'schoner'] };
 const REITER_TEILE = {
   allgemein: [
     { key: 'sichtschutz',  label: 'Sichtschutz' },
+    { key: 'zeilenfarben', label: 'Farbige Zeilen' },
     { key: 'schoner',      label: 'Bildschirmschoner (Ein/Aus und Zeit)' },
     { key: 'theme',        label: 'Automatische Tag-/Nachtansicht' },
     { key: 'zoom',         label: 'Größe der Darstellung' },

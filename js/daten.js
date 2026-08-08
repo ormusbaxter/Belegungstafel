@@ -27,6 +27,7 @@ function grundEinstellungen() {
     styles: Object.fromEntries(OPTION_CATEGORIES.filter(hatStil).map(c => [c.key, {}])),
     privacy: { on: true, seconds: 120 },
     kontextmenue: DEFAULT_KONTEXTMENUE,
+    zeilenfarben: DEFAULT_ZEILENFARBEN,
     rechte: { einfach: [...DEFAULT_RECHTE.einfach], gesperrt: [] },
     screensaver: copy(DEFAULT_SAVER),
     zoom: 100,
@@ -116,7 +117,8 @@ function mergeSettings(target, source) {
   if (Array.isArray(source.beds)) {
     const beds = source.beds
       .filter(bed => bed && String(bed.label || '').trim())
-      .map(bed => ({ id: String(bed.id || newBedId()), label: String(bed.label).trim() }));
+      .map(bed => ({ id: String(bed.id || newBedId()), label: String(bed.label).trim(),
+                     trenner: bed.trenner === true }));
     if (beds.length) target.beds = beds;
   }
   if (source.namen && typeof source.namen === 'object') {
@@ -137,6 +139,7 @@ function mergeSettings(target, source) {
     if (Number.isFinite(seconds)) target.privacy.seconds = Math.min(3600, Math.max(5, seconds));
   }
   if (typeof source.kontextmenue === 'boolean') target.kontextmenue = source.kontextmenue;
+  if (typeof source.zeilenfarben === 'boolean') target.zeilenfarben = source.zeilenfarben;
   if (source.rechte && Array.isArray(source.rechte.einfach)) {
     /* Nur bekannte Reiter übernehmen, und niemals einen gesperrten. Eine
        leere Liste würde der einfachen Stufe ein Fenster ohne Inhalt zeigen –
@@ -266,6 +269,7 @@ function syncBeds() {
 function applySettings() {
   BEDS = settings.beds;
   applyNamen();
+  document.body.classList.toggle('ohne-zeilenfarben', !settings.zeilenfarben);
   for (const col of COLUMNS) {
     const custom = settings.headers[col.key];
     col.label = custom !== undefined && custom.trim() ? custom : DEFAULT_HEADS[col.key].label;

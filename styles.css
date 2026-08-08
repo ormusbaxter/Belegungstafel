@@ -444,6 +444,14 @@ tr.st-nvk       { background: var(--st-nvk); }
 tr.st-abwesend  { background: var(--st-abwesend); }
 tr.st-verlegung { background: var(--st-verlegung); }
 tr.st-gesperrt  { background: var(--st-gesperrt); }
+/* Ohne Zeilenfarben bleibt nur der Balken am Zeilenanfang: Der Status ist
+   weiter zu erkennen, die Fläche bleibt ruhig. */
+body.ohne-zeilenfarben tbody tr { background: var(--panel); }
+
+/* Kräftigere Trennlinie zwischen den Zimmern */
+tbody tr.trenner td {
+  border-bottom: 2px solid var(--line);
+}
 
 /* Farbbalken am Zeilenanfang */
 td.col-status { padding-left: 9px; padding-right: 7px; }
@@ -808,6 +816,9 @@ tr:hover .clearbed, .clearbed:focus-visible { opacity: 1; }
 .entrylist { display: flex; flex-direction: column; gap: 4px; }
 .entry { display: grid; grid-template-columns: 1fr auto auto auto; gap: 4px; align-items: center; }
 .entry-phone { grid-template-columns: 78px 1fr auto auto auto; }
+/* Bettplätze: Bezeichnung, Trennlinien-Kästchen, drei Schaltflächen */
+.entry-bed { grid-template-columns: 1fr auto auto auto auto; }
+.bedtrenner { justify-self: center; margin: 0 4px; }
 .entry-header { grid-template-columns: 150px 1fr; }
 /* Meldestufe: Beschriftung und Schaltflächen in einer Zeile, darunter die
    Ansicht der Kachel und die Farbauswahl über die ganze Breite. */
@@ -1662,6 +1673,8 @@ body.saver-on { overflow: hidden; }
     max-height: calc(var(--print-row, 9mm) - 1mm);
     overflow: hidden;
   }
+  /* Die Trennlinien der Zimmer gelten auch auf dem Blatt. */
+  tbody tr.trenner td { border-bottom-width: 1.8px; }
   tbody td {
     height: var(--print-row, 9mm);
     padding: 1px 3px;

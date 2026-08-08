@@ -353,6 +353,9 @@ function buildRow(bed) {
   const data = state.beds[bed.id];
   const tr = el('tr');
   tr.dataset.bed = bed.id;
+  /* Kräftigere Linie unter diesem Bettplatz – trennt in der Vorgabe die
+     Zimmer voneinander, ist aber je Bettplatz einstellbar. */
+  if (bed.trenner) tr.classList.add('trenner');
 
   for (const col of COLUMNS) {
     const td = el('td', 'col-' + col.key);

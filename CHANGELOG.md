@@ -4,6 +4,20 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.21.0
+
+- **Kräftigere Trennlinie zwischen den Zimmern.** Sie steht ab Werk unter 0 b, 1 b, 2, 3, 4 b,
+  5, 6 b und 7 – überall dort, wo ein Zimmer endet, und nicht zwischen den beiden Plätzen
+  eines Zimmers. Je Bettplatz an- und abwählbar unter Einstellungen → **Bettplätze**, Kästchen
+  hinter der Bezeichnung. Die Linie gilt auch auf dem Visitenausdruck
+- **Die farbigen Zeilen lassen sich abschalten** – Einstellungen → Allgemein, Punkt 2. Der
+  **Farbbalken am Zeilenanfang bleibt stehen**: Der Anwesenheitsstatus ist also weiter auf
+  einen Blick zu erkennen, nur die Fläche bleibt ruhig. Der Ausdruck ist ohnehin schwarzweiß
+- beide Punkte lassen sich über **Berechtigungen** einzeln freigeben oder wegnehmen; die
+  Zeilenfarben sind dort als eigener Unterpunkt von Allgemein geführt
+- zwei Prüfungen wählten ihr Ankreuzfeld über die Position in der Liste. Ein neuer Punkt unter
+  Allgemein verschob sie; sie greifen jetzt auf die Beschriftung zu
+
 ## 2.20.2
 
 - **Das Kennzeichen `ISO` steht unter der Bettbezeichnung statt daneben.** Nebeneinander

@@ -124,7 +124,13 @@ Spalte der Tafel zugeordnet.
 - **Autospeicherung** in den `localStorage` des Browsers
 - **Farbkodierung** der Zeilen nach Anwesenheitsstatus (Aufnahme, belegt, NVK, außerhalb der
   Station, Verlegung, gesperrt), `ISO`-Kennzeichnung bei eingetragener Isolation,
-  farbliche Hervorhebung einer hinterlegten Therapielimitierung
+  farbliche Hervorhebung einer hinterlegten Therapielimitierung. Die Zeilenfarben lassen sich
+  unter Einstellungen → Allgemein **abschalten**; der Farbbalken am Zeilenanfang bleibt dabei
+  stehen, der Status ist also weiter erkennbar
+- **Kräftigere Trennlinie zwischen den Zimmern**: je Bettplatz an- und abwählbar
+  (Einstellungen → Bettplätze, Kästchen hinter der Bezeichnung). Ab Werk unter 0 b, 1 b, 2, 3,
+  4 b, 5, 6 b und 7 – also überall dort, wo ein Zimmer endet, und nicht zwischen den beiden
+  Plätzen eines Zimmers. Die Linie gilt auch auf dem Visitenausdruck
 - **Kopfbereich**: belegte Betten (x / 13; belegt ist jeder Bettplatz mit gesetztem
   Anwesenheitsstatus **oder** eingetragener Fachdisziplin, unabhängig davon, welche Werte in
   den Einstellungen hinterlegt sind; `gesperrt` oder `Reinigung` im Feld Patientenname zählt

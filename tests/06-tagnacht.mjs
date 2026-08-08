@@ -24,10 +24,12 @@ gleich('keine Beschriftung', (await stand(tag)).label, '');
 /* ---- Option einschalten ---- */
 await oeffneEinstellungen(tag, 'Allgemein');
 const kaesten = await tag.$$('#settingsPane .setrow input[type=checkbox]');
-gleich('fünf Kästchen unter Allgemein', kaesten.length, 5);
+gleich('sechs Kästchen unter Allgemein', kaesten.length, 6);
 gleich('Zeitfelder zunächst gesperrt',
   await tag.$$eval('.timefield', is => is.map(i => i.disabled).join(',')), 'true,true');
-await kaesten[2].check();
+/* Über die Beschriftung statt über die Reihenfolge: Ein neuer Punkt unter
+   Allgemein verschiebt sonst den Index. */
+await tag.check('#settingsPane .setrow:has-text("Automatische Tag-/Nachtansicht") input');
 gleich('Zeitfelder danach frei',
   await tag.$$eval('.timefield', is => is.map(i => i.disabled).join(',')), 'false,false');
 const felder = await tag.$$('.timefield');
@@ -75,8 +77,7 @@ gleich('nach der Grenze hell, ohne Neuladen', (await stand(nacht)).thema, 'light
 
 /* ---- Option abschalten, während Auto lief ---- */
 await oeffneEinstellungen(nacht, 'Allgemein');
-const kaesten2 = await nacht.$$('#settingsPane .setrow input[type=checkbox]');
-await kaesten2[2].uncheck();
+await nacht.uncheck('#settingsPane .setrow:has-text("Automatische Tag-/Nachtansicht") input');
 await nacht.click('#settingsSave');
 await nacht.waitForTimeout(250);
 const danach = await stand(nacht);
