@@ -144,7 +144,7 @@ gleich('der Titel führt dann nur das Haus', await page.title(), 'Klinikum Muste
 keineFehler(page);
 
 /* ---- Ordner einlesen über einen Webserver ---- */
-const server = await serverStarten(8321);
+const server = await serverStarten();
 const online = await neueSeite(browser, { url: server.url });
 await oeffneEinstellungen(online, 'Bildschirmschoner');
 await online.click('#settingsPane .slidebar button:text-is("Ordner einlesen")');

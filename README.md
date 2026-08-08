@@ -362,15 +362,21 @@ Spalte der Tafel zugeordnet.
 
 ## Prüfungen
 
-Im Ordner `tests/` liegen neun Testdateien, die die Tafel in einem echten Browser bedienen
+Im Ordner `tests/` liegen **16 Testdateien**, die die Tafel in einem echten Browser bedienen
 (Chromium über Playwright) und das Ergebnis prüfen – Zählung, Pfeile, Ausdruck, Zoom,
-Bildschirmschoner, Tag-/Nachtansicht, Verlauf, Sicherung und Einstellungen. Jede meldet
-Skript- und Konsolenfehler als Fehlschlag.
+Bildschirmschoner, Tag-/Nachtansicht, Verlauf, Sicherung, Einstellungen, Pflichtangaben,
+Physio- und Visitendruck, Stationsvorgabe, Statistik, Sichtschutz, Sicherheit der Ausgaben
+und den Übergabezettel. Jede meldet Skript- und Konsolenfehler als Fehlschlag.
 
 ```
 cd tests && npm install && npx playwright install chromium
-node run.mjs
+node run.mjs            die regulären Tests, vier nebeneinander (~45 s)
+node run.mjs --alle     zusätzlich die optionalen
 ```
+
+Der Bildschirmschoner-Test prüft Zeitverhalten und läuft deshalb nur mit `--alle` mit; der Test
+der Stationsvorgabe läuft allein, weil er `js/vorgaben.js` schreibt. Wo auf Zeit gewartet wird,
+stellen die Tests die Uhr der Seite an und spulen sie vor, statt die Spanne abzusitzen.
 
 Einzelheiten in `tests/README.md`. Die Tafel selbst bleibt abhängigkeitsfrei; Playwright wird
 nur für die Prüfungen gebraucht.

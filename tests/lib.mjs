@@ -81,7 +81,16 @@ export async function neueSeite(browser, opt = {}) {
   page.on('pageerror', err => page.fehler.push(err.message));
   page.on('console', msg => { if (msg.type() === 'error') page.fehler.push(msg.text()); });
   if (opt.dialogeBestaetigen !== false) page.on('dialog', d => d.accept());
-  if (opt.zeit) await page.clock.install({ time: new Date(opt.zeit) });
+  /* Eine gestellte Uhr macht zeitabhängige Prüfungen reproduzierbar und
+     erlaubt zugleich, Wartezeiten vorzuspulen (siehe vorspulen). Die Timer
+     der Seite laufen daneben weiter wie gehabt. */
+  page.hatUhr = Boolean(opt.zeit || opt.uhr);
+  if (page.hatUhr) await page.clock.install({ time: new Date(opt.zeit || Date.now()) });
+  /* uhr: true hält die Zeit zusätzlich an. Sie rückt dann nur noch durch
+     vorspulen() vor – exakt und ohne dass echtes Warten sie nebenher
+     weiterschiebt. Beides zugleich hatte in der Diaschau Schritte
+     verschluckt. Wer nur ein festes Datum braucht, lässt die Uhr laufen. */
+  if (opt.uhr) await page.clock.pauseAt(new Date(opt.zeit || Date.now()));
   await page.goto(opt.url || APP_URL);
   if (opt.speicher !== false) {
     await page.evaluate(() => localStorage.clear());
@@ -89,6 +98,25 @@ export async function neueSeite(browser, opt = {}) {
   }
   await page.waitForTimeout(opt.warten || 300);
   return page;
+}
+
+/* Wartezeit überspringen, statt sie abzusitzen.
+ *
+ * Mit gestellter Uhr (neueSeite mit `uhr: true` oder `zeit`) werden die
+ * Zeitgeber der Seite um die angegebene Spanne vorgestellt und feuern sofort;
+ * aus elf Sekunden Warten wird ein Sekundenbruchteil. Ohne Uhr bleibt es beim
+ * echten Warten, damit jeder Test auch ohne diese Vorbereitung läuft.
+ *
+ * Nicht überall brauchbar: Was der Browser selbst betreibt – Übergänge,
+ * Bildaufbau, Laden von Dateien – spult nicht mit. Dafür weiter warten.
+ */
+export async function vorspulen(page, ms, nachlauf = 60) {
+  if (!page.hatUhr) return await page.waitForTimeout(ms);
+  await page.clock.runFor(ms);
+  /* Kurzer echter Nachlauf: Was die Zeitgeber angestoßen haben, muss noch
+     dargestellt werden. Bei angehaltener Uhr schiebt er die Zeitgeber nicht
+     weiter, verfälscht die Spanne also nicht. */
+  if (nachlauf) await page.waitForTimeout(nachlauf);
 }
 
 /* Einstellungen vorgeben, ohne den Dialog zu bedienen. */
@@ -99,6 +127,8 @@ export async function setzeEinstellungen(page, einstellungen, thema) {
   }, [{ version: 3, ...einstellungen }, thema || '']);
   await page.reload();
   await page.waitForTimeout(300);
+  /* Bei angehaltener Uhr kämen die Zeitgeber des Starts sonst nie zum Zug. */
+  if (page.hatUhr) await page.clock.runFor(50);
 }
 
 /* Einstellungsdialog öffnen und einen Reiter wählen. Ohne Angabe wird das
@@ -128,7 +158,9 @@ const TYPEN = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/cs
                 '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg',
                 '.pdf': 'application/pdf', '.svg': 'image/svg+xml', '.txt': 'text/plain' };
 
-export function serverStarten(port = 8321) {
+/* port 0: Das Betriebssystem sucht einen freien Port. Ein fester würde sich
+   mit einem gleichzeitig laufenden Test beißen. */
+export function serverStarten(port = 0) {
   const server = createServer(async (req, res) => {
     const pfad = decodeURIComponent(req.url.split('?')[0]);
     const ziel = join(APP_DIR, pfad);
@@ -149,10 +181,9 @@ export function serverStarten(port = 8321) {
     }
   });
   return new Promise(resolve => {
-    server.listen(port, '127.0.0.1', () => resolve({
-      url: 'http://127.0.0.1:' + port + '/index.html',
-      basis: 'http://127.0.0.1:' + port + '/',
-      stop: () => new Promise(r => server.close(r))
-    }));
+    server.listen(port, '127.0.0.1', () => {
+      const basis = 'http://127.0.0.1:' + server.address().port + '/';
+      resolve({ url: basis + 'index.html', basis, stop: () => new Promise(r => server.close(r)) });
+    });
   });
 }

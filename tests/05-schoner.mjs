@@ -1,11 +1,13 @@
 /* Bildschirmschoner: Start von Hand und automatisch, Weiterschalten,
    Einpassen, zufällige Reihenfolge, Seitenangabe */
-import { browserStarten, neueSeite, setzeEinstellungen, oeffneEinstellungen,
+import { browserStarten, neueSeite, setzeEinstellungen, oeffneEinstellungen, vorspulen,
          testName, gleich, pruefe, enthaelt, keineFehler, bilanz } from './lib.mjs';
 
 testName('Bildschirmschoner');
 const browser = await browserStarten();
-const page = await neueSeite(browser);
+/* Mit gestellter Uhr: Der Schoner prüft Zeitverhalten – Wartezeiten werden
+   vorgespult statt abgesessen (siehe vorspulen in lib.mjs). */
+const page = await neueSeite(browser, { uhr: true });
 
 const hinweise = ['A', 'B', 'C', 'D', 'E', 'F'].map(t =>
   ({ kind: 'text', title: t, text: 'Inhalt ' + t, on: true, seconds: 2 }));
@@ -15,16 +17,16 @@ await setzeEinstellungen(page, { screensaver: { on: false, seconds: 300, default
   shuffle: false, items: hinweise } });
 
 await page.click('#btnSaver');
-await page.waitForTimeout(300);
+await vorspulen(page, 300);
 pruefe('Schau startet von Hand', await page.isVisible('#saver'));
 gleich('erster Eintrag', await page.textContent('#saverStage h2'), 'A');
 gleich('Zähler', await page.textContent('#saverCount'), '1 / 6');
 
-await page.waitForTimeout(2100);
+await vorspulen(page, 2100);
 gleich('schaltet weiter', await page.textContent('#saverStage h2'), 'B');
 
 await page.keyboard.press('Escape');
-await page.waitForTimeout(200);
+await vorspulen(page, 200);
 pruefe('Taste beendet die Schau', !(await page.isVisible('#saver')));
 pruefe('Sichtschutz danach aus', !(await page.evaluate(() => document.body.classList.contains('privacy'))));
 
@@ -34,14 +36,14 @@ await setzeEinstellungen(page, { screensaver: { on: false, seconds: 300, default
 const durchlauf = async schritte => {
   const gesehen = [];
   await page.click('#btnSaver');
-  await page.waitForTimeout(300);
+  await vorspulen(page, 300);
   gesehen.push(await page.textContent('#saverStage h2'));
   for (let i = 0; i < schritte; i++) {
-    await page.waitForTimeout(2050);
+    await vorspulen(page, 2050);
     gesehen.push(await page.textContent('#saverStage h2'));
   }
   await page.keyboard.press('Escape');
-  await page.waitForTimeout(150);
+  await vorspulen(page, 150);
   return gesehen;
 };
 const lauf = await durchlauf(11);
@@ -54,23 +56,23 @@ pruefe('kein Wiederholen an der Nahtstelle', runde1[5] !== runde2[0], runde1[5] 
 /* ---- ohne Inhalte ---- */
 await setzeEinstellungen(page, { screensaver: { on: false, items: [] } });
 await page.click('#btnSaver');
-await page.waitForTimeout(300);
+await vorspulen(page, 300);
 enthaelt('Hinweis ohne Inhalte', await page.textContent('#saverStage'), 'noch keine Inhalte');
 await page.keyboard.press('Escape');
 
 /* ---- automatischer Start ---- */
 await setzeEinstellungen(page, { screensaver: { on: true, seconds: 10, defaultSeconds: 30,
   items: [{ kind: 'text', title: 'Auto', text: 'x', on: true }] }, privacy: { on: true, seconds: 300 } });
-await page.waitForTimeout(11200);
+await vorspulen(page, 11200);
 pruefe('startet nach der eingestellten Zeit', await page.isVisible('#saver'));
 await page.mouse.move(200, 200);
 await page.mouse.move(700, 600);
-await page.waitForTimeout(250);
+await vorspulen(page, 250);
 pruefe('Mausbewegung beendet die Schau', !(await page.isVisible('#saver')));
 
 /* ---- kein Start bei offenem Dialog ---- */
 await oeffneEinstellungen(page);
-await page.waitForTimeout(11500);
+await vorspulen(page, 11500);
 pruefe('kein Start bei offenem Fenster', !(await page.isVisible('#saver')));
 await page.click('#settingsCancel');
 
@@ -78,7 +80,7 @@ await page.click('#settingsCancel');
 await setzeEinstellungen(page, { screensaver: { on: false, defaultSeconds: 30, items: [
   { kind: 'text', title: 'Lang', text: 'Zeile mit Inhalt. '.repeat(160), on: true }] } });
 await page.click('#btnSaver');
-await page.waitForTimeout(400);
+await vorspulen(page, 400);
 const karte = await page.$eval('#saverStage', e => {
   const c = e.firstElementChild;
   return { scroll: c.scrollHeight, sicht: c.clientHeight, schrift: parseFloat(getComputedStyle(c).fontSize) };
@@ -92,7 +94,7 @@ await page.keyboard.press('Escape');
 await setzeEinstellungen(page, { screensaver: { on: false, defaultSeconds: 30, items: [
   { kind: 'datei', file: 'test.pdf', page: 3, on: true }] } });
 await page.click('#btnSaver');
-await page.waitForTimeout(400);
+await vorspulen(page, 400);
 const quelle = await page.$eval('#saverStage .slide-pdf', e => e.getAttribute('src'));
 enthaelt('gewählte Seite im Verweis', quelle, '#page=3');
 await page.keyboard.press('Escape');
