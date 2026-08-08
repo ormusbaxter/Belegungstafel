@@ -87,7 +87,32 @@ function openSettings(stufe) {
   activeTab = 'allgemein';
   renderTabs();
   renderPane();
+  knopfleiste();
   $('#settingsDlg').showModal();
+}
+
+/* Steht im Entwurf etwas anderes als im gespeicherten Stand?
+ *
+ * Der Entwurf ist eine Kopie der Einstellungen, die Schlüssel stehen also in
+ * derselben Reihenfolge – ein Textvergleich genügt und erspart einen eigenen
+ * Tiefenvergleich. */
+function geaendert() {
+  return JSON.stringify(draft) !== JSON.stringify(settings);
+}
+
+/* „Übernehmen“ erscheint nur, wenn es etwas zu übernehmen gibt. */
+function knopfleiste() {
+  $('#settingsSave').hidden = !geaendert();
+}
+
+/* Schließen: ohne Änderungen sofort, sonst mit Rückfrage. */
+function schliesseEinstellungen() {
+  if (geaendert() &&
+      confirm('Es gibt Änderungen, die noch nicht übernommen wurden.\n\n' +
+              'OK übernimmt sie, Abbrechen verwirft sie.')) {
+    commitSettings();
+  }
+  $('#settingsDlg').close();
 }
 
 function renderTabs() {
@@ -1317,7 +1342,13 @@ function commitSettings() {
   statistikButtonZeigen();
   uebergabeButtonZeigen();
   statistikTaktStarten();
-  $('#settingsDlg').close();
+  /* Das Fenster bleibt offen – wer mehrere Bereiche ändert, soll nicht jedes
+     Mal neu aufschließen müssen. Der Entwurf beginnt beim übernommenen Stand
+     von vorn, damit „Übernehmen“ wieder verschwindet. */
+  draft = copy(settings);
+  renderTabs();
+  renderPane();
+  knopfleiste();
   setSaveState('Einstellungen übernommen');
 }
 
@@ -1372,7 +1403,19 @@ function initSettings() {
     openSettings(stufe);
   });
   $('#settingsSave').addEventListener('click', commitSettings);
-  $('#settingsCancel').addEventListener('click', () => $('#settingsDlg').close());
+  $('#settingsClose').addEventListener('click', schliesseEinstellungen);
+  /* Die Bausteine der Reiter schreiben unmittelbar in den Entwurf und melden
+     das nicht. Statt jede Stelle anzufassen, wird nach jeder Eingabe und
+     jedem Klick im Fenster nachgesehen, ob sich etwas geändert hat. */
+  for (const art of ['input', 'change', 'click']) {
+    $('#settingsDlg').addEventListener(art, knopfleiste);
+  }
+  /* Esc schließt den Dialog von sich aus; mit Änderungen soll auch dann
+     gefragt werden. */
+  $('#settingsDlg').addEventListener('cancel', event => {
+    event.preventDefault();
+    schliesseEinstellungen();
+  });
   /* Wird der Dialog ohne „Übernehmen“ geschlossen, gilt wieder die
      gespeicherte Größe – die Vorschau des Schiebereglers verfällt. */
   $('#settingsDlg').addEventListener('close', () => applyZoom(settings.zoom));

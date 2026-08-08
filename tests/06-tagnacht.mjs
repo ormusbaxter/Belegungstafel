@@ -1,6 +1,6 @@
 /* Tag- und Nachtansicht: drei Zustände, einstellbare Zeitspanne */
 import { browserStarten, neueSeite, setzeEinstellungen, oeffneEinstellungen,
-         testName, gleich, pruefe, enthaelt, keineFehler, bilanz } from './lib.mjs';
+         testName, gleich, pruefe, enthaelt, keineFehler, bilanz, uebernehmen } from './lib.mjs';
 
 testName('Tag- und Nachtansicht');
 const browser = await browserStarten();
@@ -35,7 +35,7 @@ gleich('Zeitfelder danach frei',
 const felder = await tag.$$('.timefield');
 await felder[0].fill('17:00');
 await felder[1].fill('06:30');
-await tag.click('#settingsSave');
+await uebernehmen(tag);
 await tag.waitForTimeout(250);
 
 const auto = await stand(tag);
@@ -78,7 +78,7 @@ gleich('nach der Grenze hell, ohne Neuladen', (await stand(nacht)).thema, 'light
 /* ---- Option abschalten, während Auto lief ---- */
 await oeffneEinstellungen(nacht, 'Allgemein');
 await nacht.uncheck('#settingsPane .setrow:has-text("Automatische Tag-/Nachtansicht") input');
-await nacht.click('#settingsSave');
+await uebernehmen(nacht);
 await nacht.waitForTimeout(250);
 const danach = await stand(nacht);
 gleich('sichtbare Ansicht bleibt', danach.thema, 'light');

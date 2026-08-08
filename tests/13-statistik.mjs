@@ -1,6 +1,6 @@
 /* Statistik je Schicht: Kennzahlen, Schichtzuordnung, Fenster, Einstellungen */
 import { browserStarten, neueSeite, oeffneEinstellungen, setzeEinstellungen,
-         testName, gleich, pruefe, enthaelt, keineFehler, bilanz, TIMEOUT } from './lib.mjs';
+         testName, gleich, pruefe, enthaelt, keineFehler, bilanz, TIMEOUT, uebernehmen } from './lib.mjs';
 
 testName('Statistik je Schicht');
 const browser = await browserStarten();
@@ -117,7 +117,7 @@ gleich('Anfangszeiten', zeiten.join(','), '06:00,14:12,20:30');
 /* Schaltfläche ausblenden */
 const kaesten = await page.$$('#settingsPane .setrow input[type=checkbox]');
 await kaesten[1].uncheck();
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(250);
 pruefe('Schaltfläche lässt sich ausblenden', !(await page.isVisible('#btnStats')));
 
@@ -125,7 +125,7 @@ pruefe('Schaltfläche lässt sich ausblenden', !(await page.isVisible('#btnStats
 await oeffneEinstellungen(page, 'Statistik');
 const zeitFelder = await page.$$('#settingsPane .timefield');
 await zeitFelder[1].fill('13:00');
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(250);
 gleich('geänderte Zeit wirkt sofort', await schicht('2026-03-05T13:30:00'), 'Spätdienst 2026-03-05');
 gleich('Zeit gespeichert',

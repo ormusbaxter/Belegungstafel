@@ -19,7 +19,7 @@ if (ordnerwahl) await page.selectOption('#settingsPane .zielpick', 'download');
 await page.waitForTimeout(150);
 enthaelt('Warnung vor dem Download-Ordner', await page.textContent('.backupstatus'),
   'kein geschützter Ablageort');
-await page.click('#settingsCancel');
+await page.click('#settingsClose');
 await page.waitForTimeout(150);
 
 /* ---- Sicherung von Hand in den Download-Ordner ---- */
@@ -45,7 +45,7 @@ pruefe('Sicherung enthält die Einstellungen', Boolean(inhalt.settings && inhalt
 
 await page.waitForTimeout(300);
 enthaelt('Rückmeldung im Fenster', await page.textContent('.backupstatus'), 'Download-Ordner');
-await page.click('#settingsCancel');
+await page.click('#settingsClose');
 
 /* ---- Merkzettel verhindert doppelte Sicherung am selben Tag ---- */
 const notiz = await page.evaluate(() => localStorage.getItem('belegungstafel.sicherung'));
@@ -79,7 +79,7 @@ gleich('ohne Kennung unverändert', await page.evaluate(() => STORAGE_KEY), 'bel
 pruefe('Kennung erscheint in den Einstellungen',
   (await (async () => { await oeffneEinstellungen(page, 'Daten');
     const text = await page.textContent('#settingsPane');
-    await page.click('#settingsCancel');
+    await page.click('#settingsClose');
     return text; })()).includes('Kennung dieser Tafel'));
 
 await browser.close();

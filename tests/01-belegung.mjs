@@ -1,6 +1,6 @@
 /* Zählung der belegten Betten, Zeilenfarben, Bettplatz räumen */
 import { browserStarten, neueSeite, oeffneEinstellungen,
-         testName, gleich, pruefe, keineFehler, bilanz } from './lib.mjs';
+         testName, gleich, pruefe, keineFehler, bilanz, uebernehmen } from './lib.mjs';
 
 testName('Belegung und Zählung');
 const browser = await browserStarten();
@@ -56,7 +56,7 @@ pruefe('die Linie ist kräftiger als die gewöhnliche',
 /* Sie lässt sich je Bettplatz abwählen */
 await oeffneEinstellungen(page, 'Bettplätze');
 await page.uncheck('#settingsPane .entry-bed:nth-child(2) .bedtrenner input');
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(300);
 pruefe('abgewählte Linie verschwindet',
   !(await page.evaluate(() =>
@@ -77,7 +77,7 @@ const balkenBunt = await balken();
 
 await oeffneEinstellungen(page, 'Allgemein');
 await page.uncheck('#settingsPane .setrow:has-text("Zeilen nach Status einfärben") input');
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(300);
 pruefe('ohne Zeilenfarben ist die Zeile neutral', (await farbe()) !== bunt,
   bunt + ' → ' + (await farbe()));
@@ -86,7 +86,7 @@ gleich('der Farbbalken bleibt aber stehen', await balken(), balkenBunt);
 /* wieder einschalten für die folgenden Prüfungen */
 await oeffneEinstellungen(page, 'Allgemein');
 await page.check('#settingsPane .setrow:has-text("Zeilen nach Status einfärben") input');
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(300);
 gleich('eingeschaltet wieder farbig', await farbe(), bunt);
 

@@ -2,7 +2,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { browserStarten, neueSeite, oeffneEinstellungen, APP_DIR,
-         testName, gleich, pruefe, enthaelt, keineFehler, bilanz, TIMEOUT } from './lib.mjs';
+         testName, gleich, pruefe, enthaelt, keineFehler, bilanz, TIMEOUT, uebernehmen } from './lib.mjs';
 
 testName('Vorgabe der Station');
 const DATEI = join(APP_DIR, 'js', 'vorgaben.js');
@@ -27,7 +27,7 @@ try {
   const regler = await page.$('.zoomslider');
   await regler.fill('150');
   await regler.dispatchEvent('input');
-  await page.click('#settingsSave');
+  await uebernehmen(page);
   await page.waitForTimeout(300);
 
   /* Patientenname eintragen – er darf nicht in der Vorgabedatei landen */
@@ -48,7 +48,7 @@ try {
   enthaelt('Zoom enthalten', inhalt, '"zoom": 150');
   pruefe('keine Patientendaten in der Datei', !inhalt.includes('Geheim'));
   pruefe('kein Belegungsteil', !/"beds"\s*:\s*\{/.test(inhalt));
-  await page.click('#settingsCancel');
+  await page.click('#settingsClose');
   keineFehler(page);
   await page.context().close();
 
@@ -71,14 +71,14 @@ try {
   const nachReset = await page.$$eval('#settingsPane .entry input', is => is.map(i => i.value));
   pruefe('eigener Eintrag entfernt', !nachReset.includes('NUR-TEST'));
   pruefe('Vorgabe bleibt erhalten', nachReset.includes('PALLIATIV'), nachReset.join(','));
-  await page.click('#settingsCancel');
+  await page.click('#settingsClose');
 
   /* Örtlich gespeicherte Einstellungen haben Vorrang vor der Vorgabe */
   await oeffneEinstellungen(page, 'Allgemein');
   const regler2 = await page.$('.zoomslider');
   await regler2.fill('80');
   await regler2.dispatchEvent('input');
-  await page.click('#settingsSave');
+  await uebernehmen(page);
   await page.reload();
   await page.waitForTimeout(400);
   gleich('örtliche Einstellung gewinnt',

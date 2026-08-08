@@ -1,6 +1,6 @@
 /* Einstellungen: Passwort, Listen, Bettplätze, Diaordner (mit und ohne Server) */
 import { browserStarten, neueSeite, oeffneEinstellungen, serverStarten,
-         testName, gleich, pruefe, enthaelt, keineFehler, bilanz, TIMEOUT } from './lib.mjs';
+         testName, gleich, pruefe, enthaelt, keineFehler, bilanz, TIMEOUT, uebernehmen, verneineRueckfrage } from './lib.mjs';
 
 testName('Einstellungen');
 const browser = await browserStarten();
@@ -35,7 +35,7 @@ gleich('nur zwei Reiter', wenige.join(' | '), 'Allgemein | Bildschirmschoner');
 await page.click('#settingsTabs .tab:text-is("Bildschirmschoner")');
 await page.waitForTimeout(150);
 pruefe('Bildschirmschoner bedienbar', await page.isVisible('#settingsPane .slidebar'));
-await page.click('#settingsCancel');
+await page.click('#settingsClose');
 await page.waitForTimeout(150);
 
 /* Volle Stufe: alle Reiter */
@@ -52,12 +52,64 @@ gleich('Reiter in der erwarteten Reihenfolge', reiter.slice(0, 7).join(' | '),
   'Allgemein | Bildschirmschoner | Statistik | Spaltenköpfe | Bettplätze | ' +
   'Anwesenheitsstatus | Patientenname');
 
+/* ---- Übernehmen und Schließen ---- */
+pruefe('ohne Änderung kein Übernehmen-Knopf', await page.isHidden('#settingsSave'));
+pruefe('Schließen steht immer bereit', await page.isVisible('#settingsClose'));
+
+await page.click('#settingsTabs .tab:text-is("Allgemein")');
+await page.waitForTimeout(150);
+await page.uncheck('#settingsPane .setrow:has-text("Zeilen nach Status einfärben") input');
+await page.waitForTimeout(150);
+pruefe('nach einer Änderung erscheint er', await page.isVisible('#settingsSave'));
+
+await page.click('#settingsSave');
+await page.waitForTimeout(300);
+pruefe('Übernehmen schließt das Fenster nicht', await page.isVisible('#settingsDlg'));
+gleich('die Änderung ist übernommen',
+  await page.evaluate(() => settings.zeilenfarben), false);
+pruefe('und der Knopf verschwindet wieder', await page.isHidden('#settingsSave'));
+
+/* Ohne Änderung schließt es ohne Rückfrage. */
+let gefragt = false;
+const merker = () => { gefragt = true; };
+page.on('dialog', merker);
+await page.click('#settingsClose');
+await page.waitForTimeout(250);
+pruefe('ohne Änderung keine Rückfrage', !gefragt);
+pruefe('und das Fenster ist zu', await page.isHidden('#settingsDlg'));
+page.off('dialog', merker);
+
+/* Mit Änderung wird gefragt – verneint heißt verwerfen. */
+await oeffneEinstellungen(page, 'Allgemein');
+await page.check('#settingsPane .setrow:has-text("Zeilen nach Status einfärben") input');
+await page.waitForTimeout(150);
+verneineRueckfrage(page);
+await page.click('#settingsClose');
+await page.waitForTimeout(300);
+pruefe('verneint schließt und verwirft', await page.isHidden('#settingsDlg'));
+gleich('die Einstellung blieb unverändert',
+  await page.evaluate(() => settings.zeilenfarben), false);
+
+/* Bestätigt heißt übernehmen. */
+await oeffneEinstellungen(page, 'Allgemein');
+await page.check('#settingsPane .setrow:has-text("Zeilen nach Status einfärben") input');
+await page.waitForTimeout(150);
+await page.click('#settingsClose');
+await page.waitForTimeout(300);
+pruefe('bestätigt schließt ebenfalls', await page.isHidden('#settingsDlg'));
+gleich('und übernimmt die Änderung',
+  await page.evaluate(() => settings.zeilenfarben), true);
+keineFehler(page);
+
+/* Für die folgenden Prüfungen wieder aufschließen. */
+await oeffneEinstellungen(page);
+
 /* ---- Auswahlliste ändern ---- */
 await page.click('#settingsTabs .tab:text-is("Fachdisziplinen")');
 await page.waitForTimeout(150);
 await page.click('#settingsPane .addentry');
 await page.fill('#settingsPane .entry:last-child input', 'Testfach');
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(300);
 const optionen = await page.$$eval('#tbody tr:first-child td.col-disziplin option', os => os.map(o => o.value));
 pruefe('neuer Eintrag steht in der Tabelle', optionen.includes('Testfach'));
@@ -69,7 +121,7 @@ const vorher = await page.$$eval('#settingsPane .entry input', is => is.map(i =>
 gleich('ausgelieferte Liste', vorher.join(', '), 'Notbett, gesperrt, Reinigung, NA, OP, CV');
 await page.click('#settingsPane .addentry');
 await page.fill('#settingsPane .entry:last-child input', 'Ausweichbett');
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(300);
 await page.click('tr[data-bed="0a"] td.col-name .combobtn');
 await page.waitForTimeout(150);
@@ -83,7 +135,7 @@ await page.click('#settingsReset');
 await page.waitForTimeout(150);
 const zurueck = await page.$$eval('#settingsPane .entry input', is => is.map(i => i.value));
 gleich('Kategorie zurücksetzbar', zurueck.join(', '), 'Notbett, gesperrt, Reinigung, NA, OP, CV');
-await page.click('#settingsCancel');
+await page.click('#settingsClose');
 await page.waitForTimeout(150);
 
 /* ---- Bettplatz umbenennen, Einträge bleiben ---- */
@@ -91,7 +143,7 @@ await page.fill('tr[data-bed="0a"] td.col-name input', 'Bleibt erhalten');
 await page.waitForTimeout(400);
 await oeffneEinstellungen(page, 'Bettplätze');
 await page.fill('#settingsPane .entry:first-child input', '0 neu');
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(300);
 gleich('Bettplatz umbenannt', await page.textContent('#tbody tr:first-child .bedlabel'), '0 neu');
 gleich('Eintrag blieb erhalten', await page.inputValue('#tbody tr:first-child td.col-name input'),
@@ -106,7 +158,7 @@ await page.click('#settingsPane .slidebar button:text-is("+ Eigener Hinweis")');
 await page.waitForTimeout(150);
 const seitenfelder = await page.$$eval('.entry-slide', rs => rs.map(r => Boolean(r.querySelector('.slidepage'))));
 gleich('Seitenfeld nur beim Dateieintrag', seitenfelder.join(','), 'true,false');
-await page.click('#settingsCancel');
+await page.click('#settingsClose');
 keineFehler(page);
 
 /* ---- Berechtigungen: was die einfache Stufe ändern darf ---- */
@@ -120,7 +172,7 @@ gleich('ab Werk zwei Reiter frei',
 
 /* Statistik dazugeben */
 await page.click('.rechteliste .setrow:has(span:text-is("Statistik")) input');
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(300);
 gleich('neue Berechtigung gespeichert',
   await page.evaluate(() => settings.rechte.einfach.join(',')), 'allgemein,schoner,statistik');
@@ -130,7 +182,7 @@ await oeffneEinstellungen(page, null, 'Vinzenz1');
 gleich('einfache Stufe sieht drei Reiter',
   (await page.$$eval('#settingsTabs .tab', ts => ts.map(t => t.textContent))).join(' | '),
   'Allgemein | Bildschirmschoner | Statistik');
-await page.click('#settingsCancel');
+await page.click('#settingsClose');
 await page.waitForTimeout(200);
 
 /* Zurücknehmen, und die letzte Berechtigung lässt sich nicht entfernen */
@@ -142,7 +194,7 @@ await page.click('.rechteliste .setrow:has(span:text-is("Allgemein")) input');
 await page.waitForTimeout(150);
 gleich('die letzte Berechtigung bleibt bestehen',
   await page.evaluate(() => draft.rechte.einfach.join(',')), 'allgemein');
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(300);
 
 /* ---- Berechtigungen für einzelne Unterpunkte ---- */
@@ -163,7 +215,7 @@ for (const t of ['Norton-Skala', 'Rechte Maustaste']) {
   await page.click(`.rechteliste .rechteteil:has(span:text-is("${t}")) input`);
   await page.waitForTimeout(100);
 }
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(300);
 gleich('beide Sperren gespeichert',
   await page.evaluate(() => settings.rechte.gesperrt.join(',')),
@@ -176,14 +228,14 @@ gleich('einfache Stufe: sechs statt acht Punkte', bloecke.length, 6);
 gleich('lückenlos durchnummeriert', bloecke.join(' | '),
   '1. Sichtschutz | 2. Farbige Zeilen | 3. Bildschirmschoner | ' +
   '4. Tag- und Nachtansicht | 5. Größe der Darstellung | 6. Übergabezettel');
-await page.click('#settingsCancel');
+await page.click('#settingsClose');
 await page.waitForTimeout(200);
 
 /* Die volle Stufe sieht weiterhin alles */
 await oeffneEinstellungen(page, 'Allgemein');
 gleich('volle Stufe unverändert acht Punkte',
   await page.$$eval('#settingsPane h3', hs => hs.length), 8);
-await page.click('#settingsCancel');
+await page.click('#settingsClose');
 await page.waitForTimeout(200);
 
 /* Sperren wieder aufheben, damit die folgenden Prüfungen den vollen Reiter sehen */
@@ -192,7 +244,7 @@ for (const t of ['Norton-Skala', 'Rechte Maustaste']) {
   await page.click(`.rechteliste .rechteteil:has(span:text-is("${t}")) input`);
   await page.waitForTimeout(100);
 }
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(300);
 keineFehler(page);
 
@@ -211,7 +263,7 @@ pruefe('im Textfeld erlaubt', stand.feld);
 
 await oeffneEinstellungen(page, 'Allgemein');
 await page.click('#settingsPane .setrow:has-text("Kontextmenü der rechten Maustaste") input');
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(300);
 stand = await menue();
 pruefe('eingeschaltet auch über der Tafel erlaubt', stand.tabelle);
@@ -244,7 +296,7 @@ await page.fill('#settingsPane .entry-melde:last-child input', 'Abmeldung');
 /* Hellgelb ist das neunte Feld der Auswahl (das erste ist „Standard“). */
 await page.click('#settingsPane .entry-melde:last-child .swatch >> nth=8');
 await page.waitForTimeout(150);
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(400);
 
 gleich('neue Stufe steht zur Wahl', (await stufen()).join(' | '), 'grün | gelb | rot | Abmeldung');
@@ -258,7 +310,7 @@ pruefe('und ist als gefärbt gekennzeichnet', hell.faerbig);
 await oeffneEinstellungen(page, 'Meldestatus');
 await page.click('#settingsPane .entry-melde:last-child .swatch.none');
 await page.waitForTimeout(150);
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(400);
 pruefe('Stufe ohne Farbe färbt nicht', !(await kachel()).faerbig);
 
@@ -266,7 +318,7 @@ pruefe('Stufe ohne Farbe färbt nicht', !(await kachel()).faerbig);
 await oeffneEinstellungen(page, 'Meldestatus');
 await page.click('#settingsPane .entry-melde:last-child .entrybtn.remove');
 await page.waitForTimeout(150);
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(400);
 gleich('entfernte, aber gesetzte Stufe bleibt wählbar',
   await page.inputValue('#meldestatus'), 'Abmeldung');
@@ -283,7 +335,7 @@ for (let i = 0; i < 3; i++) {
 }
 gleich('die letzte Stufe bleibt stehen',
   await page.$$eval('#settingsPane .entry-melde', es => es.length), 1);
-await page.click('#settingsCancel');
+await page.click('#settingsClose');
 await page.waitForTimeout(200);
 keineFehler(page);
 
@@ -296,7 +348,7 @@ gleich('beide Felder unter Daten',
 await page.fill('#settingsPane .setrow:has(span:text-is("Krankenhaus")) input',
   'Klinikum Musterstadt');
 await page.fill('#settingsPane .setrow:has(span:text-is("Station")) input', 'Intensiv 2');
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(300);
 
 gleich('Krankenhaus steht neben dem Logo',
@@ -315,7 +367,7 @@ gleich('bleibt nach dem Neuladen stehen',
 /* Ein leeres Feld soll keine Lücke hinterlassen. */
 await oeffneEinstellungen(page, 'Daten');
 await page.fill('#settingsPane .setrow:has(span:text-is("Station")) input', '');
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(300);
 pruefe('leere Station wird ausgeblendet', await page.isHidden('.brandstation'));
 gleich('der Titel führt dann nur das Haus', await page.title(), 'Klinikum Musterstadt');
@@ -332,7 +384,7 @@ pruefe('Dateien über den Server gefunden', /\d+ Datei/.test(status), status.sli
 const gefunden = await online.$$eval('.entry-slide .slidefile', is => is.map(i => i.value));
 pruefe('nur zugelassene Dateitypen', gefunden.every(n => /\.(pdf|png|jpe?g)$/i.test(n)), gefunden.join(', '));
 pruefe('LIESMICH wird nicht übernommen', !gefunden.some(n => /liesmich/i.test(n)));
-await online.click('#settingsCancel');
+await online.click('#settingsClose');
 keineFehler(online);
 await server.stop();
 

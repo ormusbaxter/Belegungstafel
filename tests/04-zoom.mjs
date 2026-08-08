@@ -1,6 +1,6 @@
 /* Größe der Darstellung: Regler, Vorschau, Bestand, Grenzwerte */
 import { browserStarten, neueSeite, oeffneEinstellungen, setzeEinstellungen,
-         testName, gleich, pruefe, keineFehler, bilanz } from './lib.mjs';
+         testName, gleich, pruefe, keineFehler, bilanz, uebernehmen, verneineRueckfrage } from './lib.mjs';
 
 testName('Zoom der Tafel');
 const browser = await browserStarten();
@@ -32,15 +32,18 @@ pruefe('Tabelle etwa doppelt so breit', Math.abs(vorschau.breite - start.breite 
 gleich('Dialog bleibt unverändert', vorschau.dialog, start.dialog);
 gleich('Anzeige neben dem Regler', await page.textContent('.zoomvalue'), '200 %');
 
-await page.click('#settingsCancel');
-await page.waitForTimeout(200);
-gleich('Abbrechen stellt zurück', (await mass()).zoom, '1');
+/* Schließen fragt nach, weil der Regler den Entwurf verändert hat. Verneint
+   heißt: verwerfen – die Vorschau verfällt. */
+verneineRueckfrage(page);
+await page.click('#settingsClose');
+await page.waitForTimeout(250);
+gleich('verworfen stellt den Zoom zurück', (await mass()).zoom, '1');
 
 await oeffneEinstellungen(page, 'Allgemein');
 const regler2 = await page.$('.zoomslider');
 await regler2.fill('160');
 await regler2.dispatchEvent('input');
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(300);
 gleich('Übernehmen speichert', (await mass()).zoom, '1.6');
 

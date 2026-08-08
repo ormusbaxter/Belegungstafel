@@ -4,6 +4,22 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.22.0
+
+- **„Übernehmen" schließt das Einstellungsfenster nicht mehr.** Wer mehrere Bereiche ändert,
+  musste bisher jedes Mal neu aufschließen – mit Passwort. Der Entwurf beginnt nach dem
+  Übernehmen beim gespeicherten Stand von vorn
+- **„Übernehmen" erscheint nur, wenn es etwas zu übernehmen gibt.** Verglichen wird der
+  Entwurf mit dem gespeicherten Stand; die Bausteine der Reiter schreiben unmittelbar in den
+  Entwurf, deshalb wird nach jeder Eingabe und jedem Klick im Fenster nachgesehen
+- **Neu: „Schließen".** Ohne Änderungen schließt es sofort, sonst fragt es: OK übernimmt,
+  Abbrechen verwirft. Die **Esc-Taste** verhält sich genauso – sonst wäre sie der stille Weg
+  an der Rückfrage vorbei. Die frühere Schaltfläche „Abbrechen" entfällt; ihre Aufgabe
+  übernimmt die Rückfrage
+- die Prüfungen bekamen dafür zwei Hilfen: `uebernehmen()` für das frühere Verhalten
+  (übernehmen und schließen) und `verneineRueckfrage()`, weil die Testseite Rückfragen sonst
+  von sich aus bestätigt und der Verwerfen-Fall dadurch nie geprüft würde
+
 ## 2.21.0
 
 - **Kräftigere Trennlinie zwischen den Zimmern.** Sie steht ab Werk unter 0 b, 1 b, 2, 3, 4 b,

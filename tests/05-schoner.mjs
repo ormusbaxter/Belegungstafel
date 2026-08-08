@@ -74,7 +74,7 @@ pruefe('Mausbewegung beendet die Schau', !(await page.isVisible('#saver')));
 await oeffneEinstellungen(page);
 await vorspulen(page, 11500);
 pruefe('kein Start bei offenem Fenster', !(await page.isVisible('#saver')));
-await page.click('#settingsCancel');
+await page.click('#settingsClose');
 
 /* ---- langer Text wird eingepasst ---- */
 await setzeEinstellungen(page, { screensaver: { on: false, defaultSeconds: 30, items: [

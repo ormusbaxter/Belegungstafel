@@ -88,7 +88,12 @@ export async function neueSeite(browser, opt = {}) {
   page.fehler = [];
   page.on('pageerror', err => page.fehler.push(err.message));
   page.on('console', msg => { if (msg.type() === 'error') page.fehler.push(msg.text()); });
-  if (opt.dialogeBestaetigen !== false) page.on('dialog', d => d.accept());
+  /* Rückfragen werden von sich aus bestätigt; verneineRueckfrage() lässt die
+     jeweils nächste verneinen. */
+  if (opt.dialogeBestaetigen !== false) page.on('dialog', d => {
+    if (page.naechsteVerneinen) { page.naechsteVerneinen = false; d.dismiss(); }
+    else d.accept();
+  });
   /* Eine gestellte Uhr macht zeitabhängige Prüfungen reproduzierbar und
      erlaubt zugleich, Wartezeiten vorzuspulen (siehe vorspulen). Die Timer
      der Seite laufen daneben weiter wie gehabt. */
@@ -125,6 +130,22 @@ export async function vorspulen(page, ms, nachlauf = 60) {
      dargestellt werden. Bei angehaltener Uhr schiebt er die Zeitgeber nicht
      weiter, verfälscht die Spanne also nicht. */
   if (nachlauf) await page.waitForTimeout(nachlauf);
+}
+
+/* Die nächste Rückfrage verneinen statt zu bestätigen. */
+export function verneineRueckfrage(page) {
+  page.naechsteVerneinen = true;
+}
+
+/* Übernehmen und schließen.
+ *
+ * „Übernehmen“ lässt das Fenster seit 2.22.0 offen; die meisten Prüfungen
+ * wollen danach aber wieder an die Tafel. */
+export async function uebernehmen(page) {
+  await page.click('#settingsSave');
+  await page.waitForTimeout(200);
+  await page.click('#settingsClose');
+  await page.waitForTimeout(150);
 }
 
 /* Einstellungen vorgeben, ohne den Dialog zu bedienen. */

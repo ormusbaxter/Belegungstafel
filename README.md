@@ -272,7 +272,12 @@ Spalte der Tafel zugeordnet.
   und als Punkt 4 die Größe der Darstellung, unter „Bildschirmschoner“ die Inhalte der
   Diaschau, unter „Daten“ Export, Import und „Tafel leeren“.
   Ein Wert, der in einem Bettplatz steht, bleibt erhalten, auch wenn er später aus der
-  Liste entfernt wird
+  Liste entfernt wird.
+  **Bedienung des Fensters**: „Übernehmen" erscheint nur, wenn etwas geändert wurde, und
+  **lässt das Fenster offen** – mehrere Bereiche lassen sich nacheinander bearbeiten.
+  „Schließen" schließt ohne Rückfrage, solange nichts geändert wurde; sonst fragt es, ob die
+  Änderungen übernommen werden sollen (Abbrechen verwirft sie). Die Esc-Taste verhält sich
+  wie „Schließen"
 - **Verstorbene**: Ein für sich stehendes Pluszeichen im Feld Patientenname wird sofort zum
   Kreuz `†`; dahinter steht der Todeszeitpunkt (`Mustermann, Max † 14:30`). Die Namenszelle
   wird dann dunkelgrau hinterlegt und die Schrift hell gesetzt. Ein Plus innerhalb eines

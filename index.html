@@ -556,8 +556,10 @@
   <menu class="dlgmenu">
     <button type="button" id="settingsReset" class="danger">Kategorie zurücksetzen</button>
     <span class="spacer"></span>
-    <button type="button" id="settingsCancel">Abbrechen</button>
-    <button type="button" id="settingsSave" class="primary">Übernehmen</button>
+    <!-- Übernehmen erscheint nur, wenn etwas geändert wurde, und lässt das
+         Fenster offen. Schließen fragt dann nach. -->
+    <button type="button" id="settingsSave" class="primary" hidden>Übernehmen</button>
+    <button type="button" id="settingsClose">Schließen</button>
   </menu>
 </dialog>
 

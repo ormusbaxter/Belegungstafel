@@ -1,6 +1,6 @@
 /* Norton-Fälligkeit, Klammerwerte, Plausibilität und Übergabezettel */
 import { browserStarten, neueSeite, oeffneEinstellungen, setzeEinstellungen,
-         testName, gleich, pruefe, enthaelt, keineFehler, bilanz } from './lib.mjs';
+         testName, gleich, pruefe, enthaelt, keineFehler, bilanz, uebernehmen } from './lib.mjs';
 
 testName('Norton, Klammern und Übergabezettel');
 const browser = await browserStarten();
@@ -389,7 +389,7 @@ pruefe('kein Stilblock für die Übergabeliste',
   !(await page.isVisible('#settingsPane .styleblock')));
 await page.click('#settingsPane .addentry');
 await page.fill('#settingsPane .entry:last-child input', 'Milrinon');
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(400);
 await page.click('#btnHandover');
 await page.waitForTimeout(300);
@@ -401,7 +401,7 @@ await page.waitForTimeout(200);
 /* Schaltfläche lässt sich zentral abschalten */
 await oeffneEinstellungen(page, 'Allgemein');
 await page.click('#settingsPane .setrow:has-text("Schaltfläche anzeigen") input[type=checkbox]');
-await page.click('#settingsSave');
+await uebernehmen(page);
 await page.waitForTimeout(400);
 pruefe('abschaltbar', !(await page.isVisible('#btnHandover')));
 gleich('Einstellung bleibt gespeichert',
