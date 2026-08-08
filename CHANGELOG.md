@@ -4,6 +4,26 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.22.1
+
+Zwei Fehler an den Trennlinien aus 2.21.0, beide aus dem Stationsbetrieb gemeldet.
+
+- **Auf einer eingerichteten Tafel wurde keine Linie gezeichnet.** Ein gespeicherter Stand
+  kennt die Angabe `trenner` nicht; sie galt damit als abgewählt, und zwar für jeden
+  Bettplatz. Betroffen war jede Tafel, an der schon einmal etwas eingestellt worden war – nur
+  ein frischer Browser zeigte die Linien
+
+  Ein Stand, in dem **kein einziger** Bettplatz die Angabe trägt, gilt jetzt als älter als
+  2.21.0 und bekommt die Vorgabe je Bettplatz. Wer die Linien bewusst abwählt, hat danach
+  überall ein ausdrückliches „nein" gespeichert und wird von dieser Übernahme nicht mehr
+  erfasst
+- **Das Häkchen ließ sich nicht speichern.** Beim Übernehmen baute das Einstellungsfenster
+  jede Bettzeile als `{ id, label }` neu – die Angabe fiel dabei heraus, noch bevor
+  gespeichert wurde
+- die Prüfungen liefen bisher stets mit leerem Browserspeicher und konnten den Fehler deshalb
+  nicht sehen. `tests/01-belegung.mjs` prüft jetzt zusätzlich den gespeicherten Stand, das
+  Neuladen und beide Fälle eines älteren Standes
+
 ## 2.22.0
 
 - **„Übernehmen" schließt das Einstellungsfenster nicht mehr.** Wer mehrere Bereiche ändert,

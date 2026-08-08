@@ -115,10 +115,20 @@ function mergeSettings(target, source) {
     target.styles[cat.key] = clean;
   }
   if (Array.isArray(source.beds)) {
+    /* Stände vor 2.21.0 kennen die Trennlinie nicht. Trägt kein einziger
+       Bettplatz die Angabe, ist es ein solcher Stand – dann gilt die Vorgabe
+       je Bettplatz, statt alle Linien stillschweigend abzuschalten. Wer sie
+       bewusst abwählt, hat sie danach als `false` gespeichert und wird von
+       dieser Übernahme nicht mehr erfasst. */
+    const alterStand = source.beds.every(bed => !bed || bed.trenner === undefined);
+    const vorgabe = id => (DEFAULT_BEDS.find(bed => bed.id === id) || {}).trenner === true;
     const beds = source.beds
       .filter(bed => bed && String(bed.label || '').trim())
-      .map(bed => ({ id: String(bed.id || newBedId()), label: String(bed.label).trim(),
-                     trenner: bed.trenner === true }));
+      .map(bed => {
+        const id = String(bed.id || newBedId());
+        return { id, label: String(bed.label).trim(),
+                 trenner: alterStand ? vorgabe(id) : bed.trenner === true };
+      });
     if (beds.length) target.beds = beds;
   }
   if (source.namen && typeof source.namen === 'object') {

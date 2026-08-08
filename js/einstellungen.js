@@ -1314,7 +1314,7 @@ function commitSettings() {
   if (stat.schichten.length < 2) stat.schichten = copy(DEFAULT_STATISTIK.schichten);
 
   draft.beds = draft.beds.filter(bed => bed.label.trim())
-    .map(bed => ({ id: bed.id, label: bed.label.trim() }));
+    .map(bed => ({ id: bed.id, label: bed.label.trim(), trenner: bed.trenner === true }));
   if (!draft.beds.length) draft.beds = copy(DEFAULT_BEDS);
 
   /* Frisch eingeschaltet, beginnt die Tafel im Zustand „Auto“. */

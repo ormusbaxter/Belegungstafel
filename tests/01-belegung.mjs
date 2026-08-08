@@ -53,14 +53,54 @@ pruefe('die Linie ist kräftiger als die gewöhnliche',
   parseFloat(staerken.mit) > parseFloat(staerken.ohne),
   staerken.mit + ' gegen ' + staerken.ohne);
 
-/* Sie lässt sich je Bettplatz abwählen */
+/* Sie lässt sich je Bettplatz abwählen – und das überlebt das Neuladen */
 await oeffneEinstellungen(page, 'Bettplätze');
 await page.uncheck('#settingsPane .entry-bed:nth-child(2) .bedtrenner input');
+await page.check('#settingsPane .entry-bed:nth-child(1) .bedtrenner input');
 await uebernehmen(page);
 await page.waitForTimeout(300);
-pruefe('abgewählte Linie verschwindet',
-  !(await page.evaluate(() =>
-    document.querySelector('tr[data-bed="0b"]').classList.contains('trenner'))));
+const gesetzt = () => page.$$eval('#tbody tr.trenner', rs => rs.map(r => r.dataset.bed).join(','));
+gleich('abgewählt verschwindet, angewählt kommt hinzu',
+  await gesetzt(), '0a,1b,2,3,4b,5,6b,7');
+gleich('die Angabe steht in den Einstellungen',
+  await page.evaluate(() => settings.beds.slice(0, 2).map(b => b.trenner).join(',')),
+  'true,false');
+gleich('und im gespeicherten Stand',
+  await page.evaluate(() => JSON.parse(localStorage.getItem('belegungstafel.einstellungen'))
+    .beds.slice(0, 2).map(b => b.trenner).join(',')), 'true,false');
+await page.reload();
+await page.waitForTimeout(400);
+gleich('nach dem Neuladen unverändert', await gesetzt(), '0a,1b,2,3,4b,5,6b,7');
+
+/* Ein gespeicherter Stand von vor 2.21.0 kennt die Angabe nicht. Dann gilt
+   die Vorgabe – sonst verlöre jede eingerichtete Tafel ihre Linien. */
+await page.evaluate(() => {
+  localStorage.setItem('belegungstafel.einstellungen', JSON.stringify({
+    version: 3,
+    beds: [{ id: '0a', label: '0 a' }, { id: '0b', label: '0 b' },
+           { id: '1a', label: '1 a' }, { id: '1b', label: '1 b' }, { id: '2', label: '2' }]
+  }));
+});
+await page.reload();
+await page.waitForTimeout(400);
+gleich('alter Stand bekommt die Vorgabe', await gesetzt(), '0b,1b,2');
+
+/* Wer sie bewusst abwählt, behält das: dann steht überall false. */
+await page.evaluate(() => {
+  localStorage.setItem('belegungstafel.einstellungen', JSON.stringify({
+    version: 3,
+    beds: [{ id: '0a', label: '0 a', trenner: false },
+           { id: '0b', label: '0 b', trenner: false }, { id: '2', label: '2', trenner: false }]
+  }));
+});
+await page.reload();
+await page.waitForTimeout(400);
+gleich('bewusst abgewählt bleibt abgewählt', await gesetzt(), '');
+
+/* Ausgangslage für die folgenden Prüfungen wiederherstellen */
+await page.evaluate(() => localStorage.removeItem('belegungstafel.einstellungen'));
+await page.reload();
+await page.waitForTimeout(400);
 
 /* ---- Farbige Zeilen lassen sich abschalten ---- */
 await page.evaluate(() => {
