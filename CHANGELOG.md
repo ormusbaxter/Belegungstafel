@@ -4,6 +4,29 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.24.0
+
+- **Die Termine haben ein eigenes Fenster.** Die Schaltfläche „Termine" in der Werkzeugleiste
+  öffnet sie **ohne Zugangsstufe**: Sie gehören zum Stationsalltag und ändern sich wöchentlich;
+  dafür jedes Mal das Administrationspasswort zu verlangen, war verkehrt. Aus den Einstellungen
+  sind sie damit heraus – dort steht nur noch, ob die Schaltfläche erscheint (Allgemein)
+- jede Eingabe im Fenster ist **sofort gespeichert**, wie bei den Textfeldern der Tafel; eine
+  Zeile ohne Bezeichnung fällt beim Schließen weg
+- **wiederkehrende Termine:** wöchentlich, alle 2 Wochen, monatlich, jährlich. Das Datum ist
+  dann der **erste** Termin der Reihe, das Feld „Ende der Reihe" begrenzt sie – leer gelassen
+  läuft sie weiter
+- eine Reihe belegt in der Schau immer nur **eine Zeile**: die mit ihrem nächsten Termin. Sonst
+  füllte ein wöchentlicher Eintrag die Spalte allein. Hinter der Bezeichnung steht ihr
+  Rhythmus („wöchentlich", „monatlich" …)
+- ein monatlicher Termin am 29., 30. oder 31. **rutscht in einem kürzeren Monat auf dessen
+  letzten Tag** (31.01. → 28.02.) und steht im nächsten langen Monat wieder auf seinem Tag;
+  gerechnet wird immer vom ursprünglichen Datum aus. Ebenso der 29.02. einer jährlichen Reihe
+- unter jeder Zeile des Fensters steht, **wann der Termin das nächste Mal fällig ist** – das
+  nimmt der Wiederholung das Rätselhafte, gerade beim Monatsletzten
+- gespeichert wird jetzt unter `settings.termine.liste`; ein Stand aus `screensaver.termine`
+  (bis 2.23.0) **zieht beim ersten Start mit um**
+- neue Datei `js/termine.js`; `tests/18-termine.mjs` erweitert (43 Prüfungen)
+
 ## 2.23.0
 
 - **Die Diaschau ist zweigeteilt:** links wie bisher die Schau aus Dateien und eigenen

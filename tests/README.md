@@ -83,7 +83,7 @@ Zwei Dinge sind dabei zu beachten:
 | `15-ausgaben-sicherheit.mjs` | Formeln in der CSV, Prüfung importierter Statistik, Freitext bleibt Text |
 | `16-uebergabe-norton.mjs` | Norton-Fälligkeit, Klammerwerte, Plausibilität, Übergabezettel |
 | `17-hilfe.mjs` | Kurzanleitung: Menü der Abschnitte, keine Inhalte für die Administration |
-| `18-termine.mjs` | Anstehende Termine: rechter Teil der Diaschau, Reihenfolge, Ablauf, Pflege |
+| `18-termine.mjs` | Termine: Wiederholungen, eigenes Fenster, rechter Teil der Diaschau, Umzug alter Stände |
 
 `lib.mjs` enthält die gemeinsamen Hilfen: Browserstart, Prüfungen, das Setzen von
 Einstellungen ohne Umweg über den Dialog und einen kleinen Webserver für die Prüfungen,

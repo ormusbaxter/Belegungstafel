@@ -35,6 +35,7 @@ function grundEinstellungen() {
     night: { ...DEFAULT_NIGHT },
     norton: { ...DEFAULT_NORTON },
     uebergabe: { ...DEFAULT_UEBERGABE },
+    termine: copy(DEFAULT_TERMINE),
     /* Die Sicherungen enthalten Klarnamen. Sie sollen den Ausfall eines
        Arbeitsplatzes überbrücken, nicht ein Archiv bilden – deshalb eine
        Woche statt eines Monats. */
@@ -183,7 +184,36 @@ function mergeSettings(target, source) {
     target.uebergabe.button = source.uebergabe.button !== false;
   }
   mergeSaver(target.screensaver, source.screensaver);
+  mergeTermine(target.termine, source);
   mergeStatistik(target.statistik, source.statistik);
+}
+
+/* Termine übernehmen und dabei prüfen.
+ *
+ * Bis Fassung 2.23 hingen sie unter screensaver.termine; ein Stand von dort
+ * wird weitergeführt, damit beim Umzug in das eigene Fenster nichts verloren
+ * geht. Ein Datum ist Pflicht – ohne Datum steht der Termin nirgends. */
+function mergeTermine(target, source) {
+  if (!source || typeof source !== 'object') return;
+  const eigen = source.termine && typeof source.termine === 'object' ? source.termine : null;
+  if (eigen) target.button = eigen.button !== false;
+
+  const liste = eigen && Array.isArray(eigen.liste) ? eigen.liste
+    : source.screensaver && Array.isArray(source.screensaver.termine) ? source.screensaver.termine
+    : null;
+  if (!liste) return;
+
+  target.liste = liste
+    .filter(t => t && typeof t === 'object' && ISO_DATUM.test(t.datum || ''))
+    .map(t => terminItem({
+      id: String(t.id || newTerminId()),
+      datum: t.datum,
+      zeit: CLOCK.test(t.zeit || '') ? t.zeit : '',
+      text: String(t.text || '').trim().slice(0, TERMIN_MAX),
+      wdh: WDH_KEYS.includes(t.wdh) ? t.wdh : '',
+      bis: ISO_DATUM.test(t.bis || '') ? t.bis : ''
+    }))
+    .filter(t => t.text);
 }
 
 /* Umbenannte Auswahlwerte älterer Stände übernehmen (z. B. Stammblatt →
@@ -227,18 +257,6 @@ function mergeSaver(target, source) {
   const each = parseInt(source.defaultSeconds, 10);
   if (Number.isFinite(each)) target.defaultSeconds = Math.min(600, Math.max(SAVER_ITEM_MIN, each));
   target.shuffle = source.shuffle === true;
-  /* Vor dem vorzeitigen Rücksprung: Termine gibt es auch ohne Dia-Liste. */
-  if (Array.isArray(source.termine)) {
-    target.termine = source.termine
-      .filter(t => t && typeof t === 'object' && ISO_DATUM.test(t.datum || ''))
-      .map(t => terminItem({
-        id: String(t.id || newTerminId()),
-        datum: t.datum,
-        zeit: CLOCK.test(t.zeit || '') ? t.zeit : '',
-        text: String(t.text || '').trim().slice(0, TERMIN_MAX)
-      }))
-      .filter(t => t.text);
-  }
   if (!Array.isArray(source.items)) return;
   target.items = source.items
     .filter(item => item && typeof item === 'object')

@@ -201,7 +201,7 @@ await page.waitForTimeout(300);
 await oeffneEinstellungen(page, 'Berechtigungen');
 const teile = await page.$$eval('.rechteliste .rechteteil span:first-of-type',
   ss => ss.map(s => s.textContent));
-gleich('Unterpunkte von Allgemein, Statistik und Daten', teile.length, 15);
+gleich('Unterpunkte von Allgemein, Statistik und Daten', teile.length, 16);
 pruefe('darunter die Norton-Skala', teile.includes('Norton-Skala'));
 gleich('ab Werk ist nichts gesperrt',
   await page.evaluate(() => settings.rechte.gesperrt.length), 0);
@@ -224,17 +224,17 @@ gleich('beide Sperren gespeichert',
 /* Die einfache Stufe sieht sie nicht mehr – und die Nummern rücken auf */
 await oeffneEinstellungen(page, null, 'Vinzenz1');
 const bloecke = await page.$$eval('#settingsPane h3', hs => hs.map(h => h.textContent));
-gleich('einfache Stufe: sechs statt acht Punkte', bloecke.length, 6);
+gleich('einfache Stufe: sieben statt neun Punkte', bloecke.length, 7);
 gleich('lückenlos durchnummeriert', bloecke.join(' | '),
   '1. Sichtschutz | 2. Farbige Zeilen | 3. Bildschirmschoner | ' +
-  '4. Tag- und Nachtansicht | 5. Größe der Darstellung | 6. Übergabezettel');
+  '4. Tag- und Nachtansicht | 5. Größe der Darstellung | 6. Übergabezettel | 7. Termine');
 await page.click('#settingsClose');
 await page.waitForTimeout(200);
 
 /* Die volle Stufe sieht weiterhin alles */
 await oeffneEinstellungen(page, 'Allgemein');
-gleich('volle Stufe unverändert acht Punkte',
-  await page.$$eval('#settingsPane h3', hs => hs.length), 8);
+gleich('volle Stufe unverändert neun Punkte',
+  await page.$$eval('#settingsPane h3', hs => hs.length), 9);
 await page.click('#settingsClose');
 await page.waitForTimeout(200);
 

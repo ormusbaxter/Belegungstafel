@@ -18,6 +18,7 @@ js/daten.js           Einstellungen, Speicherung, Verlauf
 js/tabelle.js         Aufbau und Bedienung der Tabelle
 js/einstellungen.js   Einstellungsfenster
 js/schoner.js         Bildschirmschoner und Diaschau
+js/termine.js         Anstehende Termine (eigenes Fenster)
 js/statistik.js       Auswertung je Schicht
 js/uebergabe.js       Übergabezettel (Diagnosen, Neurologie, Katecholamine)
 js/tafel.js           Sichtschutz, Ansicht, Sicherung, Start
@@ -312,12 +313,9 @@ Spalte der Tafel zugeordnet.
   die erste Seite.
   Patientendaten werden nie angezeigt, unten stehen Uhrzeit, Datum und die Position in der
   Schau.
-  **Zweigeteilt:** Rechts neben der Schau stehen die **anstehenden Termine** – Datum, wahlweise
-  Uhrzeit und Bezeichnung –, die früheste zuerst. Ein Termin des heutigen Tages steht als
-  „Heute" und hervorgehoben, abgelaufene fallen von selbst heraus; läuft die Schau über
-  Mitternacht, wird der Teil neu aufgebaut. Gepflegt werden sie unter Einstellungen →
-  Bildschirmschoner. **Ohne Termin bleibt der rechte Teil fort** und die Schau nutzt die volle
-  Breite. Auch hier gilt: keine Patientendaten – die Schau ist für jeden im Raum zu lesen. Ein Browser darf ein Verzeichnis nicht von sich aus lesen; die Dateinamen kommen
+  **Zweigeteilt:** Rechts neben der Schau stehen die **anstehenden Termine** (siehe unten).
+  **Ohne Termin bleibt der rechte Teil fort** und die Schau nutzt die volle Breite.
+  Ein Browser darf ein Verzeichnis nicht von sich aus lesen; die Dateinamen kommen
   deshalb aus einer der drei Quellen (Einzelheiten in `slides/LIESMICH.txt`):
   - **„Ordner wählen …“** – der Dateidialog (`<input type="file" webkitdirectory>`) übernimmt
     alle Dateien des gewählten Ordners auf einmal. Funktioniert **ohne Webserver**, also auch
@@ -326,6 +324,30 @@ Spalte der Tafel zugeordnet.
   - **„Ordner einlesen“** – ohne Dialog über `slides/slides.json` oder die Verzeichnisübersicht
     des Webservers; eine fehlerhafte `slides.json` wird gemeldet
   - **„+ Datei von Hand“** – einzelner Dateiname
+- **Termine** (Schaltfläche oben, in den Einstellungen ein- und ausblendbar): organisatorische
+  Termine für den rechten Teil der Diaschau – Fortbildung, Gerätewartung, Teambesprechung.
+  Das Fenster steht **ohne Zugangsstufe** offen: Termine sind Stationsalltag und ändern sich
+  wöchentlich; sie liegen deshalb nicht in den Einstellungen. Jede Eingabe ist sofort
+  gespeichert, eine Zeile ohne Bezeichnung fällt beim Schließen weg.
+  Je Termin: **Datum**, wahlweise **Uhrzeit**, **Wiederholung** und **Bezeichnung** (max. 80
+  Zeichen).
+  **Wiederholung**: einmalig, wöchentlich, alle 2 Wochen, monatlich, jährlich. Das Datum ist
+  dann der **erste** Termin der Reihe; im Feld **Ende der Reihe** lässt sich festlegen, wann
+  sie ausläuft. Eine Reihe belegt in der Schau immer nur **eine Zeile** – die mit ihrem
+  nächsten Termin –, sonst füllte ein wöchentlicher Eintrag die Spalte allein. Unter jeder
+  Zeile des Fensters steht, wann der Termin das nächste Mal fällig ist.
+  Ein monatlicher Termin am 29., 30. oder 31. rutscht in einem kürzeren Monat auf dessen
+  letzten Tag (31.01. → 28.02.) und steht im nächsten langen Monat wieder auf seinem Tag;
+  gerechnet wird immer vom ursprünglichen Datum aus. Ebenso der 29.02. einer jährlichen Reihe.
+  In der Schau steht der nächste Termin zuerst, was heute ansteht als „Heute" und
+  hervorgehoben; hinter der Bezeichnung einer Reihe steht ihr Rhythmus. Abgelaufene Termine
+  fallen von selbst heraus, läuft die Schau über Mitternacht wird der Teil neu aufgebaut.
+  **Keine Patientendaten** – die Schau ist für jeden im Raum zu lesen.
+  Gespeichert werden die Termine mit den Einstellungen (`settings.termine.liste`), mit diesen
+  exportiert und in eine erzeugte `js/vorgaben.js` übernommen – eine wöchentliche
+  Frühbesprechung steht damit auch auf einem frisch aufgesetzten Arbeitsplatz. Ein Stand bis
+  Fassung 2.23 aus `screensaver.termine` zieht beim ersten Start mit um.
+
 - **Tag- und Nachtansicht**: Die Schaltfläche `◐` oben rechts schaltet hell und dunkel um. Ist
   in den Einstellungen unter „Allgemein“ (Punkt 3) die **automatische Tag-/Nachtansicht**
   aktiviert, führt sie durch drei Zustände – **Auto → dunkel → hell**. Im Zustand Auto steht
@@ -342,7 +364,7 @@ Spalte der Tafel zugeordnet.
   gespeicherten Wert wieder her. Die sichtbare Höhe der Tabelle rechnet den Zoom mit ein, und
   ab einem Kopfbereich von mehr als zwei Fünfteln der Bildschirmhöhe läuft dieser nicht mehr
   mit, damit die Tabelle nutzbar bleibt
-- **Bedienleiste** oben rechts: „Datenschutz“, „Diaschau“ und „Druck Visite“ mit Symbol sowie die
+- **Bedienleiste** oben rechts: „Datenschutz“, „Diaschau“, „Termine“ und „Druck Visite“ mit Symbol sowie die
   Umschaltung der Tag-/Nachtansicht. Export, Import und „Tafel leeren“ stehen in den Einstellungen
   unter „Daten“
 - **Kontextmenü der rechten Maustaste**: unter Einstellungen → Allgemein abschaltbar (ab Werk

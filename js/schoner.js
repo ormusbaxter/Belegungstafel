@@ -110,7 +110,7 @@ let termineStand = '';
 
 function termineAufbauen() {
   const kasten = $('#saverTermine');
-  const liste = anstehendeTermine(settings.screensaver.termine);
+  const liste = anstehendeTermine(settings.termine.liste);
   termineStand = isoToday();
   kasten.replaceChildren();
   kasten.hidden = !liste.length;
@@ -123,7 +123,12 @@ function termineAufbauen() {
     const wann = terminDatum(termin.datum) + (termin.zeit ? ' \u00B7 ' + termin.zeit : '');
     zeile.appendChild(el('span', 'saverterminzeit',
       termin.datum === heute ? 'Heute' + (termin.zeit ? ' \u00B7 ' + termin.zeit : '') : wann));
-    zeile.appendChild(el('span', 'savertermintext', termin.text));
+    const text = el('span', 'savertermintext', termin.text);
+    /* Bei einer Reihe steht der n\u00E4chste Termin da; der Zusatz sagt, dass es
+       nicht bei diesem einen bleibt. */
+    const kurz = wiederholungKurz(termin.wdh);
+    if (kurz) text.appendChild(el('span', 'saverterminwdh', kurz));
+    zeile.appendChild(text);
     kasten.appendChild(zeile);
   }
 }

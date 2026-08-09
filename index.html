@@ -75,6 +75,14 @@
       </svg>
       Übergabezettel
     </button>
+    <button type="button" id="btnTermine" class="iconbtn" hidden
+            title="Anstehende Termine für die Diaschau: Fortbildung, Wartung, Besprechung">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+        <path fill="currentColor" d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 16H5V10h14v10Zm0-12H5V6h14v2Z"/>
+        <path fill="currentColor" d="M7 12h4v4H7z"/>
+      </svg>
+      Termine
+    </button>
     <button type="button" id="btnPrintPhysio" class="iconbtn"
             title="Blatt für die Physiotherapie drucken – große Schrift, A4 quer">
       <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
@@ -336,14 +344,33 @@
         außerdem von allein, sobald eine eingestellte Zeit lang niemand etwas eingegeben hat.
         Die Tafel liegt dabei verdeckt darunter; <b>jede Mausbewegung oder Taste</b> beendet die
         Schau und bringt die Tafel zurück.</p>
-      <p>Rechts neben der Schau stehen die <b>anstehenden Termine</b> – Fortbildung,
-        Gerätewartung, Teambesprechung –, die früheste zuerst. Was heute ansteht, steht als
-        <b>Heute</b> und hervorgehoben; abgelaufene Termine verschwinden von selbst. Gepflegt
-        werden sie unter Einstellungen → Bildschirmschoner. Ohne Eintrag bleibt der rechte
-        Teil fort und die Schau nutzt die volle Breite.</p>
+      <p>Rechts neben der Schau stehen die <b>anstehenden Termine</b> (siehe nächster
+        Abschnitt). Ohne Eintrag bleibt der rechte Teil fort und die Schau nutzt die volle
+        Breite.</p>
       <p>Der Bildschirmschoner zeigt keine Patientendaten und startet nicht, solange ein Fenster
-        wie die Einstellungen geöffnet ist. Das gilt auch für die Termine – sie sind für alle
-        im Raum zu lesen.</p>
+        wie die Einstellungen geöffnet ist.</p>
+    </section>
+
+    <section>
+      <h3>Termine</h3>
+      <p>Die Schaltfläche <b>Termine</b> oben öffnet die Liste der anstehenden Termine –
+        Fortbildung, Gerätewartung, Teambesprechung. Sie erscheinen <b>rechts neben der
+        Diaschau</b>, der nächste zuerst. Was heute ansteht, steht als <b>Heute</b> und
+        hervorgehoben; abgelaufene Termine verschwinden von selbst, es muss niemand
+        aufräumen.</p>
+      <p>Das Fenster steht <b>allen offen</b> – Termine gehören zum Stationsalltag. Jede
+        Eingabe ist sofort gespeichert; eine Zeile ohne Bezeichnung fällt beim Schließen
+        weg.</p>
+      <p>Je Zeile stehen <b>Datum</b>, eine freiwillige <b>Uhrzeit</b>, die <b>Wiederholung</b>
+        und die <b>Bezeichnung</b>. Bei einer Wiederholung – wöchentlich, alle 2 Wochen,
+        monatlich, jährlich – ist das Datum der <b>erste</b> Termin der Reihe; im Feld
+        <b>Ende der Reihe</b> lässt sich festlegen, wann sie ausläuft, sonst läuft sie weiter.
+        Eine Reihe belegt in der Schau immer nur <b>eine Zeile</b>: die mit ihrem nächsten
+        Termin. Unter jeder Zeile steht, wann dieser fällig ist.</p>
+      <p>Ein monatlicher Termin am 29., 30. oder 31. rutscht in einem kürzeren Monat auf
+        dessen letzten Tag und steht im nächsten langen Monat wieder auf seinem Tag.</p>
+      <p class="warn">Die Schau hängt bildschirmfüllend über der Tafel und ist von jedem im Raum
+        zu lesen – <b>Patientendaten gehören hier nicht hinein</b>, so wenig wie in die Dias.</p>
     </section>
 
     <section>
@@ -547,6 +574,25 @@
   </menu>
 </dialog>
 
+<!-- Anstehende Termine für den rechten Teil der Diaschau -->
+<dialog id="terminDlg" class="dlg dlg-termine">
+  <h2>Anstehende Termine</h2>
+  <p class="dlgsub">Erscheinen rechts neben der Diaschau, der nächste zuerst. Ein Termin des
+    heutigen Tages steht als „Heute“ und hervorgehoben; abgelaufene verschwinden von selbst.
+    Eine Reihe – wöchentlich, monatlich, jährlich – belegt immer nur eine Zeile: die mit
+    ihrem nächsten Termin.</p>
+  <p class="panehint warn">Die Schau hängt bildschirmfüllend über der Tafel und ist von jedem
+    im Raum zu sehen – hier gehören keine Patientendaten hinein, so wenig wie in die Dias.</p>
+
+  <div class="entrylist terminlist" id="terminList"></div>
+  <button type="button" id="terminAdd" class="addentry">+ Termin hinzufügen</button>
+
+  <menu class="dlgmenu">
+    <span class="spacer"></span>
+    <button type="button" id="terminClose" class="primary">Schließen</button>
+  </menu>
+</dialog>
+
 <!-- Statistik je Schicht -->
 <dialog id="statsDlg" class="dlg dlg-stats">
   <h2>Statistik je Schicht</h2>
@@ -609,6 +655,7 @@
 <script src="js/tabelle.js"></script>
 <script src="js/einstellungen.js"></script>
 <script src="js/schoner.js"></script>
+<script src="js/termine.js"></script>
 <script src="js/statistik.js"></script>
 <script src="js/uebergabe.js"></script>
 <script src="js/tafel.js"></script>

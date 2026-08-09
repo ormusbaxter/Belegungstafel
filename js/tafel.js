@@ -518,6 +518,7 @@ function init() {
   initVerlauf();
   initStatistik();
   initUebergabe();
+  initTermine();
   initBackup();
   initCombo();
   standMerken();

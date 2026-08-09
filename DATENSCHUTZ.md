@@ -129,7 +129,13 @@ Wirksame Maßnahmen sind deshalb organisatorisch:
   Patientendaten
   Die anstehenden Termine im rechten Teil der Schau sind organisatorisch (Fortbildung,
   Gerätewartung, Teambesprechung) und dürfen keine Patientendaten enthalten; sie werden
-  wie die übrigen Einstellungen gespeichert und mit exportiert
+  wie die übrigen Einstellungen gespeichert und mit exportiert.
+  Gepflegt werden sie seit Fassung 2.24 in einem eigenen Fenster über die Werkzeugleiste,
+  das **ohne Zugangsstufe** offensteht – jede Person am Arbeitsplatz kann Termine eintragen,
+  ändern und löschen. Das ist gewollt (Termine sind Stationsalltag) und vertretbar, weil dort
+  keine personenbezogenen Daten von Patientinnen und Patienten stehen dürfen. Wer das
+  einschränken will, blendet die Schaltfläche unter Einstellungen → Allgemein aus; vorhandene
+  Termine laufen dann weiter, lassen sich aber nicht mehr ändern
 
 ## 6. Beschäftigtendaten
 

@@ -11,6 +11,7 @@
  *   tabelle.js        Aufbau und Bedienung der Tabelle
  *   einstellungen.js  Einstellungsfenster
  *   schoner.js        Bildschirmschoner und Diaschau
+ *   termine.js        Anstehende Termine
  *   statistik.js      Auswertung je Schicht
  *   uebergabe.js      Übergabezettel
  *   tafel.js          Sichtschutz, Ansicht, Sicherung, Start
@@ -22,7 +23,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.23.0';
+const VERSION = '2.24.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -505,32 +506,113 @@ const DEFAULT_SAVER = {
   seconds: 300,
   defaultSeconds: 10,
   shuffle: false,
-  items: [],
-  /* Anstehende Termine – siehe unten. */
-  termine: []
+  items: []
 };
 
-/* Anstehende Termine im rechten Teil der Diaschau.
+/* ------------------------------------------------------------------ *
+ * Anstehende Termine
  *
- * Organisatorisches: Fortbildung, Gerätewartung, Teambesprechung. Die Schau
- * hängt bildschirmfüllend über der Tafel und ist von jedem im Raum zu sehen –
- * **Patientendaten gehören hier nicht hinein**, so wenig wie in die Dias.
- * Abgelaufene Termine verschwinden von selbst; niemand muss aufräumen. */
+ * Organisatorisches: Fortbildung, Gerätewartung, Teambesprechung. Sie stehen
+ * im rechten Teil der Diaschau, die bildschirmfüllend über der Tafel hängt
+ * und von jedem im Raum zu sehen ist – **Patientendaten gehören hier nicht
+ * hinein**, so wenig wie in die Dias.
+ *
+ * Gepflegt werden sie in einem eigenen Fenster über die Werkzeugleiste, nicht
+ * in den Einstellungen: Termine sind Stationsalltag und ändern sich
+ * wöchentlich; dafür jedes Mal die Zugangsstufe zu verlangen, wäre verkehrt.
+ * In den Einstellungen steht nur noch, ob die Schaltfläche erscheint.
+ *
+ * Abgelaufene Termine verschwinden von selbst; niemand muss aufräumen.
+ * ------------------------------------------------------------------ */
+const DEFAULT_TERMINE = { button: true, liste: [] };
 const TERMIN_MAX = 80;          /* Zeichen je Bezeichnung */
+
+/* Wiederholung. Ein leerer Schlüssel heißt „einmalig“ und bleibt die Vorgabe;
+   so trägt ein Termin ohne eigene Angabe nichts Unerwartetes. */
+const WIEDERHOLUNGEN = [
+  { key: '',      label: 'einmalig',       kurz: '' },
+  { key: 'woche', label: 'wöchentlich',    kurz: 'wöchentlich' },
+  { key: 'zwei',  label: 'alle 2 Wochen',  kurz: '2-wöchentlich' },
+  { key: 'monat', label: 'monatlich',      kurz: 'monatlich' },
+  { key: 'jahr',  label: 'jährlich',       kurz: 'jährlich' }
+];
+const WDH_KEYS = WIEDERHOLUNGEN.map(w => w.key);
+
+function wiederholungKurz(wdh) {
+  const eintrag = WIEDERHOLUNGEN.find(w => w.key === wdh);
+  return eintrag ? eintrag.kurz : '';
+}
 
 function newTerminId() {
   return 'trm' + Math.random().toString(36).slice(2, 8);
 }
 
+/* datum ist bei einer Reihe der erste Termin, bis das freiwillige Ende. */
 function terminItem(props) {
-  return { id: newTerminId(), datum: '', zeit: '', text: '', ...props };
+  return { id: newTerminId(), datum: '', zeit: '', text: '', wdh: '', bis: '', ...props };
 }
 
-/* Was heute oder später ansteht, in zeitlicher Reihenfolge. */
+/* Tage zwischen zwei ISO-Daten. Mittags gerechnet, damit die Sommerzeit-
+   umstellung (23 bzw. 25 Stunden) nicht einen Tag verschluckt. */
+function tageZwischen(von, bis) {
+  return Math.round((new Date(bis + 'T12:00:00') - new Date(von + 'T12:00:00')) / 86400000);
+}
+
+/* Dasselbe Datum einige Monate später. Ein Monatstag, den der Zielmonat nicht
+   hat, rutscht auf dessen letzten Tag: Der 31. wird im Februar zum 28. bzw.
+   29., im April zum 30. Gerechnet wird dabei immer vom ursprünglichen Datum
+   aus, damit ein einmal gerutschter Termin im nächsten langen Monat wieder
+   auf dem 31. steht. */
+function monateSpaeter(iso, anzahl) {
+  const [jahr, monat, tag] = iso.split('-').map(Number);
+  const ziel = new Date(jahr, monat - 1 + anzahl, 1, 12);
+  const letzter = new Date(ziel.getFullYear(), ziel.getMonth() + 1, 0).getDate();
+  ziel.setDate(Math.min(tag, letzter));
+  return ziel.getFullYear() + '-' + pad(ziel.getMonth() + 1) + '-' + pad(ziel.getDate());
+}
+
+/* Der nächste Termin dieser Reihe am Stichtag oder danach – oder '', wenn
+   keiner mehr kommt (einmalig und vorbei, oder hinter dem Ende der Reihe). */
+function naechsterTermin(termin, stichtag) {
+  const start = termin && termin.datum;
+  if (!ISO_DATUM.test(start || '')) return '';
+  let datum = start;
+
+  if (datum < stichtag) {
+    if (termin.wdh === 'woche' || termin.wdh === 'zwei') {
+      const schritt = termin.wdh === 'woche' ? 7 : 14;
+      const offen = Math.ceil(tageZwischen(start, stichtag) / schritt);
+      datum = addDays(start, offen * schritt);
+    } else if (termin.wdh === 'monat' || termin.wdh === 'jahr') {
+      const faktor = termin.wdh === 'jahr' ? 12 : 1;
+      const [sj, sm] = start.split('-').map(Number);
+      const [zj, zm] = stichtag.split('-').map(Number);
+      /* Ein Schritt zu wenig geschätzt, wenn der Monatstag noch aussteht –
+         deshalb notfalls ein weiterer. */
+      let schritte = Math.max(0, Math.floor(((zj - sj) * 12 + (zm - sm)) / faktor));
+      datum = monateSpaeter(start, schritte * faktor);
+      if (datum < stichtag) datum = monateSpaeter(start, (schritte + 1) * faktor);
+    } else {
+      return '';
+    }
+  }
+
+  if (ISO_DATUM.test(termin.bis || '') && datum > termin.bis) return '';
+  return datum;
+}
+
+/* Was ansteht, in zeitlicher Reihenfolge. Jede Reihe steuert höchstens ihren
+   nächsten Termin bei – sonst füllte ein wöchentlicher Eintrag die Spalte
+   allein. Der zurückgegebene Eintrag trägt dieses Datum, nicht das der Reihe. */
 function anstehendeTermine(liste) {
   const heute = isoToday();
   return (liste || [])
-    .filter(t => t && t.datum >= heute && String(t.text || '').trim())
+    .map(termin => {
+      if (!termin || !String(termin.text || '').trim()) return null;
+      const datum = naechsterTermin(termin, heute);
+      return datum ? { ...termin, datum } : null;
+    })
+    .filter(Boolean)
     .sort((a, b) => (a.datum + a.zeit).localeCompare(b.datum + b.zeit));
 }
 
@@ -614,6 +696,7 @@ const REITER_TEILE = {
     { key: 'zoom',         label: 'Größe der Darstellung' },
     { key: 'norton',       label: 'Norton-Skala' },
     { key: 'uebergabe',    label: 'Übergabezettel-Schaltfläche' },
+    { key: 'termine',      label: 'Termine-Schaltfläche' },
     { key: 'kontextmenue', label: 'Rechte Maustaste' }
   ],
   statistik: [
