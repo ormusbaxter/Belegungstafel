@@ -4,6 +4,13 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.25.2
+
+- das Terminfenster heißt jetzt **„Termin-Management"** statt „Anstehende Termine"
+- der Erklärtext darüber (Reihenfolge, „Heute", Reihen) und der Datenschutzhinweis sind
+  entfallen; das Fenster beginnt mit der Liste. Beides steht weiterhin in der Kurzanleitung,
+  der Hinweis auf die Patientendaten zusätzlich in `DATENSCHUTZ.md`
+
 ## 2.25.1
 
 - die Passwortabfrage der Einstellungen nennt die beiden Zugangsstufen nicht mehr. Wer das
