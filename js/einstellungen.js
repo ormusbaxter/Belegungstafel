@@ -622,7 +622,9 @@ function renderSaverPane(pane) {
      loszuwerden, ohne jeden Eintrag einzeln zu entfernen. */
   const platz = el('div', 'slideplatz');
   const platzText = el('span', 'panehint');
-  const leeren = el('button', 'entrybtn', 'Übernommene Dateien entfernen');
+  /* addentry und nicht entrybtn: entrybtn ist die 26 × 26 px große
+     Symbolschaltfläche (× ↑ ↓), in der ein Wort nicht Platz hat. */
+  const leeren = el('button', 'addentry', 'Übernommene Dateien entfernen');
   leeren.type = 'button';
   leeren.addEventListener('click', async () => {
     if (!confirm('Alle in die Tafel übernommenen Dateien entfernen? Die Einträge der Liste ' +
@@ -642,11 +644,6 @@ function renderSaverPane(pane) {
   slideUI.platzText = platzText;
   slideUI.platzKnopf = leeren;
   slidePlatzZeigen(platzText, leeren);
-
-  pane.appendChild(el('p', 'panehint',
-    'Rechts neben der Schau stehen die anstehenden Termine. Sie werden nicht hier gepflegt, ' +
-    'sondern im eigenen Fenster „Termine“ unten rechts – sie gehören zum ' +
-    'Stationsalltag und sollen ohne Zugangsstufe zu ändern sein.'));
 }
 
 /* Ordner übernehmen.
@@ -771,14 +768,15 @@ async function ordnerUebernehmen(files) {
    es etwas zu leeren gibt. */
 async function slidePlatzZeigen(text, knopf) {
   if (!text || !knopf) return;
-  const gesamt = await diaGesamtgroesse();
   const anzahl = (await diaSchluessel()).length;
   knopf.hidden = !anzahl;
-  text.textContent = anzahl
-    ? anzahl + ' Datei' + (anzahl === 1 ? '' : 'en') + ' in der Tafel gespeichert, ' +
-      groesseText(gesamt) + '. Sie stehen nicht im Export und nicht in einer erzeugten ' +
-      'js/vorgaben.js – ein neuer Arbeitsplatz bekommt sie über dieselbe Ordnerauswahl.'
-    : 'Noch keine Dateien übernommen.';
+  if (!anzahl) {
+    text.textContent = 'Noch keine Dateien übernommen.';
+    return;
+  }
+  const belegt = await diaGesamtgroesse();
+  text.textContent = anzahl + ' Datei' + (anzahl === 1 ? '' : 'en') +
+    ' in Tafel gespeichert, ' + platzPaar(belegt, await speicherGrenze());
 }
 
 function focusLast(list, selector) {

@@ -4,6 +4,16 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.26.2
+
+- **behoben:** Die Schaltfläche „Übernommene Dateien entfernen“ war unleserlich – sie trug die
+  Klasse der 26 × 26 px großen Symbolschaltflächen (× ↑ ↓), in der ein Wort nicht Platz hat,
+  und schob den Bereich zugleich in die Breite
+- die Zeile unter der Liste nennt jetzt kurz **„6 Dateien in Tafel gespeichert, 5,3 MB von
+  894 MB“**. Die Grenze kommt vom Browser selbst und richtet sich nach dem freien
+  Plattenplatz. Der Hinweis auf Export und `js/vorgaben.js` steht weiterhin im README, der auf
+  die Termine in der Kurzanleitung – im Einstellungsfenster standen beide im Weg
+
 ## 2.26.1
 
 - **Laufbalken am unteren Rand der Diaschau:** Er läuft je Eintrag durch und zeigt, wie lange

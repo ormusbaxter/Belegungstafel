@@ -340,8 +340,11 @@ Spalte der Tafel zugeordnet.
   Wird derselbe Ordner erneut gewählt, werden gleichnamige Einträge **aufgefrischt** statt
   verdoppelt; Anzeigedauer und Platz in der Reihenfolge bleiben erhalten. So wird auch ein
   ausgetauschter Aushang übernommen.
-  Unter der Liste stehen Anzahl und belegter Platz, daneben **„Übernommene Dateien
-  entfernen“**. Entfernte Einträge geben ihren Platz beim Übernehmen wieder frei.
+  Unter der Liste steht, wie viele Dateien übernommen sind und wie viel Platz sie belegen –
+  gemessen an dem, was der Browser diesem Arbeitsplatz insgesamt zugesteht
+  (`navigator.storage.estimate()`, unter `file://` verfügbar; die Zahl richtet sich nach dem
+  freien Plattenplatz). Daneben **„Übernommene Dateien entfernen“**; entfernte Einträge geben
+  ihren Platz beim Übernehmen wieder frei.
   Diese Dateien stehen **nicht** im JSON-Export und nicht in einer erzeugten `js/vorgaben.js`
   – dort stehen nur Einstellungen. Ein neuer Arbeitsplatz bekommt sie über dieselbe
   Ordnerauswahl.

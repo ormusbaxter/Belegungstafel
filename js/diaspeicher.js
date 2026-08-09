@@ -139,10 +139,42 @@ function diaAdressenFreigeben() {
   diaAdressen.clear();
 }
 
-/* „1,2 MB“ – für die Anzeige im Einstellungsfenster */
+/* ---- Größenangaben ---- */
+const MB = 1024 * 1024;
+const komma = (wert, stellen) => wert.toFixed(stellen).replace('.', ',');
+
+/* „1,2 MB“ – für einzelne Angaben */
 function groesseText(bytes) {
   const zahl = Number(bytes) || 0;
   if (zahl < 1024) return zahl + ' B';
-  if (zahl < 1024 * 1024) return (zahl / 1024).toFixed(0) + ' kB';
-  return (zahl / (1024 * 1024)).toFixed(1).replace('.', ',') + ' MB';
+  if (zahl < MB) return Math.round(zahl / 1024) + ' kB';
+  const mb = zahl / MB;
+  return (mb < 100 ? komma(mb, 1) : String(Math.round(mb))) + ' MB';
+}
+
+/* „5,2 MB von 851 MB“ – belegter Platz und das, was der Browser zulässt.
+   Beide Zahlen in derselben Einheit, sonst wäre der Vergleich mühsam. */
+function platzPaar(belegt, grenze) {
+  if (!(grenze > 0)) return groesseText(belegt);
+  const mbBelegt = belegt / MB;
+  const mbGrenze = grenze / MB;
+  if (mbGrenze >= 10240) {
+    return komma(mbBelegt / 1024, 1) + ' GB von ' + komma(mbGrenze / 1024, 1) + ' GB';
+  }
+  return (mbBelegt < 100 ? komma(mbBelegt, 1) : String(Math.round(mbBelegt))) +
+    ' MB von ' + Math.round(mbGrenze) + ' MB';
+}
+
+/* Wie viel der Browser diesem Arbeitsplatz insgesamt zugesteht. Die Zahl
+   richtet sich nach dem freien Plattenplatz und ändert sich mit ihm; sie ist
+   eine Größenordnung, keine Zusage. Nennt der Browser sie nicht, bleibt es
+   bei der belegten Menge allein. */
+async function speicherGrenze() {
+  if (!navigator.storage || !navigator.storage.estimate) return 0;
+  try {
+    const schaetzung = await navigator.storage.estimate();
+    return schaetzung && schaetzung.quota > 0 ? schaetzung.quota : 0;
+  } catch (err) {
+    return 0;
+  }
 }

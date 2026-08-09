@@ -1051,15 +1051,16 @@ tr:hover .clearbed, .clearbed:focus-visible { opacity: 1; }
 /* Belegter Platz und das Leeren, unter der Liste */
 .slideplatz {
   display: flex;
-  align-items: baseline;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px 12px;
   margin: 10px 0 4px;
   padding-top: 8px;
   border-top: 1px solid var(--line-soft);
 }
-.slideplatz .panehint { margin: 0; }
-.slideplatz button { flex: none; }
+.slideplatz .panehint { flex: 1 1 auto; min-width: 0; margin: 0; }
+.slideplatz button { flex: 0 0 auto; margin-top: 0; white-space: nowrap; }
 .entry-slide .slidesec,
 .entry-slide .slidepage { text-align: center; font-variant-numeric: tabular-nums; }
 .entry-slide .unit { font-size: 12px; color: var(--ink-soft); }

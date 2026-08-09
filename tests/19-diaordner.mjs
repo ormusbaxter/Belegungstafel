@@ -60,7 +60,8 @@ pruefe('der Name ist nicht mehr änderbar',
   await page.evaluate(() => document.querySelectorAll('.slidefile-fest').length === 2));
 
 const platz = await page.textContent('.slideplatz .panehint');
-enthaelt('der belegte Platz wird ausgewiesen', platz, 'in der Tafel gespeichert');
+enthaelt('der belegte Platz wird ausgewiesen', platz, 'in Tafel gespeichert');
+enthaelt('mit der Grenze des Browsers', platz, ' von ');
 
 await uebernehmen(page);
 await page.waitForTimeout(400);
