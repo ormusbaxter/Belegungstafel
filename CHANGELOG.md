@@ -4,6 +4,38 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.25.0
+
+- **Ein Ordner für die Diaschau, sonst nichts.** „Ordner wählen …“ fragt nach einem Ordner und
+  übernimmt alle darin liegenden Dateien der Art PDF, PNG und JPEG **mit ihrem Inhalt** in die
+  Tafel. Wo der Ordner liegt, ist gleichgültig: Schreibtisch, USB-Stick, Netzlaufwerk. Es muss
+  keine Datei kopiert, umbenannt oder von Hand eingetragen werden
+- bis dahin wurden nur die **Namen** übernommen und über den festen Pfad `slides/…` angezeigt.
+  Wer einen anderen Ordner wählte, bekam eine Warnung und eine leere Schau – die Aushänge
+  mussten erst in den einen richtigen Ordner kopiert werden
+- die Dateien liegen jetzt im Browserprofil (`IndexedDB`, neue Datei `js/diaspeicher.js`) und
+  werden über eine Blob-Adresse angezeigt, nicht über einen Pfad
+- **derselbe Ordner erneut gewählt frischt auf, statt zu verdoppeln**: Gleichnamige Einträge
+  behalten Anzeigedauer und Platz in der Reihenfolge, bekommen aber den neuen Inhalt. So wird
+  ein ausgetauschter Aushang übernommen; neue Dateien kommen hinten dazu
+- unter der Liste stehen **Anzahl und belegter Platz**, daneben „Übernommene Dateien
+  entfernen“. Entfernte Einträge geben ihren Platz wieder frei – auch dann, wenn eine
+  Ordnerauswahl über „Schließen“ verworfen wurde
+- das **Seitenformat einer PDF** wird beim Übernehmen aus `/MediaBox` gelesen und steht damit
+  auch ohne Webserver zur Verfügung
+- entfallen: „Ordner einlesen“ über `slides/slides.json` oder die Verzeichnisübersicht eines
+  Webservers, und damit die Notwendigkeit, eine Liste von Hand zu pflegen. `slides/slides.json`
+  ist gelöscht, `slides/LIESMICH.txt` neu geschrieben. „+ Datei aus „slides““ bleibt als
+  Notnagel für den Betrieb über einen Webserver
+- **behoben:** Nach einer Ordnerauswahl blieb „Übernehmen“ verborgen, bis man irgendwo sonst
+  im Fenster klickte. Der Dateidialog liegt außerhalb des Fensters, sein Ereignis erreichte die
+  Änderungserkennung nicht (seit 2.22.0)
+- die Dateien stehen **nicht** im JSON-Export und nicht in einer erzeugten `js/vorgaben.js`;
+  ein neuer Arbeitsplatz bekommt sie über dieselbe Ordnerauswahl. In `DATENSCHUTZ.md` steht
+  der neue Speicher mit dem Hinweis, dass dort keine Patientendaten hineingehören
+- neue Prüfdatei `tests/19-diaordner.mjs` (22 Prüfungen); sie wählt einen Ordner **außerhalb**
+  des Anwendungsordners und prüft, dass die Schau die Bilder wirklich zeigt
+
 ## 2.24.1
 
 - **Die Schaltfläche „Termine" steht jetzt unten rechts** bei Statistik, Hilfe und Zahnrad –

@@ -262,9 +262,11 @@ function mergeSaver(target, source) {
     .filter(item => item && typeof item === 'object')
     .map(item => {
       const seconds = parseInt(item.seconds, 10);
+      const quelle = SLIDE_QUELLEN.includes(item.quelle) ? item.quelle : 'ordner';
       return slideItem({
         id: String(item.id || newSlideId()),
         kind: item.kind === 'text' ? 'text' : 'datei',
+        quelle,
         file: slideName(item.file),
         title: String(item.title || ''),
         text: String(item.text || ''),

@@ -58,6 +58,14 @@ voneinander unabhängigen Bestand.
 Schlüssel: `belegungstafel.intensiv.v1`, `.einstellungen`, `.theme`, `.sicherung`,
 `.statistik`, gegebenenfalls ergänzt um die Kennung der Tafel aus `data-instanz`.
 
+Zwei Nebenspeicher liegen im selben Browserprofil in `IndexedDB`:
+
+- `belegungstafel` – der Verweis auf den Zielordner der automatischen Sicherung
+- `belegungstafel.dias` – die für die Diaschau übernommenen Dateien (PDF, PNG, JPEG),
+  seit Fassung 2.25. Es sind organisatorische Aushänge; **Patientendaten gehören dort nicht
+  hinein**, so wenig wie auf den Schirm selbst. Sie stehen weder im Export noch in einer
+  erzeugten `js/vorgaben.js`. Beim Löschen des Browserprofils verschwinden sie mit.
+
 ## 3. Was den Rechner verlässt
 
 | Weg | Inhalt | Auslöser |

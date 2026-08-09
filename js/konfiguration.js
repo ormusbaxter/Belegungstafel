@@ -8,6 +8,7 @@
  *   konfiguration.js  Bettplätze, Spalten, Auswahllisten, Hilfsfunktionen
  *   vorgaben.js       Vorgabe der Station (ersetzt die ausgelieferten Werte)
  *   daten.js          Einstellungen, Speicherung, Verlauf
+ *   diaspeicher.js    Dateien der Diaschau (IndexedDB)
  *   tabelle.js        Aufbau und Bedienung der Tabelle
  *   einstellungen.js  Einstellungsfenster
  *   schoner.js        Bildschirmschoner und Diaschau
@@ -23,7 +24,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.24.1';
+const VERSION = '2.25.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -490,11 +491,11 @@ const PALETTE = [
 
 /* ------------------------------------------------------------------ *
  * Bildschirmschoner
- * Die Dateien der Diaschau liegen im Unterordner „slides“ neben index.html.
- * Ein Browser kann keinen Ordner auslesen; die Dateinamen kommen deshalb aus
- * der Liste slides/slides.json oder – falls der Webserver eine Verzeichnis-
- * übersicht ausliefert – aus dieser Übersicht. Von Hand eingetragene Namen
- * funktionieren immer, auch wenn die Seite direkt von der Festplatte kommt.
+ * Die Dateien der Diaschau werden in den Einstellungen aus einem beliebigen
+ * Ordner übernommen und liegen danach in der Tafel (js/diaspeicher.js). Ein
+ * Browser kann kein Verzeichnis auslesen; der Dateidialog ist der einzige Weg
+ * zu erfahren, was in einem Ordner liegt. SLIDE_DIR gilt nur noch für Einträge
+ * älterer Stände und für von Hand eingetragene Namen.
  * ------------------------------------------------------------------ */
 const SLIDE_DIR = 'slides/';
 const SLIDE_TYPES = /\.(pdf|png|jpe?g)$/i;
@@ -627,11 +628,20 @@ function newSlideId() {
   return 'dia' + Math.random().toString(36).slice(2, 8);
 }
 
+/* quelle: woher die Datei kommt.
+   'ordner'      – Datei im Ordner „slides“ neben index.html, adressiert über
+                   ihren Namen. So war es bis Fassung 2.24, und so bleibt es
+                   für vorhandene Einträge und für den Betrieb am Webserver.
+   'gespeichert' – Datei liegt mit ihrem Inhalt in der Tafel (js/diaspeicher.js).
+                   Dann ist gleichgültig, wo der gewählte Ordner lag; „file“
+                   trägt nur noch den ursprünglichen Namen zur Anzeige. */
 function slideItem(props) {
   /* page: anzuzeigende Seite eines PDF, ratio: Seitenverhältnis, sofern bekannt */
-  return { id: newSlideId(), kind: 'datei', file: '', title: '', text: '',
+  return { id: newSlideId(), kind: 'datei', quelle: 'ordner', file: '', title: '', text: '',
            on: true, seconds: null, page: 1, ratio: 0, ...props };
 }
+
+const SLIDE_QUELLEN = ['ordner', 'gespeichert'];
 
 /* ------------------------------------------------------------------ *
  * Statistik

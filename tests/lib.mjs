@@ -181,8 +181,8 @@ export function keineFehler(page) {
 }
 
 /* ---------------- Kleiner Webserver ---------------- */
-/* Für die Prüfungen, die einen Server voraussetzen (Verzeichnisübersicht,
-   Einlesen von slides.json). */
+/* Für die Prüfungen, die einen Server voraussetzen – etwa weil unter file://
+   kein fetch erlaubt ist. */
 const TYPEN = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
                 '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg',
                 '.pdf': 'application/pdf', '.svg': 'image/svg+xml', '.txt': 'text/plain' };

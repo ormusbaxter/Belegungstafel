@@ -7,8 +7,10 @@
 
 /* ------------------------------------------------------------------ *
  * Bildschirmschoner: Diaschau
- * Zeigt nacheinander die freigegebenen Dateien aus dem Ordner „slides“ und
- * die von Hand angelegten Einträge. Der Start erfolgt nach der eingestellten
+ * Zeigt nacheinander die freigegebenen Dateien und die von Hand angelegten
+ * Hinweise. Die Dateien liegen in der Tafel (js/diaspeicher.js) oder – bei
+ * älteren Einträgen – im Ordner „slides“ neben index.html.
+ * Der Start erfolgt nach der eingestellten
  * Zeit ohne Eingabe oder von Hand über die Schaltfläche im Seitenkopf; jede
  * Eingabe beendet die Schau wieder.
  * ------------------------------------------------------------------ */
@@ -164,7 +166,8 @@ function slideNode(item) {
     return card;
   }
 
-  const src = SLIDE_DIR + encodeURIComponent(item.file);
+  const src = slideQuelle(item);
+  if (!src) return missingSlideNode(item.file, item.quelle);
   if (/\.pdf$/i.test(item.file)) {
     /* „view=Fit“ zeigt die ganze Seite statt sie auf die Breite zu ziehen;
        zusätzlich erhält der Rahmen das Seitenverhältnis der ersten Seite,
@@ -180,8 +183,16 @@ function slideNode(item) {
   const img = el('img', 'slide slide-img');
   img.src = src;
   img.alt = item.file;
-  img.addEventListener('error', () => img.replaceWith(missingSlideNode(item.file)));
+  img.addEventListener('error', () => img.replaceWith(missingSlideNode(item.file, item.quelle)));
   return img;
+}
+
+/* Adresse der Datei: entweder der Ordner „slides“ neben index.html oder der
+   in der Tafel gespeicherte Inhalt. */
+function slideQuelle(item) {
+  return item.quelle === 'gespeichert'
+    ? diaAdresse(item.id)
+    : SLIDE_DIR + encodeURIComponent(item.file);
 }
 
 /* ---- Einpassen der Inhalte: nichts abschneiden, nichts scrollen ---- */
@@ -209,8 +220,10 @@ const OHNE_SERVER = location.protocol === 'file:';
 async function pdfAspect(src) {
   /* Ohne Webserver ist fetch gesperrt. Der Versuch würde nur eine
      Fehlermeldung in der Browserkonsole hinterlassen; das Seitenformat
-     kommt in diesem Fall aus der Ordnerauswahl. */
-  if (OHNE_SERVER) return 0;
+     kommt in diesem Fall aus der Ordnerauswahl.
+     Eine in der Tafel gespeicherte Datei (blob:) ist davon nicht betroffen –
+     sie liegt im Browser und lässt sich immer lesen. */
+  if (OHNE_SERVER && !src.startsWith('blob:')) return 0;
   try {
     const res = await fetch(src, { cache: 'force-cache' });
     if (!res.ok) return 0;
@@ -262,10 +275,12 @@ function fitSlide() {
   }
 }
 
-function missingSlideNode(file) {
+function missingSlideNode(file, quelle) {
   const card = el('div', 'slide slide-text slide-missing');
   card.appendChild(el('h2', null, 'Datei nicht gefunden'));
-  card.appendChild(el('p', null, SLIDE_DIR + file));
+  card.appendChild(el('p', null, quelle === 'gespeichert'
+    ? file + ' – der gespeicherte Inhalt fehlt. In den Einstellungen den Ordner erneut wählen.'
+    : SLIDE_DIR + file));
   return card;
 }
 
@@ -273,9 +288,10 @@ function emptySlideNode() {
   const card = el('div', 'slide slide-text');
   card.appendChild(el('h2', null, tafelTitel()));
   card.appendChild(el('p', null,
-    'Für die Diaschau sind noch keine Inhalte freigegeben. Dateien (PDF, PNG, JPEG) ' +
-    'gehören in den Ordner „slides“ neben der Tafel; eigene Hinweise lassen sich in den ' +
-    'Einstellungen unter „Bildschirmschoner“ anlegen.'));
+    'Für die Diaschau sind noch keine Inhalte freigegeben. In den Einstellungen unter ' +
+    '„Bildschirmschoner“ den Ordner wählen, in dem die Dateien (PDF, PNG, JPEG) liegen – ' +
+    'sie werden dann in die Tafel übernommen. Eigene Hinweise lassen sich dort ebenfalls ' +
+    'anlegen.'));
   return card;
 }
 
@@ -292,62 +308,8 @@ function tickSlideClock() {
 function initSaver() {
   $('#btnSaver').addEventListener('click', startSaver);
   restartSaverTimer();
-}
-
-/* ------------------------------------------------------------------ *
- * Dateien im Ordner „slides“ suchen
- * Ein Browser kann kein Verzeichnis auflisten. Gelesen wird deshalb die
- * Liste slides/slides.json und – sofern der Webserver eine Verzeichnis-
- * übersicht ausliefert – zusätzlich diese Übersicht.
- * ------------------------------------------------------------------ */
-async function scanSlideFolder() {
-  const found = [];
-  let fehler = '';
-  if (OHNE_SERVER) {
-    found.hinweis = 'Ohne Webserver kann der Browser weder slides.json noch das Verzeichnis ' +
-      'lesen. Bitte „Ordner wählen …“ benutzen.';
-    return found;
-  }
-  const add = value => {
-    const name = slideName(value);
-    if (name && !found.some(f => f.toLowerCase() === name.toLowerCase())) found.push(name);
-  };
-
-  try {
-    const res = await fetch(SLIDE_DIR + 'slides.json', { cache: 'no-store' });
-    if (res.ok) {
-      const text = await res.text();
-      try {
-        const data = JSON.parse(text);
-        const list = Array.isArray(data) ? data : Array.isArray(data && data.slides) ? data.slides : [];
-        for (const entry of list) add(typeof entry === 'string' ? entry : entry && entry.file);
-      } catch (err) {
-        /* Ein Tippfehler in der Liste darf nicht unbemerkt bleiben. */
-        fehler = 'Die Datei slides/slides.json ist fehlerhaft und wurde übergangen (' +
-          err.message + ').';
-      }
-    }
-  } catch (err) {
-    /* keine Liste vorhanden oder nicht erreichbar – kein Fehler */
-  }
-
-  try {
-    const res = await fetch(SLIDE_DIR, { cache: 'no-store' });
-    if (res.ok) {
-      const html = await res.text();
-      const doc = new DOMParser().parseFromString(html, 'text/html');
-      for (const link of doc.querySelectorAll('a[href]')) {
-        try {
-          add(decodeURIComponent(link.getAttribute('href')));
-        } catch (err) {
-          add(link.getAttribute('href'));
-        }
-      }
-    }
-  } catch (err) {
-    /* keine Verzeichnisübersicht – kein Fehler */
-  }
-
-  found.hinweis = fehler;
-  return found;
+  /* Die gespeicherten Dateien bekommen ihre Adressen, bevor die Schau zum
+     ersten Mal läuft. Das Lesen ist asynchron, der Start der Schau nicht –
+     deshalb einmal im Voraus und nicht bei jedem Dia. */
+  diaAdressenAufbauen();
 }

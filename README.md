@@ -15,6 +15,7 @@ styles.css            Layout, Farbkodierung, Druckansicht
 js/konfiguration.js   Bettplätze, Spalten, Auswahllisten, Hilfsfunktionen
 js/vorgaben.js        Vorgabe der Station (überschreibt die ausgelieferten Werte)
 js/daten.js           Einstellungen, Speicherung, Verlauf
+js/diaspeicher.js     Dateien der Diaschau (IndexedDB)
 js/tabelle.js         Aufbau und Bedienung der Tabelle
 js/einstellungen.js   Einstellungsfenster
 js/schoner.js         Bildschirmschoner und Diaschau
@@ -22,7 +23,7 @@ js/termine.js         Anstehende Termine (eigenes Fenster)
 js/statistik.js       Auswertung je Schicht
 js/uebergabe.js       Übergabezettel (Diagnosen, Neurologie, Katecholamine)
 js/tafel.js           Sichtschutz, Ansicht, Sicherung, Start
-slides/               Inhalte für den Bildschirmschoner (PDF, PNG, JPEG)
+slides/               Beispielinhalte für die Diaschau; seit 2.25 nicht mehr nötig
 tests/                Prüfungen im echten Browser (siehe tests/README.md)
 CHANGELOG.md          Änderungen je Fassung
 DATENSCHUTZ.md        Steckbrief für Datenschutzbeauftragte, IT und Personalrat
@@ -294,8 +295,8 @@ Spalte der Tafel zugeordnet.
   sowie die Kennzahlen; der Ausdruck wird nie unkenntlich gemacht. Eine später ergänzte
   Spalte ist von sich aus geschützt (`PRIVATE_OFFEN` in `js/daten.js` nennt die Ausnahmen)
 - **Bildschirmschoner (Diaschau)**: zeigt bildschirmfüllend die freigegebenen Inhalte
-  nacheinander – Dateien aus dem Ordner `slides` (PDF, PNG, JPEG) und in den Einstellungen
-  angelegte Hinweise aus Überschrift und Infotext. Der Start erfolgt über die Schaltfläche
+  nacheinander – übernommene Dateien (PDF, PNG, JPEG) und in den Einstellungen angelegte
+  Hinweise aus Überschrift und Infotext. Der Start erfolgt über die Schaltfläche
   „Diaschau“ im Seitenkopf oder, wenn der Bildschirmschoner eingeschaltet ist, nach der
   eingestellten Zeit ohne Eingabe (mindestens 10 Sekunden); jede Mausbewegung oder Taste
   beendet ihn wieder. Solange ein Dialog geöffnet ist, startet er nicht. Jeder Eintrag lässt
@@ -315,15 +316,27 @@ Spalte der Tafel zugeordnet.
   Schau.
   **Zweigeteilt:** Rechts neben der Schau stehen die **anstehenden Termine** (siehe unten).
   **Ohne Termin bleibt der rechte Teil fort** und die Schau nutzt die volle Breite.
-  Ein Browser darf ein Verzeichnis nicht von sich aus lesen; die Dateinamen kommen
-  deshalb aus einer der drei Quellen (Einzelheiten in `slides/LIESMICH.txt`):
-  - **„Ordner wählen …“** – der Dateidialog (`<input type="file" webkitdirectory>`) übernimmt
-    alle Dateien des gewählten Ordners auf einmal. Funktioniert **ohne Webserver**, also auch
-    beim Öffnen von der Festplatte; dabei wird zugleich das Seitenformat der PDF aus den Dateien
-    gelesen, was ohne Server sonst nicht möglich ist
-  - **„Ordner einlesen“** – ohne Dialog über `slides/slides.json` oder die Verzeichnisübersicht
-    des Webservers; eine fehlerhafte `slides.json` wird gemeldet
-  - **„+ Datei von Hand“** – einzelner Dateiname
+  **Dateien freigeben – „Ordner wählen …“:** Der Dateidialog
+  (`<input type="file" webkitdirectory>`) fragt nach einem Ordner; alle darin liegenden
+  Dateien der Art PDF, PNG und JPEG werden **mit ihrem Inhalt** in die Tafel übernommen und in
+  `IndexedDB` abgelegt (`js/diaspeicher.js`). Wo der Ordner liegt, ist damit gleichgültig –
+  Schreibtisch, Stick, Netzlaufwerk –, und es muss keine Datei kopiert, umbenannt oder von
+  Hand eingetragen werden. Angezeigt wird über eine Blob-Adresse, nicht über einen Pfad.
+  Beim Übernehmen wird zugleich das Seitenformat der PDF aus `/MediaBox` gelesen.
+  Wird derselbe Ordner erneut gewählt, werden gleichnamige Einträge **aufgefrischt** statt
+  verdoppelt; Anzeigedauer und Platz in der Reihenfolge bleiben erhalten. So wird auch ein
+  ausgetauschter Aushang übernommen.
+  Unter der Liste stehen Anzahl und belegter Platz, daneben **„Übernommene Dateien
+  entfernen“**. Entfernte Einträge geben ihren Platz beim Übernehmen wieder frei.
+  Diese Dateien stehen **nicht** im JSON-Export und nicht in einer erzeugten `js/vorgaben.js`
+  – dort stehen nur Einstellungen. Ein neuer Arbeitsplatz bekommt sie über dieselbe
+  Ordnerauswahl.
+  **Warum der Umweg über den Dialog:** Ein Browser darf ein Verzeichnis nicht von sich aus
+  lesen – unter `file://` scheitern `fetch`, `XMLHttpRequest` und der Zugriff auf einen
+  eingebetteten Rahmen gleichermaßen. Der Dateidialog ist der einzige Weg, auf dem eine Seite
+  erfährt, was in einem Ordner liegt.
+  **„+ Datei aus „slides““** bleibt als Notnagel für den Betrieb über einen Webserver: Der
+  eingetragene Name zeigt auf eine Datei im Ordner `slides` neben `index.html`.
 - **Termine** (runde Schaltfläche unten rechts, über der Statistik; in den Einstellungen ein-
   und ausblendbar): organisatorische
   Termine für den rechten Teil der Diaschau – Fortbildung, Gerätewartung, Teambesprechung.
@@ -438,11 +451,11 @@ Spalte der Tafel zugeordnet.
 
 ## Prüfungen
 
-Im Ordner `tests/` liegen **18 Testdateien**, die die Tafel in einem echten Browser bedienen
+Im Ordner `tests/` liegen **19 Testdateien**, die die Tafel in einem echten Browser bedienen
 (Chromium über Playwright) und das Ergebnis prüfen – Zählung, Pfeile, Ausdruck, Zoom,
 Bildschirmschoner, Tag-/Nachtansicht, Verlauf, Sicherung, Einstellungen, Pflichtangaben,
-Physio- und Visitendruck, Stationsvorgabe, Statistik, Sichtschutz, Sicherheit der Ausgaben
-und den Übergabezettel. Jede meldet Skript- und Konsolenfehler als Fehlschlag.
+Physio- und Visitendruck, Stationsvorgabe, Statistik, Sichtschutz, Sicherheit der Ausgaben,
+den Übergabezettel, die Termine und das Übernehmen eines Ordners für die Diaschau. Jede meldet Skript- und Konsolenfehler als Fehlschlag.
 
 ```
 cd tests && npm install && npx playwright install chromium

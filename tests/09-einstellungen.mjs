@@ -1,5 +1,5 @@
 /* Einstellungen: Passwort, Listen, Bettplätze, Diaordner (mit und ohne Server) */
-import { browserStarten, neueSeite, oeffneEinstellungen, serverStarten,
+import { browserStarten, neueSeite, oeffneEinstellungen,
          testName, gleich, pruefe, enthaelt, keineFehler, bilanz, TIMEOUT, uebernehmen, verneineRueckfrage } from './lib.mjs';
 
 testName('Einstellungen');
@@ -151,7 +151,7 @@ gleich('Eintrag blieb erhalten', await page.inputValue('#tbody tr:first-child td
 
 /* ---- Diaordner von Hand: Seitenangabe erscheint nur bei PDF ---- */
 await oeffneEinstellungen(page, 'Bildschirmschoner');
-await page.click('#settingsPane .slidebar button:text-is("+ Datei von Hand")');
+await page.click('#settingsPane .slidebar button:text-is("+ Datei aus „slides“")');
 await page.fill('.entry-slide:last-child .slidefile', 'aushang.pdf');
 await page.waitForTimeout(150);
 await page.click('#settingsPane .slidebar button:text-is("+ Eigener Hinweis")');
@@ -373,20 +373,21 @@ pruefe('leere Station wird ausgeblendet', await page.isHidden('.brandstation'));
 gleich('der Titel führt dann nur das Haus', await page.title(), 'Klinikum Musterstadt');
 keineFehler(page);
 
-/* ---- Ordner einlesen über einen Webserver ---- */
-const server = await serverStarten();
-const online = await neueSeite(browser, { url: server.url });
-await oeffneEinstellungen(online, 'Bildschirmschoner');
-await online.click('#settingsPane .slidebar button:text-is("Ordner einlesen")');
-await online.waitForTimeout(900);
-const status = await online.textContent('.slidestatus');
-pruefe('Dateien über den Server gefunden', /\d+ Datei/.test(status), status.slice(0, 90));
-const gefunden = await online.$$eval('.entry-slide .slidefile', is => is.map(i => i.value));
-pruefe('nur zugelassene Dateitypen', gefunden.every(n => /\.(pdf|png|jpe?g)$/i.test(n)), gefunden.join(', '));
-pruefe('LIESMICH wird nicht übernommen', !gefunden.some(n => /liesmich/i.test(n)));
-await online.click('#settingsClose');
-keineFehler(online);
-await server.stop();
+/* ---- Der Notnagel für den Ordner „slides“ bleibt ----
+   Die Ordnerauswahl selbst prüft 19-diaordner.mjs; hier geht es nur darum,
+   dass ein von Hand eingetragener Name weiterhin auf den Ordner „slides“
+   neben index.html zeigt und nicht in den Speicher der Tafel. */
+await oeffneEinstellungen(page, 'Bildschirmschoner');
+await page.click('#settingsPane .slidebar button:text-is("+ Datei aus „slides“")');
+await page.waitForTimeout(150);
+await page.fill('.entry-slide:last-of-type .slidefile', 'aushang.png');
+gleich('von Hand eingetragen bleibt es beim Ordner', await page.evaluate(() => {
+  const item = draft.screensaver.items[draft.screensaver.items.length - 1];
+  return item.quelle + ' ' + slideQuelle(item);
+}), 'ordner slides/aushang.png');
+verneineRueckfrage(page);
+await page.click('#settingsClose');
+await page.waitForTimeout(200);
 
 await browser.close();
 bilanz();

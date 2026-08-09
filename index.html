@@ -91,7 +91,7 @@
     </button>
     <button type="button" id="btnTheme" title="Hell / Dunkel">◐<span class="themelabel" id="themeLabel"></span></button>
     <input type="file" id="fileInput" accept="application/json" hidden>
-    <!-- Auswahl des Ordners „slides“ für den Bildschirmschoner -->
+    <!-- Auswahl des Ordners mit den Dateien für die Diaschau -->
     <input type="file" id="folderInput" webkitdirectory directory multiple hidden>
   </div>
 </header>
@@ -352,6 +352,11 @@
       <p>Rechts neben der Schau stehen die <b>anstehenden Termine</b> (siehe nächster
         Abschnitt). Ohne Eintrag bleibt der rechte Teil fort und die Schau nutzt die volle
         Breite.</p>
+      <p><b>Inhalte freigeben</b> (Einstellungen → Bildschirmschoner): Mit
+        <b>„Ordner wählen …“</b> den Ordner auswählen, in dem die Dateien liegen – alle darin
+        enthaltenen PDF, PNG und JPEG werden in die Tafel übernommen. Wo der Ordner liegt, ist
+        gleichgültig; es muss keine Datei kopiert oder umbenannt werden. Kamen Dateien hinzu
+        oder wurde eine ausgetauscht, denselben Ordner einfach erneut wählen.</p>
       <p>Der Bildschirmschoner zeigt keine Patientendaten und startet nicht, solange ein Fenster
         wie die Einstellungen geöffnet ist.</p>
     </section>
@@ -658,6 +663,7 @@
 <script src="js/konfiguration.js"></script>
 <script src="js/vorgaben.js"></script>
 <script src="js/daten.js"></script>
+<script src="js/diaspeicher.js"></script>
 <script src="js/tabelle.js"></script>
 <script src="js/einstellungen.js"></script>
 <script src="js/schoner.js"></script>

@@ -113,6 +113,10 @@ function schliesseEinstellungen() {
     commitSettings();
   }
   $('#settingsDlg').close();
+  /* Verworfene Ordnerauswahl: Die Dateien sind beim Wählen sofort in den
+     Speicher gegangen, ihre Einträge aber mit dem Entwurf verfallen. Ohne
+     dieses Aufräumen bliebe der Platz für immer belegt. */
+  diaAufraeumen(settings.screensaver.items.map(item => item.id)).then(diaAdressenAufbauen);
 }
 
 function renderTabs() {
@@ -555,12 +559,13 @@ function renderSaverPane(pane) {
   pane.appendChild(el('h3', null, 'Bildschirmschoner'));
   pane.appendChild(el('p', 'panehint',
     'Gezeigt werden alle angehakten Einträge nacheinander – in der Reihenfolge dieser Liste ' +
-    'oder gemischt, siehe „Reihenfolge zufällig“. ' +
-    'Dateien (PDF, PNG, JPEG) gehören in den Ordner „slides“ neben index.html. ' +
-    '„Ordner wählen“ öffnet den Dateidialog und übernimmt alle Dateien des Ordners – das ' +
-    'funktioniert auch ohne Webserver. „Ordner einlesen“ kommt ohne Dialog aus, setzt aber ' +
-    'einen Webserver voraus (slides/slides.json oder Verzeichnisübersicht). Einzelne Namen ' +
-    'lassen sich außerdem von Hand eintragen.'));
+    'oder gemischt, siehe „Reihenfolge zufällig“.'));
+  pane.appendChild(el('p', 'panehint',
+    '„Ordner wählen …“ fragt nach einem Ordner und übernimmt alle darin liegenden Dateien ' +
+    'der Art PDF, PNG und JPEG in die Tafel – mit Inhalt, nicht nur mit Namen. Wo der Ordner ' +
+    'liegt, ist gleichgültig: Schreibtisch, Stick, Netzlaufwerk. Es muss keine Datei kopiert, ' +
+    'umbenannt oder von Hand eingetragen werden. Kamen Dateien hinzu oder wurde eine ' +
+    'ausgetauscht, denselben Ordner einfach erneut wählen.'));
 
   pane.appendChild(numberRow('Anzeigedauer je Eintrag', draft.screensaver.defaultSeconds,
     { min: SAVER_ITEM_MIN, max: 600, step: 1 }, value => { draft.screensaver.defaultSeconds = value; }));
@@ -581,33 +586,17 @@ function renderSaverPane(pane) {
   slideUI = { list, status };
 
   const bar = el('div', 'slidebar');
-  const pick = el('button', 'addentry', 'Ordner wählen …');
+  const pick = el('button', 'addentry primary', 'Ordner wählen …');
   pick.type = 'button';
   pick.addEventListener('click', () => $('#folderInput').click());
   bar.appendChild(pick);
 
-  const scan = el('button', 'addentry', 'Ordner einlesen');
-  scan.type = 'button';
-  scan.addEventListener('click', async () => {
-    scan.disabled = true;
-    status.textContent = 'Ordner „slides“ wird gelesen …';
-    const found = await scanSlideFolder();
-    scan.disabled = false;
-    const added = mergeFoundSlides(draft.screensaver.items, found);
-    markMissingSlides(draft.screensaver.items, found);
-    renderSlideEntries(list, status);
-    status.textContent = (found.hinweis ? found.hinweis + ' ' : '') + (!found.length
-      ? 'Im Ordner „slides“ wurde keine Datei gefunden. Entweder liegt dort nichts, oder der ' +
-        'Browser darf das Verzeichnis nicht lesen – dann bitte slides/slides.json pflegen oder ' +
-        'den Dateinamen von Hand eintragen.'
-      : found.length + (found.length === 1 ? ' Datei gefunden' : ' Dateien gefunden') +
-        (added ? ', ' + added + ' neu übernommen.' : ', nichts Neues.'));
-    status.classList.toggle('warnstatus', !!found.hinweis);
-  });
-  bar.appendChild(scan);
-
-  const addFile = el('button', 'addentry', '+ Datei von Hand');
+  /* Notnagel für den Betrieb am Webserver: Wer die Dateien bewusst im Ordner
+     „slides“ neben index.html hält, trägt ihren Namen hier ein, statt sie in
+     die Tafel zu übernehmen. */
+  const addFile = el('button', 'addentry', '+ Datei aus „slides“');
   addFile.type = 'button';
+  addFile.title = 'Dateiname einer Datei im Ordner „slides“ neben index.html';
   addFile.addEventListener('click', () => {
     draft.screensaver.items.push(slideItem({ kind: 'datei', file: '' }));
     renderSlideEntries(list, status);
@@ -629,16 +618,46 @@ function renderSaverPane(pane) {
   pane.appendChild(list);
   renderSlideEntries(list, status);
 
+  /* Was die übernommenen Dateien belegen – und der Weg, sie wieder
+     loszuwerden, ohne jeden Eintrag einzeln zu entfernen. */
+  const platz = el('div', 'slideplatz');
+  const platzText = el('span', 'panehint');
+  const leeren = el('button', 'entrybtn', 'Übernommene Dateien entfernen');
+  leeren.type = 'button';
+  leeren.addEventListener('click', async () => {
+    if (!confirm('Alle in die Tafel übernommenen Dateien entfernen? Die Einträge der Liste ' +
+                 'verschwinden mit; die Dateien im gewählten Ordner bleiben unberührt.')) return;
+    draft.screensaver.items = draft.screensaver.items.filter(item => item.quelle !== 'gespeichert');
+    await diaAufraeumen(draft.screensaver.items.map(item => item.id));
+    await diaAdressenAufbauen();
+    renderSlideEntries(list, status);
+    status.textContent = 'Übernommene Dateien entfernt.';
+    status.classList.remove('warnstatus');
+    slidePlatzZeigen(platzText, leeren);
+    knopfleiste();
+  });
+  platz.appendChild(platzText);
+  platz.appendChild(leeren);
+  pane.appendChild(platz);
+  slideUI.platzText = platzText;
+  slideUI.platzKnopf = leeren;
+  slidePlatzZeigen(platzText, leeren);
+
   pane.appendChild(el('p', 'panehint',
     'Rechts neben der Schau stehen die anstehenden Termine. Sie werden nicht hier gepflegt, ' +
     'sondern im eigenen Fenster „Termine“ unten rechts – sie gehören zum ' +
     'Stationsalltag und sollen ohne Zugangsstufe zu ändern sein.'));
 }
 
-/* Ordner über den Dateidialog übernehmen. Der Browser darf ein Verzeichnis
-   nicht von sich aus lesen; nach dieser einmaligen Auswahl kennt die Tafel
-   aber alle Dateinamen – auch ohne Webserver. Angezeigt werden die Dateien
-   weiterhin über den Pfad slides/…, die Auswahl dient nur den Namen. */
+/* Ordner übernehmen.
+ *
+ * Der Browser darf ein Verzeichnis nicht von sich aus lesen – weder über
+ * fetch noch über einen eingebetteten Rahmen; unter file:// erst recht nicht.
+ * Der Dateidialog ist der einzige Weg zu erfahren, was in einem Ordner liegt.
+ *
+ * Übernommen wird seit Fassung 2.25 der **Inhalt** jeder Datei, nicht mehr
+ * nur ihr Name. Damit ist gleichgültig, wo der Ordner liegt, und die Station
+ * muss nichts in einen bestimmten Ordner kopieren. */
 let slideUI = null;
 
 function initSlideFolderInput() {
@@ -647,77 +666,117 @@ function initSlideFolderInput() {
     const files = [...input.files];
     input.value = '';
     if (!slideUI || !draft || !files.length) return;
-    const { list, status } = slideUI;
-
-    const ordner = (files[0].webkitRelativePath || '').split('/')[0] || '';
-    const dateien = files.filter(file => SLIDE_TYPES.test(file.name))
-      .sort((a, b) => a.name.localeCompare(b.name, 'de'));
-    const namen = [];
-    for (const file of dateien) {
-      if (!namen.some(n => n.toLowerCase() === file.name.toLowerCase())) namen.push(file.name);
-    }
-
-    const added = mergeFoundSlides(draft.screensaver.items, namen);
-    markMissingSlides(draft.screensaver.items, namen);
-    renderSlideEntries(list, status);
-
-    const fremd = ordner && ordner.toLowerCase() !== 'slides'
-      ? 'Achtung: gewählt wurde der Ordner „' + ordner + '“. Die Dateien müssen im Ordner ' +
-        '„slides“ neben index.html liegen, sonst bleibt die Anzeige leer. '
-      : '';
-    status.textContent = fremd + (!namen.length
-      ? 'In diesem Ordner liegt keine Datei der Art PDF, PNG oder JPEG.'
-      : namen.length + (namen.length === 1 ? ' Datei übernommen' : ' Dateien gefunden') +
-        (added ? ', ' + added + ' neu übernommen.' : ', nichts Neues.') +
-        ' Seitenformate werden gelesen …');
-    status.classList.toggle('warnstatus', !!fremd);
-
-    /* Seitenverhältnis der PDF gleich aus den gewählten Dateien lesen –
-       ohne Webserver ist das später nicht mehr möglich. */
-    let gelesen = 0;
-    for (const file of dateien) {
-      if (!/\.pdf$/i.test(file.name)) continue;
-      const ratio = aspectFromPdfBytes(new Uint8Array(await file.arrayBuffer()));
-      if (!ratio) continue;
-      pdfRatios.set(SLIDE_DIR + encodeURIComponent(file.name), ratio);
-      for (const item of draft.screensaver.items) {
-        if (item.kind === 'datei' && item.file.toLowerCase() === file.name.toLowerCase()) {
-          item.ratio = ratio;
-          gelesen++;
-        }
-      }
-    }
-    if (namen.length) {
-      status.textContent = status.textContent.replace('Seitenformate werden gelesen …',
-        gelesen ? 'Seitenformat von ' + gelesen + ' PDF übernommen.' : '');
-    }
+    await ordnerUebernehmen(files);
   });
+}
+
+async function ordnerUebernehmen(files) {
+  const { list, status } = slideUI;
+  const ordner = (files[0].webkitRelativePath || '').split('/')[0] || '';
+
+  /* Nur die zugelassenen Arten, nach Namen sortiert, jeder Name einmal. */
+  const dateien = [];
+  for (const file of files.sort((a, b) => a.name.localeCompare(b.name, 'de'))) {
+    if (!SLIDE_TYPES.test(file.name)) continue;
+    if (dateien.some(d => d.name.toLowerCase() === file.name.toLowerCase())) continue;
+    dateien.push(file);
+  }
+
+  if (!dateien.length) {
+    status.textContent = 'Im Ordner „' + ordner + '“ liegt keine Datei der Art PDF, PNG ' +
+      'oder JPEG.';
+    status.classList.add('warnstatus');
+    return;
+  }
+
+  status.textContent = dateien.length + ' Datei' + (dateien.length === 1 ? '' : 'en') +
+    ' wird übernommen …';
+  status.classList.remove('warnstatus');
+
+  const items = draft.screensaver.items;
+  let neu = 0;
+  let ersetzt = 0;
+  let summe = 0;
+  let fehler = 0;
+
+  for (const file of dateien) {
+    /* Ein Eintrag desselben Namens wird aufgefrischt statt verdoppelt: So
+       ersetzt ein erneutes Wählen des Ordners einen ausgetauschten Aushang,
+       ohne dass Anzeigedauer oder Reihenfolge verloren gehen. */
+    let item = items.find(i => i.kind === 'datei' &&
+      i.file.toLowerCase() === file.name.toLowerCase());
+    if (item) ersetzt++;
+    else {
+      item = slideItem({ kind: 'datei', file: file.name });
+      items.push(item);
+      neu++;
+    }
+    item.quelle = 'gespeichert';
+    item.file = file.name;
+    item.missing = false;
+
+    let bytes;
+    try {
+      bytes = await file.arrayBuffer();
+    } catch (err) {
+      fehler++;
+      continue;
+    }
+    /* Das Seitenverhältnis der ersten PDF-Seite gleich mitlesen – die Bytes
+       liegen ohnehin vor. */
+    item.ratio = /\.pdf$/i.test(file.name) ? aspectFromPdfBytes(new Uint8Array(bytes)) : 0;
+
+    const gespeichert = await diaSpeichern(item.id, {
+      name: file.name,
+      typ: file.type || '',
+      groesse: bytes.byteLength,
+      stand: new Date().toISOString(),
+      blob: new Blob([bytes], { type: file.type || '' })
+    });
+    if (gespeichert === null) fehler++;
+    else summe += bytes.byteLength;
+  }
+
+  await diaAdressenAufbauen();
+  renderSlideEntries(list, status);
+  slidePlatzZeigen(slideUI.platzText, slideUI.platzKnopf);
+
+  const gesamt = await diaGesamtgroesse();
+  const teile = [];
+  if (neu) teile.push(neu + ' neu übernommen');
+  if (ersetzt) teile.push(ersetzt + ' aufgefrischt');
+  status.textContent = 'Ordner „' + ordner + '“: ' + (teile.join(', ') || 'nichts geändert') +
+    ' (' + groesseText(summe) + '). Die Dateien liegen jetzt in der Tafel; der Ordner wird ' +
+    'für die Anzeige nicht mehr gebraucht.' +
+    (fehler ? ' ' + fehler + ' Datei(en) ließen sich nicht speichern.' : '');
+  status.classList.toggle('warnstatus', fehler > 0 || gesamt > DIA_WARNUNG);
+  if (gesamt > DIA_WARNUNG) {
+    status.textContent += ' Achtung: Die Tafel hält inzwischen ' + groesseText(gesamt) +
+      ' an Dateien. Der Browser kann die Aufnahme irgendwann verweigern.';
+  }
+  /* Der Dateidialog liegt außerhalb des Fensters – sein „change“ erreicht die
+     Änderungserkennung nicht. Ohne diesen Aufruf bliebe „Übernehmen“ nach der
+     Ordnerauswahl verborgen. */
+  knopfleiste();
+}
+
+/* Belegter Platz unter der Liste. Der Knopf zum Leeren erscheint nur, wenn
+   es etwas zu leeren gibt. */
+async function slidePlatzZeigen(text, knopf) {
+  if (!text || !knopf) return;
+  const gesamt = await diaGesamtgroesse();
+  const anzahl = (await diaSchluessel()).length;
+  knopf.hidden = !anzahl;
+  text.textContent = anzahl
+    ? anzahl + ' Datei' + (anzahl === 1 ? '' : 'en') + ' in der Tafel gespeichert, ' +
+      groesseText(gesamt) + '. Sie stehen nicht im Export und nicht in einer erzeugten ' +
+      'js/vorgaben.js – ein neuer Arbeitsplatz bekommt sie über dieselbe Ordnerauswahl.'
+    : 'Noch keine Dateien übernommen.';
 }
 
 function focusLast(list, selector) {
   const fields = list.querySelectorAll(selector);
   if (fields.length) fields[fields.length - 1].focus();
-}
-
-/* Neu gefundene Dateien hinten anfügen; bekannte behalten ihre Einstellungen. */
-function mergeFoundSlides(items, found) {
-  let added = 0;
-  for (const file of found) {
-    if (items.some(item => item.kind === 'datei' && item.file.toLowerCase() === file.toLowerCase())) continue;
-    items.push(slideItem({ kind: 'datei', file }));
-    added++;
-  }
-  return added;
-}
-
-/* Nur kennzeichnen, wenn überhaupt etwas gefunden wurde – sonst wäre jeder
-   Eintrag als fehlend markiert, obwohl bloß das Auslesen nicht möglich war. */
-function markMissingSlides(items, found) {
-  for (const item of items) {
-    if (item.kind !== 'datei') continue;
-    item.missing = found.length > 0 &&
-      !found.some(file => file.toLowerCase() === item.file.toLowerCase());
-  }
 }
 
 function renderSlideEntries(list, status) {
@@ -748,14 +807,19 @@ function renderSlideEntries(list, status) {
       text.placeholder = 'Infotext';
       text.addEventListener('input', () => { item.text = text.value; });
       main.appendChild(text);
+    } else if (item.quelle === 'gespeichert') {
+      /* Die Datei liegt in der Tafel; ihr Name ist nur noch Beschriftung und
+         lässt sich nicht ändern – ein anderer Name würde auf nichts zeigen. */
+      row.appendChild(el('span', 'slidekind', /\.pdf$/i.test(item.file) ? 'PDF' : 'Bild'));
+      main.appendChild(el('span', 'slidefile slidefile-fest', item.file));
+      main.appendChild(el('span', 'slidehinweis', 'in der Tafel gespeichert'));
     } else {
       row.appendChild(el('span', 'slidekind', /\.pdf$/i.test(item.file) ? 'PDF' : 'Bild'));
       main.appendChild(entryInput(item.file, 'dateiname.pdf', 'slidefile', value => {
         item.file = slideName(value);
-        item.missing = false;
         item.ratio = 0;   /* neues Ziel, altes Seitenformat verwerfen */
       }));
-      if (item.missing) main.appendChild(el('span', 'slidewarn', 'im Ordner nicht gefunden'));
+      main.appendChild(el('span', 'slidehinweis', 'aus dem Ordner „slides“'));
     }
     row.appendChild(main);
 
@@ -1358,6 +1422,8 @@ function commitSettings() {
   uebergabeButtonZeigen();
   termineButtonZeigen();
   statistikTaktStarten();
+  /* Dateien entfernter Einträge geben ihren Platz wieder frei. */
+  diaAufraeumen(settings.screensaver.items.map(item => item.id)).then(diaAdressenAufbauen);
   /* Das Fenster bleibt offen – wer mehrere Bereiche ändert, soll nicht jedes
      Mal neu aufschließen müssen. Der Entwurf beginnt beim übernommenen Stand
      von vorn, damit „Übernehmen“ wieder verschwindet. */

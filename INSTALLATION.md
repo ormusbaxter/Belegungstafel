@@ -34,9 +34,10 @@ später aktualisieren. Die Kästchen sind zum Abhaken gedacht.
 
 - [ ] Archiv nach `C:\Programme\Belegungstafel\` entpacken.
 - [ ] **Ordner für normale Benutzer schreibgeschützt setzen.** Wer eine Datei unter `js\`
-      ändern kann, führt beim nächsten Laden eigenen Code in der Seite aus. `slides\` darf
-      beschreibbar bleiben, wenn die Station selbst Aushänge ergänzen soll – eine PDF ist
-      ungefährlich, eine Skriptdatei nicht.
+      ändern kann, führt beim nächsten Laden eigenen Code in der Seite aus. Der Ordner darf
+      seit Fassung 2.25 vollständig schreibgeschützt sein: Aushänge für die Diaschau werden
+      in den Einstellungen aus einem beliebigen Ordner übernommen und liegen danach im
+      Browserprofil, nicht im Anwendungsordner.
 - [ ] **Verknüpfung anlegen** statt Doppelklick auf `index.html`:
 
       ```
@@ -183,9 +184,9 @@ liegen: Ohne eigene Kennung teilen sie sich denselben Speicher.
 ```
 index.html      Grundgerüst
 styles.css      Darstellung, Druckansichten
-js/             acht Skriptdateien, darunter vorgaben.js mit den Einstellungen der Station
+js/             elf Skriptdateien, darunter vorgaben.js mit den Einstellungen der Station
 logo.png        Logo im Seitenkopf
-slides/         Inhalte des Bildschirmschoners
+slides/         Beispielinhalte für die Diaschau; seit 2.25 nicht mehr nötig
 README.md       Beschreibung
 CHANGELOG.md    Änderungen je Fassung
 ```
