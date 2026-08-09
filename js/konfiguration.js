@@ -24,7 +24,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.25.2';
+const VERSION = '2.26.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -636,9 +636,12 @@ function newSlideId() {
                    Dann ist gleichgültig, wo der gewählte Ordner lag; „file“
                    trägt nur noch den ursprünglichen Namen zur Anzeige. */
 function slideItem(props) {
-  /* page: anzuzeigende Seite eines PDF, ratio: Seitenverhältnis, sofern bekannt */
+  /* page:   anzuzeigende Seite eines PDF
+     ratio:  Seitenverhältnis der ersten Seite, sofern bekannt
+     seiten: Seitenzahl des PDF, sofern lesbar. Ein Hochkant-PDF aus genau
+             zwei Seiten wird in der Schau doppelseitig gezeigt. */
   return { id: newSlideId(), kind: 'datei', quelle: 'ordner', file: '', title: '', text: '',
-           on: true, seconds: null, page: 1, ratio: 0, ...props };
+           on: true, seconds: null, page: 1, ratio: 0, seiten: 0, ...props };
 }
 
 const SLIDE_QUELLEN = ['ordner', 'gespeichert'];

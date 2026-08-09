@@ -168,23 +168,75 @@ function slideNode(item) {
 
   const src = slideQuelle(item);
   if (!src) return missingSlideNode(item.file, item.quelle);
-  if (/\.pdf$/i.test(item.file)) {
-    /* „view=Fit“ zeigt die ganze Seite statt sie auf die Breite zu ziehen;
-       zusätzlich erhält der Rahmen das Seitenverhältnis der ersten Seite,
-       damit die Seite die Fläche ohne Ränder und ohne Blättern ausfüllt. */
-    const frame = el('iframe', 'slide slide-pdf');
-    frame.src = src + '#page=' + (item.page > 1 ? item.page : 1) +
-      '&view=Fit&toolbar=0&navpanes=0&scrollbar=0&statusbar=0';
-    frame.title = item.file + (item.page > 1 ? ', Seite ' + item.page : '');
-    applyPdfRatio(frame, src, item.ratio);
-    return frame;
-  }
+  if (/\.pdf$/i.test(item.file)) return pdfNode(item, src);
 
   const img = el('img', 'slide slide-img');
   img.src = src;
   img.alt = item.file;
   img.addEventListener('error', () => img.replaceWith(missingSlideNode(item.file, item.quelle)));
   return img;
+}
+
+/* Eine PDF-Seite: ein Rahmen in einem Kasten, der ihn beschneidet.
+ *
+ * „view=Fit“ zeigt die ganze Seite, statt sie auf die Breite zu ziehen.
+ * „scrollbar=0“ befolgt der heutige Betrachter des Browsers nicht mehr; bei
+ * einem mehrseitigen PDF stünde deshalb eine Bildlaufleiste am Rand. Der
+ * Kasten ist genau seitengroß und beschneidet den etwas breiteren Rahmen –
+ * damit verschwindet sie. */
+const PDF_LEISTE = 20;   /* Breite der Bildlaufleiste, großzügig gerechnet */
+
+function pdfKasten(item, src, seite) {
+  const kasten = el('div', 'pdfkasten');
+  const frame = el('iframe');
+  frame.src = src + '#page=' + seite + '&view=Fit&toolbar=0&navpanes=0&scrollbar=0&statusbar=0';
+  frame.title = item.file + ', Seite ' + seite;
+  frame.style.width = 'calc(100% + ' + PDF_LEISTE + 'px)';
+  kasten.appendChild(frame);
+  return kasten;
+}
+
+function pdfNode(item, src) {
+  if (doppelseitig(item)) {
+    /* Zwei Rahmen derselben Datei, jeder auf seine Seite gestellt. Der
+       Betrachter des Browsers kennt keine Doppelseitenansicht, und eine
+       eigene PDF-Anzeige käme für diese Tafel nicht in Frage. */
+    const box = el('div', 'slide slide-pdf slide-doppel');
+    box.dataset.ratio = String(item.ratio * 2);
+    box.appendChild(pdfKasten(item, src, 1));
+    box.appendChild(pdfKasten(item, src, 2));
+    return box;
+  }
+
+  const kasten = pdfKasten(item, src, item.page > 1 ? item.page : 1);
+  kasten.classList.add('slide', 'slide-pdf');
+  applyPdfRatio(kasten, src, item.ratio);
+  return kasten;
+}
+
+/* Beide Seiten nebeneinander?
+ *
+ * Nur bei einem Hochkant-PDF aus genau zwei Seiten, und nur, solange keine
+ * bestimmte Seite eingestellt ist – wer „S. 2“ einträgt, will diese eine.
+ *
+ * Entschieden wird an der Bühne, nicht an einer festen Zahl: Nebeneinander
+ * fallen die Seiten kleiner aus, sobald die Bühne schmaler ist als zwei
+ * Seiten breit. Bis zu drei Vierteln der Höhe, die eine einzelne Seite hätte,
+ * ist der Gewinn – beide Seiten auf einen Blick – den Verlust wert; darunter
+ * bleibt es bei der einzelnen Seite. Die Bühne ist schmaler, wenn rechts die
+ * Termine stehen, deshalb wird bei jedem Dia neu gerechnet. */
+const DOPPEL_MINDESTHOEHE = 0.75;
+
+function doppelseitig(item) {
+  if (item.seiten !== 2 || !(item.ratio > 0) || item.ratio >= 1) return false;
+  if (item.page > 1) return false;
+  const stage = $('#saverStage');
+  const breite = stage.clientWidth;
+  const hoehe = stage.clientHeight;
+  if (!breite || !hoehe) return false;
+  const einzeln = Math.min(breite / item.ratio, hoehe);
+  const doppelt = Math.min(breite / (item.ratio * 2), hoehe);
+  return doppelt >= einzeln * DOPPEL_MINDESTHOEHE;
 }
 
 /* Adresse der Datei: entweder der Ordner „slides“ neben index.html oder der
@@ -235,8 +287,20 @@ async function pdfAspect(src) {
   }
 }
 
-function aspectFromPdfBytes(bytes) {
+/* Seitenverhältnis und Seitenzahl aus der Datei. Beides sind Näherungen aus
+   dem unkomprimierten Teil der Datei; steckt die Angabe in einem
+   komprimierten Objektstrom, bleibt es bei 0 – und damit beim bisherigen
+   Verhalten (voller Rahmen, eine Seite). */
+function pdfDatenAusBytes(bytes) {
   const text = new TextDecoder('latin1').decode(bytes);
+  return { ratio: aspectAusText(text), seiten: seitenAusText(text) };
+}
+
+function aspectFromPdfBytes(bytes) {
+  return aspectAusText(new TextDecoder('latin1').decode(bytes));
+}
+
+function aspectAusText(text) {
   const box = text.match(/\/MediaBox\s*\[\s*(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)/);
   if (!box) return 0;
   let width = Math.abs(parseFloat(box[3]) - parseFloat(box[1]));
@@ -244,6 +308,19 @@ function aspectFromPdfBytes(bytes) {
   const turn = text.match(/\/Rotate\s+(-?\d+)/);
   if (turn && Math.abs(parseInt(turn[1], 10) / 90) % 2 === 1) [width, height] = [height, width];
   return width > 0 && height > 0 ? width / height : 0;
+}
+
+/* Der Seitenbaum führt seine Gesamtzahl in /Count; bei verschachtelten
+   Knoten steht die größte Zahl an der Wurzel. Fehlt sie, werden die
+   Seitenobjekte gezählt. */
+function seitenAusText(text) {
+  let groesste = 0;
+  for (const treffer of text.matchAll(/\/Count\s+(\d+)/g)) {
+    groesste = Math.max(groesste, parseInt(treffer[1], 10) || 0);
+  }
+  if (groesste) return groesste;
+  const einzeln = text.match(/\/Type\s*\/Page(?![s\w])/g);
+  return einzeln ? einzeln.length : 0;
 }
 
 /* Passt das aktuelle Dia in die Fläche ein: PDF auf das Seitenverhältnis,
@@ -311,5 +388,30 @@ function initSaver() {
   /* Die gespeicherten Dateien bekommen ihre Adressen, bevor die Schau zum
      ersten Mal läuft. Das Lesen ist asynchron, der Start der Schau nicht –
      deshalb einmal im Voraus und nicht bei jedem Dia. */
-  diaAdressenAufbauen();
+  diaAdressenAufbauen().then(seitenzahlenNachtragen);
+}
+
+/* Seitenzahlen für PDF, die vor Fassung 2.26 übernommen wurden.
+ *
+ * Sie kennen nur ihr Seitenverhältnis; ohne die Seitenzahl bliebe ein
+ * zweiseitiges Hochkant-PDF einseitig, bis jemand den Ordner erneut wählt.
+ * Der Inhalt liegt in der Tafel, also lässt er sich hier nachlesen – einmal,
+ * danach steht die Zahl in den Einstellungen. */
+async function seitenzahlenNachtragen() {
+  const offen = settings.screensaver.items.filter(item =>
+    item.kind === 'datei' && item.quelle === 'gespeichert' &&
+    item.seiten === 0 && /\.pdf$/i.test(item.file));
+  if (!offen.length) return;
+
+  let gelesen = 0;
+  for (const item of offen) {
+    const satz = await diaLesen(item.id);
+    if (!satz || !satz.blob) continue;
+    const daten = pdfDatenAusBytes(new Uint8Array(await satz.blob.arrayBuffer()));
+    if (!daten.seiten) continue;
+    item.seiten = daten.seiten;
+    if (!item.ratio) item.ratio = daten.ratio;
+    gelesen++;
+  }
+  if (gelesen) saveSettings();
 }

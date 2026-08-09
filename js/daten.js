@@ -275,7 +275,8 @@ function mergeSaver(target, source) {
           ? Math.min(600, Math.max(SAVER_ITEM_MIN, seconds))
           : null,
         page: Math.min(999, Math.max(1, parseInt(item.page, 10) || 1)),
-        ratio: Number.isFinite(item.ratio) && item.ratio > 0 ? item.ratio : 0
+        ratio: Number.isFinite(item.ratio) && item.ratio > 0 ? item.ratio : 0,
+        seiten: Math.min(9999, Math.max(0, parseInt(item.seiten, 10) || 0))
       });
     })
     .filter(item => item.kind === 'text' || item.file);

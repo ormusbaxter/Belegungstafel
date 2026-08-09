@@ -1573,6 +1573,32 @@ html[data-theme="dark"] .helpbody .warn { color: var(--iso); }
   border: 0;
   background: #fff;
 }
+/* Der Kasten beschneidet den Rahmen: Er ist seitengroß, der Rahmen darin
+   etwas breiter, sodass die Bildlaufleiste des PDF-Betrachters außerhalb
+   liegt. Ohne das stünde bei jedem mehrseitigen PDF ein grauer Streifen am
+   Rand – „scrollbar=0“ befolgt der Betrachter nicht mehr. */
+.pdfkasten {
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+}
+.pdfkasten iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border: 0;
+}
+/* Zwei Seiten nebeneinander: ein Kasten mit zwei Rahmen derselben Datei.
+   fitSlide() setzt die Maße auf das doppelte Seitenverhältnis, die Rahmen
+   teilen sich die Breite. Ein schmaler Steg dazwischen macht den Falz
+   kenntlich, damit nicht der Eindruck einer einzigen Seite entsteht. */
+.slide-doppel {
+  display: flex;
+  gap: 2px;
+  background: var(--line);
+}
+.slide-doppel .pdfkasten { flex: 1; height: 100%; min-width: 0; }
 .slide-text {
   width: min(1250px, 88vw);
   max-height: calc(100% - 32px);

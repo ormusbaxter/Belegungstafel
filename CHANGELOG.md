@@ -4,6 +4,28 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.26.0
+
+- **Ein PDF aus genau zwei Hochkantseiten wird nebeneinander gezeigt.** Ein Merkblatt oder ein
+  beidseitiger Aushang ist damit auf einen Blick zu lesen, statt dass die zweite Seite nur bei
+  gesondertem Eintrag erscheint. Umgesetzt als zwei Rahmen derselben Datei, auf Seite 1 und 2
+  gestellt – der Betrachter des Browsers kennt keine Doppelseitenansicht
+- die **Seitenzahl** wird beim Übernehmen aus `/Count` gelesen. Für Dateien, die vor dieser
+  Fassung übernommen wurden, trägt die Tafel sie beim nächsten Start aus dem gespeicherten
+  Inhalt nach – niemand muss den Ordner erneut wählen
+- **entschieden wird an der Bühne, nicht an einer festen Zahl:** Nebeneinander fallen die
+  Seiten kleiner aus, sobald die Bühne schmaler ist als zwei Seiten breit. Bis zu drei
+  Vierteln der Höhe, die eine einzelne Seite hätte, ist der Gewinn den Verlust wert; darunter
+  bleibt es bei der ersten Seite. Gerechnet wird bei jedem Dia neu, denn die Bühne ist
+  schmaler, wenn rechts die Termine stehen
+- eine in der Spalte „S." eingetragene Seite geht vor – wer eine bestimmte will, bekommt diese
+- die Liste im Einstellungsfenster nennt jetzt die Seitenzahl und kündigt die Doppelseite an
+- **behoben:** Bei jedem mehrseitigen PDF stand eine Bildlaufleiste am Rand und schob die
+  Seite aus der Passung, sodass die Nachbarseite angeschnitten hineinragte. Der heutige
+  Betrachter des Browsers befolgt `scrollbar=0` nicht mehr; die Seite steckt deshalb jetzt in
+  einem Kasten, der ihren Rahmen beschneidet. Das galt schon für die einzelne Seite
+- neue Prüfdatei `tests/20-doppelseite.mjs` (21 Prüfungen)
+
 ## 2.25.2
 
 - das Terminfenster heißt jetzt **„Termin-Management"** statt „Anstehende Termine"

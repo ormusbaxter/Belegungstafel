@@ -95,7 +95,7 @@ await setzeEinstellungen(page, { screensaver: { on: false, defaultSeconds: 30, i
   { kind: 'datei', file: 'test.pdf', page: 3, on: true }] } });
 await page.click('#btnSaver');
 await vorspulen(page, 400);
-const quelle = await page.$eval('#saverStage .slide-pdf', e => e.getAttribute('src'));
+const quelle = await page.$eval('#saverStage .slide-pdf iframe', e => e.getAttribute('src'));
 enthaelt('gewählte Seite im Verweis', quelle, '#page=3');
 await page.keyboard.press('Escape');
 

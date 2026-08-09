@@ -94,10 +94,15 @@ pruefe('das Bild wurde wirklich geladen',
 await page.evaluate(() => { showSlide(1); });
 await page.waitForTimeout(400);
 const zweites = await page.evaluate(() => {
+  /* Eine PDF-Seite steckt in einem Kasten, der die Bildlaufleiste des
+     Betrachters beschneidet – der Rahmen liegt darin. */
   const knoten = document.querySelector('#saverStage .slide');
-  return { tag: knoten.tagName, src: knoten.getAttribute('src') || '' };
+  const rahmen = knoten.querySelector('iframe');
+  return { pdf: knoten.classList.contains('slide-pdf'),
+           rahmen: Boolean(rahmen),
+           src: rahmen ? rahmen.getAttribute('src') : '' };
 });
-gleich('das zweite Dia ist die PDF', zweites.tag, 'IFRAME');
+pruefe('das zweite Dia ist die PDF', zweites.pdf && zweites.rahmen);
 pruefe('ebenfalls aus dem Speicher', zweites.src.startsWith('blob:'), zweites.src.slice(0, 40));
 await page.evaluate(() => { stopSaver(); $('#saver').hidden = true; });
 

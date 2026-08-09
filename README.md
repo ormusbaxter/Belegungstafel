@@ -312,6 +312,17 @@ Spalte der Tafel zugeordnet.
   `/MediaBox` gelesene Seitenverhältnis auf die Bühnengröße gerechnet, zu lange Hinweistexte
   werden schrittweise verkleinert, bis sie ganz sichtbar sind. Von mehrseitigen PDF erscheint
   die erste Seite.
+  Jede PDF-Seite steckt in einem Kasten, der ihren Rahmen um 20 px beschneidet: Der Betrachter
+  des Browsers befolgt `scrollbar=0` nicht mehr und setzte sonst bei jedem mehrseitigen PDF
+  eine Bildlaufleiste an den Rand, die die Seite zugleich aus der Passung schob.
+  **Zweiseitige Hochkant-PDF** werden **nebeneinander** gezeigt – zwei Rahmen derselben Datei,
+  auf Seite 1 und 2 gestellt, getrennt durch einen 2 px schmalen Steg. Die Seitenzahl wird
+  beim Übernehmen aus `/Count` gelesen. Entschieden wird an der Bühne, nicht an einer festen
+  Zahl: Nebeneinander fallen die Seiten kleiner aus, sobald die Bühne schmaler ist als zwei
+  Seiten breit; bis zu **drei Vierteln** der Höhe, die eine einzelne Seite hätte, ist der
+  Gewinn den Verlust wert, darunter bleibt es bei der ersten Seite. Gerechnet wird bei jedem
+  Dia neu, denn die Bühne ist schmaler, wenn rechts die Termine stehen. Eine in der Spalte
+  „S." eingetragene Seite geht vor.
   Patientendaten werden nie angezeigt, unten stehen Uhrzeit, Datum und die Position in der
   Schau.
   **Zweigeteilt:** Rechts neben der Schau stehen die **anstehenden Termine** (siehe unten).
@@ -451,11 +462,12 @@ Spalte der Tafel zugeordnet.
 
 ## Prüfungen
 
-Im Ordner `tests/` liegen **19 Testdateien**, die die Tafel in einem echten Browser bedienen
+Im Ordner `tests/` liegen **20 Testdateien**, die die Tafel in einem echten Browser bedienen
 (Chromium über Playwright) und das Ergebnis prüfen – Zählung, Pfeile, Ausdruck, Zoom,
 Bildschirmschoner, Tag-/Nachtansicht, Verlauf, Sicherung, Einstellungen, Pflichtangaben,
 Physio- und Visitendruck, Stationsvorgabe, Statistik, Sichtschutz, Sicherheit der Ausgaben,
-den Übergabezettel, die Termine und das Übernehmen eines Ordners für die Diaschau. Jede meldet Skript- und Konsolenfehler als Fehlschlag.
+den Übergabezettel, die Termine, das Übernehmen eines Ordners für die Diaschau und die
+Doppelseitenansicht. Jede meldet Skript- und Konsolenfehler als Fehlschlag.
 
 ```
 cd tests && npm install && npx playwright install chromium

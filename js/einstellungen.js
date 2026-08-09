@@ -724,7 +724,14 @@ async function ordnerUebernehmen(files) {
     }
     /* Das Seitenverhältnis der ersten PDF-Seite gleich mitlesen – die Bytes
        liegen ohnehin vor. */
-    item.ratio = /\.pdf$/i.test(file.name) ? aspectFromPdfBytes(new Uint8Array(bytes)) : 0;
+    if (/\.pdf$/i.test(file.name)) {
+      const daten = pdfDatenAusBytes(new Uint8Array(bytes));
+      item.ratio = daten.ratio;
+      item.seiten = daten.seiten;
+    } else {
+      item.ratio = 0;
+      item.seiten = 0;
+    }
 
     const gespeichert = await diaSpeichern(item.id, {
       name: file.name,
@@ -779,6 +786,20 @@ function focusLast(list, selector) {
   if (fields.length) fields[fields.length - 1].focus();
 }
 
+/* Zusatz hinter der Herkunft: Seitenzahl eines PDF und, bei zwei Hochkant-
+   seiten, der Hinweis auf die Doppelseite. Er nimmt der Schau das
+   Überraschende – sonst stünde plötzlich etwas anderes auf dem Schirm, als
+   in der Liste zu erwarten war. */
+function seitenHinweis(item) {
+  if (!/\.pdf$/i.test(item.file) || !item.seiten) return '';
+  if (item.seiten !== 2 || !(item.ratio > 0) || item.ratio >= 1) {
+    return ' · ' + item.seiten + ' Seite' + (item.seiten === 1 ? '' : 'n');
+  }
+  return item.page > 1
+    ? ' · 2 Seiten, gezeigt wird Seite ' + item.page
+    : ' · 2 Seiten, nebeneinander gezeigt';
+}
+
 function renderSlideEntries(list, status) {
   const items = draft.screensaver.items;
   list.replaceChildren();
@@ -812,12 +833,14 @@ function renderSlideEntries(list, status) {
          lässt sich nicht ändern – ein anderer Name würde auf nichts zeigen. */
       row.appendChild(el('span', 'slidekind', /\.pdf$/i.test(item.file) ? 'PDF' : 'Bild'));
       main.appendChild(el('span', 'slidefile slidefile-fest', item.file));
-      main.appendChild(el('span', 'slidehinweis', 'in der Tafel gespeichert'));
+      main.appendChild(el('span', 'slidehinweis',
+        'in der Tafel gespeichert' + seitenHinweis(item)));
     } else {
       row.appendChild(el('span', 'slidekind', /\.pdf$/i.test(item.file) ? 'PDF' : 'Bild'));
       main.appendChild(entryInput(item.file, 'dateiname.pdf', 'slidefile', value => {
         item.file = slideName(value);
         item.ratio = 0;   /* neues Ziel, altes Seitenformat verwerfen */
+        item.seiten = 0;
       }));
       main.appendChild(el('span', 'slidehinweis', 'aus dem Ordner „slides“'));
     }
