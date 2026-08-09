@@ -158,6 +158,9 @@
     <span class="savercount" id="saverCount"></span>
     <span class="saverhint">Maus bewegen oder Taste drücken</span>
   </footer>
+  <!-- Läuft je Dia von links nach rechts durch; zeigt, wie lange das Bild
+       noch steht. Bei nur einem Eintrag bleibt sie fort. -->
+  <div class="saverlauf" id="saverLauf" hidden><span id="saverLaufBalken"></span></div>
 </div>
 
 <section class="notes">
@@ -349,6 +352,8 @@
         außerdem von allein, sobald eine eingestellte Zeit lang niemand etwas eingegeben hat.
         Die Tafel liegt dabei verdeckt darunter; <b>jede Mausbewegung oder Taste</b> beendet die
         Schau und bringt die Tafel zurück.</p>
+      <p>Am unteren Rand läuft ein schmaler Balken durch: Er zeigt, wie lange das Bild noch
+        steht. Bei nur einem Eintrag bleibt er fort – dann wechselt nichts.</p>
       <p>Rechts neben der Schau stehen die <b>anstehenden Termine</b> (siehe nächster
         Abschnitt). Ohne Eintrag bleibt der rechte Teil fort und die Schau nutzt die volle
         Breite.</p>

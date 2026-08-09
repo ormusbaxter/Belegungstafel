@@ -1646,6 +1646,29 @@ html[data-theme="dark"] .helpbody .warn { color: var(--iso); }
 }
 .savercount { font-variant-numeric: tabular-nums; }
 .saverhint { font-size: 13px; opacity: .7; }
+
+/* Laufbalken am unteren Rand: zeigt, wie lange das Dia noch steht.
+   Bewegt wird über transform, nicht über die Breite – so rechnet der
+   Browser die Bewegung auf der Grafikkarte und die Schau bleibt ruhig.
+   Bei nur einem Eintrag steht die Bahn gar nicht erst da. */
+.saverlauf {
+  flex: none;
+  height: 6px;
+  background: rgba(231, 237, 243, .12);
+  overflow: hidden;
+}
+.saverlauf span {
+  display: block;
+  height: 100%;
+  background: #7fb2e5;
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+}
+/* Ein Arbeitsplatz, der Bewegung unterdrückt, bekommt sie auch hier nicht. */
+@media (prefers-reduced-motion: reduce) {
+  .saverlauf span { transition: none !important; }
+}
 body.saver-on { overflow: hidden; }
 
 @media print {

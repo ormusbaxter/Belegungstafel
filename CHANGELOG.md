@@ -4,6 +4,14 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.26.1
+
+- **Laufbalken am unteren Rand der Diaschau:** Er läuft je Eintrag durch und zeigt, wie lange
+  das Bild noch steht. Bei nur einem Eintrag bleibt er fort – dann wechselt nichts
+- bewegt wird er über einen CSS-Übergang auf `transform`, nicht über einen zweiten Zeitgeber
+  neben dem, der das Dia weiterschaltet. Ein Arbeitsplatz mit `prefers-reduced-motion` bekommt
+  ihn ohne Bewegung
+
 ## 2.26.0
 
 - **Ein PDF aus genau zwei Hochkantseiten wird nebeneinander gezeigt.** Ein Merkblatt oder ein

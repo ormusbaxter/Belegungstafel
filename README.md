@@ -324,7 +324,10 @@ Spalte der Tafel zugeordnet.
   Dia neu, denn die Bühne ist schmaler, wenn rechts die Termine stehen. Eine in der Spalte
   „S." eingetragene Seite geht vor.
   Patientendaten werden nie angezeigt, unten stehen Uhrzeit, Datum und die Position in der
-  Schau.
+  Schau. Am unteren Rand läuft je Eintrag ein **6 px schmaler Balken** durch, der die
+  verbleibende Anzeigedauer zeigt; bei nur einem Eintrag bleibt er fort. Bewegt wird er über
+  einen CSS-Übergang auf `transform`, nicht über einen zweiten Zeitgeber – das kostet nichts
+  und bleibt ruhig. Ein Arbeitsplatz mit `prefers-reduced-motion` bekommt ihn ohne Bewegung.
   **Zweigeteilt:** Rechts neben der Schau stehen die **anstehenden Termine** (siehe unten).
   **Ohne Termin bleibt der rechte Teil fort** und die Schau nutzt die volle Breite.
   **Dateien freigeben – „Ordner wählen …“:** Der Dateidialog

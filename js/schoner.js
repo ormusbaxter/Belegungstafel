@@ -99,6 +99,7 @@ function stopSaver(event) {
   clearInterval(slideClock);
   $('#saverStage').replaceChildren();
   $('#saverTermine').replaceChildren();
+  laufStarten(0);
   $('#saver').hidden = true;
   document.body.classList.remove('saver-on');
   return true;
@@ -156,6 +157,31 @@ function showSlide(index) {
 
   /* Bei nur einem Eintrag gibt es nichts weiterzuschalten. */
   if (count > 1) slideTimer = setTimeout(() => showSlide(slideIndex + 1), slideSeconds(item) * 1000);
+  laufStarten(count > 1 ? slideSeconds(item) : 0);
+}
+
+/* Laufbalken am unteren Rand.
+ *
+ * Er wird nicht Schritt für Schritt gesetzt, sondern einmal in Gang gebracht:
+ * Der Browser bewegt ihn selbst über einen Übergang. Das erspart einen
+ * zweiten Zeitgeber neben dem, der das Dia weiterschaltet, und läuft flüssig,
+ * ohne die Schau zu belasten. */
+function laufStarten(sekunden) {
+  const bahn = $('#saverLauf');
+  const balken = $('#saverLaufBalken');
+  if (!bahn || !balken) return;
+
+  bahn.hidden = !(sekunden > 0);
+  balken.style.transition = 'none';
+  balken.style.transform = 'scaleX(0)';
+  if (!(sekunden > 0)) return;
+
+  /* Den Rücksprung auf 0 wirksam werden lassen, bevor die neue Bewegung
+     beginnt – sonst fasst der Browser beides zusammen und der Balken läuft
+     vom alten Stand weiter, statt neu anzusetzen. */
+  void balken.offsetWidth;
+  balken.style.transition = 'transform ' + sekunden + 's linear';
+  balken.style.transform = 'scaleX(1)';
 }
 
 function slideNode(item) {

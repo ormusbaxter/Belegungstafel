@@ -97,7 +97,44 @@ await page.click('#btnSaver');
 await vorspulen(page, 400);
 const quelle = await page.$eval('#saverStage .slide-pdf iframe', e => e.getAttribute('src'));
 enthaelt('gewählte Seite im Verweis', quelle, '#page=3');
+pruefe('bei einem Eintrag keine Laufleiste', await page.isHidden('#saverLauf'));
 await page.keyboard.press('Escape');
+await vorspulen(page, 200);
+
+/* ---- Laufbalken ----
+   Die Bewegung selbst führt der Browser über einen Übergang aus; sie folgt
+   nicht der gestellten Uhr und lässt sich hier nicht vorspulen. Geprüft wird
+   deshalb, dass er zur richtigen Dauer angesetzt und bei jedem Dia neu
+   gestartet wird. */
+await setzeEinstellungen(page, { screensaver: { on: false, defaultSeconds: 2, items: [
+  { kind: 'text', title: 'A', text: 'a', on: true },
+  { kind: 'text', title: 'B', text: 'b', on: true, seconds: 25 }] } });
+await page.click('#btnSaver');
+await vorspulen(page, 300);
+
+const leiste = async () => await page.evaluate(() => {
+  const balken = document.querySelector('#saverLaufBalken');
+  const stil = getComputedStyle(balken);
+  return { sichtbar: !document.querySelector('#saverLauf').hidden,
+           dauer: stil.transitionDuration,
+           ziel: balken.style.transform };
+});
+const stand = await leiste();
+pruefe('die Laufleiste erscheint', stand.sichtbar);
+gleich('Dauer des ersten Dias', stand.dauer, '2s');
+gleich('und er läuft auf die volle Breite zu', stand.ziel, 'scaleX(1)');
+
+await vorspulen(page, 2100);
+gleich('das zweite Dia hat eine eigene Dauer', (await leiste()).dauer, '25s');
+pruefe('am Anfang steht er wieder bei null',
+  await page.evaluate(() => {
+    const balken = document.querySelector('#saverLaufBalken');
+    /* Kurz nach dem Wechsel ist erst ein schmaler Teil der Breite gefüllt. */
+    return balken.getBoundingClientRect().width < window.innerWidth / 4;
+  }));
+await page.keyboard.press('Escape');
+await vorspulen(page, 200);
+pruefe('nach dem Ende ist die Leiste fort', await page.isHidden('#saverLauf'));
 
 keineFehler(page);
 await browser.close();
