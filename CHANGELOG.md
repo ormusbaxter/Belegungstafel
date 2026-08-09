@@ -4,6 +4,11 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.25.1
+
+- die Passwortabfrage der Einstellungen nennt die beiden Zugangsstufen nicht mehr. Wer das
+  Passwort hat, weiß, welches er hat; wer es nicht hat, brauchte den Hinweis auch nicht
+
 ## 2.25.0
 
 - **Ein Ordner für die Diaschau, sonst nichts.** „Ordner wählen …“ fragt nach einem Ordner und
