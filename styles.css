@@ -818,6 +818,10 @@ tr:hover .clearbed, .clearbed:focus-visible { opacity: 1; }
 .entry-phone { grid-template-columns: 78px 1fr auto auto auto; }
 /* Bettplätze: Bezeichnung, Trennlinien-Kästchen, drei Schaltflächen */
 .entry-bed { grid-template-columns: 1fr auto auto auto auto; }
+/* Termin: Datum, Uhrzeit, Bezeichnung, Entfernen */
+.entry-termin { grid-template-columns: auto auto 1fr auto; }
+.entry-termin input[type=date],
+.entry-termin input[type=time] { font-variant-numeric: tabular-nums; }
 .bedtrenner { justify-self: center; margin: 0 4px; }
 .entry-header { grid-template-columns: 150px 1fr; }
 /* Meldestufe: Beschriftung und Schaltflächen in einer Zeile, darunter die
@@ -1472,6 +1476,47 @@ html[data-theme="dark"] .helpbody .warn { color: var(--iso); }
 }
 /* Die Bühne gibt die volle Fläche frei; jedes Dia passt sich ihr an,
    damit nichts abgeschnitten wird und nichts gescrollt werden muss. */
+/* Zweiteilig: links die Schau, rechts die Termine. */
+.saverbuehne { flex: 1; display: flex; min-height: 0; }
+.savertermine {
+  flex: 0 0 clamp(240px, 28%, 520px);
+  display: flex;
+  flex-direction: column;
+  gap: 1.2vh;
+  min-width: 0;
+  padding: 3vh 2.5vw;
+  border-left: 1px solid rgba(231, 237, 243, .18);
+  overflow: hidden;
+}
+.savertermine h2 {
+  margin: 0 0 .6vh;
+  font-size: clamp(15px, 1.9vh, 26px);
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #9fb3c8;
+}
+.savertermin {
+  display: flex;
+  flex-direction: column;
+  gap: .2vh;
+  padding-bottom: 1vh;
+  border-bottom: 1px solid rgba(231, 237, 243, .1);
+}
+.saverterminzeit {
+  font-size: clamp(13px, 1.7vh, 22px);
+  font-weight: 700;
+  color: #7fb2e5;
+  font-variant-numeric: tabular-nums;
+}
+.savertermintext {
+  font-size: clamp(15px, 2.3vh, 30px);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+/* Heute hervorgehoben – daran hängt im Dienst die nächste Handlung. */
+.savertermin.heute .saverterminzeit { color: #ffd479; }
+
 .saverstage {
   position: relative;
   flex: 1;

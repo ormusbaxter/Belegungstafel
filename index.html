@@ -131,7 +131,12 @@
 
 <!-- Bildschirmschoner: Diaschau -->
 <div class="saver" id="saver" role="presentation" hidden>
-  <div class="saverstage" id="saverStage"></div>
+  <!-- Links die Schau, rechts die anstehenden Termine. Der rechte Teil
+       erscheint nur, wenn Termine eingetragen sind. -->
+  <div class="saverbuehne">
+    <div class="saverstage" id="saverStage"></div>
+    <aside class="savertermine" id="saverTermine" hidden></aside>
+  </div>
   <div class="saverveil"></div>
   <footer class="saverfoot">
     <span class="saverclock" id="saverClock">–</span>
@@ -331,8 +336,14 @@
         außerdem von allein, sobald eine eingestellte Zeit lang niemand etwas eingegeben hat.
         Die Tafel liegt dabei verdeckt darunter; <b>jede Mausbewegung oder Taste</b> beendet die
         Schau und bringt die Tafel zurück.</p>
+      <p>Rechts neben der Schau stehen die <b>anstehenden Termine</b> – Fortbildung,
+        Gerätewartung, Teambesprechung –, die früheste zuerst. Was heute ansteht, steht als
+        <b>Heute</b> und hervorgehoben; abgelaufene Termine verschwinden von selbst. Gepflegt
+        werden sie unter Einstellungen → Bildschirmschoner. Ohne Eintrag bleibt der rechte
+        Teil fort und die Schau nutzt die volle Breite.</p>
       <p>Der Bildschirmschoner zeigt keine Patientendaten und startet nicht, solange ein Fenster
-        wie die Einstellungen geöffnet ist.</p>
+        wie die Einstellungen geöffnet ist. Das gilt auch für die Termine – sie sind für alle
+        im Raum zu lesen.</p>
     </section>
 
     <section>

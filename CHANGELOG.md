@@ -4,6 +4,21 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.23.0
+
+- **Die Diaschau ist zweigeteilt:** links wie bisher die Schau aus Dateien und eigenen
+  Hinweisen, rechts die **anstehenden Termine** – Datum, wahlweise Uhrzeit und Bezeichnung,
+  die früheste zuerst. Gepflegt unter Einstellungen → Bildschirmschoner
+- ein Termin des **heutigen Tages** steht als „Heute" und hervorgehoben; **abgelaufene fallen
+  von selbst heraus**, niemand muss aufräumen. Läuft die Schau über Mitternacht, wird der
+  rechte Teil neu aufgebaut – sonst hieße „Heute" dort weiter der Vortag
+- **ohne Termin bleibt der rechte Teil fort** und die Schau nutzt die volle Breite. Eine
+  dauerhaft leere Spalte wäre nur verschenkter Platz
+- die Termine sind organisatorisch und dürfen **keine Patientendaten** enthalten – die Schau
+  hängt bildschirmfüllend über der Tafel und ist von jedem im Raum zu lesen. Der Hinweis steht
+  in den Einstellungen, in der Kurzanleitung und in `DATENSCHUTZ.md`
+- neue Prüfdatei `tests/18-termine.mjs` (17 Prüfungen), im regulären Durchlauf enthalten
+
 ## 2.22.3
 
 - **Lizenz ergänzt: MIT** (`LICENSE`, mit deutscher Lesefassung). Ohne Lizenzdatei galt

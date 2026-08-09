@@ -618,6 +618,69 @@ function renderSaverPane(pane) {
   pane.appendChild(status);
   pane.appendChild(list);
   renderSlideEntries(list, status);
+
+  renderTerminBlock(pane);
+}
+
+/* Anstehende Termine – der rechte Teil der Schau */
+function renderTerminBlock(pane) {
+  pane.appendChild(el('h3', null, 'Anstehende Termine'));
+  pane.appendChild(el('p', 'panehint',
+    'Erscheinen rechts neben der Schau, die früheste zuerst. Ein Termin des heutigen Tages ' +
+    'steht als „Heute“ und hervorgehoben; abgelaufene verschwinden von selbst. Ohne Eintrag ' +
+    'bleibt der rechte Teil fort und die Schau nutzt die volle Breite.'));
+  pane.appendChild(el('p', 'panehint warn',
+    'Die Schau hängt bildschirmfüllend über der Tafel und ist von jedem im Raum zu sehen – ' +
+    'hier gehören keine Patientendaten hinein, so wenig wie in die Dias.'));
+
+  const liste = el('div', 'entrylist');
+  pane.appendChild(liste);
+  renderTerminEntries(liste);
+
+  const add = el('button', 'addentry', '+ Termin hinzufügen');
+  add.type = 'button';
+  add.addEventListener('click', () => {
+    draft.screensaver.termine.push(terminItem({ datum: isoToday() }));
+    renderTerminEntries(liste);
+    focusLast(liste, '.termintext');
+  });
+  pane.appendChild(add);
+}
+
+function renderTerminEntries(liste) {
+  const termine = draft.screensaver.termine;
+  liste.replaceChildren();
+
+  termine.forEach((termin, index) => {
+    const row = el('div', 'entry entry-termin');
+
+    const datum = el('input', 'terminDatum');
+    datum.type = 'date';
+    datum.value = termin.datum;
+    datum.setAttribute('aria-label', 'Datum');
+    datum.addEventListener('input', () => { termin.datum = datum.value; });
+    row.appendChild(datum);
+
+    const zeit = el('input', 'terminzeit');
+    zeit.type = 'time';
+    zeit.value = termin.zeit;
+    zeit.setAttribute('aria-label', 'Uhrzeit, kann leer bleiben');
+    zeit.addEventListener('input', () => { termin.zeit = zeit.value; });
+    row.appendChild(zeit);
+
+    row.appendChild(entryInput(termin.text, 'Bezeichnung', 'termintext',
+      wert => { termin.text = wert; }));
+
+    const remove = moveButton('×', 'entfernen', () => {
+      termine.splice(index, 1);
+      renderTerminEntries(liste);
+    });
+    remove.classList.add('remove');
+    row.appendChild(remove);
+    liste.appendChild(row);
+  });
+
+  if (!termine.length) liste.appendChild(el('p', 'panehint', 'Noch keine Termine.'));
 }
 
 /* Ordner über den Dateidialog übernehmen. Der Browser darf ein Verzeichnis
@@ -1293,6 +1356,11 @@ function commitSettings() {
   draft.zoom = clampZoom(draft.zoom);
   if (!CLOCK.test(draft.night.from)) draft.night.from = DEFAULT_NIGHT.from;
   if (!CLOCK.test(draft.night.to)) draft.night.to = DEFAULT_NIGHT.to;
+
+  /* Termine ohne Datum oder Bezeichnung sind unbrauchbar. */
+  draft.screensaver.termine = draft.screensaver.termine
+    .filter(t => ISO_DATUM.test(t.datum || '') && t.text.trim())
+    .map(t => ({ ...t, text: t.text.trim().slice(0, TERMIN_MAX) }));
 
   /* Bildschirmschoner: Zeiten begrenzen, leere Einträge verwerfen */
   const saver = draft.screensaver;

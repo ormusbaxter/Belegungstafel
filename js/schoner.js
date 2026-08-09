@@ -84,6 +84,7 @@ function startSaver() {
   setPrivacy(true);
   $('#saver').hidden = false;
   document.body.classList.add('saver-on');
+  termineAufbauen();
   showSlide(0);
   tickSlideClock();
   slideClock = setInterval(tickSlideClock, 1000);
@@ -95,9 +96,36 @@ function stopSaver(event) {
   clearTimeout(slideTimer);
   clearInterval(slideClock);
   $('#saverStage').replaceChildren();
+  $('#saverTermine').replaceChildren();
   $('#saver').hidden = true;
   document.body.classList.remove('saver-on');
   return true;
+}
+
+/* Rechter Teil der Schau: was heute oder später ansteht.
+ *
+ * Ohne Termine bleibt der Bereich fort, damit die Schau die volle Breite
+ * behält – eine dauerhaft leere Spalte wäre nur verschenkter Platz. */
+let termineStand = '';
+
+function termineAufbauen() {
+  const kasten = $('#saverTermine');
+  const liste = anstehendeTermine(settings.screensaver.termine);
+  termineStand = isoToday();
+  kasten.replaceChildren();
+  kasten.hidden = !liste.length;
+  if (!liste.length) return;
+
+  kasten.appendChild(el('h2', null, 'Anstehende Termine'));
+  const heute = isoToday();
+  for (const termin of liste) {
+    const zeile = el('div', 'savertermin' + (termin.datum === heute ? ' heute' : ''));
+    const wann = terminDatum(termin.datum) + (termin.zeit ? ' \u00B7 ' + termin.zeit : '');
+    zeile.appendChild(el('span', 'saverterminzeit',
+      termin.datum === heute ? 'Heute' + (termin.zeit ? ' \u00B7 ' + termin.zeit : '') : wann));
+    zeile.appendChild(el('span', 'savertermintext', termin.text));
+    kasten.appendChild(zeile);
+  }
 }
 
 function showSlide(index) {
@@ -247,6 +275,8 @@ function emptySlideNode() {
 }
 
 function tickSlideClock() {
+  /* Läuft die Schau über Mitternacht, wäre „Heute" sonst von gestern. */
+  if (saverOn && termineStand && termineStand !== isoToday()) termineAufbauen();
   const d = new Date();
   const days = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
   $('#saverClock').textContent = timeStr(d);

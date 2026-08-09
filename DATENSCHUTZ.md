@@ -127,6 +127,9 @@ Wirksame Maßnahmen sind deshalb organisatorisch:
   Pflegekraft. Sofort auslösbar über die Schaltfläche „Datenschutz"
 - der Bildschirmschoner legt sich nach ⟨n⟩ Sekunden über die Tafel und zeigt selbst keine
   Patientendaten
+  Die anstehenden Termine im rechten Teil der Schau sind organisatorisch (Fortbildung,
+  Gerätewartung, Teambesprechung) und dürfen keine Patientendaten enthalten; sie werden
+  wie die übrigen Einstellungen gespeichert und mit exportiert
 
 ## 6. Beschäftigtendaten
 

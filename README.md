@@ -311,7 +311,13 @@ Spalte der Tafel zugeordnet.
   werden schrittweise verkleinert, bis sie ganz sichtbar sind. Von mehrseitigen PDF erscheint
   die erste Seite.
   Patientendaten werden nie angezeigt, unten stehen Uhrzeit, Datum und die Position in der
-  Schau. Ein Browser darf ein Verzeichnis nicht von sich aus lesen; die Dateinamen kommen
+  Schau.
+  **Zweigeteilt:** Rechts neben der Schau stehen die **anstehenden Termine** – Datum, wahlweise
+  Uhrzeit und Bezeichnung –, die früheste zuerst. Ein Termin des heutigen Tages steht als
+  „Heute" und hervorgehoben, abgelaufene fallen von selbst heraus; läuft die Schau über
+  Mitternacht, wird der Teil neu aufgebaut. Gepflegt werden sie unter Einstellungen →
+  Bildschirmschoner. **Ohne Termin bleibt der rechte Teil fort** und die Schau nutzt die volle
+  Breite. Auch hier gilt: keine Patientendaten – die Schau ist für jeden im Raum zu lesen. Ein Browser darf ein Verzeichnis nicht von sich aus lesen; die Dateinamen kommen
   deshalb aus einer der drei Quellen (Einzelheiten in `slides/LIESMICH.txt`):
   - **„Ordner wählen …“** – der Dateidialog (`<input type="file" webkitdirectory>`) übernimmt
     alle Dateien des gewählten Ordners auf einmal. Funktioniert **ohne Webserver**, also auch
@@ -409,7 +415,7 @@ Spalte der Tafel zugeordnet.
 
 ## Prüfungen
 
-Im Ordner `tests/` liegen **17 Testdateien**, die die Tafel in einem echten Browser bedienen
+Im Ordner `tests/` liegen **18 Testdateien**, die die Tafel in einem echten Browser bedienen
 (Chromium über Playwright) und das Ergebnis prüfen – Zählung, Pfeile, Ausdruck, Zoom,
 Bildschirmschoner, Tag-/Nachtansicht, Verlauf, Sicherung, Einstellungen, Pflichtangaben,
 Physio- und Visitendruck, Stationsvorgabe, Statistik, Sichtschutz, Sicherheit der Ausgaben

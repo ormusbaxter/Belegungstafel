@@ -227,6 +227,18 @@ function mergeSaver(target, source) {
   const each = parseInt(source.defaultSeconds, 10);
   if (Number.isFinite(each)) target.defaultSeconds = Math.min(600, Math.max(SAVER_ITEM_MIN, each));
   target.shuffle = source.shuffle === true;
+  /* Vor dem vorzeitigen Rücksprung: Termine gibt es auch ohne Dia-Liste. */
+  if (Array.isArray(source.termine)) {
+    target.termine = source.termine
+      .filter(t => t && typeof t === 'object' && ISO_DATUM.test(t.datum || ''))
+      .map(t => terminItem({
+        id: String(t.id || newTerminId()),
+        datum: t.datum,
+        zeit: CLOCK.test(t.zeit || '') ? t.zeit : '',
+        text: String(t.text || '').trim().slice(0, TERMIN_MAX)
+      }))
+      .filter(t => t.text);
+  }
   if (!Array.isArray(source.items)) return;
   target.items = source.items
     .filter(item => item && typeof item === 'object')

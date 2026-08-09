@@ -22,7 +22,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.22.3';
+const VERSION = '2.23.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -505,8 +505,41 @@ const DEFAULT_SAVER = {
   seconds: 300,
   defaultSeconds: 10,
   shuffle: false,
-  items: []
+  items: [],
+  /* Anstehende Termine – siehe unten. */
+  termine: []
 };
+
+/* Anstehende Termine im rechten Teil der Diaschau.
+ *
+ * Organisatorisches: Fortbildung, Gerätewartung, Teambesprechung. Die Schau
+ * hängt bildschirmfüllend über der Tafel und ist von jedem im Raum zu sehen –
+ * **Patientendaten gehören hier nicht hinein**, so wenig wie in die Dias.
+ * Abgelaufene Termine verschwinden von selbst; niemand muss aufräumen. */
+const TERMIN_MAX = 80;          /* Zeichen je Bezeichnung */
+
+function newTerminId() {
+  return 'trm' + Math.random().toString(36).slice(2, 8);
+}
+
+function terminItem(props) {
+  return { id: newTerminId(), datum: '', zeit: '', text: '', ...props };
+}
+
+/* Was heute oder später ansteht, in zeitlicher Reihenfolge. */
+function anstehendeTermine(liste) {
+  const heute = isoToday();
+  return (liste || [])
+    .filter(t => t && t.datum >= heute && String(t.text || '').trim())
+    .sort((a, b) => (a.datum + a.zeit).localeCompare(b.datum + b.zeit));
+}
+
+/* „Mo 12.08." – der Wochentag hilft beim Überfliegen mehr als die Jahreszahl. */
+const WOCHENTAGE = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+function terminDatum(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  return WOCHENTAGE[new Date(y, m - 1, d).getDay()] + ' ' + shortDate(iso);
+}
 
 function newSlideId() {
   return 'dia' + Math.random().toString(36).slice(2, 8);
@@ -623,6 +656,7 @@ function alleReiter() {
   ];
 }
 const CLOCK = /^([01]?\d|2[0-3]):[0-5]\d$/;
+const ISO_DATUM = /^\d{4}-\d{2}-\d{2}$/;
 const clockMinutes = value => {
   const parts = String(value).split(':');
   return (parseInt(parts[0], 10) || 0) * 60 + (parseInt(parts[1], 10) || 0);
