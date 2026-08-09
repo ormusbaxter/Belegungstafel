@@ -324,7 +324,8 @@ Spalte der Tafel zugeordnet.
   - **„Ordner einlesen“** – ohne Dialog über `slides/slides.json` oder die Verzeichnisübersicht
     des Webservers; eine fehlerhafte `slides.json` wird gemeldet
   - **„+ Datei von Hand“** – einzelner Dateiname
-- **Termine** (Schaltfläche oben, in den Einstellungen ein- und ausblendbar): organisatorische
+- **Termine** (runde Schaltfläche unten rechts, über der Statistik; in den Einstellungen ein-
+  und ausblendbar): organisatorische
   Termine für den rechten Teil der Diaschau – Fortbildung, Gerätewartung, Teambesprechung.
   Das Fenster steht **ohne Zugangsstufe** offen: Termine sind Stationsalltag und ändern sich
   wöchentlich; sie liegen deshalb nicht in den Einstellungen. Jede Eingabe ist sofort
@@ -364,7 +365,7 @@ Spalte der Tafel zugeordnet.
   gespeicherten Wert wieder her. Die sichtbare Höhe der Tabelle rechnet den Zoom mit ein, und
   ab einem Kopfbereich von mehr als zwei Fünfteln der Bildschirmhöhe läuft dieser nicht mehr
   mit, damit die Tabelle nutzbar bleibt
-- **Bedienleiste** oben rechts: „Datenschutz“, „Diaschau“, „Termine“ und „Druck Visite“ mit Symbol sowie die
+- **Bedienleiste** oben rechts: „Datenschutz“, „Diaschau“ und „Druck Visite“ mit Symbol sowie die
   Umschaltung der Tag-/Nachtansicht. Export, Import und „Tafel leeren“ stehen in den Einstellungen
   unter „Daten“
 - **Kontextmenü der rechten Maustaste**: unter Einstellungen → Allgemein abschaltbar (ab Werk

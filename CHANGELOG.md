@@ -4,6 +4,15 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.24.1
+
+- **Die Schaltfläche „Termine" steht jetzt unten rechts** bei Statistik, Hilfe und Zahnrad –
+  nicht mehr in der Werkzeugleiste oben. Die obere Leiste führt damit weiter nur Ansicht und
+  Ausdruck, die runden Knöpfe unten die Fenster
+- die vier Knöpfe sind dabei zu einem **Stapel** geworden, statt einzeln festgesetzt zu sein:
+  Blendet man Termine oder Statistik aus, rückt er zusammen, statt eine Lücke stehen zu lassen.
+  Die verbliebenen Knöpfe behalten ihre bisherigen Plätze
+
 ## 2.24.0
 
 - **Die Termine haben ein eigenes Fenster.** Die Schaltfläche „Termine" in der Werkzeugleiste

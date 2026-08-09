@@ -110,7 +110,7 @@ await page.evaluate(() => { $('#saver').hidden = true; });
 
 /* ---- Pflege im eigenen Fenster, ohne Zugangsstufe ---- */
 await page.evaluate(() => { settings.termine.liste = []; saveSettings(); });
-pruefe('die Schaltfläche steht in der Werkzeugleiste', await page.isVisible('#btnTermine'));
+pruefe('die Schaltfläche steht unten rechts', await page.isVisible('#btnTermine'));
 
 await page.click('#btnTermine');
 await page.waitForSelector('#terminDlg[open]');

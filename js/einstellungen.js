@@ -509,7 +509,8 @@ function renderGeneralPane(pane) {
 
   ziel = abschnitt('termine', 'Termine');
   ziel.appendChild(el('p', 'panehint',
-    'Blendet die Schaltfläche „Termine“ in der Werkzeugleiste ein. Dahinter werden die ' +
+    'Blendet die runde Schaltfläche „Termine“ unten rechts ein – über der Statistik, der ' +
+    'Hilfe und dem Zahnrad. Dahinter werden die ' +
     'Termine gepflegt, die rechts neben der Diaschau erscheinen – Fortbildung, Wartung, ' +
     'Besprechung. Das Fenster steht ohne Zugangsstufe offen; ohne die Schaltfläche lassen ' +
     'sich keine Termine mehr eintragen, die vorhandenen laufen aber weiter.'));
@@ -630,7 +631,7 @@ function renderSaverPane(pane) {
 
   pane.appendChild(el('p', 'panehint',
     'Rechts neben der Schau stehen die anstehenden Termine. Sie werden nicht hier gepflegt, ' +
-    'sondern im eigenen Fenster „Termine“ in der Werkzeugleiste – sie gehören zum ' +
+    'sondern im eigenen Fenster „Termine“ unten rechts – sie gehören zum ' +
     'Stationsalltag und sollen ohne Zugangsstufe zu ändern sein.'));
 }
 
