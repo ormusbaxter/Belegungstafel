@@ -323,7 +323,9 @@
       <ul class="colorlist" id="helpColors"></ul>
       <ul>
         <li>Am Bettplatz steht <b>ISO</b>, sobald ein Keim bestätigt ist, und <b>ISO?</b>,
-          solange nur Verdachtsfälle eingetragen sind.</li>
+          solange nur Verdachtsfälle eingetragen sind. Ist in den Einstellungen
+          <b>„Isolierte Bettplätze gelb hinterlegen“</b> gesetzt, wird die ganze Zeile gelb –
+          bei bestätigtem Keim wie bei Verdacht.</li>
         <li>Ein <b>rot hinterlegtes Datum</b> in der Spalte Abstriche bedeutet: Screening fällig
           oder überfällig.</li>
       </ul>
@@ -610,8 +612,8 @@
 <dialog id="statsDlg" class="dlg dlg-stats">
   <h2>Statistik je Schicht</h2>
   <p class="dlgsub">Je Schicht wird der zuletzt erfasste Stand geführt: belegte Betten,
-    maximale Bettenzahl, Isolationen (bestätigt oder Verdacht), Beatmungen und Dialysen.
-    Erfasst wird, solange die Tafel geöffnet ist.</p>
+    maximale Bettenzahl, Isolationen (bestätigt oder Verdacht), Beatmungen, Dialysen und die
+    Aufteilung auf die Fachabteilungen. Erfasst wird, solange die Tafel geöffnet ist.</p>
 
   <div class="statsbar">
     <label for="statsRange">Zeitraum</label>
@@ -628,6 +630,7 @@
 
   <p class="panehint statsinfo" id="statsInfo"></p>
   <div class="statssummary" id="statsSummary"></div>
+  <div class="statsfaecher" id="statsFaecher"></div>
   <div class="statstable" id="statsTable"></div>
 
   <menu class="dlgmenu">

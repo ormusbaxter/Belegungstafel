@@ -28,6 +28,7 @@ function grundEinstellungen() {
     privacy: { on: true, seconds: 120 },
     kontextmenue: DEFAULT_KONTEXTMENUE,
     zeilenfarben: DEFAULT_ZEILENFARBEN,
+    isoZeile: DEFAULT_ISO_ZEILE,
     rechte: { einfach: [...DEFAULT_RECHTE.einfach], gesperrt: [] },
     screensaver: copy(DEFAULT_SAVER),
     zoom: 100,
@@ -151,6 +152,7 @@ function mergeSettings(target, source) {
   }
   if (typeof source.kontextmenue === 'boolean') target.kontextmenue = source.kontextmenue;
   if (typeof source.zeilenfarben === 'boolean') target.zeilenfarben = source.zeilenfarben;
+  if (typeof source.isoZeile === 'boolean') target.isoZeile = source.isoZeile;
   if (source.rechte && Array.isArray(source.rechte.einfach)) {
     /* Nur bekannte Reiter übernehmen, und niemals einen gesperrten. Eine
        leere Liste würde der einfachen Stufe ein Fenster ohne Inhalt zeigen –
@@ -313,6 +315,7 @@ function applySettings() {
   BEDS = settings.beds;
   applyNamen();
   document.body.classList.toggle('ohne-zeilenfarben', !settings.zeilenfarben);
+  document.body.classList.toggle('iso-zeile', settings.isoZeile);
   for (const col of COLUMNS) {
     const custom = settings.headers[col.key];
     col.label = custom !== undefined && custom.trim() ? custom : DEFAULT_HEADS[col.key].label;

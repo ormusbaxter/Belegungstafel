@@ -30,8 +30,43 @@ function statistikKennzahlen() {
     beatmung: belegte.filter(d => Array.isArray(d.beatmung) && d.beatmung.length > 0).length,
     /* Nur die Spalte Dialyse; die externe Dialyse steht als Intervention
        „ext. Dial.“ in einer anderen Spalte und zählt hier nicht mit. */
-    dialyse: belegte.filter(d => String(d.dialyse || '').trim() !== '').length
+    dialyse: belegte.filter(d => String(d.dialyse || '').trim() !== '').length,
+    faecher: faecherZaehlen(belegte)
   };
+}
+
+/* Belegte Bettplätze je Fachdisziplin.
+ *
+ * Gezählt wird der eingetragene Wert, nicht die Auswahlliste: Wird eine
+ * Abteilung später aus den Einstellungen genommen, bleibt sie in den bereits
+ * erfassten Ständen stehen und verschwindet nicht rückwirkend aus der
+ * Auswertung. Ein belegter Bettplatz ohne Angabe zählt unter '' und wird als
+ * „ohne Angabe“ ausgewiesen – das macht Lücken in der Pflege sichtbar,
+ * statt sie zu verstecken. */
+function faecherZaehlen(belegte) {
+  const zaehler = {};
+  for (const daten of belegte) {
+    const fach = String(daten.disziplin || '').trim();
+    zaehler[fach] = (zaehler[fach] || 0) + 1;
+  }
+  return zaehler;
+}
+
+const FACH_MAX = 40;          /* Abteilungen je Eintrag */
+const FACH_NAME_MAX = 40;     /* Zeichen je Bezeichnung */
+const OHNE_FACH = 'ohne Angabe';
+
+/* Wie die übrigen Kennzahlen wird auch diese Angabe beim Einlesen geprüft –
+   sie kommt gegebenenfalls aus einer fremden Sicherungsdatei. */
+function faecherPruefen(wert) {
+  if (!wert || typeof wert !== 'object' || Array.isArray(wert)) return null;
+  const rein = {};
+  for (const [name, anzahl] of Object.entries(wert)) {
+    if (Object.keys(rein).length >= FACH_MAX) break;
+    if (typeof anzahl !== 'number' || !Number.isFinite(anzahl) || anzahl < 0) continue;
+    rein[String(name).slice(0, FACH_NAME_MAX)] = Math.round(anzahl);
+  }
+  return rein;
 }
 
 /* ------------------------------------------------------------------ *
@@ -89,6 +124,11 @@ function statistikPruefen(liste) {
         zeit: text(e.zeit)
       };
       for (const [feld] of STATS_FELDER) eintrag[feld] = zahl(e[feld]);
+      /* Vor Fassung 2.27 nicht erfasst – dann bleibt das Feld leer und der
+         Eintrag fällt aus der Auswertung je Fachabteilung heraus, statt sie
+         mit Nullen zu verfälschen. */
+      const faecher = faecherPruefen(e.faecher);
+      if (faecher) eintrag.faecher = faecher;
       return eintrag;
     });
 }
@@ -213,6 +253,41 @@ function zahl(wert, stellen) {
   return stellen ? wert.toFixed(stellen).replace('.', ',') : String(wert);
 }
 
+/* ---- Fachabteilungen ---- */
+
+/* Auswertung je Fachabteilung über die Einträge, die sie überhaupt führen.
+ *
+ * Der Mittelwert wird über diese Einträge gebildet, nicht über alle: Eine
+ * Abteilung, die in einer Schicht kein Bett belegt, geht dort mit 0 ein –
+ * das ist gewollt. Ein Eintrag ohne die Angabe (vor Fassung 2.27) bleibt
+ * dagegen ganz außen vor, sonst sänke jeder Mittelwert grundlos. */
+function faecherAuswerten(daten) {
+  const mitAngabe = daten.filter(e => e.faecher);
+  if (!mitAngabe.length) return { schichten: 0, zeilen: [] };
+
+  const namen = new Set();
+  for (const eintrag of mitAngabe) for (const name of Object.keys(eintrag.faecher)) namen.add(name);
+
+  const belegtMittel = mittel(mitAngabe, STATS_FELDER[0]) || 0;
+  const zeilen = [...namen].map(name => {
+    const werte = mitAngabe.map(e => e.faecher[name] || 0);
+    const summe = werte.reduce((a, b) => a + b, 0);
+    return {
+      name: name || OHNE_FACH,
+      ohneAngabe: !name,
+      mittel: summe / werte.length,
+      hoechst: Math.max(...werte),
+      anteil: belegtMittel > 0 ? summe / werte.length / belegtMittel * 100 : null
+    };
+  });
+
+  /* Die stärkste Abteilung zuerst; „ohne Angabe“ steht immer am Ende, es ist
+     keine Abteilung. */
+  zeilen.sort((a, b) => (a.ohneAngabe - b.ohneAngabe) || (b.mittel - a.mittel) ||
+    a.name.localeCompare(b.name, 'de'));
+  return { schichten: mitAngabe.length, zeilen };
+}
+
 /* ------------------------------------------------------------------ *
  * Fenster
  * ------------------------------------------------------------------ */
@@ -225,7 +300,48 @@ function renderStatistik() {
   const daten = statistikZeitraumDaten();
   renderStatistikKopf(daten);
   renderStatistikSummen(daten);
+  renderStatistikFaecher(daten);
   renderStatistikTabelle(daten);
+}
+
+/* Belegung je Fachabteilung. Eine eigene Tabelle und keine weiteren Spalten
+   in der großen: Ein Dutzend Abteilungen neben den Kennzahlen wäre nicht
+   mehr zu lesen. */
+function renderStatistikFaecher(daten) {
+  const box = $('#statsFaecher');
+  box.replaceChildren();
+  if (!daten.length) return;
+
+  const { schichten, zeilen } = faecherAuswerten(daten);
+  box.appendChild(el('h3', null, 'Belegung je Fachabteilung'));
+  if (!zeilen.length) {
+    box.appendChild(el('p', 'panehint',
+      'Für diesen Zeitraum liegt keine Aufteilung vor. Erfasst wird sie seit Fassung 2.27; ' +
+      'früher aufgenommene Schichten führen sie nicht.'));
+    return;
+  }
+  box.appendChild(el('p', 'panehint',
+    'Mittelwert über ' + schichten + (schichten === 1 ? ' Schicht' : ' Schichten') +
+    ' mit dieser Angabe. Der Anteil bezieht sich auf die mittlere Belegung im selben ' +
+    'Zeitraum; er kann sich durch Rundung auf mehr oder weniger als 100 % summieren.'));
+
+  const tabelle = el('table', 'statstab');
+  const kopf = el('tr');
+  kopf.appendChild(el('th', null, 'Fachabteilung'));
+  for (const text of ['Mittel', 'Höchstwert', 'Anteil %']) kopf.appendChild(el('th', 'num', text));
+  tabelle.appendChild(el('thead')).appendChild(kopf);
+
+  const body = el('tbody');
+  for (const zeile of zeilen) {
+    const tr = el('tr', zeile.ohneAngabe ? 'ohnefach' : null);
+    tr.appendChild(el('td', null, zeile.name));
+    tr.appendChild(el('td', 'num', zahl(zeile.mittel, 1)));
+    tr.appendChild(el('td', 'num', zahl(zeile.hoechst, 0)));
+    tr.appendChild(el('td', 'num', zahl(zeile.anteil, 1)));
+    body.appendChild(tr);
+  }
+  tabelle.appendChild(body);
+  box.appendChild(tabelle);
 }
 
 function renderStatistikKopf(daten) {
@@ -310,8 +426,19 @@ function renderStatistikTabelle(daten) {
 function statistikCsv() {
   /* Auch hier über csvFeld: Die Schichtbezeichnungen sind frei wählbar. */
   const esc = csvFeld;
-  const kopf = ['Datum', 'Schicht', 'Beginn', ...STATS_SPALTEN.map(([, label]) => label), 'erfasst um'];
-  const zeilen = statistikZeitraumDaten().map(e => [
+  const daten = statistikZeitraumDaten();
+
+  /* In der Tabellenkalkulation ist Platz: Dort bekommt jede Fachabteilung
+     eine eigene Spalte, statt wie im Fenster nur den Mittelwert. Ein Feld
+     bleibt leer, wenn die Schicht die Aufteilung nicht führt – das ist etwas
+     anderes als eine Null. */
+  const faecher = [...new Set(daten.filter(e => e.faecher)
+    .flatMap(e => Object.keys(e.faecher)))]
+    .sort((a, b) => (!a - !b) || a.localeCompare(b, 'de'));
+
+  const kopf = ['Datum', 'Schicht', 'Beginn', ...STATS_SPALTEN.map(([, label]) => label),
+    ...faecher.map(name => name || OHNE_FACH), 'erfasst um'];
+  const zeilen = daten.map(e => [
     e.datum,
     e.name || schichtName(e.schicht),
     e.start || '',
@@ -322,6 +449,7 @@ function statistikCsv() {
          liest und nicht als Text. */
       return spalte[3] ? wert.toFixed(1).replace('.', ',') : wert;
     }),
+    ...faecher.map(name => (e.faecher ? e.faecher[name] || 0 : '')),
     timeStr(new Date(e.zeit))
   ].map(esc).join(';'));
   download('belegungstafel-statistik-' + stamp() + '.csv',

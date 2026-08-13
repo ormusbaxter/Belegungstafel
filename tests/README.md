@@ -86,6 +86,7 @@ Zwei Dinge sind dabei zu beachten:
 | `18-termine.mjs` | Termine: Wiederholungen, eigenes Fenster, rechter Teil der Diaschau, Umzug alter Stände |
 | `19-diaordner.mjs` | Ordner für die Diaschau: Übernahme mit Inhalt aus einem beliebigen Ordner, Auffrischen, Entfernen |
 | `20-doppelseite.mjs` | Zweiseitige Hochkant-PDF nebeneinander: Erkennung, Bühnenbreite, Nachtragen |
+| `21-faecher-iso.mjs` | Belegung je Fachabteilung (Erfassung, Mittelwerte, CSV), Gelbfärbung isolierter Zeilen |
 
 `lib.mjs` enthält die gemeinsamen Hilfen: Browserstart, Prüfungen, das Setzen von
 Einstellungen ohne Umweg über den Dialog und einen kleinen Webserver für die Prüfungen,
@@ -93,7 +94,7 @@ die einen solchen voraussetzen.
 
 ## Eine Prüfung ergänzen
 
-Neue Datei nach dem Muster `21-name.mjs` anlegen:
+Neue Datei nach dem Muster `22-name.mjs` anlegen:
 
 ```js
 import { browserStarten, neueSeite, testName, gleich, keineFehler, bilanz } from './lib.mjs';

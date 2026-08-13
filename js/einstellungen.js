@@ -406,6 +406,15 @@ function renderGeneralPane(pane) {
     /* Sofort im Hintergrund sichtbar, wie beim Zoom. */
     document.body.classList.toggle('ohne-zeilenfarben', !on);
   }));
+  ziel.appendChild(checkRow('Isolierte Bettplätze gelb hinterlegen', draft.isoZeile, on => {
+    draft.isoZeile = on;
+    document.body.classList.toggle('iso-zeile', on);
+  }));
+  ziel.appendChild(el('p', 'panehint',
+    'Jeder Bettplatz mit einem Eintrag in der Spalte Isolation wird gelb hinterlegt – ' +
+    'bestätigter Keim wie Verdacht, denn isoliert wird in beiden Fällen. Diese Färbung geht ' +
+    'den Statusfarben vor und gilt auch dann, wenn die Zeilen sonst einfarbig bleiben. Auf ' +
+    'dem Ausdruck erscheint sie nicht; dort steht die Isolation in ihrer Spalte.'))
 
   ziel = abschnitt('schoner', 'Bildschirmschoner');
   ziel.appendChild(el('p', 'panehint',

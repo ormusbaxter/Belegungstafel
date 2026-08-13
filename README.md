@@ -130,6 +130,11 @@ Spalte der Tafel zugeordnet.
   unter Einstellungen → Allgemein **abschalten**; der Farbbalken am Zeilenanfang bleibt dabei
   stehen, der Status ist also weiter erkennbar
 - **Kräftigere Trennlinie zwischen den Zimmern**: je Bettplatz an- und abwählbar
+- **Isolierte Bettplätze gelb hinterlegen** (Einstellungen → Allgemein, ab Werk aus): Jeder
+  Bettplatz mit einem Eintrag in der Spalte Isolation bekommt eine gelbe Zeile – bestätigter
+  Keim wie Verdacht, denn isoliert wird in beiden Fällen. Die Färbung geht den Statusfarben
+  vor und gilt auch dann, wenn die Zeilen sonst einfarbig bleiben. Auf dem Ausdruck erscheint
+  sie nicht (`* { background: none }` im Druck)
   (Einstellungen → Bettplätze, Kästchen hinter der Bezeichnung). Ab Werk unter 0 b, 1 b, 2, 3,
   4 b, 5, 6 b und 7 – also überall dort, wo ein Zimmer endet, und nicht zwischen den beiden
   Plätzen eines Zimmers. Die Linie gilt auch auf dem Visitenausdruck
@@ -406,6 +411,15 @@ Spalte der Tafel zugeordnet.
 - **Bettplatz räumen** über das `×` in der Bettspalte
 - **Export/Import** als JSON (Belegung, Angaben zur Schicht und Einstellungen) sowie
   CSV-Export für Excel
+- **Belegung je Fachabteilung**: Jede Momentaufnahme hält fest, wie sich die belegten
+  Bettplätze auf die Fachdisziplinen verteilen. Gezählt wird der **eingetragene Wert**, nicht
+  die Auswahlliste – eine später entfernte Abteilung bleibt in den erfassten Ständen stehen.
+  Ein belegter Bettplatz ohne Angabe zählt als **„ohne Angabe"** und wird ausgewiesen, statt
+  unterschlagen zu werden. Im Statistikfenster steht dafür eine **eigene Tabelle** (Mittel,
+  Höchstwert, Anteil an der mittleren Belegung), damit die große Tabelle schmal bleibt; in der
+  **CSV** bekommt jede Abteilung eine eigene Spalte. Ein Stand, der vor Fassung 2.27 erfasst
+  wurde, führt die Aufteilung nicht und bleibt aus dieser Auswertung heraus – sonst sänke
+  jeder Mittelwert grundlos.
 - **Statistik je Schicht** über die runde Schaltfläche unten rechts (über der Hilfe; ihre
   Sichtbarkeit ist einstellbar): je Schicht **belegte Betten, maximale Bettenzahl,
   Auslastung (%), Isolationen (bestätigt oder Verdacht), Beatmungen und Dialysen**, dazu
@@ -468,7 +482,7 @@ Spalte der Tafel zugeordnet.
 
 ## Prüfungen
 
-Im Ordner `tests/` liegen **20 Testdateien**, die die Tafel in einem echten Browser bedienen
+Im Ordner `tests/` liegen **21 Testdateien**, die die Tafel in einem echten Browser bedienen
 (Chromium über Playwright) und das Ergebnis prüfen – Zählung, Pfeile, Ausdruck, Zoom,
 Bildschirmschoner, Tag-/Nachtansicht, Verlauf, Sicherung, Einstellungen, Pflichtangaben,
 Physio- und Visitendruck, Stationsvorgabe, Statistik, Sichtschutz, Sicherheit der Ausgaben,

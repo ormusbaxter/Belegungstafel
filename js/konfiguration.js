@@ -24,7 +24,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.26.2';
+const VERSION = '2.27.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -687,6 +687,12 @@ const DEFAULT_KONTEXTMENUE = false;   /* false = unterdrücken */
    Stationen, denen die Tafel zu bunt ist; der Farbbalken am Zeilenanfang
    bleibt dabei stehen, der Status ist also weiter zu erkennen. */
 const DEFAULT_ZEILENFARBEN = true;
+
+/* Isolierte Bettplätze zusätzlich gelb hinterlegen. Ab Werk aus: Die
+   Isolation steht ohnehin in ihrer Spalte und als Kennzeichen an der
+   Bettbezeichnung; die Fläche einzufärben ist eine Entscheidung der Station.
+   Ist sie getroffen, geht sie den Statusfarben vor. */
+const DEFAULT_ISO_ZEILE = false;
 
 /* Reiter, die mit der einfachen Zugangsstufe offenstehen. Die volle Stufe
    legt das in den Einstellungen unter „Berechtigungen“ fest; hier steht, was

@@ -27,6 +27,7 @@
   --st-gesperrt: #e6e9ee;
   --st-gesperrt-bar: #5a6672;
   --iso: #c62828;
+  --iso-zeile: #fff3c4;
   --limit: #6a1b9a;
   /* Hervorhebung fälliger Screenings im Kopf. Die Farben des Meldestatus
      stehen seit 2.16.0 in den Einstellungen, nicht mehr hier. */
@@ -70,6 +71,7 @@ html[data-theme="dark"] {
   --st-gesperrt: #141a20;
   --st-gesperrt-bar: #7b8794;
   --iso: #ff6b6b;
+  --iso-zeile: #332c12;
   --limit: #c792ea;
   --warnung: #c0392b;
   --pfeil-auf: #5cb860;
@@ -447,6 +449,14 @@ tr.st-gesperrt  { background: var(--st-gesperrt); }
 /* Ohne Zeilenfarben bleibt nur der Balken am Zeilenanfang: Der Status ist
    weiter zu erkennen, die Fläche bleibt ruhig. */
 body.ohne-zeilenfarben tbody tr { background: var(--panel); }
+
+/* Isolierte Bettplätze gelb hinterlegt – abschaltbar in den Einstellungen.
+   Die Regel steht hinter den Statusfarben und gewinnt deshalb gegen sie: Wer
+   sie einschaltet, will die Isolation zuerst sehen. Sie gilt auch ohne
+   Zeilenfarben, denn sie ist eine eigene Entscheidung. Ein bloßer Verdacht
+   zählt mit – auch dann wird isoliert. */
+body.iso-zeile tbody tr.has-iso,
+body.iso-zeile.ohne-zeilenfarben tbody tr.has-iso { background: var(--iso-zeile); }
 
 /* Kräftigere Trennlinie zwischen den Zimmern */
 tbody tr.trenner td {
@@ -1191,6 +1201,10 @@ body.privacy .privacyhint { display: block; }
 html[data-theme="dark"] .pwerror { color: var(--iso); }
 
 /* Fenster der Statistik */
+.statsfaecher { margin: 14px 0 4px; }
+.statsfaecher h3 { margin: 0 0 2px; font-size: 14px; }
+/* „ohne Angabe“ ist keine Abteilung – gedämpft und am Ende der Liste. */
+.statstab tr.ohnefach td { color: var(--ink-soft); font-style: italic; }
 /* Übergabezettel: je belegtem Bettplatz ein Block mit den drei Angaben,
    die nicht auf der Tafel stehen. */
 .dlg.dlg-handover { width: min(980px, 96vw); }

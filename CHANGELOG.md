@@ -4,6 +4,26 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.27.0
+
+- **Die Statistik wertet die Fachabteilungen mit aus.** Jede Momentaufnahme hält fest, wie sich
+  die belegten Bettplätze auf die Fachdisziplinen verteilen; im Fenster steht dafür eine eigene
+  Tabelle mit Mittelwert, Höchstwert und Anteil an der mittleren Belegung
+- gezählt wird der **eingetragene Wert**, nicht die Auswahlliste: Eine später aus den
+  Einstellungen entfernte Abteilung bleibt in den bereits erfassten Ständen stehen und
+  verschwindet nicht rückwirkend
+- ein belegter Bettplatz **ohne Angabe** wird als solcher ausgewiesen, statt unterschlagen zu
+  werden – das macht Lücken in der Pflege sichtbar
+- ein Stand, der **vor dieser Fassung** erfasst wurde, führt die Aufteilung nicht und bleibt
+  aus dieser Auswertung heraus; sonst sänke jeder Mittelwert grundlos
+- in der **CSV** bekommt jede Abteilung eine eigene Spalte; im Fenster bleibt es bei der
+  eigenen Tabelle, sonst wäre die große nicht mehr zu lesen
+- **Neue Option: isolierte Bettplätze gelb hinterlegen** (Einstellungen → Allgemein, ab Werk
+  aus). Bestätigter Keim wie Verdacht – isoliert wird in beiden Fällen. Die Färbung geht den
+  Statusfarben vor und gilt auch dann, wenn die Zeilen sonst einfarbig bleiben; auf dem
+  Ausdruck erscheint sie nicht
+- neue Prüfdatei `tests/21-faecher-iso.mjs` (27 Prüfungen)
+
 ## 2.26.2
 
 - **behoben:** Die Schaltfläche „Übernommene Dateien entfernen“ war unleserlich – sie trug die
