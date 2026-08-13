@@ -4,6 +4,24 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.28.0
+
+- **Monatlich gestaffelte Auswertung.** Eine neue Tabelle im Statistikfenster zeigt je Monat
+  die Schichtzahl, die Mittelwerte aller Kennzahlen und die **höchste Belegung** („Spitze"),
+  der jüngste Monat zuerst
+- gemittelt wird über die erfassten **Schichten** des Monats, nicht über die Tage: Ein Tag, an
+  dem die Tafel nur eine Schicht lang lief, zieht das Ergebnis dann nicht nach unten. Woran ein
+  Monat hängt, steht in der Spalte „Schichten"
+- die Tabelle erscheint erst, wenn der Zeitraum über einen Monat hinausreicht; sonst stünde
+  dort dieselbe Zeile wie unter „alle Schichten". An ihrer Stelle steht dann der Hinweis, einen
+  größeren Zeitraum zu wählen
+- neue Schaltfläche **„CSV je Monat"**: Mittelwerte je Monat, höchste Belegung und je
+  Fachabteilung eine Spalte – für einen Bericht nach oben. Im Fenster bleiben die Abteilungen
+  aus der Monatstabelle heraus, in der Tabellenkalkulation ist Platz dafür
+- die bisherige Schaltfläche heißt jetzt **„CSV je Schicht"** statt „CSV für Excel", damit der
+  Unterschied ohne Nachdenken zu sehen ist
+- neue Prüfdatei `tests/22-monate.mjs` (25 Prüfungen)
+
 ## 2.27.0
 
 - **Die Statistik wertet die Fachabteilungen mit aus.** Jede Momentaufnahme hält fest, wie sich

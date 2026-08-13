@@ -1201,8 +1201,10 @@ body.privacy .privacyhint { display: block; }
 html[data-theme="dark"] .pwerror { color: var(--iso); }
 
 /* Fenster der Statistik */
-.statsfaecher { margin: 14px 0 4px; }
-.statsfaecher h3 { margin: 0 0 2px; font-size: 14px; }
+.statsfaecher,
+.statsmonate { margin: 14px 0 4px; }
+.statsfaecher h3,
+.statsmonate h3 { margin: 0 0 2px; font-size: 14px; }
 /* „ohne Angabe“ ist keine Abteilung – gedämpft und am Ende der Liste. */
 .statstab tr.ohnefach td { color: var(--ink-soft); font-style: italic; }
 /* Übergabezettel: je belegtem Bettplatz ein Block mit den drei Angaben,

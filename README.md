@@ -411,6 +411,17 @@ Spalte der Tafel zugeordnet.
 - **Bettplatz räumen** über das `×` in der Bettspalte
 - **Export/Import** als JSON (Belegung, Angaben zur Schicht und Einstellungen) sowie
   CSV-Export für Excel
+- **Monatsübersicht**: Über der Aufteilung nach Fachabteilungen steht eine Tabelle mit einer
+  Zeile je Monat – Schichtzahl, Mittelwerte aller Kennzahlen und die **höchste Belegung**
+  („Spitze"), der jüngste Monat zuerst. Gemittelt wird über die erfassten **Schichten** des
+  Monats, nicht über die Tage: Ein Tag, an dem die Tafel nur eine Schicht lang lief, zieht das
+  Ergebnis dann nicht nach unten; woran ein Monat hängt, zeigt die Spalte „Schichten".
+  Die Tabelle erscheint erst, wenn der gewählte Zeitraum über einen Monat hinausreicht – sonst
+  stünde dort dieselbe Zeile wie unter „alle Schichten".
+- **Zwei CSV-Ausgaben**: „CSV je Schicht" (jede Momentaufnahme, eine Spalte je Fachabteilung)
+  und **„CSV je Monat"** (Mittelwerte je Monat, höchste Belegung, dazu je Fachabteilung eine
+  Spalte). Die monatliche Ausgabe ist für einen Bericht nach oben gedacht; im Fenster bleiben
+  die Fachabteilungen aus der Monatstabelle heraus, in der Tabellenkalkulation stehen sie mit.
 - **Belegung je Fachabteilung**: Jede Momentaufnahme hält fest, wie sich die belegten
   Bettplätze auf die Fachdisziplinen verteilen. Gezählt wird der **eingetragene Wert**, nicht
   die Auswahlliste – eine später entfernte Abteilung bleibt in den erfassten Ständen stehen.
@@ -482,7 +493,7 @@ Spalte der Tafel zugeordnet.
 
 ## Prüfungen
 
-Im Ordner `tests/` liegen **21 Testdateien**, die die Tafel in einem echten Browser bedienen
+Im Ordner `tests/` liegen **22 Testdateien**, die die Tafel in einem echten Browser bedienen
 (Chromium über Playwright) und das Ergebnis prüfen – Zählung, Pfeile, Ausdruck, Zoom,
 Bildschirmschoner, Tag-/Nachtansicht, Verlauf, Sicherung, Einstellungen, Pflichtangaben,
 Physio- und Visitendruck, Stationsvorgabe, Statistik, Sichtschutz, Sicherheit der Ausgaben,

@@ -253,6 +253,43 @@ function zahl(wert, stellen) {
   return stellen ? wert.toFixed(stellen).replace('.', ',') : String(wert);
 }
 
+/* ---- Monatliche Staffelung ---- */
+
+const MONATSNAMEN = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+                     'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+
+/* „2026-08“ → „August 2026“ */
+function monatName(monat) {
+  const [jahr, nr] = monat.split('-');
+  return MONATSNAMEN[parseInt(nr, 10) - 1] + ' ' + jahr;
+}
+
+/* Die Einträge des Zeitraums nach Monat gebündelt, der jüngste zuerst –
+   wie in der Tabelle der einzelnen Schichten.
+   Gemittelt wird über die Schichten des Monats, nicht über die Tage: Ein Tag,
+   an dem die Tafel nur eine Schicht lang lief, zieht das Ergebnis dann nicht
+   nach unten. Ein Monat mit weniger Schichten ist an der Spalte „Schichten“
+   erkennbar. */
+function monateAuswerten(daten) {
+  const gruppen = new Map();
+  for (const eintrag of daten) {
+    const monat = eintrag.datum.slice(0, 7);
+    if (!gruppen.has(monat)) gruppen.set(monat, []);
+    gruppen.get(monat).push(eintrag);
+  }
+  return [...gruppen.entries()]
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([monat, liste]) => ({
+      monat,
+      name: monatName(monat),
+      liste,
+      /* Die höchste Belegung des Monats – für einen Bericht oft die zweite
+         Zahl nach dem Mittelwert. */
+      spitze: liste.reduce((groesste, e) =>
+        Number.isFinite(e.belegt) ? Math.max(groesste, e.belegt) : groesste, 0)
+    }));
+}
+
 /* ---- Fachabteilungen ---- */
 
 /* Auswertung je Fachabteilung über die Einträge, die sie überhaupt führen.
@@ -300,8 +337,52 @@ function renderStatistik() {
   const daten = statistikZeitraumDaten();
   renderStatistikKopf(daten);
   renderStatistikSummen(daten);
+  renderStatistikMonate(daten);
   renderStatistikFaecher(daten);
   renderStatistikTabelle(daten);
+}
+
+/* Monatsübersicht. Sie erscheint erst, wenn der Zeitraum über einen Monat
+   hinausreicht – bei einem einzigen Monat stünde dort dieselbe Zeile wie
+   unter „alle Schichten“. */
+function renderStatistikMonate(daten) {
+  const box = $('#statsMonate');
+  box.replaceChildren();
+  if (!daten.length) return;
+
+  const monate = monateAuswerten(daten);
+  box.appendChild(el('h3', null, 'Monatsübersicht'));
+  if (monate.length < 2) {
+    box.appendChild(el('p', 'panehint',
+      'Der gewählte Zeitraum liegt in einem einzigen Monat. Für eine monatliche Staffelung ' +
+      'einen größeren Zeitraum wählen.'));
+    return;
+  }
+  box.appendChild(el('p', 'panehint',
+    'Mittelwerte je Monat, gerechnet über die erfassten Schichten des Monats. Die Spalte ' +
+    '„Schichten“ zeigt, auf wie vielen Ständen ein Monat beruht.'));
+
+  const tabelle = el('table', 'statstab');
+  const kopf = el('tr');
+  kopf.appendChild(el('th', null, 'Monat'));
+  kopf.appendChild(el('th', 'num', 'Schichten'));
+  for (const [, , kurz] of STATS_SPALTEN) kopf.appendChild(el('th', 'num', kurz));
+  kopf.appendChild(el('th', 'num', 'Spitze'));
+  tabelle.appendChild(el('thead')).appendChild(kopf);
+
+  const body = el('tbody');
+  for (const monat of monate) {
+    const tr = el('tr');
+    tr.appendChild(el('td', null, monat.name));
+    tr.appendChild(el('td', 'num', String(monat.liste.length)));
+    for (const spalte of STATS_SPALTEN) {
+      tr.appendChild(el('td', 'num', zahl(mittel(monat.liste, spalte), 1)));
+    }
+    tr.appendChild(el('td', 'num', zahl(monat.spitze, 0)));
+    body.appendChild(tr);
+  }
+  tabelle.appendChild(body);
+  box.appendChild(tabelle);
 }
 
 /* Belegung je Fachabteilung. Eine eigene Tabelle und keine weiteren Spalten
@@ -456,6 +537,44 @@ function statistikCsv() {
     '﻿' + [kopf.map(esc).join(';'), ...zeilen].join('\r\n'), 'text/csv');
 }
 
+/* Dieselben Zahlen, monatlich gestaffelt.
+ *
+ * Für einen Bericht nach oben ist nicht die einzelne Schicht gefragt, sondern
+ * der Monat. Anders als im Fenster stehen hier auch die Fachabteilungen mit –
+ * eine Tabellenkalkulation verträgt die Breite. */
+function statistikCsvMonate() {
+  const esc = csvFeld;
+  const daten = statistikZeitraumDaten();
+  const monate = monateAuswerten(daten);
+  const faecher = [...new Set(daten.filter(e => e.faecher)
+    .flatMap(e => Object.keys(e.faecher)))]
+    .sort((a, b) => (!a - !b) || a.localeCompare(b, 'de'));
+
+  const komma = wert => (wert === null || wert === undefined ? '' : wert.toFixed(1).replace('.', ','));
+  const kopf = ['Monat', 'Schichten',
+    ...STATS_SPALTEN.map(([, label]) => label + ' (Mittel)'),
+    'höchste Belegung',
+    ...faecher.map(name => (name || OHNE_FACH) + ' (Mittel)')];
+
+  const zeilen = monate.map(monat => {
+    /* Fachabteilungen nur über die Schichten mitteln, die die Aufteilung
+       führen – wie im Fenster auch. */
+    const mitFach = monat.liste.filter(e => e.faecher);
+    return [
+      monat.name,
+      monat.liste.length,
+      ...STATS_SPALTEN.map(spalte => komma(mittel(monat.liste, spalte))),
+      monat.spitze,
+      ...faecher.map(name => mitFach.length
+        ? komma(mitFach.reduce((summe, e) => summe + (e.faecher[name] || 0), 0) / mitFach.length)
+        : '')
+    ].map(esc).join(';');
+  });
+
+  download('belegungstafel-statistik-monate-' + stamp() + '.csv',
+    '﻿' + [kopf.map(esc).join(';'), ...zeilen].join('\r\n'), 'text/csv');
+}
+
 /* ------------------------------------------------------------------ *
  * Start
  * ------------------------------------------------------------------ */
@@ -475,6 +594,7 @@ function initStatistik() {
   $('#btnStats').addEventListener('click', oeffneStatistik);
   $('#statsClose').addEventListener('click', () => $('#statsDlg').close());
   $('#statsCsv').addEventListener('click', statistikCsv);
+  $('#statsCsvMonat').addEventListener('click', statistikCsvMonate);
   $('#statsNow').addEventListener('click', () => {
     const eintrag = statistikErfassen();
     renderStatistik();
