@@ -82,8 +82,10 @@ gleich('erste Zeile ist die stärkste Abteilung',
 pruefe('„ohne Angabe" ist als solche gekennzeichnet',
   await page.evaluate(() =>
     document.querySelector('#statsFaecher tbody tr:last-child').classList.contains('ohnefach')));
+/* Datum, Schicht, sieben Kennzahlen (mit Mittel, Tief und Spitze), erfasst –
+   die Abteilungen stehen in ihrer eigenen Tabelle und nicht hier. */
 gleich('die große Tabelle bleibt schmal',
-  await page.$$eval('#statsTable thead th', ths => ths.length), 9);
+  await page.$$eval('#statsTable thead th', ths => ths.length), 12);
 await page.click('#statsClose');
 await page.waitForTimeout(150);
 

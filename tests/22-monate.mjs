@@ -61,7 +61,7 @@ gleich('erste Zeile ist der jüngste Monat',
   await page.textContent('#statsMonate tbody tr:first-child td'), 'September 2026');
 gleich('Spalten: Monat, Schichten, Kennzahlen, Spitze',
   await page.$$eval('#statsMonate thead th', ths => ths.map(t => t.textContent).join('|')),
-  'Monat|Schichten|belegt|max.|Ausl. %|Isolation|Beatmung|Dialyse|Spitze');
+  'Monat|Schichten|belegt|Mittel|Tief|Spitze|max.|Ausl. %|Isolation|Beatmung|Dialyse|Monatsspitze');
 gleich('der Juli beruht auf einer Schicht',
   await page.textContent('#statsMonate tbody tr:last-child td:nth-child(2)'), '1');
 

@@ -124,6 +124,10 @@ function statistikPruefen(liste) {
         zeit: text(e.zeit)
       };
       for (const [feld] of STATS_FELDER) eintrag[feld] = zahl(e[feld]);
+      /* Mittel, Tief, Spitze und die Rechengrößen dahinter. Vor Fassung 2.30
+         nicht geführt – dann bleiben sie leer, und die Auswertung fällt für
+         diesen Eintrag auf den erfassten Stand zurück. */
+      for (const feld of STATS_VERDICHTET) eintrag[feld] = zahl(e[feld]);
       /* Vor Fassung 2.27 nicht erfasst – dann bleibt das Feld leer und der
          Eintrag fällt aus der Auswertung je Fachabteilung heraus, statt sie
          mit Nullen zu verfälschen. */
@@ -161,22 +165,66 @@ function statistikAufraeumen(daten) {
   return rest.length > STATS_MAX ? rest.slice(rest.length - STATS_MAX) : rest;
 }
 
+/* Mittel, Tief und Spitze der Schicht fortschreiben.
+ *
+ * Aufgehoben wird weiterhin nur ein Eintrag je Schicht – gesammelt würden
+ * 96 Aufnahmen am Tag den Speicher sprengen. Stattdessen rechnet jede
+ * Aufnahme mit: Der bis dahin geltende Stand geht mit der Zeit ein, die er
+ * gegolten hat, nicht mit „einer Stimme". Sonst zöge häufiges Drücken von
+ * „Jetzt erfassen" den Mittelwert zu sich.
+ *
+ * Die Wartezeit wird auf den eingestellten Abstand gedeckelt: War die Tafel
+ * drei Stunden geschlossen, ist nicht bekannt, was in dieser Zeit galt. Der
+ * letzte gesehene Stand zählt dann nur bis zur nächsten planmäßigen Aufnahme.
+ *
+ * Der jeweils jüngste Stand wiegt noch nichts – er bekommt sein Gewicht erst
+ * bei der folgenden Aufnahme. Bei nur einer Aufnahme ist das Mittel deshalb
+ * dieser eine Wert.
+ */
+function statistikVerdichten(vor, belegt, jetzt) {
+  const zahl = wert => (typeof wert === 'number' && Number.isFinite(wert) ? wert : null);
+  if (!Number.isFinite(belegt)) return { belegtMittel: null, belegtTief: null, belegtSpitze: null,
+    dauer: null, aufnahmen: null };
+  /* Erste Aufnahme der Schicht, oder ein Eintrag aus einer Fassung vor 2.30,
+     der die Felder nicht führt: Dann beginnt die Rechnung mit diesem Stand. */
+  const vorMittel = vor ? zahl(vor.belegtMittel) : null;
+  const vorBelegt = vor ? zahl(vor.belegt) : null;
+  if (vorMittel === null || vorBelegt === null) {
+    return { belegtMittel: belegt, belegtTief: belegt, belegtSpitze: belegt,
+      dauer: 0, aufnahmen: 1 };
+  }
+  const vorDauer = Math.max(0, zahl(vor.dauer) || 0);
+  const abstand = Math.max(1, parseInt(settings.statistik.intervall, 10) || 15);
+  const gewicht = Math.max(0, Math.min(abstand,
+    (jetzt - new Date(vor.zeit)) / 60000)) || 0;
+  const dauer = vorDauer + gewicht;
+  return {
+    belegtMittel: dauer > 0 ? (vorMittel * vorDauer + vorBelegt * gewicht) / dauer : belegt,
+    belegtTief: Math.min(zahl(vor.belegtTief) ?? vorBelegt, belegt),
+    belegtSpitze: Math.max(zahl(vor.belegtSpitze) ?? vorBelegt, belegt),
+    dauer,
+    aufnahmen: (zahl(vor.aufnahmen) || 1) + 1
+  };
+}
+
 /* Momentaufnahme der laufenden Schicht ablegen. Ein vorhandener Eintrag
-   derselben Schicht wird überschrieben. */
+   derselben Schicht wird überschrieben; Mittel, Tief und Spitze der Schicht
+   werden dabei fortgeschrieben. */
 function statistikErfassen(zeit) {
   const jetzt = zeit || new Date();
   const schicht = schichtAm(jetzt);
   const werte = statistikKennzahlen();
   const daten = statistikAufraeumen(statistikLaden());
+  const stelle = daten.findIndex(e => e.datum === schicht.datum && e.schicht === schicht.key);
   const eintrag = {
     datum: schicht.datum,
     schicht: schicht.key,
     name: schicht.name,
     start: schicht.start,
     zeit: jetzt.toISOString(),
-    ...werte
+    ...werte,
+    ...statistikVerdichten(stelle >= 0 ? daten[stelle] : null, werte.belegt, jetzt)
   };
-  const stelle = daten.findIndex(e => e.datum === eintrag.datum && e.schicht === eintrag.schicht);
   if (stelle >= 0) daten[stelle] = eintrag;
   else daten.push(eintrag);
   daten.sort((a, b) => (a.datum + a.start).localeCompare(b.datum + b.start));
@@ -197,6 +245,11 @@ const STATS_FELDER = [
   ['dialyse', 'Dialysen', 'Dialyse']
 ];
 
+/* Was je Schicht mitgerechnet wird (siehe statistikVerdichten). „dauer" ist
+   die Zeit in Minuten, über die gemittelt wurde, „aufnahmen" ihre Anzahl –
+   beide tragen die Rechnung und stehen nicht in der Tabelle. */
+const STATS_VERDICHTET = ['belegtMittel', 'belegtTief', 'belegtSpitze', 'dauer', 'aufnahmen'];
+
 /* Auslastung der Schicht in Prozent.
  *
  * Nenner ist die maximale Bettenzahl ohne das Notbett – so, wie sie im Kopf
@@ -216,10 +269,22 @@ function auslastung(eintrag) {
    berechnete Auslastung hinter der Bettenzahl. Sie wird nicht mitgespeichert –
    dadurch steht sie auch für früher erfasste Schichten zur Verfügung. */
 const STATS_SPALTEN = [
-  ...STATS_FELDER.slice(0, 2),
+  STATS_FELDER[0],
+  /* Fünftes Feld: Nachkommastellen. Das Mittel ist die einzige gespeicherte
+     Kennzahl, die keine ganze Zahl ist. */
+  ['belegtMittel', 'belegte Betten (Mittel)', 'Mittel', null, 1],
+  ['belegtTief', 'niedrigste Belegung', 'Tief'],
+  ['belegtSpitze', 'höchste Belegung', 'Spitze'],
+  STATS_FELDER[1],
   ['auslastung', 'Auslastung (%)', 'Ausl. %', auslastung],
   ...STATS_FELDER.slice(2)
 ];
+
+/* Nachkommastellen einer Spalte: gerechnete Werte und das Mittel mit einer,
+   gezählte Kennzahlen ohne. */
+function spaltenStellen(spalte) {
+  return spalte[4] !== undefined ? spalte[4] : (spalte[3] ? 1 : 0);
+}
 
 /* Wert einer Spalte für einen Eintrag – gespeichert oder gerechnet. */
 function spaltenWert(spalte, eintrag) {
@@ -305,8 +370,13 @@ function monateAuswerten(daten) {
       liste,
       /* Die höchste Belegung des Monats – für einen Bericht oft die zweite
          Zahl nach dem Mittelwert. */
-      spitze: liste.reduce((groesste, e) =>
-        Number.isFinite(e.belegt) ? Math.max(groesste, e.belegt) : groesste, 0)
+      /* Der höchste Stand des Monats. Seit Fassung 2.30 kennt jede Schicht
+         auch ihren Gipfel zwischen zwei Aufnahmen; wo er fehlt, bleibt es
+         beim erfassten Stand. */
+      spitze: liste.reduce((groesste, e) => {
+        const werte = [e.belegtSpitze, e.belegt].filter(Number.isFinite);
+        return werte.length ? Math.max(groesste, ...werte) : groesste;
+      }, 0)
     }));
 }
 
@@ -400,7 +470,10 @@ function renderStatistikMonate(daten) {
   kopf.appendChild(el('th', null, 'Monat'));
   kopf.appendChild(el('th', 'num', 'Schichten'));
   for (const [, , kurz] of STATS_SPALTEN) kopf.appendChild(el('th', 'num', kurz));
-  kopf.appendChild(el('th', 'num', 'Spitze'));
+  /* „Monatsspitze", nicht „Spitze": Die Spalte davor führt seit Fassung 2.30
+     die Spitze je Schicht, im Monat gemittelt. Hier steht der höchste Stand
+     des ganzen Monats. */
+  kopf.appendChild(el('th', 'num', 'Monatsspitze'));
   tabelle.appendChild(el('thead')).appendChild(kopf);
 
   const body = el('tbody');
@@ -525,9 +598,7 @@ function renderStatistikTabelle(daten) {
     tr.appendChild(el('td', null, fullDate(eintrag.datum)));
     tr.appendChild(el('td', null, eintrag.name || schichtName(eintrag.schicht)));
     for (const spalte of STATS_SPALTEN) {
-      /* Die gerechnete Auslastung mit einer Nachkommastelle, die gezählten
-         Kennzahlen als ganze Zahl. */
-      tr.appendChild(el('td', 'num', zahl(spaltenWert(spalte, eintrag), spalte[3] ? 1 : 0)));
+      tr.appendChild(el('td', 'num', zahl(spaltenWert(spalte, eintrag), spaltenStellen(spalte))));
     }
     tr.appendChild(el('td', 'num', timeStr(new Date(eintrag.zeit))));
     body.appendChild(tr);
@@ -559,9 +630,10 @@ function statistikCsv() {
     ...STATS_SPALTEN.map(spalte => {
       const wert = spaltenWert(spalte, e);
       if (wert === null || wert === undefined) return '';
-      /* Dezimalkomma, damit die Tabellenkalkulation die Auslastung als Zahl
-         liest und nicht als Text. */
-      return spalte[3] ? wert.toFixed(1).replace('.', ',') : wert;
+      /* Dezimalkomma, damit die Tabellenkalkulation Auslastung und Mittel als
+         Zahl liest und nicht als Text. */
+      const stellen = spaltenStellen(spalte);
+      return stellen ? wert.toFixed(stellen).replace('.', ',') : wert;
     }),
     ...faecher.map(name => (e.faecher ? e.faecher[name] || 0 : '')),
     timeStr(new Date(e.zeit))
@@ -586,7 +658,7 @@ function statistikCsvMonate() {
   const komma = wert => (wert === null || wert === undefined ? '' : wert.toFixed(1).replace('.', ','));
   const kopf = ['Monat', 'Schichten',
     ...STATS_SPALTEN.map(([, label]) => label + ' (Mittel)'),
-    'höchste Belegung',
+    'höchste Belegung im Monat',
     ...faecher.map(name => (name || OHNE_FACH) + ' (Mittel)')];
 
   const zeilen = monate.map(monat => {
