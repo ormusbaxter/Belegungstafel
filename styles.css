@@ -46,7 +46,11 @@
      Linien und dürfen sie nicht überstimmen. */
   --stat-belegt: #1e5f9e;
   --stat-max: #c2410c;
-  --stat-flaeche: rgba(30, 95, 158, .12);
+  --stat-flaeche: rgba(30, 95, 158, .09);
+  /* Spanne Tief–Spitze: dieselbe Farbe wie die Linie, nur als Fläche –
+     es ist dieselbe Größe, nicht eine zweite Reihe. */
+  --stat-spanne: rgba(30, 95, 158, .22);
+  --stat-spanne-probe: #7ba3c8;
   --stat-netz: #e3e9f0;
   --stat-achse: #b9c4d0;
   --stat-tag: #55697f;
@@ -105,7 +109,9 @@ html[data-theme="dark"] {
      hellen Werte – umgedreht wäre der Kontrast nicht mehr derselbe. */
   --stat-belegt: #3987e5;
   --stat-max: #e2703a;
-  --stat-flaeche: rgba(57, 135, 229, .15);
+  --stat-flaeche: rgba(57, 135, 229, .11);
+  --stat-spanne: rgba(57, 135, 229, .26);
+  --stat-spanne-probe: #2f628f;
   --stat-netz: #232d37;
   --stat-achse: #3a4753;
   --stat-tag: #8296a8;
@@ -1403,6 +1409,13 @@ html[data-theme="dark"] .pwerror { color: var(--iso); }
   font-size: 11.5px;
 }
 .statskachel { width: 11px; height: 11px; border: 1px solid var(--line); border-radius: 2px; }
+.statsspanne {
+  width: 26px;
+  height: 11px;
+  border-radius: 2px;
+  background: var(--stat-spanne);
+  border: 1px solid var(--stat-spanne-probe);
+}
 .statsplot { position: relative; flex: 1 1 auto; min-height: 0; }
 .statsplot svg { display: block; width: 100%; height: 100%; }
 .statsplot svg text { font-variant-numeric: tabular-nums; }

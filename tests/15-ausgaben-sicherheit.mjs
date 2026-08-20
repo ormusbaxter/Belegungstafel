@@ -65,7 +65,8 @@ gleich('gültiger Eintrag bleibt vollständig', nachImport[0].belegt, 7);
 gleich('Text in einer Kennzahl wird verworfen', nachImport[1].belegt, null);
 gleich('unbrauchbarer Wert wird nicht gerechnet', nachImport[1].max, null);
 pruefe('kein zusätzliches Feld übernommen',
-  Object.keys(nachImport[1]).join(',') === 'datum,schicht,name,start,zeit,belegt,max,isolation,beatmung,dialyse',
+  Object.keys(nachImport[1]).join(',') === 'datum,schicht,name,start,zeit,belegt,max,isolation,beatmung,dialyse,' +
+    'belegtMittel,belegtTief,belegtSpitze,dauer,aufnahmen',
   Object.keys(nachImport[1]).join(','));
 gleich('Object.prototype unberührt', await page.evaluate(() => ({}).vergiftet), undefined);
 gleich('fehlende Startzeit bleibt leer', nachImport[1].start, '');

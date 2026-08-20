@@ -448,9 +448,18 @@ Spalte der Tafel zugeordnet.
   Die Daten liegen im `localStorage` unter `belegungstafel.statistik`, enthalten keine
   Patientendaten und gehen in die automatische Sicherung mit ein. Erfasst wird nur, solange die
   Tafel geöffnet ist
+- **Mittelwert je Schicht**: Wird mehrmals in derselben Schicht erfasst, zählt nicht der letzte
+  Stand allein. Jede Aufnahme rechnet mit, und zwar **zeitgewichtet** – ein Stand geht mit der
+  Zeit ein, die er gegolten hat, sonst zöge häufiges Drücken von „Jetzt erfassen“ das Ergebnis
+  zu sich. Die Wartezeit wird auf den eingestellten Abstand gedeckelt: Was bei geschlossener
+  Tafel galt, ist nicht bekannt. Neben dem Mittel führt jede Schicht ihr **Tief** und ihre
+  **Spitze**. Die Datenmenge bleibt dabei gleich – aufgehoben wird ein Eintrag je Schicht, er
+  trägt nur fünf Zahlen mehr; alle Aufnahmen zu sammeln ergäbe bei 15-Minuten-Takt rund 35 000
+  Einträge im Jahr und sprengte den Browser-Speicher. Stände aus Fassungen vor 2.30 führen die
+  Felder nicht; für sie bleibt es beim erfassten Wert
 - **Verlaufsbild** über den Tabellen (`js/statistikbild.js`): zwei Linien über die Schichten des
   Zeitraums – die **maximale Bettenzahl** als gestrichelte Treppe, darunter die **tatsächliche
-  Belegung**; der Abstand dazwischen sind die freien Betten. Die Waagerechte trägt die **Tage,
+  Belegung im Mittel**, hinterlegt mit einem Band von **Tief bis Spitze** der Schicht; der Abstand dazwischen sind die freien Betten. Die Waagerechte trägt die **Tage,
   jeder Tag in seine Schichten geteilt**; eine Schicht ist am Farbton ihres Streifens, am
   Kürzel unter der Achse und an der Form ihres Messpunktes zu erkennen – dreifach, weil auf
   blassen Monitoren, im Ausdruck und bei Farbsehschwäche jeweils eines der Merkmale ausfällt.

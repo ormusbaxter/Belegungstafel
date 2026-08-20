@@ -155,11 +155,55 @@ const datei = await download;
 const { readFile } = await import('node:fs/promises');
 const csv = await readFile(await datei.path(), 'utf8');
 enthaelt('CSV mit Kopfzeile', csv, '"Datum";"Schicht";"Beginn"');
-enthaelt('CSV enthält den Frühdienst', csv, '"Frühdienst";"06:00";"4";"12";"33,3";"2";"2";"1"');
+/* Tief 0: Beim Start der Tafel war die Station in dieser Prüfung noch leer,
+   und dieser Stand gehört zur Schicht dazu. */
+enthaelt('CSV enthält den Frühdienst', csv,
+  '"Frühdienst";"06:00";"4";"4,0";"0";"4";"12";"33,3";"2";"2";"1"');
 enthaelt('CSV nennt die Auslastung im Kopf', csv, '"Auslastung (%)"');
 pruefe('keine Patientennamen in der Auswertung', !csv.includes('"A"') && !csv.includes('gesperrt'));
 await page.click('#statsClose');
 keineFehler(page);
+
+/* ---- Mittel, Tief und Spitze je Schicht ----
+   Mehrfach erfasste Schichten sollen nicht den letzten Stand allein zeigen:
+   Der bis dahin geltende Wert geht mit der Zeit ein, die er gegolten hat. */
+const spaet = () => page.evaluate(() => {
+  const e = statistikLaden().find(x => x.schicht === 'spaet');
+  return { belegt: e.belegt, mittel: e.belegtMittel, tief: e.belegtTief,
+           spitze: e.belegtSpitze, dauer: e.dauer, aufnahmen: e.aufnahmen };
+});
+const stand = await spaet();
+gleich('erste Aufnahme: Mittel ist der Wert selbst', stand.mittel, stand.belegt);
+gleich('erste Aufnahme: Tief und Spitze fallen zusammen',
+  stand.tief + '/' + stand.spitze, stand.belegt + '/' + stand.belegt);
+
+/* Zwei weitere Aufnahmen der Spätschicht: 15 Minuten mit 5 Betten, dann
+   15 Minuten mit 7 – das Mittel steht danach bei 6. */
+await page.evaluate(() => {
+  state.beds['5'].name = 'F'; state.beds['5'].status = '●';
+  state.beds['6a'].name = 'G'; state.beds['6a'].status = '●';
+  save();
+});
+await erfasse('2026-03-05T15:15:00');
+await erfasse('2026-03-05T15:30:00');
+const gemittelt = await spaet();
+gleich('zeitgewichtetes Mittel über zwei Spannen', gemittelt.mittel, 6);
+gleich('Spitze der Schicht', gemittelt.spitze, 7);
+gleich('Tief der Schicht', gemittelt.tief, 5);
+gleich('gewichtete Dauer in Minuten', gemittelt.dauer, 30);
+gleich('Zahl der Aufnahmen', gemittelt.aufnahmen, 3);
+
+/* Ein Handdruck kurz danach zieht das Mittel nicht zu sich: Er wiegt nur die
+   Minute, die seither vergangen ist. */
+await erfasse('2026-03-05T15:31:00');
+const nachDruck = await spaet();
+gleich('kurz darauf erfasst verschiebt kaum',
+  Math.round(nachDruck.mittel * 100) / 100, 6.03);
+
+/* Eine lange Pause zählt nur bis zur nächsten planmäßigen Aufnahme: Was bei
+   geschlossener Tafel galt, ist nicht bekannt. */
+await erfasse('2026-03-05T19:31:00');
+gleich('Wartezeit auf den Abstand gedeckelt', (await spaet()).dauer, 46);
 
 /* ---- Einstellungen ---- */
 await oeffneEinstellungen(page, 'Statistik');

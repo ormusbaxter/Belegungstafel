@@ -4,6 +4,31 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.30.0
+
+- **Mittelwert, Tief und Spitze je Schicht.** Wird mehrmals in derselben Schicht erfasst – vom
+  Takt oder von Hand –, zählt nicht mehr allein der letzte Stand: Jede Aufnahme rechnet mit.
+  Der Verlauf zeigt damit, wie belegt eine Schicht **im Mittel** war, und wie weit die Belegung
+  sich in ihr bewegt hat
+- gemittelt wird **zeitgewichtet**: Ein Stand geht mit der Zeit ein, die er gegolten hat. Sonst
+  zöge häufiges Drücken von „Jetzt erfassen" den Mittelwert zu sich. Die Wartezeit wird auf den
+  eingestellten Abstand gedeckelt – war die Tafel drei Stunden geschlossen, ist nicht bekannt,
+  was in dieser Zeit galt
+- **die Datenmenge bleibt gleich**: Aufgehoben wird weiterhin ein Eintrag je Schicht, er trägt
+  nur fünf Zahlen mehr (Mittel, Tief, Spitze, gewichtete Dauer, Zahl der Aufnahmen). Alle
+  Aufnahmen zu sammeln hätte bei 15-Minuten-Takt rund 35 000 Einträge im Jahr ergeben – mehr,
+  als der Browser-Speicher fasst
+- im **Verlaufsbild** zeigt die Linie jetzt das Mittel, dahinter liegt ein Band von **Tief bis
+  Spitze** der Schicht. Wo nur eine Aufnahme vorliegt, fällt es in sich zusammen; die Tafel am
+  Messpunkt nennt Mittel, Spanne, Zahl der Aufnahmen und den letzten Stand mit seiner Uhrzeit
+- **Tabellen und CSV** bekommen je eine Spalte „Mittel", „Tief" und „Spitze"
+- die Monatsübersicht führt in der Spalte **„Monatsspitze"** wie bisher den höchsten Stand des
+  Monats – sie heißt jetzt so, weil daneben die Spitze je Schicht steht. Sie berücksichtigt nun
+  auch Gipfel, die zwischen zwei Aufnahmen lagen
+- Stände aus früheren Fassungen führen die Felder nicht; für sie bleibt es beim erfassten Wert,
+  Tief und Spitze fallen mit ihm zusammen
+- `tests/13-statistik.mjs` prüft die Gewichtung mit (64 Prüfungen)
+
 ## 2.29.0
 
 - **Verlaufsbild in der Statistik.** Über den Tabellen steht jetzt ein Diagramm mit zwei
