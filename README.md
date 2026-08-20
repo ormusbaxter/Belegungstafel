@@ -21,6 +21,7 @@ js/einstellungen.js   Einstellungsfenster
 js/schoner.js         Bildschirmschoner und Diaschau
 js/termine.js         Anstehende Termine (eigenes Fenster)
 js/statistik.js       Auswertung je Schicht
+js/statistikbild.js   Verlaufsbild der Auswertung (Diagramm)
 js/uebergabe.js       Übergabezettel (Diagnosen, Neurologie, Katecholamine)
 js/tafel.js           Sichtschutz, Ansicht, Sicherung, Start
 slides/               Beispielinhalte für die Diaschau; seit 2.25 nicht mehr nötig
@@ -447,6 +448,22 @@ Spalte der Tafel zugeordnet.
   Die Daten liegen im `localStorage` unter `belegungstafel.statistik`, enthalten keine
   Patientendaten und gehen in die automatische Sicherung mit ein. Erfasst wird nur, solange die
   Tafel geöffnet ist
+- **Verlaufsbild** über den Tabellen (`js/statistikbild.js`): zwei Linien über die Schichten des
+  Zeitraums – die **maximale Bettenzahl** als gestrichelte Treppe, darunter die **tatsächliche
+  Belegung**; der Abstand dazwischen sind die freien Betten. Die Waagerechte trägt die **Tage,
+  jeder Tag in seine Schichten geteilt**; eine Schicht ist am Farbton ihres Streifens, am
+  Kürzel unter der Achse und an der Form ihres Messpunktes zu erkennen – dreifach, weil auf
+  blassen Monitoren, im Ausdruck und bei Farbsehschwäche jeweils eines der Merkmale ausfällt.
+  **Nicht erfasste Schichten werden nicht überbrückt**: Der Streifen wird schraffiert und die
+  Linie bricht ab, denn eine geschlossene Tafel ist etwas anderes als eine leere Station. Maus
+  oder Pfeiltasten führen ein Fadenkreuz mit Datum, Schicht, beiden Zahlen, freien Betten und
+  Auslastung. Reicht der Zeitraum über 180 Tage hinaus, zeigt das Bild den jüngsten Ausschnitt
+  und sagt es in der Fußzeile; die Tabellen bleiben beim ganzen Zeitraum
+- **Zeitraum**: Schnellwahl (7 / 30 / 90 Tage, letztes Jahr, alles) und zwei Datumsfelder *von*
+  und *bis*. Die Schnellwahl schreibt in dieselben Felder – so steht immer sichtbar da, worauf
+  sich die Zahlen beziehen; eine Angabe von Hand stellt die Schnellwahl auf „frei gewählt“, ein
+  verdrehter Zeitraum wird getauscht. Bild, Tabellen und beide CSV-Ausgaben nehmen denselben
+  Ausschnitt
 - **Vorgabe der Station**: Die Datei `js/vorgaben.js` legt fest, mit welchen Einstellungen die
   Tafel startet, wenn im Browser noch nichts gespeichert ist, und worauf „Kategorie
   zurücksetzen“ zurückführt. Erzeugt wird sie in den Einstellungen unter „Daten“ über

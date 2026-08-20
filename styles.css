@@ -39,6 +39,26 @@
   --verstorben: #4a5058;
   --verstorben-ink: #f4f6f8;
 
+  /* Verlaufsbild der Statistik.
+     Zwei Reihen, deshalb zwei Farben, die auch bei Rot-Grün- und
+     Blau-Gelb-Schwäche auseinanderfallen: Blau gegen Orange. Die
+     Schichtstreifen tragen eigene, blasse Töne – sie liegen hinter den
+     Linien und dürfen sie nicht überstimmen. */
+  --stat-belegt: #1e5f9e;
+  --stat-max: #c2410c;
+  --stat-flaeche: rgba(30, 95, 158, .12);
+  --stat-netz: #e3e9f0;
+  --stat-achse: #b9c4d0;
+  --stat-tag: #55697f;
+  --stat-band1: #fdf1d9;
+  --stat-band1-ink: #92650f;
+  --stat-band2: #d8ecef;
+  --stat-band2-ink: #1a6a72;
+  --stat-band3: #dcdef4;
+  --stat-band3-ink: #474a9c;
+  --stat-band4: #f7e1e9;
+  --stat-band4-ink: #9b3f63;
+
   --row-h: 42px;
 
   /* Größe der Tafel, über die Einstellungen zwischen 0.25 und 3 */
@@ -80,6 +100,23 @@ html[data-theme="dark"] {
   --luecke-linie: rgba(228, 107, 107, .6);
   --verstorben: #333a42;
   --verstorben-ink: #e7edf3;
+
+  /* Verlaufsbild: eigene Stufen für den dunklen Grund, keine Umkehrung der
+     hellen Werte – umgedreht wäre der Kontrast nicht mehr derselbe. */
+  --stat-belegt: #3987e5;
+  --stat-max: #e2703a;
+  --stat-flaeche: rgba(57, 135, 229, .15);
+  --stat-netz: #232d37;
+  --stat-achse: #3a4753;
+  --stat-tag: #8296a8;
+  --stat-band1: #2a2415;
+  --stat-band1-ink: #d3a54a;
+  --stat-band2: #10312f;
+  --stat-band2-ink: #58b6bd;
+  --stat-band3: #24203f;
+  --stat-band3-ink: #9497e8;
+  --stat-band4: #331f28;
+  --stat-band4-ink: #e08fac;
 }
 
 * { box-sizing: border-box; }
@@ -1284,7 +1321,22 @@ html[data-theme="dark"] .pwerror { color: var(--iso); }
 /* Das Blatt selbst erscheint nur im Ausdruck. */
 .handoversheet { display: none; }
 
-.dlg.dlg-stats { width: min(1020px, 96vw); }
+/* Das Fenster nimmt Breite und Höhe des Bildschirms: Das Verlaufsbild
+   braucht beides, sonst stehen die Schichten eines Monats auf wenigen
+   Pixeln. Kopf, Leiste und Bild bleiben stehen, gescrollt werden die
+   Tabellen darunter. */
+.dlg.dlg-stats {
+  width: 96vw;
+  height: 94vh;
+  max-height: 94vh;
+}
+/* Die Spaltenaufteilung nur am geöffneten Fenster: Ein display-Wert am
+   Dialog selbst höbe das eingebaute display:none des geschlossenen auf –
+   das Fenster läge dann unsichtbar über der Tafel und finge Klicks ab. */
+.dlg.dlg-stats[open] {
+  display: flex;
+  flex-direction: column;
+}
 .statsbar {
   display: flex;
   flex-wrap: wrap;
@@ -1293,7 +1345,8 @@ html[data-theme="dark"] .pwerror { color: var(--iso); }
   margin: 10px 0 6px;
   font-size: 13px;
 }
-.statsbar select {
+.statsbar select,
+.statsbar input[type="date"] {
   padding: 4px 8px;
   border: 1px solid var(--line);
   border-radius: 6px;
@@ -1301,13 +1354,101 @@ html[data-theme="dark"] .pwerror { color: var(--iso); }
   color: var(--ink);
   font: inherit;
 }
+.statsbar input[type="date"] { font-variant-numeric: tabular-nums; }
 .statsbar button { padding: 4px 12px; font-size: 12.5px; }
+.statsbar .spacer { flex: 1; }
 .statsinfo { margin: 0 0 10px; }
 .statssummary { margin-bottom: 14px; }
+
+/* ---- Verlaufsbild ---- */
+.statsbild {
+  display: flex;
+  flex-direction: column;
+  /* Etwa die obere Hälfte des Fensters; darunter beginnen die Tabellen.
+     Ohne Mindesthöhe fiele das Bild auf einem flachen Schirm zusammen. */
+  flex: 1 1 54%;
+  min-height: 210px;
+  margin: 0 0 12px;
+  padding: 8px 10px 6px;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--panel);
+}
+.statsbildkopf {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 18px;
+  padding-bottom: 6px;
+}
+.statsbildtitel { font-size: 13.5px; font-weight: 700; }
+.statslegende {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 14px;
+  margin-left: auto;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+.statsleg { display: inline-flex; align-items: center; gap: 7px; }
+.statslegtrenner { width: 1px; height: 15px; background: var(--line); }
+.statsprobe {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px 2px 5px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 11.5px;
+}
+.statskachel { width: 11px; height: 11px; border: 1px solid var(--line); border-radius: 2px; }
+.statsplot { position: relative; flex: 1 1 auto; min-height: 0; }
+.statsplot svg { display: block; width: 100%; height: 100%; }
+.statsplot svg text { font-variant-numeric: tabular-nums; }
+.statsplot svg:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.statsbildfuss { margin: 4px 0 0; }
+/* Hinweis statt leerer Zeichenfläche, wenn im Zeitraum nichts erfasst ist */
+.statsleerhinweis { display: none; margin: 0; padding-top: 12px; color: var(--ink-soft); font-size: 13px; }
+.statsbild.ohnedaten .statsleerhinweis { display: block; }
+
+/* Tafel am Messpunkt: Datum, Schicht und beide Zahlen */
+.statstip {
+  position: absolute;
+  z-index: 3;
+  min-width: 190px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel);
+  box-shadow: 0 6px 18px rgba(18, 24, 31, .18);
+  font-size: 12.5px;
+  pointer-events: none;
+  opacity: 0;
+}
+.statstip[data-an="1"] { opacity: 1; }
+.statstip h3 { margin: 0 0 5px; font-size: 12.5px; }
+.statstipzeile { display: flex; align-items: baseline; gap: 8px; }
+.statstippunkt { width: 9px; height: 9px; border-radius: 2px; }
+.statstipname { color: var(--ink-soft); }
+.statstipwert { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
+.statstiprand,
+.statstipleer {
+  margin: 6px 0 0;
+  padding-top: 5px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--ink-soft);
+  font-size: 11.5px;
+}
+.statstipleer { border-top: none; padding-top: 0; }
+
+/* Der Tabellensatz unter dem Bild scrollt als Ganzes; die einzelnen
+   Tabellen bringen keinen zweiten Rollbalken mehr mit. */
+.statsbody { flex: 1 1 46%; min-height: 0; overflow: auto; }
 /* Beide Tabellen dürfen breiter werden als das Fenster und scrollen dann
    waagerecht – sonst quetscht der Tabellensatz die Kopfzeilen ab. */
 .statssummary { overflow-x: auto; }
-.statstable { max-height: 46vh; overflow: auto; }
+.statstable { max-height: none; }
 .statstab {
   width: 100%;
   min-width: max-content;

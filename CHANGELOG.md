@@ -4,6 +4,32 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.29.0
+
+- **Verlaufsbild in der Statistik.** Über den Tabellen steht jetzt ein Diagramm mit zwei
+  Linien: die **maximale Bettenzahl** als gestrichelte Treppe (sie wechselt sprunghaft, wenn
+  ein Platz gesperrt oder ein Bett aufgestellt wird) und darunter die **tatsächliche
+  Belegung**. Der Abstand dazwischen sind die freien Betten
+- die Waagerechte trägt die **Tage, jeder Tag in seine Schichten geteilt**. Eine Schicht ist
+  dreifach zu erkennen: am Farbton ihres Streifens, am Kürzel unter der Achse und an der Form
+  ihres Messpunktes – auf blassen Monitoren, im Ausdruck und bei Farbsehschwäche fällt jeweils
+  eines der drei Merkmale aus
+- **nicht erfasste Schichten werden nicht überbrückt**: Der Streifen wird schraffiert, die
+  Linie bricht ab. Eine geschlossene Tafel ist etwas anderes als eine leere Station; die
+  Fußzeile zählt die Lücken des Zeitraums
+- **Zeitraum frei wählbar**: neben der Schnellwahl stehen zwei Datumsfelder *von* und *bis*.
+  Die Schnellwahl schreibt in dieselben Felder, damit immer sichtbar ist, worauf sich die
+  Zahlen beziehen; von Hand eingetragen springt sie auf „frei gewählt". Verdrehte Angaben
+  werden getauscht. Bild, Tabellen und beide CSV-Ausgaben nehmen denselben Ausschnitt
+- **Fenster über Bildschirmbreite und -höhe**: Das Bild braucht beides, sonst stehen die
+  Schichten eines Monats auf wenigen Pixeln. Kopf, Leiste und Bild bleiben stehen, gescrollt
+  werden die Tabellen darunter
+- Maus am Bild zeigt Fadenkreuz und Tafel mit Datum, Schicht, beiden Zahlen, freien Betten und
+  Auslastung; mit der Tastatur bewegen die Pfeiltasten den Messpunkt. Reicht der Zeitraum über
+  180 Tage hinaus, zeigt das Bild den jüngsten Ausschnitt und sagt es in der Fußzeile – die
+  Tabellen bleiben beim ganzen Zeitraum
+- neue Datei `js/statistikbild.js`; `tests/13-statistik.mjs` prüft das Bild mit (55 Prüfungen)
+
 ## 2.28.0
 
 - **Monatlich gestaffelte Auswertung.** Eine neue Tabelle im Statistikfenster zeigt je Monat

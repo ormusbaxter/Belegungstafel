@@ -88,6 +88,60 @@ enthaelt('Auslastung der Schicht berechnet', frueh, '|33,3|');
 /* Mittel über 4, 5 und 5 Betten bei je 12 Plätzen = 38,9 % */
 enthaelt('Mittelwert der Auslastung', summen[3], '38,9');
 
+/* ---- Verlaufsbild ---- */
+/* Der Zeitraum steht ab Werk auf 30 Tagen bis heute (05.03.2026); das Bild
+   hält für jeden Tag drei Plätze bereit, auch für die nicht erfassten. */
+gleich('Zeitraum in den Datumsfeldern',
+  await page.inputValue('#statsVon') + ' bis ' + await page.inputValue('#statsBis'),
+  '2026-02-04 bis 2026-03-05');
+const bild = await page.evaluate(() => ({
+  plaetze: bildStand.plaetze.length,
+  tage: bildStand.tage,
+  luecken: bildStand.plaetze.filter(p => !p.eintrag).length
+}));
+gleich('30 Tage je drei Schichten', bild.plaetze, 90);
+gleich('erfasst sind drei davon', bild.plaetze - bild.luecken, 3);
+enthaelt('Legende nennt die Schichten', await page.textContent('#statsLegende'), 'Nachtdienst');
+enthaelt('Fußzeile weist die Lücken aus', await page.textContent('#statsBildFuss'),
+  'ohne Erfassung');
+
+/* Tafel am Messpunkt: erfasste Schicht mit beiden Zahlen, Lücke als solche */
+const tafelText = nr => page.evaluate(stelle => {
+  statistikBildZeigen(stelle);
+  return $('#statsTip').textContent;
+}, nr);
+const stelleFrueh = await page.evaluate(() =>
+  bildStand.plaetze.findIndex(pl => pl.eintrag && pl.eintrag.schicht === 'frueh'));
+const tafelFrueh = await tafelText(stelleFrueh);
+enthaelt('Tafel nennt die Schicht', tafelFrueh, 'Frühdienst');
+enthaelt('Tafel nennt die freien Betten', tafelFrueh, '8 Betten frei');
+enthaelt('Tafel rechnet die Auslastung', tafelFrueh, '33 % Auslastung');
+enthaelt('Lücke wird als solche benannt', await tafelText(0), 'Nicht erfasst');
+
+/* Zeitraum von Hand: die Schnellwahl tritt zurück, Bild und Tabelle folgen */
+await page.fill('#statsVon', '2026-03-05');
+await page.fill('#statsBis', '2026-03-05');
+await page.dispatchEvent('#statsBis', 'change');
+await page.waitForTimeout(250);
+gleich('Schnellwahl steht auf frei gewählt', await page.inputValue('#statsRange'), 'frei');
+gleich('nur der eine Tag im Bild', await page.evaluate(() => bildStand.plaetze.length), 3);
+gleich('keine Lücke mehr',
+  await page.evaluate(() => bildStand.plaetze.filter(pl => !pl.eintrag).length), 0);
+gleich('Tabelle zeigt denselben Tag',
+  await page.$$eval('#statsTable tbody tr', rs => rs.length), 3);
+
+/* Verdrehte Angaben werden getauscht, nicht abgewiesen */
+await page.fill('#statsVon', '2026-03-31');
+await page.dispatchEvent('#statsVon', 'change');
+await page.waitForTimeout(250);
+gleich('vertauschter Zeitraum wird gedreht',
+  await page.inputValue('#statsVon') + ' bis ' + await page.inputValue('#statsBis'),
+  '2026-03-05 bis 2026-03-31');
+
+await page.selectOption('#statsRange', '30');
+await page.waitForTimeout(250);
+keineFehler(page);
+
 /* Ohne eingetragene Bettenzahl bleibt die Spalte leer statt 0 */
 const ohneMax = await page.evaluate(() => auslastung({ belegt: 4, max: null }));
 gleich('ohne Bettenzahl kein Wert', ohneMax, null);

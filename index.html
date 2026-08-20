@@ -613,7 +613,8 @@
   <h2>Statistik je Schicht</h2>
   <p class="dlgsub">Je Schicht wird der zuletzt erfasste Stand geführt: belegte Betten,
     maximale Bettenzahl, Isolationen (bestätigt oder Verdacht), Beatmungen, Dialysen und die
-    Aufteilung auf die Fachabteilungen. Erfasst wird, solange die Tafel geöffnet ist.</p>
+    Aufteilung auf die Fachabteilungen. Erfasst wird, solange die Tafel geöffnet ist –
+    nicht erfasste Schichten stehen im Bild als Lücke.</p>
 
   <div class="statsbar">
     <label for="statsRange">Zeitraum</label>
@@ -623,17 +624,41 @@
       <option value="90">letzte 90 Tage</option>
       <option value="365">letztes Jahr</option>
       <option value="0">alles</option>
+      <option value="frei">frei gewählt</option>
     </select>
+    <label for="statsVon">von</label>
+    <input type="date" id="statsVon">
+    <label for="statsBis">bis</label>
+    <input type="date" id="statsBis">
+    <span class="spacer"></span>
     <button type="button" id="statsNow">Jetzt erfassen</button>
     <button type="button" id="statsCsv">CSV je Schicht</button>
     <button type="button" id="statsCsvMonat">CSV je Monat</button>
   </div>
 
   <p class="panehint statsinfo" id="statsInfo"></p>
-  <div class="statssummary" id="statsSummary"></div>
-  <div class="statsmonate" id="statsMonate"></div>
-  <div class="statsfaecher" id="statsFaecher"></div>
-  <div class="statstable" id="statsTable"></div>
+
+  <!-- Verlaufsbild: zwei Linien über die Schichten des Zeitraums -->
+  <figure class="statsbild" id="statsBild">
+    <figcaption class="statsbildkopf">
+      <span class="statsbildtitel">Belegung je Schicht</span>
+      <span class="statslegende" id="statsLegende"></span>
+    </figcaption>
+    <div class="statsplot" id="statsPlot">
+      <svg id="statsSvg" role="img" tabindex="0"
+           aria-label="Verlauf der maximalen und der tatsächlichen Belegung je Schicht"></svg>
+      <div class="statstip" id="statsTip" role="status" aria-live="polite"></div>
+      <p class="statsleerhinweis">Für diesen Zeitraum liegt nichts vor.</p>
+    </div>
+    <p class="panehint statsbildfuss" id="statsBildFuss"></p>
+  </figure>
+
+  <div class="statsbody">
+    <div class="statssummary" id="statsSummary"></div>
+    <div class="statsmonate" id="statsMonate"></div>
+    <div class="statsfaecher" id="statsFaecher"></div>
+    <div class="statstable" id="statsTable"></div>
+  </div>
 
   <menu class="dlgmenu">
     <span class="spacer"></span>
@@ -676,6 +701,7 @@
 <script src="js/schoner.js"></script>
 <script src="js/termine.js"></script>
 <script src="js/statistik.js"></script>
+<script src="js/statistikbild.js"></script>
 <script src="js/uebergabe.js"></script>
 <script src="js/tafel.js"></script>
 </body>

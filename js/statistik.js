@@ -227,15 +227,35 @@ function spaltenWert(spalte, eintrag) {
   return rechner ? rechner(eintrag) : eintrag[feld];
 }
 
-let statistikZeitraum = 30;   /* Tage; 0 = alles */
+/* Zeitraum der Auswertung: zwei Datumsangaben, jede für sich weglassbar.
+ *
+ * Die Schnellwahl („letzte 30 Tage“) schreibt in dieselben beiden Felder,
+ * die auch von Hand zu füllen sind. So steht immer sichtbar da, worauf sich
+ * die Zahlen beziehen, statt dass eine Angabe die andere heimlich aussticht.
+ * Ein leeres Feld heißt „nach unten bzw. oben offen“; beide leer ist der
+ * ganze Bestand. Tabellen, Bild und CSV nehmen denselben Ausschnitt. */
+let statistikVon = '';
+let statistikBis = '';
+
+function statistikGrenzen() {
+  return { von: statistikVon, bis: statistikBis };
+}
+
+/* Schnellwahl: die letzten n Tage bis heute, 0 für alles. */
+function statistikZeitraumSetzen(tage) {
+  if (!tage) {
+    statistikVon = '';
+    statistikBis = '';
+  } else {
+    statistikBis = isoToday();
+    statistikVon = addDays(statistikBis, -(tage - 1));
+  }
+}
 
 function statistikZeitraumDaten() {
-  const daten = statistikLaden();
-  if (!statistikZeitraum) return daten;
-  const grenze = new Date();
-  grenze.setDate(grenze.getDate() - statistikZeitraum + 1);
-  const ab = isoDatum(grenze);
-  return daten.filter(e => e.datum >= ab);
+  return statistikLaden().filter(e =>
+    (!statistikVon || e.datum >= statistikVon) &&
+    (!statistikBis || e.datum <= statistikBis));
 }
 
 /* Mittelwert einer Spalte; leere Angaben bleiben außen vor. Bei der Auslastung
@@ -335,11 +355,24 @@ function oeffneStatistik() {
 
 function renderStatistik() {
   const daten = statistikZeitraumDaten();
+  statistikFelderZeigen();
   renderStatistikKopf(daten);
+  /* Das Bild steht über den Tabellen: der Verlauf zuerst, die Zahlen dazu.
+     Gezeichnet wird es in js/statistikbild.js. */
+  statistikBildZeichnen(daten);
   renderStatistikSummen(daten);
   renderStatistikMonate(daten);
   renderStatistikFaecher(daten);
   renderStatistikTabelle(daten);
+}
+
+/* Die beiden Datumsfelder auf den geltenden Zeitraum stellen. */
+function statistikFelderZeigen() {
+  const von = $('#statsVon');
+  const bis = $('#statsBis');
+  if (!von || !bis) return;
+  von.value = statistikVon;
+  bis.value = statistikBis;
 }
 
 /* Monatsübersicht. Sie erscheint erst, wenn der Zeitraum über einen Monat
@@ -602,9 +635,29 @@ function initStatistik() {
       fullDate(eintrag.datum));
   });
   $('#statsRange').addEventListener('change', event => {
-    statistikZeitraum = parseInt(event.target.value, 10) || 0;
+    if (event.target.value === 'frei') return;   /* nur Anzeige der Handwahl */
+    statistikZeitraumSetzen(parseInt(event.target.value, 10) || 0);
     renderStatistik();
   });
+
+  /* Ein Datum von Hand: Die Schnellwahl springt auf „frei gewählt“, damit
+     dort nicht länger ein Zeitraum steht, der nicht mehr gilt. Verdrehte
+     Angaben werden getauscht statt abgewiesen – gemeint ist offensichtlich
+     die Spanne dazwischen. */
+  const handWahl = () => {
+    statistikVon = $('#statsVon').value;
+    statistikBis = $('#statsBis').value;
+    if (statistikVon && statistikBis && statistikBis < statistikVon) {
+      [statistikVon, statistikBis] = [statistikBis, statistikVon];
+    }
+    $('#statsRange').value = 'frei';
+    renderStatistik();
+  };
+  $('#statsVon').addEventListener('change', handWahl);
+  $('#statsBis').addEventListener('change', handWahl);
+
+  statistikZeitraumSetzen(parseInt($('#statsRange').value, 10) || 0);
+  initStatistikBild();
   statistikButtonZeigen();
   statistikTaktStarten();
 }
