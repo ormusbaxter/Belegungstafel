@@ -54,7 +54,7 @@ await page.evaluate(() => {
 });
 
 const auswertung = await page.evaluate(() => {
-  statistikZeitraum = 0;
+  statistikZeitraumSetzen(0);
   return faecherAuswerten(statistikZeitraumDaten());
 });
 gleich('nur Schichten mit Angabe gehen ein', auswertung.schichten, 2);
@@ -71,7 +71,7 @@ gleich('Anteil von INT an der mittleren Belegung (9)',
 /* ---- Das Fenster zeigt sie ---- */
 await page.click('#btnStats');
 await page.waitForSelector('#statsDlg[open]');
-await page.evaluate(() => { statistikZeitraum = 0; renderStatistik(); });
+await page.evaluate(() => { statistikZeitraumSetzen(0); renderStatistik(); });
 await page.waitForTimeout(200);
 enthaelt('eigener Abschnitt im Fenster',
   await page.textContent('#statsFaecher h3'), 'Belegung je Fachabteilung');

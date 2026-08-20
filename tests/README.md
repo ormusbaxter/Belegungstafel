@@ -78,7 +78,7 @@ Zwei Dinge sind dabei zu beachten:
 | `10-pflichtangaben.mjs` | fehlende Angaben bei belegtem Bett, roter Screening-Hinweis |
 | `11-physio-druck.mjs` | Blatt für die Physiotherapie: Spalten, Zeilen, Schriftgrößen, eine Seite |
 | `12-vorgaben.mjs` | Vorgabedatei erzeugen, Geltung, Zurücksetzen, fehlerhafte Datei – **läuft allein** |
-| `13-statistik.mjs` | Kennzahlen, Schichtzuordnung über Mitternacht, Fenster, Einstellungen |
+| `13-statistik.mjs` | Kennzahlen, Schichtzuordnung über Mitternacht, Fenster, Verlaufsbild, Zeitraum von/bis, Einstellungen |
 | `14-datenschutz-verstorben.mjs` | Umfang des Sichtschutzes, Kreuz und dunkle Namenszelle |
 | `15-ausgaben-sicherheit.mjs` | Formeln in der CSV, Prüfung importierter Statistik, Freitext bleibt Text |
 | `16-uebergabe-norton.mjs` | Norton-Fälligkeit, Klammerwerte, Plausibilität, Übergabezettel |

@@ -32,7 +32,7 @@ await page.evaluate(() => {
 
 /* ---- Bündelung ---- */
 const monate = await page.evaluate(() => {
-  statistikZeitraum = 0;
+  statistikZeitraumSetzen(0);
   return monateAuswerten(statistikZeitraumDaten())
     .map(m => ({ monat: m.monat, name: m.name, schichten: m.liste.length, spitze: m.spitze }));
 });
@@ -51,7 +51,7 @@ gleich('Mittel der Belegung im August',
 /* ---- Übersicht im Fenster ---- */
 await page.click('#btnStats');
 await page.waitForSelector('#statsDlg[open]');
-await page.evaluate(() => { statistikZeitraum = 0; renderStatistik(); });
+await page.evaluate(() => { statistikZeitraumSetzen(0); renderStatistik(); });
 await page.waitForTimeout(200);
 
 enthaelt('eigener Abschnitt', await page.textContent('#statsMonate h3'), 'Monatsübersicht');
@@ -98,7 +98,7 @@ const csv = await page.evaluate(() => {
   let name = '', inhalt = '';
   const echt = window.download;
   window.download = (n, text) => { name = n; inhalt = text; };
-  statistikZeitraum = 0;
+  statistikZeitraumSetzen(0);
   statistikCsvMonate();
   window.download = echt;
   return { name, inhalt };
