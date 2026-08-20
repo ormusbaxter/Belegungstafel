@@ -1,0 +1,786 @@
+<title>Belegungsverlauf</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+
+<style>
+/* Belegungstafel Intensivstation – Mockup der statistischen Auswertung.
+   Farben und Formensprache folgen styles.css der Tafel; die beiden
+   Datenreihen sind gegen Rot-Grün- und Blau-Gelb-Schwäche geprüft. */
+:root {
+  color-scheme: light;
+  --bg: #eef1f5;
+  --panel: #ffffff;
+  --panel-2: #f7f9fc;
+  --ink: #12181f;
+  --ink-soft: #5a6672;
+  --ink-faint: #8794a1;
+  --line: #cfd7e0;
+  --line-soft: #e3e9f0;
+  --accent: #1e5f9e;
+  --accent-ink: #ffffff;
+
+  --serie-belegt: #1e5f9e;
+  --serie-max: #c2410c;
+  --serie-flaeche: rgba(30, 95, 158, .15);
+
+  /* Schichtstreifen: eine Helligkeitstreppe, kein zweiter Farbkreis */
+  --band-frueh: #ffffff;
+  --band-spaet: #eef2f7;
+  --band-nacht: #dde4ed;
+  --band-ink: #5a6672;
+
+  --grid: #e3e9f0;
+  --achse: #b9c4d0;
+  --schatten: 0 1px 2px rgba(18, 24, 31, .06), 0 8px 24px rgba(18, 24, 31, .06);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0f1419;
+    --panel: #171e26;
+    --panel-2: #1d262f;
+    --ink: #e7edf3;
+    --ink-soft: #93a1b0;
+    --ink-faint: #6d7c8a;
+    --line: #2c3742;
+    --line-soft: #232d37;
+    --accent: #4a9eff;
+    --accent-ink: #06131f;
+
+    --serie-belegt: #3987e5;
+    --serie-max: #e2703a;
+    --serie-flaeche: rgba(57, 135, 229, .17);
+
+    --band-frueh: #1b242e;
+    --band-spaet: #161e27;
+    --band-nacht: #111820;
+    --band-ink: #93a1b0;
+
+    --grid: #232d37;
+    --achse: #3a4753;
+    --schatten: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px rgba(0, 0, 0, .35);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0f1419;
+  --panel: #171e26;
+  --panel-2: #1d262f;
+  --ink: #e7edf3;
+  --ink-soft: #93a1b0;
+  --ink-faint: #6d7c8a;
+  --line: #2c3742;
+  --line-soft: #232d37;
+  --accent: #4a9eff;
+  --accent-ink: #06131f;
+
+  --serie-belegt: #3987e5;
+  --serie-max: #e2703a;
+  --serie-flaeche: rgba(57, 135, 229, .17);
+
+  --band-frueh: #1b242e;
+  --band-spaet: #161e27;
+  --band-nacht: #111820;
+  --band-ink: #93a1b0;
+
+  --grid: #232d37;
+  --achse: #3a4753;
+  --schatten: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px rgba(0, 0, 0, .35);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 14px/1.4 "IBM Plex Sans", "Segoe UI", Roboto, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Das Widget füllt Fensterbreite und -höhe; nur das Diagramm wächst mit. */
+.widget {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px clamp(12px, 2vw, 22px) 16px;
+}
+
+/* ------------------------------------------------ Kopfleiste */
+.kopf {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px 22px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.kopf h1 {
+  margin: 0;
+  font-size: clamp(18px, 2.2vw, 23px);
+  font-weight: 600;
+  letter-spacing: -.01em;
+  text-wrap: balance;
+}
+.kopf p {
+  margin: 3px 0 0;
+  max-width: 62ch;
+  color: var(--ink-soft);
+  font-size: 12.5px;
+}
+.zeitraum {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+  margin-left: auto;
+}
+.feld { display: flex; flex-direction: column; gap: 3px; }
+.feld label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+input[type="date"], select {
+  font: 500 13px/1 "IBM Plex Mono", ui-monospace, monospace;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 7px 8px;
+}
+select { font-family: "IBM Plex Sans", "Segoe UI", sans-serif; }
+.schnellwahl { display: flex; gap: 0; }
+.schnellwahl button {
+  font: 500 12.5px/1 "IBM Plex Sans", "Segoe UI", sans-serif;
+  color: var(--ink-soft);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left-width: 0;
+  padding: 8px 11px;
+  cursor: pointer;
+}
+.schnellwahl button:first-child { border-left-width: 1px; border-radius: 6px 0 0 6px; }
+.schnellwahl button:last-child { border-radius: 0 6px 6px 0; }
+.schnellwahl button[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.schnellwahl button:hover:not([aria-pressed="true"]) { background: var(--panel-2); color: var(--ink); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ------------------------------------------------ Kennzahlen */
+.kennzahlen {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+  gap: 10px;
+}
+.kachel {
+  background: var(--panel);
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-shadow: var(--schatten);
+}
+.kachel dt {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.kachel dd {
+  margin: 4px 0 0;
+  font: 600 24px/1.05 "IBM Plex Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
+}
+.kachel dd small {
+  font: 400 12px/1 "IBM Plex Sans", "Segoe UI", sans-serif;
+  color: var(--ink-soft);
+  margin-left: 4px;
+}
+
+/* ------------------------------------------------ Diagramm */
+.tafel {
+  flex: 1 1 auto;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  box-shadow: var(--schatten);
+  overflow: hidden;
+}
+.tafelkopf {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.tafelkopf h2 {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.legende { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin-left: auto; }
+.legende .eintrag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+.legende svg { display: block; overflow: visible; }
+.trenner { width: 1px; height: 16px; background: var(--line); }
+.schichtlegende { display: inline-flex; align-items: center; gap: 6px; }
+.schichtlegende .probe {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px 2px 5px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+.probe .kachelchen { width: 11px; height: 11px; border: 1px solid var(--line); border-radius: 2px; }
+
+.plotwrap { position: relative; flex: 1 1 auto; min-height: 0; }
+.plotwrap svg { display: block; width: 100%; height: 100%; }
+.plotwrap svg text { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+.tip {
+  position: absolute;
+  z-index: 3;
+  min-width: 168px;
+  padding: 8px 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  box-shadow: var(--schatten);
+  font-size: 12.5px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .09s linear;
+}
+.tip[data-an="1"] { opacity: 1; }
+.tip h3 { margin: 0 0 5px; font-size: 12.5px; font-weight: 600; }
+.tip .zeile { display: flex; align-items: baseline; gap: 8px; }
+.tip .zeile .name { color: var(--ink-soft); }
+.tip .zeile .wert {
+  margin-left: auto;
+  font: 600 12.5px/1 "IBM Plex Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+.tip .punkt { width: 9px; height: 9px; border-radius: 2px; }
+.tip .rand { margin-top: 6px; padding-top: 5px; border-top: 1px solid var(--line-soft); color: var(--ink-soft); font-size: 11.5px; }
+
+/* ------------------------------------------------ Tabelle */
+details.tabelle {
+  background: var(--panel);
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  box-shadow: var(--schatten);
+}
+details.tabelle > summary {
+  padding: 9px 13px;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  list-style: none;
+}
+details.tabelle > summary::-webkit-details-marker { display: none; }
+details.tabelle > summary::before { content: "▸ "; color: var(--ink-faint); }
+details.tabelle[open] > summary::before { content: "▾ "; }
+.tabellenrahmen { max-height: 34vh; overflow: auto; border-top: 1px solid var(--line-soft); }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th, td { padding: 5px 12px; text-align: left; border-bottom: 1px solid var(--line-soft); white-space: nowrap; }
+th {
+  position: sticky;
+  top: 0;
+  background: var(--panel-2);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+td.zahl { text-align: right; font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+tr.voll td.zahl.belegt { color: var(--serie-max); font-weight: 600; }
+
+.fussnote { margin: 0; color: var(--ink-faint); font-size: 11.5px; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+@media (max-width: 720px) {
+  .zeitraum { margin-left: 0; width: 100%; }
+  .legende { margin-left: 0; width: 100%; }
+}
+</style>
+
+<div class="widget">
+  <header class="kopf">
+    <div>
+      <h1>Statistische Auswertung</h1>
+      <p>Je Schicht der zuletzt erfasste Stand. Erfasst wird, solange die Tafel geöffnet ist –
+        Lücken im Verlauf bedeuten geschlossene Tafel, nicht leere Station.</p>
+    </div>
+    <div class="zeitraum">
+      <div class="feld">
+        <label for="von">Zeitraum von</label>
+        <input type="date" id="von">
+      </div>
+      <div class="feld">
+        <label for="bis">bis</label>
+        <input type="date" id="bis">
+      </div>
+      <div class="feld">
+        <label id="lblSchnell">Schnellwahl</label>
+        <div class="schnellwahl" role="group" aria-labelledby="lblSchnell">
+          <button type="button" data-tage="7">7 Tage</button>
+          <button type="button" data-tage="14">14 Tage</button>
+          <button type="button" data-tage="30" aria-pressed="true">30 Tage</button>
+          <button type="button" data-tage="90">90 Tage</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <dl class="kennzahlen" id="kennzahlen"></dl>
+
+  <section class="tafel">
+    <div class="tafelkopf">
+      <h2>Belegung je Schicht</h2>
+      <div class="legende">
+        <span class="eintrag">
+          <svg width="26" height="12" aria-hidden="true">
+            <line x1="0" y1="6" x2="26" y2="6" stroke="var(--serie-max)" stroke-width="2" stroke-dasharray="6 3"></line>
+          </svg>
+          Maximale Belegung
+        </span>
+        <span class="eintrag">
+          <svg width="26" height="12" aria-hidden="true">
+            <line x1="0" y1="6" x2="26" y2="6" stroke="var(--serie-belegt)" stroke-width="2"></line>
+            <circle cx="13" cy="6" r="4" fill="var(--serie-belegt)" stroke="var(--panel)" stroke-width="2"></circle>
+          </svg>
+          Tatsächliche Belegung
+        </span>
+        <span class="trenner" aria-hidden="true"></span>
+        <span class="schichtlegende">
+          <span class="probe"><span class="kachelchen" style="background:var(--band-frueh)"></span>
+            <svg width="10" height="10" aria-hidden="true"><circle cx="5" cy="5" r="3.4" fill="var(--band-ink)"></circle></svg>Früh</span>
+          <span class="probe"><span class="kachelchen" style="background:var(--band-spaet)"></span>
+            <svg width="10" height="10" aria-hidden="true"><rect x="1.8" y="1.8" width="6.4" height="6.4" fill="var(--band-ink)"></rect></svg>Spät</span>
+          <span class="probe"><span class="kachelchen" style="background:var(--band-nacht)"></span>
+            <svg width="10" height="10" aria-hidden="true"><path d="M5 1.4 L9 8.4 L1 8.4 Z" fill="var(--band-ink)"></path></svg>Nacht</span>
+        </span>
+      </div>
+    </div>
+    <div class="plotwrap" id="plotwrap">
+      <svg id="plot" role="img" tabindex="0" aria-label="Linien-Diagramm: maximale und tatsächliche Belegung je Schicht"></svg>
+      <div class="tip" id="tip" role="status" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <details class="tabelle">
+    <summary>Werte als Tabelle</summary>
+    <div class="tabellenrahmen">
+      <table>
+        <thead>
+          <tr><th>Datum</th><th>Schicht</th><th style="text-align:right">Belegt</th>
+            <th style="text-align:right">Maximal</th><th style="text-align:right">Frei</th>
+            <th style="text-align:right">Auslastung</th></tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </details>
+
+  <p class="fussnote">Mockup mit erfundenen Werten – zur Beurteilung der graphischen Umsetzung.
+    Pfeiltasten links/rechts bewegen den Messpunkt, sobald das Diagramm den Fokus hat.</p>
+</div>
+
+<script>
+'use strict';
+
+/* ------------------------------------------------------------------ *
+ * Schichten – wie in konfiguration.js (DEFAULT_STATISTIK)
+ * ------------------------------------------------------------------ */
+const SCHICHTEN = [
+  { key: 'frueh', name: 'Frühdienst',  kurz: 'F', zeit: '06:00–14:12', band: 'var(--band-frueh)', form: 'kreis' },
+  { key: 'spaet', name: 'Spätdienst',  kurz: 'S', zeit: '14:12–20:30', band: 'var(--band-spaet)', form: 'quadrat' },
+  { key: 'nacht', name: 'Nachtdienst', kurz: 'N', zeit: '20:30–06:00', band: 'var(--band-nacht)', form: 'dreieck' }
+];
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+const el = (name, attr) => {
+  const knoten = document.createElementNS(SVGNS, name);
+  for (const [schluessel, wert] of Object.entries(attr || {})) {
+    if (wert !== null && wert !== undefined) knoten.setAttribute(schluessel, wert);
+  }
+  return knoten;
+};
+const pad = n => String(n).padStart(2, '0');
+const isoDatum = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const ausIso = s => { const [j, m, t] = s.split('-').map(Number); return new Date(j, m - 1, t, 12); };
+const kurzDatum = d => pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.';
+const WOCHENTAG = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+
+/* ------------------------------------------------------------------ *
+ * Erfundene, aber reproduzierbare Werte
+ * Die Bettenzahl wechselt gelegentlich – eine gesperrte Zeile, ein
+ * aufgestelltes Bett –, damit die obere Linie nicht schnurgerade liegt.
+ * ------------------------------------------------------------------ */
+function rausch(k) {
+  let x = Math.sin(k * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+}
+function maxBetten(tagNr) {
+  const zyklus = ((tagNr % 61) + 61) % 61;
+  if (zyklus >= 12 && zyklus <= 19) return 11;   /* ein Platz gesperrt */
+  if (zyklus >= 38 && zyklus <= 44) return 13;   /* Zusatzbett aufgestellt */
+  return 12;
+}
+function reihe(von, bis) {
+  const daten = [];
+  const start = ausIso(von), ende = ausIso(bis);
+  const tag = new Date(start.getTime());
+  while (tag <= ende) {
+    const tagNr = Math.round(tag.getTime() / 86400000);
+    const max = maxBetten(tagNr);
+    SCHICHTEN.forEach((schicht, i) => {
+      const k = tagNr * 3 + i;
+      const welle = 1.9 * Math.sin(tagNr / 6.4) + 0.9 * Math.sin(tagNr / 2.1 + i);
+      const nachtab = i === 2 ? 0.55 : 0;
+      const roh = max - 1.1 - nachtab + welle - 1.8 * rausch(k);
+      const belegt = Math.max(2, Math.min(max, Math.round(roh)));
+      daten.push({ datum: new Date(tag.getTime()), schicht: i, belegt: belegt, max: max });
+    });
+    tag.setDate(tag.getDate() + 1);
+  }
+  return daten;
+}
+
+/* ------------------------------------------------------------------ *
+ * Zustand
+ * ------------------------------------------------------------------ */
+const heute = new Date(2026, 7, 20, 12);
+const zustand = { von: null, bis: null, daten: [], punkte: [], zeiger: -1 };
+
+function setzeZeitraum(tage) {
+  const bis = new Date(heute.getTime());
+  const von = new Date(heute.getTime());
+  von.setDate(von.getDate() - (tage - 1));
+  zustand.von = isoDatum(von);
+  zustand.bis = isoDatum(bis);
+  document.getElementById('von').value = zustand.von;
+  document.getElementById('bis').value = zustand.bis;
+}
+
+function neuBerechnen() {
+  if (ausIso(zustand.von) > ausIso(zustand.bis)) { const h = zustand.von; zustand.von = zustand.bis; zustand.bis = h; }
+  /* Über 180 Tage hinaus wird die Schichtauflösung unleserlich. */
+  const spanne = Math.round((ausIso(zustand.bis) - ausIso(zustand.von)) / 86400000);
+  if (spanne > 180) {
+    const von = ausIso(zustand.bis); von.setDate(von.getDate() - 180);
+    zustand.von = isoDatum(von);
+    document.getElementById('von').value = zustand.von;
+  }
+  zustand.daten = reihe(zustand.von, zustand.bis);
+  zustand.zeiger = -1;
+  kennzahlen();
+  tabelle();
+  zeichne();
+}
+
+/* ------------------------------------------------------------------ *
+ * Kennzahlen
+ * ------------------------------------------------------------------ */
+function kennzahlen() {
+  const d = zustand.daten;
+  const tage = d.length / 3;
+  const mittel = d.reduce((s, e) => s + e.belegt, 0) / d.length;
+  const spitze = d.reduce((s, e) => Math.max(s, e.belegt), 0);
+  const auslastung = d.reduce((s, e) => s + e.belegt / e.max, 0) / d.length * 100;
+  const voll = d.filter(e => e.belegt >= e.max).length;
+  const werte = [
+    ['Erfasste Schichten', d.length, tage + ' Tage'],
+    ['Ø Belegung', mittel.toFixed(1), 'Betten'],
+    ['Spitzenbelegung', spitze, 'Betten'],
+    ['Ø Auslastung', auslastung.toFixed(1) + ' %', ''],
+    ['Schichten in Vollbelegung', voll, (voll / d.length * 100).toFixed(0) + ' %']
+  ];
+  document.getElementById('kennzahlen').innerHTML = werte.map(([name, wert, rand]) =>
+    '<div class="kachel"><dt>' + name + '</dt><dd>' + wert +
+    (rand ? '<small>' + rand + '</small>' : '') + '</dd></div>').join('');
+}
+
+/* ------------------------------------------------------------------ *
+ * Tabelle – dieselben Zahlen ohne Farbe
+ * ------------------------------------------------------------------ */
+function tabelle() {
+  document.getElementById('tbody').innerHTML = zustand.daten.map(e => {
+    const voll = e.belegt >= e.max;
+    return '<tr' + (voll ? ' class="voll"' : '') + '><td>' + WOCHENTAG[e.datum.getDay()] + ' ' +
+      kurzDatum(e.datum) + '</td><td>' + SCHICHTEN[e.schicht].name + ' <span style="color:var(--ink-faint)">' +
+      SCHICHTEN[e.schicht].zeit + '</span></td><td class="zahl belegt">' + e.belegt +
+      '</td><td class="zahl">' + e.max + '</td><td class="zahl">' + (e.max - e.belegt) +
+      '</td><td class="zahl">' + Math.round(e.belegt / e.max * 100) + ' %</td></tr>';
+  }).join('');
+}
+
+/* ------------------------------------------------------------------ *
+ * Diagramm
+ * ------------------------------------------------------------------ */
+function marke(x, y, form, farbe) {
+  if (form === 'quadrat') return el('rect', { x: x - 3.6, y: y - 3.6, width: 7.2, height: 7.2,
+    fill: farbe, stroke: 'var(--panel)', 'stroke-width': 2 });
+  if (form === 'dreieck') return el('path', { d: 'M' + x + ' ' + (y - 4.6) + 'L' + (x + 4.3) + ' ' + (y + 3.2) +
+    'L' + (x - 4.3) + ' ' + (y + 3.2) + 'Z', fill: farbe, stroke: 'var(--panel)', 'stroke-width': 2 });
+  return el('circle', { cx: x, cy: y, r: 4, fill: farbe, stroke: 'var(--panel)', 'stroke-width': 2 });
+}
+
+function zeichne() {
+  const svg = document.getElementById('plot');
+  const rahmen = document.getElementById('plotwrap').getBoundingClientRect();
+  const breite = Math.max(360, Math.round(rahmen.width));
+  const hoehe = Math.max(240, Math.round(rahmen.height));
+  svg.setAttribute('viewBox', '0 0 ' + breite + ' ' + hoehe);
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+  const daten = zustand.daten;
+  const tage = daten.length / 3;
+  const rand = { oben: 26, rechts: 18, unten: 54, links: 46 };
+  const px = rand.links, py = rand.oben;
+  const pb = breite - rand.links - rand.rechts;
+  const ph = hoehe - rand.oben - rand.unten;
+  const schritt = pb / daten.length;
+  const tagBreite = schritt * 3;
+
+  const obersteZahl = Math.max(...daten.map(e => e.max)) + 1;   /* eine Stufe Luft über der Kapazität */
+  const y = wert => py + ph - (wert / obersteZahl) * ph;
+  const x = i => px + (i + 0.5) * schritt;
+
+  /* --- Schichtstreifen: jede Schicht ein eigener Grundton ---------- */
+  const bandGruppe = el('g', { 'aria-hidden': 'true' });
+  daten.forEach((e, i) => {
+    bandGruppe.appendChild(el('rect', { x: px + i * schritt, y: py, width: schritt + .5, height: ph,
+      fill: SCHICHTEN[e.schicht].band }));
+  });
+  svg.appendChild(bandGruppe);
+
+  /* --- Waagerechtes Netz ------------------------------------------- */
+  const netz = el('g', { 'aria-hidden': 'true' });
+  for (let w = 0; w <= obersteZahl; w++) {
+    if (obersteZahl > 16 && w % 2) continue;
+    netz.appendChild(el('line', { x1: px, y1: y(w), x2: px + pb, y2: y(w),
+      stroke: 'var(--grid)', 'stroke-width': 1 }));
+    netz.appendChild(el('text', { x: px - 10, y: y(w) + 4, 'text-anchor': 'end',
+      'font-size': 11, fill: 'var(--ink-faint)' })).textContent = w;
+  }
+  svg.appendChild(netz);
+
+  /* --- Fläche unter der Belegung: die belegten Betten ----------------
+     Halbdurchlässig, damit die Schichtstreifen darunter sichtbar bleiben.
+     Der Abstand zwischen Flächenkante und Treppenlinie sind die freien
+     Betten – die Lücke trägt die Aussage, ohne zweite Füllung. */
+  const flaeche = ['M' + px + ' ' + y(daten[0].belegt)];
+  daten.forEach((e, i) => flaeche.push('L' + x(i) + ' ' + y(e.belegt)));
+  flaeche.push('L' + (px + pb) + ' ' + y(daten[daten.length - 1].belegt));
+  flaeche.push('L' + (px + pb) + ' ' + y(0) + 'L' + px + ' ' + y(0) + 'Z');
+  svg.appendChild(el('path', { d: flaeche.join(' '), fill: 'var(--serie-flaeche)', 'aria-hidden': 'true' }));
+
+  /* --- Tagesgrenzen ------------------------------------------------- */
+  const grenzen = el('g', { 'aria-hidden': 'true' });
+  const grenzAbstand = tagBreite < 9 ? Math.ceil(9 / tagBreite) : 1;
+  for (let t = 0; t <= tage; t++) {
+    if (t % grenzAbstand) continue;
+    const gx = px + t * tagBreite;
+    grenzen.appendChild(el('line', { x1: gx, y1: py, x2: gx, y2: py + ph + 6,
+      stroke: 'var(--achse)', 'stroke-width': 1, 'stroke-opacity': .55 }));
+  }
+  svg.appendChild(grenzen);
+
+
+  /* --- Linie 1: maximale Belegung als Treppe ------------------------ */
+  const treppe = [];
+  daten.forEach((e, i) => {
+    treppe.push((i ? 'L' : 'M') + (px + i * schritt) + ' ' + y(e.max));
+    treppe.push('L' + (px + (i + 1) * schritt) + ' ' + y(e.max));
+  });
+  svg.appendChild(el('path', { d: treppe.join(' '), fill: 'none', stroke: 'var(--serie-max)',
+    'stroke-width': 2, 'stroke-dasharray': '7 3.5', 'stroke-linecap': 'butt' }));
+
+  /* --- Linie 2: tatsächliche Belegung ------------------------------- */
+  const linie = daten.map((e, i) => (i ? 'L' : 'M') + x(i) + ' ' + y(e.belegt)).join(' ');
+  svg.appendChild(el('path', { d: linie, fill: 'none', stroke: 'var(--serie-belegt)',
+    'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+
+  /* Messpunkte je Schicht mit eigener Form – die Schicht bleibt auch
+     ohne Farbe erkennbar. Bei enger Lage entfallen sie. */
+  if (schritt >= 11) {
+    const punkte = el('g', { 'aria-hidden': 'true' });
+    daten.forEach((e, i) => punkte.appendChild(marke(x(i), y(e.belegt), SCHICHTEN[e.schicht].form, 'var(--serie-belegt)')));
+    svg.appendChild(punkte);
+  }
+
+  /* --- Beschriftung: Schichtkürzel, darunter der Tag ---------------- */
+  const achse = el('g', { 'aria-hidden': 'true' });
+  achse.appendChild(el('line', { x1: px, y1: py + ph, x2: px + pb, y2: py + ph,
+    stroke: 'var(--achse)', 'stroke-width': 1 }));
+
+  if (schritt >= 15) {
+    daten.forEach((e, i) => {
+      achse.appendChild(el('rect', { x: px + i * schritt + .6, y: py + ph + 5, width: schritt - 1.2, height: 13,
+        fill: SCHICHTEN[e.schicht].band, stroke: 'var(--line)', 'stroke-width': .6, rx: 2 }));
+      achse.appendChild(el('text', { x: x(i), y: py + ph + 15, 'text-anchor': 'middle',
+        'font-size': 9.5, fill: 'var(--band-ink)' })).textContent = SCHICHTEN[e.schicht].kurz;
+    });
+  }
+
+  const beschriftet = tagBreite >= 62 ? 1 : Math.ceil(62 / tagBreite);
+  const langeForm = tagBreite >= 74;
+  for (let t = 0; t < tage; t++) {
+    if (t % beschriftet) continue;
+    const datum = daten[t * 3].datum;
+    const mitte = px + (t + 0.5) * tagBreite;
+    const text = (langeForm ? WOCHENTAG[datum.getDay()] + ' ' : '') + kurzDatum(datum);
+    achse.appendChild(el('text', { x: mitte, y: py + ph + (schritt >= 15 ? 32 : 20), 'text-anchor': 'middle',
+      'font-size': 11, fill: 'var(--ink-soft)' })).textContent = text;
+  }
+  achse.appendChild(el('text', { x: px + pb, y: hoehe - 6, 'text-anchor': 'end',
+    'font-size': 10.5, fill: 'var(--ink-faint)' })).textContent = 'Tage, je Tag drei Schichten';
+  achse.appendChild(el('text', { x: 8, y: py - 11, 'font-size': 10.5, fill: 'var(--ink-faint)' })).textContent = 'Betten';
+  svg.appendChild(achse);
+
+  /* --- Letzter Stand direkt beschriftet -----------------------------
+     Liegt die Treppenlinie dicht darüber, rückt die Angabe unter den
+     Punkt, damit sich Schrift und Linie nicht überlagern. */
+  const letzte = daten[daten.length - 1];
+  const lx = x(daten.length - 1), ly = y(letzte.belegt);
+  const eng = y(letzte.max) > ly - 22;
+  /* Bei sehr dichter Lage ließe sich die Angabe keinem Punkt mehr zuordnen. */
+  if (schritt >= 8) {
+  const schrift = el('text', { x: lx - 9, y: eng ? ly + 17 : ly - 10, 'text-anchor': 'end',
+    'font-size': 11.5, 'font-weight': 600, fill: 'var(--serie-belegt)',
+    stroke: 'var(--panel)', 'stroke-width': 3.5, 'paint-order': 'stroke' });
+  schrift.textContent = letzte.belegt + ' von ' + letzte.max;
+  svg.appendChild(schrift);
+  }
+
+  /* --- Fadenkreuz und Tafel ---------------------------------------- */
+  const kreuz = el('g', { id: 'kreuz', visibility: 'hidden', 'aria-hidden': 'true' });
+  kreuz.appendChild(el('line', { id: 'kreuzLinie', y1: py, y2: py + ph, stroke: 'var(--ink-soft)',
+    'stroke-width': 1, 'stroke-dasharray': '3 3' }));
+  kreuz.appendChild(el('circle', { id: 'kreuzMax', r: 4.5, fill: 'var(--serie-max)',
+    stroke: 'var(--panel)', 'stroke-width': 2 }));
+  kreuz.appendChild(el('circle', { id: 'kreuzBelegt', r: 5, fill: 'var(--serie-belegt)',
+    stroke: 'var(--panel)', 'stroke-width': 2 }));
+  svg.appendChild(kreuz);
+
+  const feld = el('rect', { x: px, y: py, width: pb, height: ph, fill: 'transparent' });
+  svg.appendChild(feld);
+
+  zustand.punkte = { x: x, y: y, px: px, py: py, pb: pb, ph: ph, schritt: schritt };
+
+  feld.addEventListener('mousemove', ev => {
+    const kasten = svg.getBoundingClientRect();
+    const relativ = (ev.clientX - kasten.left) / kasten.width * breite;
+    zeigeStand(Math.max(0, Math.min(daten.length - 1, Math.floor((relativ - px) / schritt))));
+  });
+  feld.addEventListener('mouseleave', versteckeStand);
+  if (zustand.zeiger >= 0) zeigeStand(zustand.zeiger);
+}
+
+function zeigeStand(index) {
+  const daten = zustand.daten;
+  if (!daten.length || !zustand.punkte.x) return;
+  index = Math.max(0, Math.min(daten.length - 1, index));
+  zustand.zeiger = index;
+  const e = daten[index];
+  const { x, y, py, ph, px, pb } = zustand.punkte;
+  const kreuz = document.getElementById('kreuz');
+  kreuz.setAttribute('visibility', 'visible');
+  const linie = document.getElementById('kreuzLinie');
+  linie.setAttribute('x1', x(index)); linie.setAttribute('x2', x(index));
+  const pMax = document.getElementById('kreuzMax');
+  pMax.setAttribute('cx', x(index)); pMax.setAttribute('cy', y(e.max));
+  const pBel = document.getElementById('kreuzBelegt');
+  pBel.setAttribute('cx', x(index)); pBel.setAttribute('cy', y(e.belegt));
+
+  const tip = document.getElementById('tip');
+  const schicht = SCHICHTEN[e.schicht];
+  tip.innerHTML =
+    '<h3>' + WOCHENTAG[e.datum.getDay()] + ' ' + kurzDatum(e.datum) + ' · ' + schicht.name + '</h3>' +
+    '<div class="zeile"><span class="punkt" style="background:var(--serie-max)"></span>' +
+    '<span class="name">Maximale Belegung</span><span class="wert">' + e.max + '</span></div>' +
+    '<div class="zeile"><span class="punkt" style="background:var(--serie-belegt)"></span>' +
+    '<span class="name">Tatsächliche Belegung</span><span class="wert">' + e.belegt + '</span></div>' +
+    '<div class="rand">' + (e.max - e.belegt) + ' Betten frei · ' +
+    Math.round(e.belegt / e.max * 100) + ' % Auslastung · ' + schicht.zeit + '</div>';
+  tip.setAttribute('data-an', '1');
+
+  const wrap = document.getElementById('plotwrap').getBoundingClientRect();
+  const svg = document.getElementById('plot').getBoundingClientRect();
+  const skala = svg.width / parseFloat(document.getElementById('plot').getAttribute('viewBox').split(' ')[2]);
+  const links = x(index) * skala;
+  const oben = Math.min(y(e.belegt), y(e.max)) * skala;
+  const breiteTip = tip.offsetWidth;
+  tip.style.left = Math.max(4, Math.min(wrap.width - breiteTip - 4, links + 14)) + 'px';
+  tip.style.top = Math.max(4, oben - tip.offsetHeight - 12) + 'px';
+}
+
+function versteckeStand() {
+  zustand.zeiger = -1;
+  const kreuz = document.getElementById('kreuz');
+  if (kreuz) kreuz.setAttribute('visibility', 'hidden');
+  document.getElementById('tip').removeAttribute('data-an');
+}
+
+/* ------------------------------------------------------------------ *
+ * Bedienung
+ * ------------------------------------------------------------------ */
+document.querySelectorAll('.schnellwahl button').forEach(knopf => {
+  knopf.addEventListener('click', () => {
+    document.querySelectorAll('.schnellwahl button').forEach(k => k.removeAttribute('aria-pressed'));
+    knopf.setAttribute('aria-pressed', 'true');
+    setzeZeitraum(Number(knopf.dataset.tage));
+    neuBerechnen();
+  });
+});
+['von', 'bis'].forEach(id => {
+  document.getElementById(id).addEventListener('change', ev => {
+    if (!ev.target.value) return;
+    zustand[id] = ev.target.value;
+    document.querySelectorAll('.schnellwahl button').forEach(k => k.removeAttribute('aria-pressed'));
+    neuBerechnen();
+  });
+});
+document.getElementById('plot').addEventListener('keydown', ev => {
+  if (ev.key !== 'ArrowLeft' && ev.key !== 'ArrowRight') return;
+  ev.preventDefault();
+  const start = zustand.zeiger < 0 ? zustand.daten.length - 1 : zustand.zeiger + (ev.key === 'ArrowRight' ? 1 : -1);
+  zeigeStand(start);
+});
+document.getElementById('plot').addEventListener('blur', versteckeStand);
+
+let bremse = null;
+new ResizeObserver(() => {
+  clearTimeout(bremse);
+  bremse = setTimeout(zeichne, 60);
+}).observe(document.getElementById('plotwrap'));
+
+setzeZeitraum(30);
+neuBerechnen();
+</script>
