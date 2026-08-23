@@ -4,6 +4,38 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.31.0
+
+Drei Anpassungen aus dem Stationsbetrieb, nachgetragen aus einem liegengebliebenen
+Zweig (`claude/druck-physio-updates`). Sie trugen dort die Nummer 2.13.0, die
+inzwischen für den Ausdruck vergeben ist.
+
+- **Die Spalte Physiotherapie steht auf dem Physio-Blatt.** Sie war die einzige Angabe, die
+  für die Runde gebraucht wird und auf dem eigens dafür gedruckten Blatt fehlte; die
+  Verordnung musste bisher aus der Tafel abgeschrieben werden. Die sechs bisherigen Spalten
+  geben ihr die Breite ab
+- dabei fiel auf, dass die festen Spalten bei wenigen Patienten überliefen: Die Schrift
+  richtete sich allein nach der Zeilenhöhe, und die wächst, je leerer die Station ist – bei
+  drei Patienten stand ein `K…` statt `KARD` auf dem Blatt. **Fachdisziplin, Telefon,
+  Pflegekraft und Physiotherapie bekommen deshalb je Spalte ein eigenes Maß**, gewonnen aus
+  ihrer Breite und ihrem längsten Eintrag. Die Kopfzeile wächst nur noch bis 3,6 mm, statt
+  „Bettplatz" in drei Zeilen übereinander zu setzen
+- **Plausibilitätsprüfung der maximalen Bettenzahl**: Zulässig sind **1 bis 12** regulär
+  betreibbare Plätze, das Notbett kommt als festes „+ 1" hinzu. Während der Eingabe bleibt
+  stehen, was getippt wurde, und wird nur rot umrandet; beim Verlassen des Feldes wird die
+  Zahl auf die nächstgelegene zulässige gesetzt. Eine unplausible Zahl geht nicht in die
+  Statistik ein – sie stünde sonst als Nenner der Auslastung im Weg. Leer bleibt erlaubt und
+  lässt die Auslastung entfallen. Die Grenzen stehen als `MAX_BETTEN_MIN` und
+  `MAX_BETTEN_MAX` in `js/konfiguration.js`
+- **Beatmungen und Dialysen zählen in der Statistik nur als laufendes Verfahren.** Ein Wert
+  in Klammern – `(INV)`, `(NIV)`, `(CiCa)` – bedeutet geplant, beendet oder nur zeitweise und
+  bleibt außen vor; dieselbe Lesart wie überall sonst auf der Tafel. Ein Bettplatz mit
+  `(INV)` und `NIV` zählt einmal, einer mit ausschließlich `(INV)` gar nicht. Das ändert die
+  Kennzahlen künftiger Aufnahmen; bereits erfasste Stände bleiben, wie sie sind
+- neue Prüfdatei `tests/23-kopfbereich.mjs` (17 Prüfungen); `tests/11-physio-druck.mjs` misst
+  jetzt in der Satzbreite eines A4-Blattes quer und prüft, dass kein Wert aus seiner Spalte
+  läuft (30 Prüfungen)
+
 ## 2.30.0
 
 - **Mittelwert, Tief und Spitze je Schicht.** Wird mehrmals in derselben Schicht erfasst – vom

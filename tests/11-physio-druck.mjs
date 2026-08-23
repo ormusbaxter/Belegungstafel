@@ -3,7 +3,10 @@ import { browserStarten, neueSeite, testName, gleich, pruefe, keineFehler, bilan
 
 testName('Blatt für die Physiotherapie');
 const browser = await browserStarten();
-const page = await neueSeite(browser, { viewport: { width: 1500, height: 950 } });
+/* Satzbreite eines A4-Blattes quer abzüglich der Ränder – 283 mm sind bei
+   96 dpi 1070 px. Nur so wird gemessen, was auch auf dem Papier steht;
+   ein breiteres Fenster gäbe den Spalten Platz, den der Drucker nicht hat. */
+const page = await neueSeite(browser, { viewport: { width: 1070, height: 900 } });
 
 /* Acht belegte Betten, einer gesperrt, einer angekündigt, Rest frei */
 await page.evaluate(() => {
@@ -16,6 +19,7 @@ await page.evaluate(() => {
     d.disziplin = 'KARD';
     d.pflege = 'S. Gertzen';
     d.telefon = '42' + (10 + i);
+    d.physio = i % 2 ? 'Mobi+AT' : 'passiv';
   });
   state.beds['0a'].isolation = [{ v: 'MRSA', s: 'positiv' }, { v: 'VRE', s: 'verdacht' }];
   state.beds['5'].name = 'gesperrt';
@@ -42,8 +46,14 @@ await page.waitForTimeout(150);
 const spalten = await page.$$eval('#thead th', ths => ths
   .filter(th => getComputedStyle(th).display !== 'none')
   .map(th => th.textContent.replace(/­/g, '').trim() || '(leer)'));
-gleich('nur die sechs gewünschten Spalten', spalten.join(' | '),
-  'Bettplatz | Patientenname | Fachdisziplin | Isolation | Telefon | Pflegekraft');
+gleich('nur die sieben gewünschten Spalten', spalten.join(' | '),
+  'Bettplatz | Patientenname | Fachdisziplin | Isolation | Telefon | Pflegekraft | Physiotherapie');
+
+/* Die Verordnung der Physiotherapie ist der Zweck des Blattes */
+gleich('Physiotherapie steht auf dem Blatt',
+  await page.locator('tr[data-bed="0a"] td.col-physio select').inputValue(), 'passiv');
+pruefe('Spalte Physiotherapie sichtbar',
+  await page.locator('#thead th.col-physio').evaluate(e => getComputedStyle(e).display !== 'none'));
 
 const zeilen = await page.$$eval('#tbody tr', trs => trs
   .filter(tr => getComputedStyle(tr).display !== 'none')
@@ -78,6 +88,29 @@ const lang = await page.evaluate(() => {
 pruefe('langer Name vollständig sichtbar', lang.passt, lang.schrift.toFixed(1) + ' pt');
 pruefe('nur der lange Name wird kleiner', lang.schrift < name, lang.schrift.toFixed(1) + ' < ' + name.toFixed(1));
 
+/* Kein Wert darf an der Spaltenbreite scheitern – „Rücksprache“ und ein
+   ausgeschriebenes Kürzel der Pflegekraft sind die längsten Einträge. */
+const abgeschnitten = await page.evaluate(() => {
+  const lang = { pflege: 'S. Gertzen', physio: 'Rücksprache' };
+  for (const bed of BEDS) Object.assign(state.beds[bed.id], state.beds[bed.id].name ? lang : {});
+  buildBody();
+  setPhysioRowHeight();
+  /* Ein Auswahlfeld meldet keinen Überlauf – es schneidet den Text still ab.
+     Gemessen wird deshalb der Text selbst gegen die Breite des Feldes. */
+  return [...document.querySelectorAll('#tbody tr')]
+    .filter(tr => getComputedStyle(tr).display !== 'none')
+    .flatMap(tr => [...tr.querySelectorAll('td input, td select')])
+    .filter(feld => {
+      if (getComputedStyle(feld.closest('td')).display === 'none' || !feld.value) return false;
+      const stil = getComputedStyle(feld);
+      const breite = widestText([feld.value],
+        stil.fontWeight + ' ' + stil.fontSize + ' ' + stil.fontFamily);
+      return breite > feld.clientWidth + 1;
+    })
+    .map(feld => feld.closest('td').className + ': ' + feld.value);
+});
+gleich('kein Inhalt läuft aus einer Zelle', abgeschnitten.join(' | '), '');
+
 /* Bettplatz und Name überlagern sich nicht (stehende Spalten sind gelöst) */
 const geometrie = await page.evaluate(() => {
   const bett = document.querySelector('tr[data-bed="0a"] td.col-bed').getBoundingClientRect();
@@ -90,18 +123,38 @@ gleich('keine stehende Spalte im Druck', geometrie.position, 'static');
 
 /* Passt auf ein Blatt – bei wenigen wie bei allen Betten */
 for (const anzahl of [1, 8, 13]) {
-  await page.evaluate(n => {
+  /* Aufbauen und gleich messen: page.pdf() des vorigen Durchgangs löst
+     afterprint aus und nimmt die Physio-Ansicht zurück – zwischen zwei
+     Aufrufen könnte das dazwischenfahren. Bei wenigen Zeilen wird alles sehr
+     groß gesetzt; die Werte müssen trotzdem in ihre Spalten passen. */
+  const zuLang = await page.evaluate(n => {
     BEDS.forEach((bed, i) => {
       const d = state.beds[bed.id];
       d.name = i < n ? 'Bergmann, Karl-Heinz' : '';
       d.status = i < n ? '●' : '';
       d.disziplin = i < n ? 'KARD' : '';
+      d.pflege = i < n ? 'S. Gertzen' : '';
+      d.telefon = i < n ? '4210' : '';
+      d.physio = i < n ? 'Rücksprache' : '';
     });
     buildBody();
     setPhysioRowHeight();
     document.body.classList.add('physio-druck');
+    return [...document.querySelectorAll('#tbody td input, #tbody td select')]
+      .filter(feld => feld.value && getComputedStyle(feld.closest('td')).display !== 'none')
+      .map(feld => {
+        const stil = getComputedStyle(feld);
+        return { spalte: feld.closest('td').classList[0], wert: feld.value,
+                 text: widestText([feld.value],
+                   stil.fontWeight + ' ' + stil.fontSize + ' ' + stil.fontFamily),
+                 platz: feld.clientWidth };
+      })
+      .filter(m => m.text > m.platz + 1)
+      .map(m => m.spalte + ' „' + m.wert + '“ ' + Math.round(m.text) + '/' + m.platz);
   }, anzahl);
   await page.waitForTimeout(150);
+  gleich('bei ' + anzahl + ' Betten läuft kein Wert aus seiner Spalte',
+    [...new Set(zuLang)].join(' | '), '');
   const pdf = await page.pdf({ format: 'A4', landscape: true,
     margin: { top: '7mm', bottom: '7mm', left: '7mm', right: '7mm' } });
   const treffer = Buffer.from(pdf).toString('latin1')
