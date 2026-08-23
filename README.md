@@ -143,7 +143,9 @@ Spalte der Tafel zugeordnet.
   Anwesenheitsstatus **oder** eingetragener Fachdisziplin, unabhängig davon, welche Werte in
   den Einstellungen hinterlegt sind; `gesperrt` oder `Reinigung` im Feld Patientenname zählt
   nie), maximale Bettenzahl als Eingabefeld mit
-  festem Zusatz „+ 1“ für das Notbett, **Meldestatus** als farbige Kachel und Anzahl der
+  festem Zusatz „+ 1“ für das Notbett – zulässig sind **1 bis 12** regulär betreibbare Plätze
+  (`MAX_BETTEN_MIN` / `MAX_BETTEN_MAX`), eine Zahl daneben wird rot umrandet, beim Verlassen
+  des Feldes auf die nächstgelegene zulässige gesetzt und geht nicht in die Statistik ein –, **Meldestatus** als farbige Kachel und Anzahl der
   fälligen Screenings. Die Stufen des Meldestatus stehen in den Einstellungen unter
   „Meldestatus“ – ausgeliefert grün, gelb und rot, ergänzbar und umbenennbar, **jede mit
   eigener Farbe** aus derselben Auswahl wie die übrigen Kategorien. Die Schriftfarbe rechnet
@@ -443,7 +445,9 @@ Spalte der Tafel zugeordnet.
   eine Momentaufnahme ab und ordnet sie der laufenden Schicht zu; eine spätere Aufnahme ersetzt
   die frühere derselben Schicht. Gezählt werden nur belegte Bettplätze; `gesperrt` und
   `Reinigung` bleiben außen vor, ebenso die externe Dialyse (sie steht als Intervention
-  `ext. Dial.`). Schichten (Bezeichnung und Beginn, ab Werk 06:00 / 14:12 / 20:30), Abstand,
+  `ext. Dial.`). **Beatmung und Dialyse zählen nur als laufendes Verfahren**: Ein Wert in
+  Klammern – `(INV)`, `(CiCa)` – bedeutet geplant, beendet oder nur zeitweise und bleibt außen
+  vor. Schichten (Bezeichnung und Beginn, ab Werk 06:00 / 14:12 / 20:30), Abstand,
   Aufbewahrung und Sichtbarkeit der Schaltfläche stehen in den Einstellungen unter „Statistik“.
   Die Daten liegen im `localStorage` unter `belegungstafel.statistik`, enthalten keine
   Patientendaten und gehen in die automatische Sicherung mit ein. Erfasst wird nur, solange die
@@ -494,7 +498,8 @@ Spalte der Tafel zugeordnet.
   unverändert. Die aktive Kennung steht in den Einstellungen unter „Daten“
 - **Blatt für die Physiotherapie** über die Schaltfläche **Druck Physio**: eigener Ausdruck
   auf **A4 quer in Schwarzweiß** mit Bettplatz, Patientenname, Fachdisziplin, Isolation,
-  Telefon und Pflegekraft. Aufgeführt werden nur belegte Bettplätze – freie sowie `gesperrt`
+  Telefon, Pflegekraft und **Physiotherapie** – die Verordnung ist der Zweck des Blattes und
+  musste vorher aus der Tafel abgeschrieben werden. Aufgeführt werden nur belegte Bettplätze – freie sowie `gesperrt`
   und `Reinigung` entfallen. Zeilenhöhe und Schrift werden aus der Zahl der Zeilen berechnet
   (`setPhysioRowHeight`), sodass bei wenigen Patienten sehr groß und bei voller Station immer
   noch auf einer Seite gedruckt wird; ein besonders langer Name wird allein in seiner Zeile
@@ -519,7 +524,7 @@ Spalte der Tafel zugeordnet.
 
 ## Prüfungen
 
-Im Ordner `tests/` liegen **22 Testdateien**, die die Tafel in einem echten Browser bedienen
+Im Ordner `tests/` liegen **23 Testdateien**, die die Tafel in einem echten Browser bedienen
 (Chromium über Playwright) und das Ergebnis prüfen – Zählung, Pfeile, Ausdruck, Zoom,
 Bildschirmschoner, Tag-/Nachtansicht, Verlauf, Sicherung, Einstellungen, Pflichtangaben,
 Physio- und Visitendruck, Stationsvorgabe, Statistik, Sichtschutz, Sicherheit der Ausgaben,

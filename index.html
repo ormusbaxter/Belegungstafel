@@ -36,8 +36,8 @@
     </div>
     <div class="stat stat-max" id="maxCard">
       <span class="statval">
-        <input type="number" id="maxBetten" min="0" max="99" step="1" placeholder="–"
-               aria-label="Maximale Bettenzahl ohne Notbett">
+        <input type="number" id="maxBetten" min="1" max="12" step="1" placeholder="–"
+               aria-label="Maximale Bettenzahl ohne Notbett (1 bis 12)">
         <span class="plusone">+ 1</span>
       </span>
       <span class="statlabel">max. Bettenzahl</span>
@@ -255,6 +255,11 @@
           beschreibt den Bettplatz statt eines Patienten: Er wird kursiv dargestellt, färbt die
           Zeile grau und zählt nie als belegt – auch dann nicht, wenn noch ein Status oder eine
           Fachdisziplin eingetragen ist.</li>
+        <li><b>max. Bettenzahl</b> nimmt <b>1 bis 12</b> regulär betreibbare Plätze auf; das
+          Notbett kommt als festes <b>+ 1</b> hinzu. Eine Zahl außerhalb dieser Spanne wird
+          <b>rot umrandet</b> und beim Verlassen des Feldes auf die nächstgelegene zulässige
+          gesetzt – ein Zahlendreher soll nicht unbemerkt in die Auslastung der Statistik
+          eingehen. Das Feld darf leer bleiben; die Auslastung entfällt dann.</li>
         <li><b>Screening fällig</b> zählt die Bettplätze, deren Screening-Datum erreicht oder
           überschritten ist. Ist mindestens eines fällig, wird die Kennzahl im Kopf
           <b>rot hinterlegt</b>, bis alle Termine erledigt oder neu gesetzt sind.</li>

@@ -29,6 +29,32 @@ gleich('Isolationen: bestätigt und Verdacht', werte.isolation, 2);
 gleich('Beatmungen', werte.beatmung, 2);
 gleich('Dialysen ohne externe Dialyse', werte.dialyse, 1);
 
+/* ---- Klammerwerte zählen nicht: geplant, beendet oder nur zeitweise ---- */
+const klammern = await page.evaluate(() => {
+  const vorher = { beatmung: state.beds['0b'].beatmung, dialyse: state.beds['0a'].dialyse };
+  /* 0a: (CiCa) statt CiCa – kein laufendes Verfahren mehr.
+     0b: (NIV) allein zählt nicht, 1a bekommt (INV) und NIV und zählt einmal. */
+  state.beds['0a'].dialyse = '(CiCa)';
+  state.beds['0b'].beatmung = ['(NIV)'];
+  state.beds['1a'].beatmung = ['(INV)', 'NIV'];
+  const jetzt = statistikKennzahlen();
+  Object.assign(state.beds['0b'], { beatmung: vorher.beatmung });
+  state.beds['0a'].dialyse = vorher.dialyse;
+  state.beds['1a'].beatmung = [];
+  return jetzt;
+});
+gleich('Beatmung nur ohne Klammern', klammern.beatmung, 2);
+gleich('Dialyse nur ohne Klammern', klammern.dialyse, 0);
+
+/* Eine unplausible Bettenzahl geht nicht in die Erfassung ein */
+const unplausibel = await page.evaluate(() => {
+  state.station.maxBetten = '40';
+  const jetzt = statistikKennzahlen().max;
+  state.station.maxBetten = '12';
+  return jetzt;
+});
+gleich('unplausible Bettenzahl wird nicht erfasst', unplausibel, null);
+
 /* ---- Zuordnung zur Schicht ---- */
 const schicht = t => page.evaluate(zeit => {
   const s = schichtAm(new Date(zeit));

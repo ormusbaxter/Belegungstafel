@@ -21,16 +21,24 @@ let statistikTimer = null;
  * ------------------------------------------------------------------ */
 function statistikKennzahlen() {
   const belegte = BEDS.map(bed => state.beds[bed.id]).filter(isOccupied);
-  const zahl = parseInt(state.station.maxBetten, 10);
+  const zahl = maxBettenZahl(state.station.maxBetten);
   return {
     belegt: belegte.length,
-    max: Number.isFinite(zahl) ? zahl : null,
+    /* Eine unplausible Bettenzahl wird nicht erfasst – sie stünde sonst als
+       Nenner der Auslastung im Weg. */
+    max: maxBettenPlausibel(zahl) ? zahl : null,
     /* Isolation zählt, sobald ein Keim eingetragen ist – bestätigt oder Verdacht. */
     isolation: belegte.filter(d => Array.isArray(d.isolation) && d.isolation.length > 0).length,
-    beatmung: belegte.filter(d => Array.isArray(d.beatmung) && d.beatmung.length > 0).length,
+    /* Beatmung und Dialyse zählen nur als laufendes Verfahren. Ein Wert in
+       Klammern – (INV), (CiCa) – bedeutet geplant, beendet oder nur zeitweise
+       und bleibt deshalb außen vor. Ein Bettplatz mit (INV) und NIV zählt
+       einmal, einer mit ausschließlich (INV) gar nicht. */
+    beatmung: belegte.filter(d => Array.isArray(d.beatmung) &&
+                                  d.beatmung.some(wert => !istKlammer(wert))).length,
     /* Nur die Spalte Dialyse; die externe Dialyse steht als Intervention
        „ext. Dial.“ in einer anderen Spalte und zählt hier nicht mit. */
-    dialyse: belegte.filter(d => String(d.dialyse || '').trim() !== '').length,
+    dialyse: belegte.filter(d => String(d.dialyse || '').trim() !== '' &&
+                                 !istKlammer(d.dialyse)).length,
     faecher: faecherZaehlen(belegte)
   };
 }

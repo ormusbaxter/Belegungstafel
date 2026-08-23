@@ -24,7 +24,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.30.0';
+const VERSION = '2.31.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -366,6 +366,22 @@ const STATION_FIELDS = [
 ];
 const STATION_KEYS = ['maxBetten', 'meldestatus', 'aufnahmen', 'infos',
                       ...STATION_FIELDS.flatMap(f => [f.key, f.key + 'Tel'])];
+
+/* Plausible maximale Bettenzahl: 1 bis 12 regulär betreibbare Plätze. Das
+   Notbett steht als festes „+ 1“ daneben und wird hier nicht mitgezählt –
+   eingetragene 12 bedeuten also 13 Plätze insgesamt. Wer die Station
+   umbaut, ändert die beiden Grenzen hier. */
+const MAX_BETTEN_MIN = 1;
+const MAX_BETTEN_MAX = 12;
+
+/* Eingetragene Bettenzahl als Zahl, sonst null (leeres oder unlesbares Feld) */
+const maxBettenZahl = wert => {
+  const zahl = parseInt(wert, 10);
+  return Number.isFinite(zahl) ? zahl : null;
+};
+const maxBettenPlausibel = zahl =>
+  zahl !== null && zahl >= MAX_BETTEN_MIN && zahl <= MAX_BETTEN_MAX;
+const maxBettenKlemmen = zahl => Math.min(MAX_BETTEN_MAX, Math.max(MAX_BETTEN_MIN, zahl));
 
 const COL_BY_KEY = Object.fromEntries(COLUMNS.map(c => [c.key, c]));
 
@@ -763,6 +779,23 @@ const clockMinutes = value => {
   const parts = String(value).split(':');
   return (parseInt(parts[0], 10) || 0) * 60 + (parseInt(parts[1], 10) || 0);
 };
+
+/* Spalten des Physio-Blattes, deren Schrift sich nach dem Inhalt richtet,
+   mit ihrem Anteil an der Satzbreite von 283 mm. Die Anteile müssen zu den
+   Breiten unter body.physio-druck in styles.css passen –
+   setPhysioRowHeight() rechnet daraus die Schriftgrößen.
+
+   Der Name bekommt sein Maß je Zeile, die übrigen je Spalte: Verordnungen
+   und Kürzel stehen untereinander und sollen sich vergleichen lassen. Ohne
+   diese Grenze stünde bei drei Patienten ein „K…“ statt „KARD“ auf dem
+   Blatt – die Schrift richtet sich sonst allein nach der Zeilenhöhe. */
+const PHYSIO_NAME_ANTEIL = 0.25;
+const PHYSIO_WERT_SPALTEN = [
+  ['disziplin', 0.09],
+  ['telefon',   0.09],
+  ['pflege',    0.14],
+  ['physio',    0.15]
+];
 
 /* Größe der Darstellung in Prozent – muss vor dem ersten Lesen der
    Einstellungen bereitstehen. */
