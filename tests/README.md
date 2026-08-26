@@ -78,7 +78,7 @@ Zwei Dinge sind dabei zu beachten:
 | `10-pflichtangaben.mjs` | fehlende Angaben bei belegtem Bett, roter Screening-Hinweis |
 | `11-physio-druck.mjs` | Blatt für die Physiotherapie: Spalten, Zeilen, Schriftgrößen, eine Seite |
 | `12-vorgaben.mjs` | Vorgabedatei erzeugen, Geltung, Zurücksetzen, fehlerhafte Datei – **läuft allein** |
-| `23-kopfbereich.mjs` | Plausibilität der maximalen Bettenzahl: Markierung, Zurechtrücken, leeres Feld |
+| `23-kopfbereich.mjs` | Plausibilität der maximalen Bettenzahl: Markierung, Zurechtrücken, leeres Feld, Nenner der Kennzahl „belegte Betten“ |
 | `13-statistik.mjs` | Kennzahlen, Schichtzuordnung über Mitternacht, Fenster, Verlaufsbild, Zeitraum von/bis, Einstellungen |
 | `14-datenschutz-verstorben.mjs` | Umfang des Sichtschutzes, Kreuz und dunkle Namenszelle |
 | `15-ausgaben-sicherheit.mjs` | Formeln in der CSV, Prüfung importierter Statistik, Freitext bleibt Text |

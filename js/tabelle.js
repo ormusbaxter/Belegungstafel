@@ -1253,8 +1253,14 @@ function commitMulti() {
  * ------------------------------------------------------------------ */
 function renderStats() {
   const beds = BEDS.map(b => state.beds[b.id]);
-  $('#statBelegt').textContent =
-    beds.filter(isOccupied).length + ' / ' + BEDS.length;
+  const belegt = beds.filter(isOccupied).length;
+  const gesamt = bettenGesamt();
+  $('#statBelegt').textContent = belegt + ' / ' + gesamt;
+  $('#belegtCard').title = maxBettenPlausibel(maxBettenZahl(state.station.maxBetten))
+    ? belegt + ' von ' + gesamt + ' betreibbaren Plätzen belegt – ' + (gesamt - 1) +
+      ' zuzüglich Notbett, siehe „max. Bettenzahl“'
+    : belegt + ' von ' + gesamt + ' Bettplätzen der Tafel belegt – ohne eingetragene ' +
+      'maximale Bettenzahl gilt die Zahl der eingerichteten Plätze';
 
   /* Fällige Screenings werden im Kopf rot hervorgehoben. */
   const faellig = beds.filter(b => b.abstriche && b.abstriche <= isoToday()).length;
