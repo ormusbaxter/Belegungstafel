@@ -68,6 +68,52 @@ pruefe('Kopfbereich läuft nicht mehr mit',
 await setzeEinstellungen(page, { zoom: 5000 });
 gleich('zu großer Wert wird begrenzt', (await mass()).zoom, '3');
 
+/* ---- Klapplisten stehen in jedem Maßstab an ihrer Zelle ----
+   Die Liste hängt am Seitenkörper, nicht in der Tabelle; sie muss den Zoom
+   deshalb selbst nachvollziehen. Geprüft werden Lage und Maßstab. */
+const klappliste = async (spalte) => {
+  await page.click(`tr[data-bed="0a"] td.col-${spalte} .combobtn`);
+  await page.waitForTimeout(200);
+  const werte = await page.evaluate(sp => {
+    const feld = document.querySelector(`tr[data-bed="0a"] td.col-${sp} input`)
+      .getBoundingClientRect();
+    const liste = document.querySelector('.combolist').getBoundingClientRect();
+    return {
+      dx: Math.round(liste.left - feld.left),
+      dy: Math.round(liste.top - feld.bottom),
+      breite: Math.round(liste.width),
+      hoehe: Math.round(liste.height),
+      imBild: liste.left >= 0 && liste.top >= 0 &&
+              liste.right <= window.innerWidth + 1 && liste.bottom <= window.innerHeight + 1
+    };
+  }, spalte);
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(100);
+  return werte;
+};
+
+await setzeEinstellungen(page, { zoom: 100 });
+const liste100 = await klappliste('telefon');
+gleich('Klappliste bündig zur Zelle (100 %)', liste100.dx, 0);
+pruefe('und dicht darunter (100 %)', liste100.dy >= 0 && liste100.dy <= 6, liste100.dy + ' px');
+
+await setzeEinstellungen(page, { zoom: 70 });
+const liste70 = await klappliste('telefon');
+gleich('Klappliste bündig zur Zelle (70 %)', liste70.dx, 0);
+pruefe('und dicht darunter (70 %)', liste70.dy >= 0 && liste70.dy <= 6, liste70.dy + ' px');
+pruefe('dabei im Maßstab der Tafel',
+  Math.abs(liste70.breite - liste100.breite * 0.7) < 4,
+  liste100.breite + ' px → ' + liste70.breite + ' px');
+pruefe('und vollständig im Bild', liste70.imBild);
+
+await setzeEinstellungen(page, { zoom: 100 });
+const namen100 = await klappliste('name');
+await setzeEinstellungen(page, { zoom: 50 });
+const namen50 = await klappliste('name');
+gleich('auch die Namensliste sitzt an ihrer Zelle (50 %)', namen50.dx, 0);
+pruefe('halbe Größe', Math.abs(namen50.hoehe - namen100.hoehe * 0.5) < 6,
+  namen100.hoehe + ' px → ' + namen50.hoehe + ' px');
+
 /* ---- Der Block unter der Tafel füllt die Resthöhe ---- */
 await setzeEinstellungen(page, { zoom: 100 });
 

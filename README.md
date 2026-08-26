@@ -104,7 +104,7 @@ Spalte der Tafel zugeordnet.
 |---|---|---|
 | Auswahlliste | Anwesenheitsstatus, Fachdisziplin, Dialyse, TTM, Intervention, Kostform, Physiotherapie, Devices | Klick auf die Zelle, Wert wählen; leerer Eintrag setzt zurück |
 | Mehrfachauswahl | Beatmungsform, Kreislaufunterstützung, Therapielimitierung | Klick öffnet Dialog, mehrere Einträge kombinierbar |
-| Freitext mit Klappliste | Patientenname, Telefon | frei tippen oder über `▾` bzw. Alt + Pfeil nach unten die vollständige Liste öffnen |
+| Freitext mit Klappliste | Patientenname, Telefon | frei tippen oder über `▾` bzw. Alt + Pfeil nach unten die vollständige Liste öffnen. Die Liste hängt am Seitenkörper, damit der Tabellenrahmen sie nicht beschneidet, und trägt den Maßstab der Tafel über `transform: scale()` – so steht sie in jeder Größe der Darstellung an ihrer Zelle (`openCombo()` in `js/tabelle.js`) |
 | Datum | Abstriche | Klick öffnet Dialog mit Datumsfeld und den Schaltflächen „nächster Montag“, „übernächster Montag“ und „löschen“ |
 | Keimliste | Isolation | Klick öffnet Dialog; Häkchen = bestätigt, zusätzlich „V. a.“ = Verdacht |
 | Ankreuzfeld | privat, Norton / Pflegestatus | direkt anklicken; „Norton“ setzt zusätzlich den nächsten Termin |

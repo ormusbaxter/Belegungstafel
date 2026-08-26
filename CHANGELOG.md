@@ -4,6 +4,25 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.35.1
+
+- **Klapplisten standen bei verkleinerter Tafel neben ihrer Zelle.** Betroffen waren die
+  Vorschlagslisten der Freitextfelder – Patientenname und Telefon –, sobald die Größe der
+  Darstellung unter 100 % lag: Die Liste erschien versetzt, statt unter dem Feld zu stehen.
+- **Ursache**: Die Liste hängt am Seitenkörper und nicht in der Tabelle; sie muss den Zoom
+  deshalb selbst nachvollziehen. Das geschah bisher über `zoom`, und dort rechnet der Browser
+  `left` und `top` in den eigenen Maßstab des Elements um – je nach Browserfassung
+  unterschiedlich. Die Umrechnung im Quelltext passte damit nicht überall
+- **Behoben**, indem der Maßstab jetzt über `transform: scale()` gesetzt wird: Ein Maßstab aus
+  `transform` lässt `left` und `top` unverändert, beide bleiben Bildschirmpunkte – dieselbe
+  Einheit, in der auch gemessen wird. Damit steht die Liste in jeder Browserfassung an ihrer
+  Zelle
+- nebenbei: Die Mindestbreite wird jetzt **vor** dem Messen gesetzt, damit eine Liste am
+  rechten Bildrand nicht mehr über den Schirm hinausläuft; nach oben ausweichende Listen
+  bleiben mit vier Pixeln Abstand im Bild
+- `tests/04-zoom.mjs` prüft Lage und Maßstab der Klapplisten bei 100 %, 70 % und 50 %
+  (33 statt 27 Prüfungen)
+
 ## 2.35.0
 
 - **Die Kurzanleitung ist für die Schicht geschrieben, nicht für die Administration.** Sie

@@ -67,18 +67,33 @@ function openCombo(input, col) {
   });
 
   document.body.appendChild(list);
-  /* Gemessen wird sichtbar auf dem Schirm, gesetzt wird im eigenen Maßstab
-     der Liste – deshalb die Umrechnung über den Zoom. */
+
+  /* Setzen und Messen im selben Maßstab.
+   *
+   * Die Liste hängt am Seitenkörper, nicht in der Tabelle, und wird über
+   * `transform: scale()` auf die Größe der Tafel gebracht. Ein Maßstab aus
+   * `transform` verändert die Koordinaten von `left` und `top` nicht: Beide
+   * bleiben Bildschirmpunkte, dieselbe Einheit, in der auch gemessen wird.
+   * Mit `zoom` war das nicht so – dort rechnet der Browser die Angaben in
+   * den eigenen Maßstab des Elements um, und zwar je nach Fassung
+   * unterschiedlich. Die Klappliste stand dann bei verkleinerter Tafel
+   * neben ihrer Zelle statt an ihr.
+   *
+   * Die eigene Breite wird dagegen im unskalierten Maß gesetzt – sie gehört
+   * zum Inhalt, den der Maßstab anschließend mitnimmt.
+   */
   const rect = input.getBoundingClientRect();
+  list.style.minWidth = Math.round(rect.width / zoomFactor) + 'px';
+  /* Erst nach der Mindestbreite messen, sonst geht die Liste am rechten
+     Rand über den Schirm hinaus. */
   const own = list.getBoundingClientRect();
   const below = window.innerHeight - rect.bottom;
-  const left = Math.min(rect.left, window.innerWidth - own.width - 8);
+  const left = Math.max(4, Math.min(rect.left, window.innerWidth - own.width - 8));
   const top = below < own.height && rect.top > own.height
-    ? rect.top - own.height - 2
+    ? Math.max(4, rect.top - own.height - 2)
     : rect.bottom + 2;
-  list.style.left = Math.round(left / zoomFactor) + 'px';
-  list.style.top = Math.round(top / zoomFactor) + 'px';
-  list.style.minWidth = Math.round(rect.width / zoomFactor) + 'px';
+  list.style.left = Math.round(left) + 'px';
+  list.style.top = Math.round(top) + 'px';
   comboOpen = { list, input };
 }
 
