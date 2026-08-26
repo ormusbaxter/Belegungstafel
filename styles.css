@@ -32,6 +32,11 @@
   /* Hervorhebung fälliger Screenings im Kopf. Die Farben des Meldestatus
      stehen seit 2.16.0 in den Einstellungen, nicht mehr hier. */
   --warnung: #b3261e;
+  /* Auslastung der Station in der Kachel „belegte Betten“: das letzte freie
+     Bett gelb, kein freies Bett rot (dieselbe Farbe wie die Warnung). Gelb
+     trägt dunkle Schrift – auf diesem Ton wäre Weiß nicht zu lesen. */
+  --knapp: #e8a300;
+  --knapp-ink: #12181f;
   --pfeil-auf: #2f7d32;
   --pfeil-ab: #8e1c1c;
   --luecke: rgba(179, 38, 30, .10);
@@ -98,6 +103,8 @@ html[data-theme="dark"] {
   --iso-zeile: #332c12;
   --limit: #c792ea;
   --warnung: #c0392b;
+  --knapp: #d9a520;
+  --knapp-ink: #12181f;
   --pfeil-auf: #5cb860;
   --pfeil-ab: #e46b6b;
   --luecke: rgba(228, 107, 107, .16);
@@ -261,6 +268,16 @@ body {
 .stat.faellig { background: var(--warnung); border-color: var(--warnung); }
 .stat.faellig .statval { color: #fff; }
 .stat.faellig .statlabel { color: #fff; }
+
+/* Auslastung: kein Bett mehr frei = rot, das letzte Bett frei = gelb.
+   Darunter bleibt die Kachel neutral – eine Tafel, die ständig färbt, sagt
+   nichts mehr. Dieselbe Bildsprache wie bei den fälligen Screenings. */
+.stat.voll { background: var(--warnung); border-color: var(--warnung); }
+.stat.voll .statval,
+.stat.voll .statlabel { color: #fff; }
+.stat.knapp { background: var(--knapp); border-color: var(--knapp); }
+.stat.knapp .statval,
+.stat.knapp .statlabel { color: var(--knapp-ink); }
 
 /* Maximale Bettenzahl */
 .stat-max .statval { display: flex; align-items: baseline; gap: 4px; }

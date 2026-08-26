@@ -144,7 +144,9 @@ Spalte der Tafel zugeordnet.
   den Einstellungen hinterlegt sind; `gesperrt` oder `Reinigung` im Feld Patientenname zählt
   nie). **Gemessen wird an der maximalen Bettenzahl zuzüglich Notbett** (`bettenGesamt()`):
   Steht dort 8, lautet die Anzeige `x / 9`; ohne Angabe oder bei einer unplausiblen Zahl gilt
-  die Zahl der eingerichteten Bettplätze. Daneben die maximale Bettenzahl als Eingabefeld mit
+  die Zahl der eingerichteten Bettplätze. Die Kachel **färbt sich nach der Auslastung**:
+  **kein Bett mehr frei rot** (`--warnung`), **noch genau ein Bett frei gelb** (`--knapp`,
+  dunkle Schrift), darunter neutral; der Zeiger nennt die Zahl der freien Betten. Daneben die maximale Bettenzahl als Eingabefeld mit
   festem Zusatz „+ 1“ für das Notbett – zulässig sind **1 bis 12** regulär betreibbare Plätze
   (`MAX_BETTEN_MIN` / `MAX_BETTEN_MAX`), eine Zahl daneben wird rot umrandet, beim Verlassen
   des Feldes auf die nächstgelegene zulässige gesetzt und geht nicht in die Statistik ein –, **Meldestatus** als farbige Kachel und Anzahl der
