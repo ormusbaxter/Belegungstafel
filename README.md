@@ -139,10 +139,12 @@ Spalte der Tafel zugeordnet.
   (Einstellungen → Bettplätze, Kästchen hinter der Bezeichnung). Ab Werk unter 0 b, 1 b, 2, 3,
   4 b, 5, 6 b und 7 – also überall dort, wo ein Zimmer endet, und nicht zwischen den beiden
   Plätzen eines Zimmers. Die Linie gilt auch auf dem Visitenausdruck
-- **Kopfbereich**: belegte Betten (x / 13; belegt ist jeder Bettplatz mit gesetztem
+- **Kopfbereich**: belegte Betten (belegt ist jeder Bettplatz mit gesetztem
   Anwesenheitsstatus **oder** eingetragener Fachdisziplin, unabhängig davon, welche Werte in
   den Einstellungen hinterlegt sind; `gesperrt` oder `Reinigung` im Feld Patientenname zählt
-  nie), maximale Bettenzahl als Eingabefeld mit
+  nie). **Gemessen wird an der maximalen Bettenzahl zuzüglich Notbett** (`bettenGesamt()`):
+  Steht dort 8, lautet die Anzeige `x / 9`; ohne Angabe oder bei einer unplausiblen Zahl gilt
+  die Zahl der eingerichteten Bettplätze. Daneben die maximale Bettenzahl als Eingabefeld mit
   festem Zusatz „+ 1“ für das Notbett – zulässig sind **1 bis 12** regulär betreibbare Plätze
   (`MAX_BETTEN_MIN` / `MAX_BETTEN_MAX`), eine Zahl daneben wird rot umrandet, beim Verlassen
   des Feldes auf die nächstgelegene zulässige gesetzt und geht nicht in die Statistik ein –, **Meldestatus** als farbige Kachel und Anzahl der

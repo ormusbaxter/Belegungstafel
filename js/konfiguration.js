@@ -24,7 +24,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.32.0';
+const VERSION = '2.33.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -382,6 +382,17 @@ const maxBettenZahl = wert => {
 const maxBettenPlausibel = zahl =>
   zahl !== null && zahl >= MAX_BETTEN_MIN && zahl <= MAX_BETTEN_MAX;
 const maxBettenKlemmen = zahl => Math.min(MAX_BETTEN_MAX, Math.max(MAX_BETTEN_MIN, zahl));
+
+/* Bezugsgröße der Anzeige „belegte Betten“: die im Kopf eingetragene maximale
+   Bettenzahl zuzüglich Notbett. Sie beschreibt, wie viele Plätze die Station
+   heute betreiben kann – und das ist die Zahl, an der sich die Belegung
+   messen soll, nicht die Zahl der eingerichteten Zeilen. Fehlt die Angabe
+   oder ist sie unplausibel, bleibt es bei den Bettplätzen der Tafel; ein
+   Bruch ohne Nenner wäre schlechter als der bisherige. */
+function bettenGesamt() {
+  const zahl = maxBettenZahl(state.station.maxBetten);
+  return maxBettenPlausibel(zahl) ? zahl + 1 : BEDS.length;
+}
 
 const COL_BY_KEY = Object.fromEntries(COLUMNS.map(c => [c.key, c]));
 

@@ -4,6 +4,21 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.33.0
+
+- **Die Kennzahl „belegte Betten“ misst an der maximalen Bettenzahl.** Bisher stand dort fest
+  die Zahl der eingerichteten Zeilen (`x / 13`), gleich wie viele Plätze die Station heute
+  tatsächlich betreiben kann. Nenner ist jetzt die im Kopf eingetragene **max. Bettenzahl
+  zuzüglich Notbett**: Steht dort 8, lautet die Anzeige `x / 9`. Damit sagt der Kopf, wie voll
+  die Station ist – dieselbe Bezugsgröße, mit der die Statistik seit 2.31.0 ihre Auslastung
+  rechnet
+- **leer oder unplausibel bleibt tragfähig**: Fehlt die Angabe oder steht während des Tippens
+  eine Zahl außerhalb von 1 bis 12 im Feld, gilt weiterhin die Zahl der eingerichteten
+  Bettplätze. Ein Bruch mit unsinnigem oder fehlendem Nenner erscheint nicht
+- der Zeiger auf der Kachel nennt die Herkunft des Nenners („… von 9 betreibbaren Plätzen
+  belegt – 8 zuzüglich Notbett“ bzw. „… Bettplätzen der Tafel“)
+- `tests/23-kopfbereich.mjs` prüft die neue Bezugsgröße mit (25 statt 17 Prüfungen)
+
 ## 2.32.0
 
 - **Spaltenbreiten lassen sich von Hand einstellen.** Bisher bemaß die Tafel ihre Spalten

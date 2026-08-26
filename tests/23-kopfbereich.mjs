@@ -63,6 +63,45 @@ await page.reload();
 await page.waitForTimeout(400);
 gleich('Bettenzahl bleibt erhalten', await page.inputValue('#maxBetten'), '9');
 
+/* ---- Die Anzeige „belegte Betten“ misst an der Bettenzahl + Notbett ---- */
+const belegt = () => page.textContent('#statBelegt');
+const belegtTitel = () => page.locator('#belegtCard').getAttribute('title');
+
+await feld.fill('8');
+await feld.blur();
+await page.waitForTimeout(300);
+gleich('Nenner ist die Bettenzahl zuzüglich Notbett', await belegt(), '0 / 9');
+pruefe('Zeiger nennt die Herkunft des Nenners',
+  (await belegtTitel()).includes('betreibbaren Plätzen'), await belegtTitel());
+
+/* Ein belegtes Bett zählt gegen denselben Nenner */
+await page.selectOption('#tbody tr:first-child td.col-status select', '\u25cf');
+await page.waitForTimeout(250);
+gleich('Belegung zählt gegen die Bettenzahl', await belegt(), '1 / 9');
+
+/* Während des Tippens steht eine unplausible Zahl im Feld; der Nenner fällt
+   dann auf die eingerichteten Bettplätze zurück, statt Unsinn zu zeigen. */
+await feld.fill('40');
+await page.waitForTimeout(250);
+gleich('unplausible Zahl zählt nicht als Nenner', await belegt(), '1 / 13');
+await feld.blur();
+await page.waitForTimeout(300);
+gleich('zurechtgerückt gilt wieder die Bettenzahl', await belegt(), '1 / 13');
+
+await feld.fill('');
+await feld.blur();
+await page.waitForTimeout(300);
+gleich('ohne Angabe gelten die eingerichteten Bettplätze', await belegt(), '1 / 13');
+pruefe('Zeiger nennt die Bettplätze der Tafel',
+  (await belegtTitel()).includes('Bettplätzen der Tafel'), await belegtTitel());
+
+await feld.fill('6');
+await feld.blur();
+await page.waitForTimeout(300);
+await page.reload();
+await page.waitForTimeout(400);
+gleich('Nenner übersteht das Neuladen', await belegt(), '1 / 7');
+
 keineFehler(page);
 await browser.close();
 bilanz();

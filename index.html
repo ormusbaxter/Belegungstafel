@@ -30,7 +30,7 @@
   </div>
 
   <div class="stats">
-    <div class="stat">
+    <div class="stat" id="belegtCard">
       <span class="statval" id="statBelegt">0 / 13</span>
       <span class="statlabel">belegte Betten</span>
     </div>
@@ -249,6 +249,11 @@
         <b>Anwesenheitsstatus</b> – gleich welcher – <b>oder</b> eine <b>Fachdisziplin</b>
         eingetragen ist. Angekündigte Aufnahmen und anstehende Verlegungen zählen also mit,
         ebenso ein Patient, bei dem zunächst nur die Fachrichtung feststeht.</p>
+      <p>Gemessen wird an der <b>max. Bettenzahl zuzüglich Notbett</b>: Steht dort 12, lautet
+        die Anzeige <b>x / 13</b>. Damit steht im Kopf, wie viele der heute betreibbaren
+        Plätze belegt sind – und nicht, wie viele der eingerichteten Zeilen. Ist das Feld
+        leer oder trägt es eine unplausible Zahl, gilt weiterhin die Zahl der eingerichteten
+        Bettplätze.</p>
       <ul>
         <li>Weder Status noch Fachdisziplin = freier Bettplatz, zählt nicht.</li>
         <li>Ein Eintrag wie <b>gesperrt</b> oder <b>Reinigung</b> im Feld Patientenname

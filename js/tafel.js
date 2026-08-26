@@ -539,6 +539,9 @@ function init() {
   $('#maxBetten').addEventListener('input', event => {
     state.station.maxBetten = event.target.value;
     updateMaxTitle();
+    /* Die Bettenzahl ist der Nenner der Anzeige „belegte Betten“ – sie muss
+       mit der Eingabe mitgehen. */
+    renderStats();
     save();
   });
   $('#maxBetten').addEventListener('change', event => {
@@ -547,6 +550,7 @@ function init() {
     if (korrigiert) event.target.value = String(maxBettenKlemmen(zahl));
     state.station.maxBetten = event.target.value;
     updateMaxTitle();
+    renderStats();
     save();
     if (!korrigiert) return;
     /* Erst schreiben, dann melden – sonst überschreibt die Speichermeldung
