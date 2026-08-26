@@ -4,6 +4,29 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.32.0
+
+- **Spaltenbreiten lassen sich von Hand einstellen.** Bisher bemaß die Tafel ihre Spalten
+  allein: die ersten beiden nach ihren Werten, die Freitextspalten nach ihren Einträgen, den
+  Rest nach der in `js/konfiguration.js` hinterlegten Breite. Das trifft nicht jeden
+  Arbeitsplatz – auf einem breiten Monitor bleibt rechts Platz liegen, den „Sonstiges“
+  gebrauchen könnte, und wo die Isolation nie mehr als einen Keim trägt, steht sie unnötig
+  breit. **Bei gedrückter Strg-Taste** erscheint deshalb am rechten Rand jedes Spaltenkopfes
+  ein Griff; daran gezogen, folgt die Spalte sofort, und die Statuszeile nennt die neue
+  Breite. **Ein Doppelklick auf denselben Griff** gibt die Spalte an die automatische Breite
+  zurück
+- erst die gedrückte Taste macht die Ränder greifbar: Ohne sie bleibt der Kopf, was er war,
+  und ein Fehlgriff beim Klicken verstellt nichts
+- gezogene Breiten stehen als `breiten` bei den übrigen Einstellungen, überleben den Neustart
+  und **überstimmen jede eigene Rechnung der Tafel** – auch bei den selbst gemessenen Spalten.
+  Zulässig sind 30 bis 600 px (`BREITE_MIN`/`BREITE_MAX`); der Zoom wird mitgerechnet
+- **der Ausdruck bleibt unverändert.** Visiten- und Physio-Blatt teilen den Platz des Blattes
+  weiter selbst ein; die Griffe werden nicht mitgedruckt
+- unter **Einstellungen → Spaltenköpfe** steht, welche Spalten von Hand gezogen wurden, mit
+  ihrem Maß; dort lassen sie sich alle auf einmal zurücksetzen, ebenso über „Vorgabe“ des
+  Reiters
+- neue Prüfdatei `tests/24-spaltenbreite.mjs` (18 Prüfungen)
+
 ## 2.31.0
 
 Drei Anpassungen aus dem Stationsbetrieb, nachgetragen aus einem liegengebliebenen

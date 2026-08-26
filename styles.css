@@ -473,6 +473,38 @@ thead th {
   overflow-wrap: anywhere;
 }
 
+/* Griff zum Ziehen der Spaltenbreite.
+   Er sitzt immer am rechten Rand des Kopffeldes, bleibt aber unsichtbar und
+   unantastbar, solange Strg nicht gedrückt ist – ein Fehlklick im Kopf soll
+   die Tabelle nicht verstellen. */
+.spaltengriff {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 7px;
+  height: 100%;
+  z-index: 30;
+  cursor: col-resize;
+  pointer-events: none;
+  opacity: 0;
+}
+body.spaltenbreite .spaltengriff { pointer-events: auto; opacity: 1; }
+.spaltengriff::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--accent, #1e5f9e);
+}
+.spaltengriff:hover::before { top: 0; bottom: 0; width: 3px; }
+/* Während des Zuges hängt der Zeiger überall am Spaltenrand, und nichts
+   soll sich unter der Hand markieren lassen. */
+body.spaltenzug { cursor: col-resize; user-select: none; }
+body.spaltenzug .spaltengriff { opacity: 1; }
+
 tbody td {
   border-bottom: 1px solid var(--line-soft);
   border-right: 1px solid var(--line-soft);
@@ -1952,6 +1984,8 @@ body.saver-on { overflow: hidden; }
     border-radius: 0;
   }
   table { table-layout: fixed; width: 100%; min-width: 0; }
+  /* Die Griffe der Spaltenbreite gehören auf den Schirm, nicht aufs Blatt. */
+  .spaltengriff { display: none !important; }
   /* Die auf dem Schirm stehenden Spalten dürfen im Druck nicht verschoben
      werden – sonst rutschen Bettplatz und Status über die Nachbarspalte. */
   thead th, tbody td,

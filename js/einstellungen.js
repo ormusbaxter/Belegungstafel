@@ -544,6 +544,7 @@ function renderGeneralPane(pane) {
 
 /* Beschriftung der Spaltenköpfe */
 function renderHeaderPane(pane) {
+  draft.breiten = draft.breiten || {};
   pane.appendChild(el('h3', null, 'Spaltenköpfe'));
   pane.appendChild(el('p', 'panehint',
     'Beschriftung der Tabellenköpfe. Ein leeres Feld lässt den Kopf frei; ' +
@@ -561,6 +562,35 @@ function renderHeaderPane(pane) {
     list.appendChild(row);
   }
   pane.appendChild(list);
+
+  pane.appendChild(el('h3', null, 'Spaltenbreiten'));
+  pane.appendChild(el('p', 'panehint',
+    'Die Tafel bemisst ihre Spalten selbst. Wer eine Spalte anders haben will, hält an der ' +
+    'Tafel Strg gedrückt und zieht ihren rechten Rand im Tabellenkopf; ein Doppelklick auf ' +
+    'denselben Rand gibt sie an die automatische Breite zurück. Gezogene Breiten gelten für ' +
+    'diesen Arbeitsplatz, nicht für den Ausdruck.'));
+
+  const gezogen = () => COLUMNS.filter(col => Number.isFinite(draft.breiten[col.key]));
+  const stand = el('p', 'panehint');
+  const breitenRow = el('div', 'setrow');
+  const zurueck = el('button', 'entrybtn', 'Alle zurücksetzen');
+  zurueck.type = 'button';
+  zurueck.title = 'alle von Hand gezogenen Spaltenbreiten verwerfen';
+  const zeige = () => {
+    const liste = gezogen();
+    stand.textContent = liste.length
+      ? 'Von Hand gezogen: ' + liste.map(col => col.label + ' (' + draft.breiten[col.key] + ' px)').join(', ')
+      : 'Alle Spalten stehen auf ihrer automatischen Breite.';
+    zurueck.disabled = !liste.length;
+  };
+  zurueck.addEventListener('click', () => {
+    draft.breiten = {};
+    zeige();
+  });
+  zeige();
+  breitenRow.appendChild(zurueck);
+  pane.appendChild(breitenRow);
+  pane.appendChild(stand);
 }
 
 /* Inhalte der Diaschau: Dateien aus dem Ordner „slides“ und eigene Hinweise */
@@ -1400,6 +1430,11 @@ function commitSettings() {
   }
   draft.privacy.seconds = Math.min(3600, Math.max(5, draft.privacy.seconds || 120));
   draft.zoom = clampZoom(draft.zoom);
+  /* Nur bekannte Spalten, nur brauchbare Maße: Was hier fehlt, bemisst die
+     Tafel wieder selbst. */
+  draft.breiten = Object.fromEntries(COLUMNS
+    .filter(col => Number.isFinite((draft.breiten || {})[col.key]))
+    .map(col => [col.key, clampBreite(draft.breiten[col.key])]));
   if (!CLOCK.test(draft.night.from)) draft.night.from = DEFAULT_NIGHT.from;
   if (!CLOCK.test(draft.night.to)) draft.night.to = DEFAULT_NIGHT.to;
 
@@ -1475,7 +1510,10 @@ function resetCategory() {
     if (!confirm('Inhalte des Bildschirmschoners auf die Vorgabe zurücksetzen?')) return;
     draft.screensaver = copy(VORGABE.screensaver);
   }
-  else if (activeTab === 'header') draft.headers = copy(VORGABE.headers);
+  else if (activeTab === 'header') {
+    draft.headers = copy(VORGABE.headers);
+    draft.breiten = copy(VORGABE.breiten);
+  }
   else if (activeTab === 'betten') draft.beds = copy(VORGABE.beds);
   else {
     draft.options[activeTab] = copy(VORGABE.options[activeTab]);

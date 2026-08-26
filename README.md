@@ -403,6 +403,18 @@ Spalte der Tafel zugeordnet.
   gespeicherten Wert wieder her. Die sichtbare Höhe der Tabelle rechnet den Zoom mit ein, und
   ab einem Kopfbereich von mehr als zwei Fünfteln der Bildschirmhöhe läuft dieser nicht mehr
   mit, damit die Tabelle nutzbar bleibt
+- **Spaltenbreite von Hand**: Bei gedrückter **Strg-Taste** (auf dem Mac auch der
+  Befehlstaste) erscheint am rechten Rand jedes Spaltenkopfes ein schmaler Griff; mit
+  gedrückter Maustaste daran gezogen, folgt die Spalte sofort, und die Statuszeile nennt die
+  neue Breite. Ein **Doppelklick** auf denselben Griff gibt die Spalte wieder an die
+  automatische Breite zurück. Ohne Strg bleibt der Kopf unberührt – ein Fehlklick verstellt
+  nichts. Zulässig sind **30 bis 600 px** (`BREITE_MIN`/`BREITE_MAX` in
+  `js/konfiguration.js`); gezogene Breiten stehen als `breiten` bei den übrigen Einstellungen
+  und überstimmen von da an jede eigene Rechnung der Tafel – auch bei den selbst gemessenen
+  Spalten Anwesenheitsstatus, Bettplatz, Patientenname, Telefon und Pflegekraft. Der Zoom
+  wird mitgerechnet, der **Ausdruck bleibt unverändert**: Dort teilt die Tafel den Platz des
+  Blattes weiter selbst ein. Unter **Einstellungen → Spaltenköpfe** steht, welche Spalten von
+  Hand gezogen wurden; dort lassen sie sich einzeln nachlesen und alle auf einmal zurücksetzen
 - **Bedienleiste** oben rechts: „Datenschutz“, „Diaschau“ und „Druck Visite“ mit Symbol sowie die
   Umschaltung der Tag-/Nachtansicht. Export, Import und „Tafel leeren“ stehen in den Einstellungen
   unter „Daten“
@@ -524,12 +536,12 @@ Spalte der Tafel zugeordnet.
 
 ## Prüfungen
 
-Im Ordner `tests/` liegen **23 Testdateien**, die die Tafel in einem echten Browser bedienen
+Im Ordner `tests/` liegen **24 Testdateien**, die die Tafel in einem echten Browser bedienen
 (Chromium über Playwright) und das Ergebnis prüfen – Zählung, Pfeile, Ausdruck, Zoom,
 Bildschirmschoner, Tag-/Nachtansicht, Verlauf, Sicherung, Einstellungen, Pflichtangaben,
 Physio- und Visitendruck, Stationsvorgabe, Statistik, Sichtschutz, Sicherheit der Ausgaben,
-den Übergabezettel, die Termine, das Übernehmen eines Ordners für die Diaschau und die
-Doppelseitenansicht. Jede meldet Skript- und Konsolenfehler als Fehlschlag.
+den Übergabezettel, die Termine, das Übernehmen eines Ordners für die Diaschau, die
+Doppelseitenansicht und die von Hand gezogenen Spaltenbreiten. Jede meldet Skript- und Konsolenfehler als Fehlschlag.
 
 ```
 cd tests && npm install && npx playwright install chromium

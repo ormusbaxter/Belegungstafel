@@ -24,7 +24,7 @@
 /* Fassung der Anwendung. Bei jeder Änderung erhöhen: die erste Stelle bei
    grundlegenden Umbauten, die zweite bei neuen Funktionen, die dritte bei
    Korrekturen und kleinen Anpassungen. */
-const VERSION = '2.31.0';
+const VERSION = '2.32.0';
 
 /* Pfeile der ersten Spalte: Aufnahme nach rechts, Verlegung nach links */
 const ARROW_IN = '\u27A1\uFE0E';
@@ -796,6 +796,14 @@ const PHYSIO_WERT_SPALTEN = [
   ['pflege',    0.14],
   ['physio',    0.15]
 ];
+
+/* Spaltenbreiten, die von Hand gezogen wurden (Strg + Ziehen am Spaltenrand).
+   Die Grenzen halten die Tabelle bedienbar: Unter 30 px ist von einer Spalte
+   nichts mehr zu erkennen, über 600 px verdrängt sie alle anderen. Sie müssen
+   vor dem ersten Lesen der Einstellungen bereitstehen. */
+const BREITE_MIN = 30;
+const BREITE_MAX = 600;
+const clampBreite = value => Math.min(BREITE_MAX, Math.max(BREITE_MIN, Math.round(value)));
 
 /* Größe der Darstellung in Prozent – muss vor dem ersten Lesen der
    Einstellungen bereitstehen. */

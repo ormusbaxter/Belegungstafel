@@ -89,6 +89,7 @@ Zwei Dinge sind dabei zu beachten:
 | `20-doppelseite.mjs` | Zweiseitige Hochkant-PDF nebeneinander: Erkennung, Bühnenbreite, Nachtragen |
 | `21-faecher-iso.mjs` | Belegung je Fachabteilung (Erfassung, Mittelwerte, CSV), Gelbfärbung isolierter Zeilen |
 | `22-monate.mjs` | Monatliche Staffelung: Bündelung, Übersicht im Fenster, CSV je Monat |
+| `24-spaltenbreite.mjs` | Spaltenbreite mit Strg ziehen: Griffe, Bestand, Grenzen, Zurücksetzen |
 
 `lib.mjs` enthält die gemeinsamen Hilfen: Browserstart, Prüfungen, das Setzen von
 Einstellungen ohne Umweg über den Dialog und einen kleinen Webserver für die Prüfungen,
