@@ -102,6 +102,41 @@ await page.reload();
 await page.waitForTimeout(400);
 gleich('Nenner übersteht das Neuladen', await belegt(), '1 / 7');
 
+/* ---- Färbung nach der Auslastung: voll rot, das letzte Bett gelb ---- */
+const stufe = () => page.locator('#belegtCard').evaluate(e =>
+  e.classList.contains('voll') ? 'voll' : e.classList.contains('knapp') ? 'knapp' : '');
+/* Bettenzahl 6 (+ Notbett = 7), ein Platz ist belegt (siehe oben). */
+gleich('reichlich Platz bleibt neutral', await stufe(), '');
+
+const belege = zahl => page.evaluate(n => {
+  BEDS.forEach((bed, i) => { state.beds[bed.id].status = i < n ? '\u25cf' : ''; });
+  buildBody();
+  renderStats();
+}, zahl);
+
+await belege(6);
+await page.waitForTimeout(200);
+gleich('das letzte freie Bett färbt gelb', await stufe(), 'knapp');
+gleich('Zeiger nennt das letzte Bett',
+  (await belegtTitel()).endsWith('nur noch ein Bett frei'), true);
+
+await belege(7);
+await page.waitForTimeout(200);
+gleich('volle Station färbt rot', await stufe(), 'voll');
+gleich('Zeiger nennt die volle Station',
+  (await belegtTitel()).endsWith('kein Bett mehr frei'), true);
+
+/* Mehr belegte Plätze als betreibbare zählen wie voll, nicht wie neutral. */
+await belege(9);
+await page.waitForTimeout(200);
+gleich('Überbelegung bleibt rot', await stufe(), 'voll');
+
+await belege(4);
+await page.waitForTimeout(200);
+gleich('wieder Platz, wieder neutral', await stufe(), '');
+gleich('Zeiger nennt die freien Betten',
+  (await belegtTitel()).endsWith('3 Betten frei'), true);
+
 keineFehler(page);
 await browser.close();
 bilanz();

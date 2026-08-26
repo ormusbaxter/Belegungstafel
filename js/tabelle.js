@@ -1256,11 +1256,24 @@ function renderStats() {
   const belegt = beds.filter(isOccupied).length;
   const gesamt = bettenGesamt();
   $('#statBelegt').textContent = belegt + ' / ' + gesamt;
-  $('#belegtCard').title = maxBettenPlausibel(maxBettenZahl(state.station.maxBetten))
+
+  /* Wie nah die Station an ihrer Grenze steht, soll man der Kachel ansehen,
+     ohne zu rechnen: kein Bett mehr frei rot, das letzte Bett gelb. Darunter
+     bleibt sie neutral – eine Kachel, die ständig färbt, sagt nichts mehr.
+     Mehr belegte Plätze als betreibbare (eine zu klein eingetragene
+     Bettenzahl) zählen wie voll. */
+  const frei = gesamt - belegt;
+  const karteBelegt = $('#belegtCard');
+  karteBelegt.classList.toggle('voll', frei <= 0);
+  karteBelegt.classList.toggle('knapp', frei === 1);
+  const woher = maxBettenPlausibel(maxBettenZahl(state.station.maxBetten))
     ? belegt + ' von ' + gesamt + ' betreibbaren Plätzen belegt – ' + (gesamt - 1) +
       ' zuzüglich Notbett, siehe „max. Bettenzahl“'
     : belegt + ' von ' + gesamt + ' Bettplätzen der Tafel belegt – ohne eingetragene ' +
       'maximale Bettenzahl gilt die Zahl der eingerichteten Plätze';
+  karteBelegt.title = woher + (frei <= 0
+    ? ' · kein Bett mehr frei'
+    : frei === 1 ? ' · nur noch ein Bett frei' : ' · ' + frei + ' Betten frei');
 
   /* Fällige Screenings werden im Kopf rot hervorgehoben. */
   const faellig = beds.filter(b => b.abstriche && b.abstriche <= isoToday()).length;

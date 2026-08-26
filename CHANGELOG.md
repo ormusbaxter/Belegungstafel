@@ -4,6 +4,21 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.34.0
+
+- **Die Kachel „belegte Betten“ färbt sich nach der Auslastung.** Wie nah die Station an ihrer
+  Grenze steht, soll man ihr ansehen, ohne zu rechnen: **kein Bett mehr frei = rot**,
+  **noch genau ein Bett frei = gelb**. Darunter bleibt die Kachel neutral – eine Kachel, die
+  ständig färbt, sagt nichts mehr. Dieselbe Bildsprache wie bei den fälligen Screenings; Rot
+  ist dieselbe Farbe (`--warnung`), Gelb ist neu als `--knapp` mit dunkler Schrift, in hellem
+  wie dunklem Grund
+- Bezugsgröße ist der Nenner der Kachel, also die maximale Bettenzahl zuzüglich Notbett. Sind
+  mehr Plätze belegt als betreibbar – eine zu klein eingetragene Bettenzahl –, gilt das wie
+  voll
+- der Zeiger auf der Kachel nennt jetzt zusätzlich, wie viele Betten noch frei sind
+- der Ausdruck bleibt schwarzweiß wie bisher
+- `tests/23-kopfbereich.mjs` prüft die Färbung mit (33 statt 25 Prüfungen)
+
 ## 2.33.0
 
 - **Die Kennzahl „belegte Betten“ misst an der maximalen Bettenzahl.** Bisher stand dort fest
