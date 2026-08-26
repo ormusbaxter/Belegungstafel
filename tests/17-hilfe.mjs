@@ -65,6 +65,18 @@ for (const abschnitt of ['Eingeben und ändern', 'Fehlende Angaben', 'Datenschut
   pruefe('Abschnitt „' + abschnitt + '“ vorhanden', titel.includes(abschnitt));
 }
 
+/* Der Einstieg fasst die Tafel zusammen, bevor es ins Einzelne geht. */
+gleich('erster Abschnitt ist die Übersicht', punkte[0], 'Auf einen Blick');
+
+/* Geschrieben ist die Anleitung für die Schicht, nicht für die Administration:
+   Sie erklärt die Schaltflächen, die jeder vor sich hat, und führt niemanden
+   durch die Einstellungen. */
+for (const knopf of ['Datenschutz', 'Diaschau', 'Übergabezettel', 'Druck Physio',
+                     'Druck Visite', 'Termine', 'Statistik', 'Rückgängig']) {
+  pruefe('Schaltfläche „' + knopf + '“ erklärt', text.includes(knopf));
+}
+pruefe('keine Wege durch die Einstellungen', !text.includes('Einstellungen →'));
+
 keineFehler(page);
 await browser.close();
 bilanz();

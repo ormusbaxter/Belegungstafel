@@ -196,51 +196,66 @@
     <div class="helpbody" id="helpBody">
 
     <section>
-      <h3>Eingeben und ändern</h3>
-      <p>Jede Zeile ist ein Bettplatz, jede Spalte eine Angabe. Alle Felder werden direkt in der
-        Tabelle bearbeitet, ein Speichern von Hand ist nicht nötig – die Statuszeile über der
-        Tabelle zeigt, wann zuletzt gespeichert wurde.</p>
-      <p><b>Schichtleitung, Blutzuständigkeit und Notfallequipment</b> stehen mit ihrer
-        Telefonnummer <b>unter der Tabelle</b>.</p>
+      <h3>Auf einen Blick</h3>
+      <p>Die Tafel zeigt die Station auf einem Bild: <b>jede Zeile ein Bettplatz, jede Spalte
+        eine Angabe</b>. Geschrieben wird direkt in der Tabelle – Speichern von Hand gibt es
+        nicht, jede Eingabe steht sofort fest.</p>
       <ul>
-        <li><b>Auswahlfelder</b> (z. B. Anwesenheitsstatus, Fachdisziplin, Kostform):
+        <li><b>Oben im Kopf</b> stehen die Kennzahlen: belegte Betten, maximale Bettenzahl,
+          Meldestatus und die Zahl der fälligen Screenings.</li>
+        <li><b>Über der Tabelle</b> läuft die Statuszeile mit dem letzten Speicherzeitpunkt und
+          – nach der ersten Änderung – <b>Rückgängig</b>.</li>
+        <li><b>Unter der Tabelle</b> stehen die Zuständigkeiten der Schicht, die geplanten
+          Aufnahmen, die Telefonnummern und ein Feld für allgemeine Hinweise.</li>
+        <li><b>Oben rechts</b> die Schaltflächen: <b>Datenschutz</b>, <b>Diaschau</b>,
+          <b>Übergabezettel</b>, <b>Druck Physio</b>, <b>Druck Visite</b> und <b>◐</b> für hell
+          oder dunkel.</li>
+        <li><b>Unten rechts</b> die runden Schaltflächen: <b>Termine</b>, <b>Statistik</b>, das
+          Fragezeichen für diese Anleitung und das <b>Zahnrad</b> für die Einstellungen.</li>
+      </ul>
+      <p>Welche Werte in den Auswahllisten stehen, wie viele Bettplätze es gibt und wie die
+        Spalten heißen, richtet die <b>Stationsleitung</b> hinter dem Zahnrad ein. Auf einer
+        anderen Station kann die Tafel deshalb etwas anders aussehen als hier beschrieben – der
+        Umgang mit ihr bleibt derselbe.</p>
+      <p>Alle Angaben bleiben <b>auf diesem Rechner</b>; es geht nichts an einen Server.</p>
+    </section>
+
+    <section>
+      <h3>Eingeben und ändern</h3>
+      <p>Ein Klick in die Zelle genügt, die Eingabe ist sofort gespeichert.</p>
+      <ul>
+        <li><b>Auswahlfelder</b> (Anwesenheitsstatus, Fachdisziplin, Kostform und weitere):
           anklicken und Wert wählen. Der leere Eintrag ganz oben setzt das Feld zurück.
           In der ersten Spalte steht der grüne Pfeil nach rechts für eine angekündigte
           <b>Aufnahme</b>, der dunkelrote Pfeil nach links für eine anstehende
           <b>Verlegung</b>.</li>
         <li><b>Mehrfachauswahl</b> (Beatmungsform, Kreislaufunterstützung, Isolation,
-          Therapielimitierung): Klick auf die Zelle öffnet ein Fenster, in dem sich mehrere
-          Einträge ankreuzen lassen. Bei der Isolation bedeutet das Häkchen „bestätigt“; das
-          zusätzliche Feld <b>V. a.</b> daneben macht daraus einen Verdacht.</li>
-        <li><b>Patientenname und Telefon</b>: frei eintippen oder über das kleine <b>▾</b> am
-          rechten Rand die hinterlegte Liste öffnen – dort stehen immer alle Einträge, auch wenn
-          im Feld schon etwas steht. Beide Listen sind in den Einstellungen zu pflegen
-          (Reiter <b>Patientenname</b> bzw. <b>Telefon (Spalte)</b>). Sie schlagen nur vor;
-          grau gefärbt und von der Zählung ausgenommen werden weiterhin allein die Wörter
-          <b>gesperrt</b> und <b>Reinigung</b>, vorübergehend abwesend allein <b>NA</b>,
-          <b>OP</b> und <b>CV</b>.</li>
-        <li><b>Abstriche</b>: Klick öffnet das Datum des nächsten Screenings, wahlweise über
-          „nächster Montag“ oder „übernächster Montag“.</li>
+          Therapielimitierung): Der Klick öffnet ein Fenster, in dem mehrere Einträge
+          angekreuzt werden können. Bei der Isolation heißt das Häkchen „bestätigt“; das Feld
+          <b>V. a.</b> daneben macht daraus einen Verdacht.</li>
+        <li><b>Patientenname und Telefon</b>: frei tippen oder über das kleine <b>▾</b> am
+          rechten Rand die hinterlegte Liste öffnen. Die Liste schlägt nur vor, sie schreibt
+          nichts vor.</li>
+        <li><b>Abstriche</b>: Der Klick öffnet das Datum des nächsten Screenings, wahlweise
+          über „nächster Montag“ oder „übernächster Montag“.</li>
         <li><b>Norton / Pflegestatus</b>: Das Häkchen <b>Norton</b> bedeutet „heute erhoben“.
-          Rechts daneben erscheint der nächste Termin – ab Werk in sieben Tagen, einstellbar
-          unter Einstellungen → Allgemein. Ist er erreicht, wird er rot. Ein Klick auf den Termin
-          öffnet ihn zum Ändern; wird das Häkchen entfernt, entfällt er.</li>
+          Rechts daneben steht der nächste Termin – ab Werk in sieben Tagen. Ist er erreicht,
+          wird er rot; ein Klick darauf ändert ihn, ein entferntes Häkchen löscht ihn.</li>
         <li><b>Werte in Klammern</b> – etwa <b>(INV)</b> oder <b>(CiCa)</b> – stehen für
-          geplant, beendet oder nur zeitweise. Sie werden <b>gestrichelt</b> umrandet, wie
-          ein Verdacht bei der Isolation. Beides zugleich – <b>INV</b> und <b>(INV)</b> –
-          kann nicht sein; die Zelle bekommt dann einen roten Rahmen.</li>
-        <li><b>Verstorbene</b>: Im Feld Patientenname hinter dem Namen ein <b>Plus</b> setzen und
-          dahinter die Uhrzeit schreiben – etwa <b>Mustermann, Max + 14:30</b>. Das Pluszeichen
-          wird sofort zum Kreuz <b>†</b>, und die Namenszelle wird dunkelgrau hinterlegt mit
-          heller Schrift. Ein Plus mitten in einem Wort bleibt unverändert. Der Bettplatz gilt
-          weiterhin als belegt, bis er geräumt wird.</li>
-        <li><b>Bettplatz räumen</b>: das <b>×</b> in der Bettplatz-Spalte löscht nach Rückfrage
+          geplant, beendet oder nur zeitweise. Sie werden <b>gestrichelt</b> umrandet, wie ein
+          Verdacht bei der Isolation. Beides zugleich – <b>INV</b> und <b>(INV)</b> – kann
+          nicht sein; die Zelle bekommt dann einen roten Rahmen.</li>
+        <li><b>Verstorbene</b>: im Feld Patientenname hinter den Namen ein <b>Plus</b> und die
+          Uhrzeit setzen – <b>Mustermann, Max + 14:30</b>. Aus dem Plus wird sofort ein Kreuz
+          <b>†</b>, die Zelle wird dunkel hinterlegt. Der Platz gilt weiter als belegt, bis er
+          geräumt wird.</li>
+        <li><b>Bettplatz räumen</b>: Das <b>×</b> in der Bettplatz-Spalte löscht nach Rückfrage
           alle Einträge dieses Platzes.</li>
       </ul>
-      <p>Mit der Tastatur: <b>Pfeiltasten</b> wechseln die Zelle, die <b>Eingabetaste</b> springt
-        eine Zeile nach unten (mit Umschalt nach oben). In Textfeldern bewegen Links und Rechts
-        zuerst den Schreibcursor. In Auswahlfeldern öffnet <b>Alt + Pfeil nach unten</b> die Liste,
-        alternativ genügt der Anfangsbuchstabe.</p>
+      <p><b>Mit der Tastatur</b>: Die <b>Pfeiltasten</b> wechseln die Zelle, die
+        <b>Eingabetaste</b> springt eine Zeile nach unten (mit Umschalt nach oben). In
+        Textfeldern bewegen Links und Rechts zuerst den Schreibcursor. In Auswahlfeldern öffnet
+        <b>Alt + Pfeil nach unten</b> die Liste, sonst genügt der Anfangsbuchstabe.</p>
     </section>
 
     <section>
@@ -248,108 +263,81 @@
       <p>Die Kennzahl <b>belegte Betten</b> im Kopf zählt jeden Bettplatz, bei dem ein
         <b>Anwesenheitsstatus</b> – gleich welcher – <b>oder</b> eine <b>Fachdisziplin</b>
         eingetragen ist. Angekündigte Aufnahmen und anstehende Verlegungen zählen also mit,
-        ebenso ein Patient, bei dem zunächst nur die Fachrichtung feststeht.</p>
-      <p>Die Kachel <b>färbt sich nach der Auslastung</b>: Ist <b>kein Bett mehr frei</b>,
-        wird sie <b>rot</b>; ist <b>noch genau ein Bett frei</b>, wird sie <b>gelb</b>.
-        Darunter bleibt sie neutral. Der Zeiger auf der Kachel nennt, wie viele Betten noch
-        frei sind.</p>
+        ebenso ein Patient, bei dem zunächst nur die Fachrichtung feststeht. Weder Status noch
+        Fachdisziplin heißt: freier Platz.</p>
       <p>Gemessen wird an der <b>max. Bettenzahl zuzüglich Notbett</b>: Steht dort 12, lautet
-        die Anzeige <b>x / 13</b>. Damit steht im Kopf, wie viele der heute betreibbaren
-        Plätze belegt sind – und nicht, wie viele der eingerichteten Zeilen. Ist das Feld
-        leer oder trägt es eine unplausible Zahl, gilt weiterhin die Zahl der eingerichteten
-        Bettplätze.</p>
+        die Anzeige <b>x / 13</b>. Die Kachel <b>färbt sich nach der Auslastung</b> – ist
+        <b>kein Bett mehr frei</b>, wird sie <b>rot</b>; ist <b>noch genau ein Bett frei</b>,
+        wird sie <b>gelb</b>. Der Zeiger auf der Kachel nennt, wie viele Betten noch frei
+        sind.</p>
       <ul>
-        <li>Weder Status noch Fachdisziplin = freier Bettplatz, zählt nicht.</li>
         <li>Ein Eintrag wie <b>gesperrt</b> oder <b>Reinigung</b> im Feld Patientenname
           beschreibt den Bettplatz statt eines Patienten: Er wird kursiv dargestellt, färbt die
-          Zeile grau und zählt nie als belegt – auch dann nicht, wenn noch ein Status oder eine
-          Fachdisziplin eingetragen ist.</li>
-        <li><b>max. Bettenzahl</b> nimmt <b>1 bis 12</b> regulär betreibbare Plätze auf; das
-          Notbett kommt als festes <b>+ 1</b> hinzu. Eine Zahl außerhalb dieser Spanne wird
-          <b>rot umrandet</b> und beim Verlassen des Feldes auf die nächstgelegene zulässige
-          gesetzt – ein Zahlendreher soll nicht unbemerkt in die Auslastung der Statistik
-          eingehen. Das Feld darf leer bleiben; die Auslastung entfällt dann.</li>
-        <li><b>Screening fällig</b> zählt die Bettplätze, deren Screening-Datum erreicht oder
-          überschritten ist. Ist mindestens eines fällig, wird die Kennzahl im Kopf
-          <b>rot hinterlegt</b>, bis alle Termine erledigt oder neu gesetzt sind.</li>
-        <li>Der <b>Meldestatus</b> färbt seine Kachel in der Farbe der gewählten Stufe.
-          Ausgeliefert sind <b>grün</b>, <b>gelb</b> und <b>rot</b>; unter Einstellungen →
-          <b>Meldestatus</b> lassen sich Stufen ergänzen, umbenennen und mit einer eigenen
-          Farbe versehen. Die Schrift wird je nach Helligkeit hell oder dunkel gesetzt; ohne
-          Farbe bleibt die Kachel neutral. <b>Eine leere Stufe gibt es nicht</b> – die Tafel
-          trägt immer einen Status; auf einem frisch aufgesetzten Arbeitsplatz gilt die erste
-          Stufe der Liste. Eine Stufe, die aus der Liste entfernt wird, bleibt an der Tafel
-          stehen, solange sie dort gesetzt ist.</li>
+          Zeile grau und zählt nie als belegt.</li>
+        <li><b>NA</b>, <b>OP</b> und <b>CV</b> stehen für vorübergehend abwesend – der Platz
+          bleibt belegt.</li>
+        <li>Die <b>max. Bettenzahl</b> im Kopf ist ein Eingabefeld: Sie nimmt <b>1 bis 12</b>
+          regulär betreibbare Plätze auf, das Notbett kommt als festes <b>+ 1</b> hinzu. Eine
+          Zahl daneben wird rot umrandet und beim Verlassen des Feldes zurechtgerückt.</li>
+        <li><b>Screening fällig</b> zählt die Plätze, deren Screening-Datum erreicht oder
+          überschritten ist; ist eines fällig, wird die Kachel rot.</li>
       </ul>
     </section>
 
     <section>
       <h3>Fehlende Angaben</h3>
-      <p>Sobald ein Bettplatz belegt ist, prüft die Tafel vier Angaben, die zu jedem Patienten
-        gehören: <b>Kostform</b>, <b>Devices</b>, <b>Norton / Pflegestatus</b> und
-        <b>Abstriche</b> (nächstes Screening). Fehlt eine davon, wird die betreffende Zelle
-        <b>dezent rot unterlegt</b>; der Zeiger auf der Zelle nennt die fehlende Angabe. Die
-        Markierung verschwindet, sobald etwas eingetragen ist.</p>
+      <p>Sobald ein Bettplatz belegt ist, achtet die Tafel auf vier Angaben, die zu jedem
+        Patienten gehören: <b>Kostform</b>, <b>Devices</b>, <b>Norton / Pflegestatus</b> und
+        <b>Abstriche</b>. Fehlt eine davon, wird die Zelle <b>dezent rot unterlegt</b>; der
+        Zeiger darauf nennt, was fehlt. Die Markierung verschwindet mit dem Eintrag.</p>
       <ul>
-        <li>Bei <b>Devices</b> ist <b>keins</b> eine gültige Angabe – die Markierung
-          verschwindet damit ebenfalls.</li>
-        <li>Bei <b>Norton / Pflegestatus</b> gilt die Zelle erst als erledigt, wenn
-          <b>beide</b> Häkchen gesetzt sind.</li>
+        <li>Bei <b>Devices</b> ist <b>keins</b> eine gültige Angabe.</li>
+        <li>Bei <b>Norton / Pflegestatus</b> müssen <b>beide</b> Häkchen gesetzt sein.</li>
         <li>Eine <b>angekündigte Aufnahme</b> (grüner Pfeil) wird nicht angemahnt – dort ist
-          noch nichts zu erfassen. Ebenso wenig ein Platz, der als <b>gesperrt</b> oder
-          <b>Reinigung</b> geführt wird.</li>
+          noch nichts zu erfassen. Ebenso wenig ein Platz, der <b>gesperrt</b> ist oder in der
+          <b>Reinigung</b> steht.</li>
       </ul>
     </section>
 
     <section>
       <h3>Patienten verschieben (Ziehen und Ablegen)</h3>
-      <p>So wird ein Patient auf einen anderen Bettplatz umgebettet:</p>
+      <p>So wird ein Patient umgebettet:</p>
       <ol>
-        <li>Mit der Maus auf die <b>Bettplatz-Zelle</b> der Zeile zeigen – der Zeiger wird zur
-          Greifhand.</li>
+        <li>Auf die <b>Bettplatz-Zelle</b> der Zeile zeigen – der Zeiger wird zur Greifhand.</li>
         <li>Maustaste gedrückt halten und die Zeile auf den <b>Ziel-Bettplatz</b> ziehen. Am
-          Zeiger hängt dabei ein Abbild der <b>gesamten Zeile</b> mit allen Angaben, angefasst
-          an der Bettplatz-Zelle – so ist auch bei langen Wegen zu sehen, welcher Patient
-          gerade bewegt wird. Die Zielzeile wird blau umrandet, die gezogene Zeile blasser
-          dargestellt.</li>
-        <li>Maustaste loslassen. Ist das Ziel frei, wandert der gesamte Eintrag dorthin. Ist das
-          Ziel belegt, <b>tauschen</b> beide Bettplätze ihre Einträge.</li>
+          Zeiger hängt ein Abbild der ganzen Zeile, die Zielzeile wird blau umrandet.</li>
+        <li>Loslassen: Ist das Ziel frei, wandert der Eintrag dorthin; ist es belegt,
+          <b>tauschen</b> beide Plätze ihre Einträge.</li>
       </ol>
-      <p>Verschoben wird immer die vollständige Zeile mit allen Angaben. Zurücknehmen lässt sich
-        das über <b>Rückgängig</b> in der Statuszeile (siehe unten).</p>
+      <p>Verschoben wird immer die vollständige Zeile mit allen Angaben – auch mit denen des
+        Übergabezettels. Zurücknehmen lässt sich das über <b>Rückgängig</b>.</p>
     </section>
 
     <section>
       <h3>Spaltenbreite ändern</h3>
-      <p>Die Tafel bemisst ihre Spalten selbst: die ersten beiden nach ihren Werten, die
-        Freitextspalten nach ihren Einträgen. Passt das am eigenen Arbeitsplatz nicht, lässt
-        sich jede Spalte von Hand einstellen:</p>
+      <p>Die Tafel bemisst ihre Spalten selbst. Ist eine davon am eigenen Bildschirm zu schmal
+        oder zu breit, lässt sie sich von Hand einstellen:</p>
       <ol>
         <li><b>Strg</b> gedrückt halten – am rechten Rand jedes Spaltenkopfes erscheint ein
           blauer Griff, der Zeiger wird zum Doppelpfeil.</li>
-        <li>Den Griff mit gedrückter Maustaste nach links oder rechts <b>ziehen</b>. Die
-          Spalte folgt sofort; unter der Tabelle steht die neue Breite in Pixeln.</li>
-        <li><b>Doppelklick</b> auf denselben Griff gibt die Spalte wieder an die automatische
-          Breite zurück.</li>
+        <li>Den Griff mit gedrückter Maustaste <b>ziehen</b>; die Spalte folgt sofort.</li>
+        <li><b>Doppelklick</b> auf denselben Griff gibt sie an die automatische Breite
+          zurück.</li>
       </ol>
-      <p>Die Breiten werden mit den Einstellungen gespeichert und gelten auch nach einem
-        Neustart. <b>Der Ausdruck bleibt unverändert</b> – dort teilt die Tafel den Platz des
-        Blattes weiter selbst ein. Unter <b>Einstellungen → Spaltenköpfe</b> steht, welche
-        Spalten von Hand gezogen wurden; dort lassen sie sich auch alle auf einmal
-        zurücksetzen.</p>
+      <p>Die Breite bleibt auch nach einem Neustart erhalten. <b>Der Ausdruck bleibt
+        unverändert</b> – dort teilt die Tafel den Platz des Blattes weiter selbst ein.</p>
     </section>
 
     <section>
       <h3>Verlauf: Änderungen zurücknehmen</h3>
-      <p>Die Statuszeile über der Tabelle zeigt nach der ersten Änderung zwei Schaltflächen:
-        <b>Rückgängig</b> nimmt den letzten Schritt zurück – dasselbe leistet <b>Strg + Z</b>,
-        solange der Schreibcursor nicht in einem Textfeld steht. <b>Verlauf …</b> öffnet die
-        Liste der letzten <b>20 Schritte</b> mit Uhrzeit; dort lässt sich auch ein weiter
-        zurückliegender Schritt einzeln zurücknehmen.</p>
+      <p>Nach der ersten Änderung zeigt die Statuszeile zwei Schaltflächen: <b>Rückgängig</b>
+        nimmt den letzten Schritt zurück – dasselbe leistet <b>Strg + Z</b>, solange der
+        Schreibcursor nicht in einem Textfeld steht. <b>Verlauf …</b> öffnet die Liste der
+        letzten <b>20 Schritte</b> mit Uhrzeit; dort lässt sich auch ein weiter zurückliegender
+        Schritt einzeln zurücknehmen.</p>
       <p>Erfasst werden Eingaben in den Feldern (mehrere Tastendrücke im selben Feld gelten als
-        ein Schritt), das Räumen eines Bettplatzes, das Verschieben von Patienten, „Tafel
-        leeren“ und der Import. Auch das Zurücknehmen selbst landet im Verlauf und lässt sich
-        damit wieder aufheben.</p>
+        ein Schritt), das Räumen eines Bettplatzes und das Verschieben von Patienten. Auch das
+        Zurücknehmen selbst landet im Verlauf und lässt sich wieder aufheben.</p>
     </section>
 
     <section>
@@ -357,123 +345,96 @@
       <ul class="colorlist" id="helpColors"></ul>
       <ul>
         <li>Am Bettplatz steht <b>ISO</b>, sobald ein Keim bestätigt ist, und <b>ISO?</b>,
-          solange nur Verdachtsfälle eingetragen sind. Ist in den Einstellungen
-          <b>„Isolierte Bettplätze gelb hinterlegen“</b> gesetzt, wird die ganze Zeile gelb –
-          bei bestätigtem Keim wie bei Verdacht.</li>
-        <li>Ein <b>rot hinterlegtes Datum</b> in der Spalte Abstriche bedeutet: Screening fällig
-          oder überfällig.</li>
+          solange nur ein Verdacht besteht. Je nach Einstellung der Station wird die ganze
+          Zeile zusätzlich gelb.</li>
+        <li>Ein <b>rot hinterlegtes Datum</b> in der Spalte Abstriche bedeutet: Screening
+          fällig oder überfällig.</li>
+        <li>Eine <b>kräftigere Linie</b> unter einer Zeile trennt die Zimmer voneinander.</li>
       </ul>
     </section>
 
     <section>
       <h3>Datenschutz</h3>
-      <p>Nach einer einstellbaren Zeit ohne Eingabe werden <b>alle patientenbezogenen
-        Spalten</b> – von Patientenname bis Sonstiges, einschließlich Kostform, privat,
-        Physiotherapie, Devices, Norton / Pflegestatus und Abstriche – sowie die Textfelder
-        unter der Tafel unkenntlich gemacht. Lesbar bleiben allein die Angaben zum Platz und
-        zur Schicht: <b>Anwesenheitsstatus, Bettplatz, Telefon und Pflegekraft</b>. Jede
-        Mausbewegung oder Taste hebt das wieder auf.</p>
-      <p>Die Schaltfläche <b>Datenschutz</b> oben rechts schaltet sofort um, etwa wenn Besuch die
-        Station betritt; dieser Zustand bleibt bis zum nächsten Klick oder Tastendruck bestehen.
-        Der Ausdruck bleibt immer vollständig lesbar.</p>
-      <p>Alle <b>Ausdrucke</b> tragen unten eine Zeile mit dem Druckzeitpunkt und dem Hinweis,
-        dass das Blatt Patientendaten enthält und nach Dienstende in den Datenmüll gehört.</p>
+      <p>Nach einer eingestellten Zeit ohne Eingabe werden <b>alle patientenbezogenen
+        Spalten</b> – von Patientenname bis Sonstiges – sowie die Textfelder unter der Tafel
+        unkenntlich gemacht. Lesbar bleiben allein die Angaben zum Platz und zur Schicht:
+        <b>Anwesenheitsstatus, Bettplatz, Telefon und Pflegekraft</b>. Jede Mausbewegung oder
+        Taste hebt das wieder auf.</p>
+      <p>Die Schaltfläche <b>Datenschutz</b> oben rechts schaltet sofort um, etwa wenn Besuch
+        die Station betritt; dieser Zustand bleibt bis zum nächsten Klick oder Tastendruck.</p>
+      <p>Der Ausdruck bleibt immer vollständig lesbar. Alle <b>Ausdrucke</b> tragen unten eine
+        Zeile mit dem Druckzeitpunkt und dem Hinweis, dass das Blatt Patientendaten enthält und
+        nach Dienstende in den Datenschutzbehälter gehört.</p>
     </section>
 
     <section>
       <h3>Bildschirmschoner (Diaschau)</h3>
-      <p>Die Schaltfläche <b>Diaschau</b> oben rechts startet sofort eine bildschirmfüllende
-        Anzeige, die alle freigegebenen Inhalte nacheinander zeigt – etwa Aushänge, Schulungs-
-        blätter oder Termine. Ist der Bildschirmschoner eingeschaltet, startet dieselbe Schau
-        außerdem von allein, sobald eine eingestellte Zeit lang niemand etwas eingegeben hat.
-        Die Tafel liegt dabei verdeckt darunter; <b>jede Mausbewegung oder Taste</b> beendet die
-        Schau und bringt die Tafel zurück.</p>
+      <p>Die Schaltfläche <b>Diaschau</b> oben rechts zeigt bildschirmfüllend die freigegebenen
+        Inhalte nacheinander – Aushänge, Schulungsblätter, Hinweise. Ist der Bildschirmschoner
+        eingeschaltet, startet dieselbe Schau von allein, sobald eine Weile niemand etwas
+        eingegeben hat. Die Tafel liegt verdeckt darunter; <b>jede Mausbewegung oder Taste</b>
+        beendet die Schau.</p>
       <p>Am unteren Rand läuft ein schmaler Balken durch: Er zeigt, wie lange das Bild noch
-        steht. Bei nur einem Eintrag bleibt er fort – dann wechselt nichts.</p>
-      <p>Rechts neben der Schau stehen die <b>anstehenden Termine</b> (siehe nächster
-        Abschnitt). Ohne Eintrag bleibt der rechte Teil fort und die Schau nutzt die volle
-        Breite.</p>
-      <p>Ein <b>PDF aus genau zwei Hochkantseiten</b> – ein Merkblatt, ein beidseitiger
-        Aushang – wird <b>nebeneinander</b> gezeigt, sodass beide Seiten zugleich zu lesen
-        sind. Ist der Platz dafür zu schmal, bleibt es bei der ersten Seite. Wer in der Spalte
-        <b>S.</b> eine bestimmte Seite einträgt, bekommt diese eine.</p>
-      <p><b>Inhalte freigeben</b> (Einstellungen → Bildschirmschoner): Mit
-        <b>„Ordner wählen …“</b> den Ordner auswählen, in dem die Dateien liegen – alle darin
-        enthaltenen PDF, PNG und JPEG werden in die Tafel übernommen. Wo der Ordner liegt, ist
-        gleichgültig; es muss keine Datei kopiert oder umbenannt werden. Kamen Dateien hinzu
-        oder wurde eine ausgetauscht, denselben Ordner einfach erneut wählen.</p>
-      <p>Der Bildschirmschoner zeigt keine Patientendaten und startet nicht, solange ein Fenster
-        wie die Einstellungen geöffnet ist.</p>
+        steht. Rechts neben der Schau stehen die <b>anstehenden Termine</b>.</p>
+      <p>Der Bildschirmschoner zeigt <b>keine Patientendaten</b> und startet nicht, solange ein
+        Fenster wie die Einstellungen geöffnet ist. Welche Inhalte er zeigt, gibt die
+        Stationsleitung vor.</p>
     </section>
 
     <section>
       <h3>Termine</h3>
-      <p>Die runde Schaltfläche <b>Termine</b> unten rechts – über der Statistik, dem
-        Fragezeichen und dem Zahnrad – öffnet die Liste der anstehenden Termine –
-        Fortbildung, Gerätewartung, Teambesprechung. Sie erscheinen <b>rechts neben der
-        Diaschau</b>, der nächste zuerst. Was heute ansteht, steht als <b>Heute</b> und
-        hervorgehoben; abgelaufene Termine verschwinden von selbst, es muss niemand
-        aufräumen.</p>
-      <p>Das Fenster steht <b>allen offen</b> – Termine gehören zum Stationsalltag. Jede
-        Eingabe ist sofort gespeichert; eine Zeile ohne Bezeichnung fällt beim Schließen
-        weg.</p>
+      <p>Die runde Schaltfläche <b>Termine</b> unten rechts öffnet die Liste der anstehenden
+        Termine – Fortbildung, Gerätewartung, Teambesprechung. Sie erscheinen <b>rechts neben
+        der Diaschau</b>, der nächste zuerst; was heute ansteht, steht hervorgehoben als
+        <b>Heute</b>. Abgelaufene Termine verschwinden von selbst.</p>
+      <p>Das Fenster steht <b>allen offen</b> und braucht kein Zahnrad. Jede Eingabe ist sofort
+        gespeichert; eine Zeile ohne Bezeichnung fällt beim Schließen weg.</p>
       <p>Je Zeile stehen <b>Datum</b>, eine freiwillige <b>Uhrzeit</b>, die <b>Wiederholung</b>
-        und die <b>Bezeichnung</b>. Bei einer Wiederholung – wöchentlich, alle 2 Wochen,
-        monatlich, jährlich – ist das Datum der <b>erste</b> Termin der Reihe; im Feld
-        <b>Ende der Reihe</b> lässt sich festlegen, wann sie ausläuft, sonst läuft sie weiter.
-        Eine Reihe belegt in der Schau immer nur <b>eine Zeile</b>: die mit ihrem nächsten
-        Termin. Unter jeder Zeile steht, wann dieser fällig ist.</p>
-      <p>Ein monatlicher Termin am 29., 30. oder 31. rutscht in einem kürzeren Monat auf
-        dessen letzten Tag und steht im nächsten langen Monat wieder auf seinem Tag.</p>
-      <p class="warn">Die Schau hängt bildschirmfüllend über der Tafel und ist von jedem im Raum
-        zu lesen – <b>Patientendaten gehören hier nicht hinein</b>, so wenig wie in die Dias.</p>
+        (wöchentlich, alle 2 Wochen, monatlich, jährlich) und die <b>Bezeichnung</b>. Bei einer
+        Wiederholung ist das Datum der <b>erste</b> Termin der Reihe; unter der Zeile steht,
+        wann der nächste fällig ist. In der Schau belegt eine Reihe immer nur eine Zeile.</p>
+      <p class="warn">Die Schau ist von jedem im Raum zu lesen – <b>Patientendaten gehören hier
+        nicht hinein</b>, so wenig wie in die Dias.</p>
     </section>
 
     <section>
-      <h3>Tag- und Nachtansicht</h3>
+      <h3>Statistik</h3>
+      <p>Die runde Schaltfläche <b>Statistik</b> unten rechts zeigt, wie voll die Station in
+        den vergangenen Wochen war. Die Tafel legt dafür in regelmäßigen Abständen eine
+        Momentaufnahme ab – belegte Betten, Isolationen, Beatmungen und weitere Kennzahlen,
+        <b>ohne Namen und ohne Patientendaten</b>.</p>
+      <p>Im Fenster lassen sich der Zeitraum wählen und die Zahlen je Schicht oder je Monat
+        ansehen; <b>Jetzt erfassen</b> hält den aktuellen Stand zusätzlich fest. Die
+        Schaltflächen <b>CSV je Schicht</b> und <b>CSV je Monat</b> schreiben die Zahlen in
+        eine Datei, die sich in einer Tabellenkalkulation öffnen lässt.</p>
+    </section>
+
+    <section>
+      <h3>Ansicht: hell, dunkel und Größe</h3>
       <p>Die Schaltfläche <b>◐</b> oben rechts stellt die Tafel hell oder dunkel dar – dunkel
-        blendet nachts deutlich weniger.</p>
-      <p>Ist in den Einstellungen unter <b>Allgemein</b> die <b>automatische Tag-/Nachtansicht</b>
-        eingeschaltet, schaltet die Schaltfläche durch drei Zustände: <b>Auto</b> → <b>dunkel</b>
-        → <b>hell</b> → wieder Auto. Im Zustand Auto steht <b>„Auto“ neben dem Symbol</b>, und die
-        Tafel richtet sich nach der Uhrzeit. Die <b>Zeitspanne für die dunkle Ansicht</b> steht
-        gleich darunter in den Einstellungen („Dunkel von … bis …“, ab Werk 19:00 bis 07:00 Uhr)
-        und darf über Mitternacht reichen. Der Wechsel erfolgt im laufenden Betrieb, ohne dass
-        die Seite neu geladen werden muss. Ohne die Option bleibt es beim Umschalten zwischen
-        hell und dunkel.</p>
-    </section>
-
-    <section>
-      <h3>Größe der Darstellung</h3>
-      <p>Passt die Tafel an Monitor und Auflösung an: In den Einstellungen steht unter
-        <b>Allgemein</b> als Punkt 3 ein Schieberegler von <b>25 % bis 300 %</b>. Er vergrößert
-        oder verkleinert den Kopfbereich, die Tabelle und die Textfelder darunter gemeinsam –
-        auf einem großen Wandmonitor wird die Tafel damit aus einigen Metern Entfernung lesbar,
-        auf einem kleinen Bildschirm passen mehr Spalten nebeneinander.</p>
-      <p>Während des Schiebens ist die neue Größe sofort hinter dem Fenster zu sehen; sie gilt
-        dauerhaft erst mit <b>Übernehmen</b>. Nach <b>Abbrechen</b> steht wieder die zuvor
-        gespeicherte Größe. Die Schaltfläche <b>100 %</b> neben dem Regler stellt die
-        Ausgangsgröße wieder her. Dialoge, Hilfe, Bildschirmschoner und der Ausdruck bleiben
-        von der Einstellung unberührt.</p>
+        blendet nachts deutlich weniger. Ist die automatische Tag- und Nachtansicht
+        eingeschaltet, schaltet sie durch drei Zustände: <b>Auto</b> → <b>dunkel</b> →
+        <b>hell</b>. Im Zustand Auto steht „Auto“ neben dem Symbol, und die Tafel richtet sich
+        nach der Uhrzeit; der Wechsel geschieht im laufenden Betrieb.</p>
+      <p>Wie groß die Tafel insgesamt dargestellt wird, richtet sich nach Monitor und
+        Auflösung – das stellt die Stationsleitung einmalig ein. Auf einem Wandmonitor ist die
+        Tafel damit aus einigen Metern lesbar, auf einem kleinen Bildschirm passen mehr Spalten
+        nebeneinander.</p>
     </section>
 
     <section>
       <h3>Drucken und Speichern</h3>
-      <p>Alle Eingaben bleiben <b>lokal auf diesem Rechner</b> im Browser gespeichert; es werden
-        keine Daten an einen Server übertragen. Mehrere geöffnete Fenster desselben Rechners
-        werden abgeglichen, andere Arbeitsplätze sehen die Tafel jedoch nicht.</p>
-      <p><b>Druck Visite</b> gibt eine Seite <b>A4 quer in Schwarzweiß</b> aus. Der Ausdruck enthält
-        oben die belegten Betten, die maximale Bettenzahl und den Meldestatus, darunter eine
-        verkürzte Tabelle: Anwesenheitsstatus, Bettplatz, Name, Fachdisziplin, Isolation,
-        Intervention, Therapielimitierung, Telefon und Pflegekraft – dazu eine breite Spalte
-        <b>Notizen</b> für handschriftliche Vermerke. Unter der Tabelle stehen wie am
-        Bildschirm die Schichtleitung und die Blutzuständigkeit mit Telefonnummer sowie die
-        geplanten Aufnahmen.</p>
-      <p>Das Blatt bleibt <b>immer eine Seite</b>, gleich wie viele Bettplätze eingerichtet sind
-        und wie voll die Zellen stehen: Vor dem Druck rechnet die Tafel aus, wie viele Zeilen
-        jeder Bettplatz braucht, und verkleinert die Schrift so weit, bis alles hineingeht.
-        Reicht der Platz, werden die Zeilen gleichmäßig über das Blatt verteilt. Erst unterhalb
-        einer noch lesbaren Größe läuft der Ausdruck lieber auf eine zweite Seite.</p>
+      <p>Alle Eingaben bleiben <b>lokal auf diesem Rechner</b> im Browser gespeichert. Mehrere
+        geöffnete Fenster desselben Rechners werden abgeglichen, andere Arbeitsplätze sehen die
+        Tafel jedoch nicht.</p>
+      <p><b>Druck Visite</b> gibt eine Seite <b>A4 quer in Schwarzweiß</b> aus: oben die
+        belegten Betten, die maximale Bettenzahl und den Meldestatus, darunter eine verkürzte
+        Tabelle – Anwesenheitsstatus, Bettplatz, Name, Fachdisziplin, Isolation, Intervention,
+        Therapielimitierung, Telefon und Pflegekraft – dazu eine breite Spalte <b>Notizen</b>
+        für handschriftliche Vermerke. Unter der Tabelle stehen die Zuständigkeiten der Schicht
+        und die geplanten Aufnahmen.</p>
+      <p>Das Blatt bleibt <b>immer eine Seite</b>: Vor dem Druck rechnet die Tafel aus, wie viel
+        Platz jeder Bettplatz braucht, und wählt die Schrift entsprechend.</p>
     </section>
 
     <section>
@@ -482,64 +443,43 @@
         dauerhaft sichtbaren Bildschirm nichts zu suchen haben. Die Schaltfläche
         <b>Übergabezettel</b> oben öffnet ein eigenes Fenster mit je einem Block pro belegtem
         Bettplatz: <b>Diagnosen</b> als Freitext, <b>Neurologie</b> und <b>Katecholamine</b>
-        als Mehrfachauswahl.</p>
+        zum Ankreuzen.</p>
       <ul>
-        <li>Diese Angaben erscheinen <b>nicht auf der Tafel</b>, werden aber mitgespeichert:
-          Beim nächsten Öffnen stehen sie wieder da, auch nach einem Neustart. Erst
-          <b>Bettplatz räumen</b> löscht sie mit.</li>
+        <li>Diese Angaben erscheinen <b>nicht auf der Tafel</b>, bleiben aber gespeichert: Beim
+          nächsten Öffnen stehen sie wieder da. Erst <b>Bettplatz räumen</b> löscht sie mit.</li>
+        <li>Ganz oben wird eingetragen, wer die <em>kommende</em> Schicht übernimmt. Die Felder
+          beginnen bei jedem Aufruf leer, gelten nur für diesen Zettel und ändern nichts an den
+          Angaben unter der Tafel. Was leer bleibt, lässt der Ausdruck zum Eintragen von Hand
+          frei.</li>
         <li><b>Drucken</b> gibt ein eigenes Blatt aus – A4 quer, mit <b>allen Bettplätzen</b>,
-          auch den freien: Die Übergabe kann die Tafel so Zeile für Zeile durchgehen. Nach dem
-          Namen folgen die <b>Diagnosen</b>, dann <b>Beatmung, Kreislauf, Nierenersatz,
-          Isolation</b> und <b>Therapielimitierung</b> aus der Tafel. Rechts stehen zwei
-          Spalten für die Hand: ein leeres Feld für das Kürzel der <b>übernehmenden
-          Pflegekraft</b> und die Spalte <b>Notizen</b>, die den Text aus <b>Sonstiges</b>
-          mitbringt und darunter Platz zum Ergänzen lässt.</li>
-        <li>Das Blatt <b>passt auf eine Seite</b>: Vor dem Druck wird die Schriftgröße so
-          gewählt, dass alles hineingeht – bei leerer Tafel groß, bei voller Station kleiner.
-          Nur wenn dreizehn sehr lange Diagnosen zusammenkommen, läuft es auf eine zweite
-          Seite, statt die Schrift unlesbar klein zu setzen.</li>
+          auch den freien: Die Übergabe kann die Tafel Zeile für Zeile durchgehen. Rechts
+          stehen zwei Spalten für die Hand: das Kürzel der <b>übernehmenden Pflegekraft</b> und
+          <b>Notizen</b>, die den Text aus <b>Sonstiges</b> mitbringen.</li>
         <li>Die Spalten sind mit <b>Symbolen</b> überschrieben, damit die Kopfzeile einzeilig
-          bleibt: 🛏 Bettplatz · 👤 Patient · 🫁 Beatmung · ♥ Kreislauf · 🫘 Nierenersatz ·
-          ☣ Isolation · ⊘ Therapielimitierung · ⚕ Diagnosen · 🧠 Neurologie ·
-          💉 Katecholamine · ✍ Übernahme · ✎ Notizen. Am Bildschirm nennt der Zeigertext
-          die Spalte im Klartext.</li>
-        <li>Unter der Tabelle stehen die <b>geplanten Aufnahmen</b> (mit Platz für
-          handschriftliche Ergänzungen), daneben die <b>Zuständigkeit</b> – Schichtleitung,
-          Blutzuständigkeit und Notfallequipment – und rechts die <b>Telefone</b> mit je einer
-          Linie für die Person, die das Gerät übernimmt. Aufgeführt sind nur die Nummern;
-          wofür ein Gerät zuständig ist, weiß die Schicht. Die Liste ist dieselbe wie die
-          Vorschläge der Spalte Telefon und wird in den Einstellungen unter
-          „Telefon (Spalte)“ gepflegt. Unter den Zuständigkeiten steht die <b>Bettenzahl</b>
-          – die maximale Zahl zuzüglich Notbett und die zurzeit belegten Plätze.</li>
-        <li>Die <b>Zuständigkeit</b> lässt sich im Fenster gleich oben eintragen. Gemeint ist,
-          wer die <em>kommende</em> Schicht übernimmt: Die Felder beginnen bei jedem Aufruf
-          leer, gelten nur für diesen Zettel und ändern nichts an den gleichnamigen Angaben
-          unter der Tafel. Pflicht ist das nicht – was leer bleibt, lässt der Ausdruck zum
-          Eintragen von Hand frei.</li>
-        <li>Die Auswahllisten für <b>Neurologie</b> und <b>Katecholamine</b> stehen in den
-          Einstellungen unter den gleichnamigen Punkten und lassen sich wie jede andere Liste
-          ergänzen.</li>
-        <li>Wird die Funktion nicht gebraucht, lässt sich die Schaltfläche unter
-          Einstellungen → Allgemein ausblenden.</li>
+          bleibt: 🛏 Bettplatz · 👤 Patient · ⚕ Diagnosen · 🫁 Beatmung · ♥ Kreislauf ·
+          🫘 Nierenersatz · ☣ Isolation · ⊘ Therapielimitierung · 🧠 Neurologie ·
+          💉 Katecholamine · ✍ Übernahme · ✎ Notizen. Am Bildschirm nennt der Zeiger die
+          Spalte im Klartext.</li>
+        <li>Unter der Tabelle stehen die <b>geplanten Aufnahmen</b>, die <b>Zuständigkeit</b>,
+          die <b>Bettenzahl</b> und die <b>Telefone</b> mit je einer Linie für die Person, die
+          das Gerät übernimmt.</li>
       </ul>
-      <p>Der Zettel enthält Diagnosen im Klartext – von allen Ausdrucken der empfindlichste.
-        Er sollte die Station nicht verlassen und gehört nach dem Dienst in den
+      <p class="warn">Der Zettel enthält Diagnosen im Klartext – von allen Ausdrucken der
+        empfindlichste. Er sollte die Station nicht verlassen und gehört nach dem Dienst in den
         Datenschutzbehälter.</p>
     </section>
 
     <section>
       <h3>Blatt für die Physiotherapie</h3>
       <p>Die Schaltfläche <b>Druck Physio</b> oben rechts gibt ein eigenes Blatt aus, das nur
-        enthält, was für die Runde der Physiotherapie gebraucht wird: <b>Bettplatz,
-        Patientenname, Fachdisziplin, Isolation, Telefon und Pflegekraft</b> – ebenfalls
-        A4 quer in Schwarzweiß.</p>
+        enthält, was für die Runde gebraucht wird: <b>Bettplatz, Patientenname, Fachdisziplin,
+        Isolation, Telefon, Pflegekraft</b> und die verordnete <b>Physiotherapie</b> – A4 quer
+        in Schwarzweiß.</p>
       <ul>
-        <li>Aufgeführt werden nur <b>belegte Bettplätze</b>. Freie Plätze und solche, die als
-          <b>gesperrt</b> oder <b>Reinigung</b> geführt werden, erscheinen nicht.</li>
-        <li>Die <b>Schrift richtet sich nach der Zahl der Zeilen</b>: Je weniger Patienten, desto
-          größer der Druck. Bei voller Station bleibt alles auf einer Seite.</li>
-        <li>Ein besonders langer Name wird nur in seiner eigenen Zeile kleiner gesetzt, damit er
-          vollständig lesbar bleibt.</li>
+        <li>Aufgeführt werden nur <b>belegte Bettplätze</b>; freie und solche in Reinigung
+          erscheinen nicht.</li>
+        <li>Die <b>Schrift richtet sich nach der Zahl der Zeilen</b>: Je weniger Patienten,
+          desto größer der Druck. Bei voller Station bleibt alles auf einer Seite.</li>
       </ul>
       <p>Der Ausdruck über <b>Druck Visite</b> bleibt davon unberührt.</p>
     </section>

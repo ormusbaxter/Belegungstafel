@@ -232,13 +232,17 @@ Spalte der Tafel zugeordnet.
   Kastens auf, sind dadurch **immer gleich hoch** und lassen sich nicht von Hand ziehen – die
   Höhe kommt aus dem Platz. Rechts bleibt eine Gasse für die schwebenden Schaltflächen frei
 - **Hilfe** über den runden Fragezeichen-Knopf unten rechts, oberhalb des Zahnrads: eine
-  Kurzanleitung **für die Schicht** – Eingabe der Felder, Zählung der belegten Betten,
-  Verschieben per Ziehen und Ablegen, Kennzeichen und Zeilenfarben, Datenschutz,
-  Bildschirmschoner, Ansicht und Größe, Drucken, Übergabezettel, Physio-Blatt und Statistik.
+  Kurzanleitung **für die Schicht**, nicht für die Administration. Sie beginnt mit
+  **„Auf einen Blick“** – was die Tafel zeigt, wo die Kennzahlen stehen, was die
+  Schaltflächen tun – und behandelt danach Eingabe der Felder, Zählung der belegten Betten,
+  fehlende Angaben, Verschieben per Ziehen und Ablegen, Spaltenbreiten, Verlauf, Kennzeichen
+  und Zeilenfarben, Datenschutz, Bildschirmschoner, Termine, Statistik, Ansicht, Drucken,
+  Übergabezettel und Physio-Blatt.
   Links steht ein **Menü der Abschnitte**, das aus den Überschriften des Textes entsteht
   (`helpMenueAufbauen()` in `js/tafel.js`) und beim Blättern mitwandert.
-  Was allein die Administration betrifft – Passwortstufen, Vorgabedatei, Sicherung, Kennung,
-  Export und Import –, steht **nicht** in der Hilfe, sondern in
+  Wege durch die Einstellungen stehen **nicht** darin: Wo eine Angabe von der Station
+  eingerichtet wird, sagt das ein Halbsatz. Was allein die Administration betrifft –
+  Passwortstufen, Vorgabedatei, Sicherung, Kennung, Export und Import –, steht in
   [INSTALLATION.md](INSTALLATION.md). Am Fuß stehen Fassung und Urheberhinweis
 - **Verschieben per Ziehen und Ablegen**: Bettplatz-Zelle greifen und auf einen anderen
   Bettplatz ziehen. Ist das Ziel belegt, tauschen beide Plätze ihre Einträge. Am Zeiger hängt

@@ -4,6 +4,30 @@ Die Fassung steht in `js/konfiguration.js` als `VERSION` und erscheint im Fuß d
 Erste Stelle: grundlegender Umbau oder geänderte Datenhaltung. Zweite: neue Funktion oder
 spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
 
+## 2.35.0
+
+- **Die Kurzanleitung ist für die Schicht geschrieben, nicht für die Administration.** Sie
+  beginnt jetzt mit dem Abschnitt **„Auf einen Blick“**: Was die Tafel zeigt, wo die
+  Kennzahlen stehen, was die Schaltflächen oben rechts und unten rechts tun und dass alles
+  auf diesem Rechner bleibt. Wer zum ersten Mal davorsteht, hat damit in zehn Zeilen den
+  Überblick
+- **Wege durch die Einstellungen sind herausgenommen.** Sie halfen nur der Stationsleitung,
+  die ohnehin hinter dem Zahnrad steht; für alle anderen standen sie im Weg. Wo eine Angabe
+  von der Station eingerichtet wird, steht das jetzt in einem Halbsatz („richtet die
+  Stationsleitung ein“) statt als Anleitung
+- **neuer Abschnitt „Statistik“**: Die runde Schaltfläche stand bisher nirgends erklärt,
+  obwohl sie jedem offensteht – Momentaufnahmen ohne Patientendaten, Zeitraum, Schicht- und
+  Monatsansicht, CSV
+- **„Tag- und Nachtansicht“ und „Größe der Darstellung“ sind zu einem Abschnitt „Ansicht:
+  hell, dunkel und Größe“ zusammengezogen**; die Abschnitte zu Eingabe, Verschieben,
+  Übergabezettel und Diaschau sind gestrafft. Der Text ist rund ein Fünftel kürzer, ohne dass
+  eine Funktion fehlt
+- die Kachel „belegte Betten“ und ihre Färbung, die Zimmertrennlinie und die Werte `NA`,
+  `OP`, `CV` sind jetzt dort erklärt, wo man sie sucht
+- `tests/17-hilfe.mjs` prüft zusätzlich den Einstieg, dass jede Schaltfläche der Leiste
+  erklärt ist und dass keine Wege durch die Einstellungen mehr im Text stehen
+  (33 statt 23 Prüfungen)
+
 ## 2.34.0
 
 - **Die Kachel „belegte Betten“ färbt sich nach der Auslastung.** Wie nah die Station an ihrer
