@@ -14,9 +14,9 @@ function buildHead() {
     const th = el('th', 'col-' + col.key, 'head' in col ? col.head : col.label);
     if (PRIVATE_KEYS.includes(col.key)) th.classList.add('privatecol');
     th.title = col.label;
-    th.style.width = col.width + 'px';
-    th.style.minWidth = col.width + 'px';
+    setColumnWidth(th, col.width);
     th.scope = 'col';
+    th.appendChild(spaltenGriff(col));
     tr.appendChild(th);
   }
   const note = el('th', 'col-notizen printcol', 'Notizen');
@@ -118,10 +118,131 @@ function widestText(texts, font) {
   return texts.reduce((max, text) => Math.max(max, measureCanvas.measureText(text).width), 0);
 }
 
+/* ------------------------------------------------------------------ *
+ * Spaltenbreiten von Hand
+ *
+ * Die Tafel bemisst ihre Spalten selbst – die ersten beiden nach ihren
+ * Werten, die Freitextspalten nach ihren Einträgen, der Rest nach der in
+ * `COLUMNS` hinterlegten Breite. Das trifft nicht jeden Arbeitsplatz: Auf
+ * einem breiten Monitor bleibt rechts Platz, den die Spalte „Sonstiges“
+ * gebrauchen könnte, und wo die Isolation nie mehr als einen Keim trägt,
+ * steht sie unnötig breit.
+ *
+ * Wer eine Spalte anders haben will, hält deshalb Strg gedrückt und zieht
+ * ihren rechten Rand im Tabellenkopf. Erst die gedrückte Taste macht die
+ * Ränder greifbar; ohne sie bleibt der Kopf, was er war, und ein Fehlgriff
+ * beim Klicken verstellt nichts. Ein Doppelklick auf denselben Rand gibt die
+ * Spalte wieder an die automatische Breite zurück.
+ *
+ * Gezogene Breiten stehen als `settings.breiten` bei den übrigen
+ * Einstellungen und überstimmen von da an jede eigene Rechnung der Tafel –
+ * deshalb steht die Abfrage in `setColumnWidth`, durch die alle Wege laufen.
+ * ------------------------------------------------------------------ */
+
+/* Spaltenschlüssel aus der Klasse „col-…“ des Kopffeldes */
+function spaltenSchluessel(th) {
+  const treffer = [...th.classList].find(cls => cls.startsWith('col-'));
+  return treffer ? treffer.slice(4) : '';
+}
+
+const eigeneBreiten = () => (settings.breiten = settings.breiten || {});
+
+function eigeneBreite(key) {
+  const breite = eigeneBreiten()[key];
+  return Number.isFinite(breite) ? breite : null;
+}
+
+/* Breite einer Spalte setzen. Eine von Hand gezogene Breite gewinnt gegen den
+   errechneten Wert – sonst würde die nächste Eingabe sie überschreiben. */
 function setColumnWidth(th, width) {
   if (!th) return;
-  th.style.width = width + 'px';
-  th.style.minWidth = width + 'px';
+  const eigen = eigeneBreite(spaltenSchluessel(th));
+  const breite = eigen === null ? width : eigen;
+  th.style.width = breite + 'px';
+  th.style.minWidth = breite + 'px';
+}
+
+/* Griff am rechten Rand eines Kopffeldes. Er liegt immer im Kopf, ist aber
+   nur bei gedrückter Strg-Taste sichtbar und anfassbar (siehe styles.css). */
+function spaltenGriff(col) {
+  const griff = el('span', 'spaltengriff');
+  griff.setAttribute('aria-hidden', 'true');
+  griff.title = col.label + ': Breite ziehen; Doppelklick setzt zurück';
+  griff.addEventListener('mousedown', event => griffZiehen(event, col.key));
+  griff.addEventListener('dblclick', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    breiteZuruecksetzen(col.key);
+  });
+  return griff;
+}
+
+function breiteZuruecksetzen(key) {
+  if (eigeneBreite(key) === null) return;
+  delete eigeneBreiten()[key];
+  setSaveState('Breite der Spalte ' + COL_BY_KEY[key].label + ' zurückgesetzt');
+  saveSettings();
+  /* Ohne den Wert gilt wieder die eingebaute Breite; die selbst gemessenen
+     Spalten holen sich ihr Maß gleich danach zurück. */
+  const th = document.querySelector('#thead th.col-' + key);
+  setColumnWidth(th, COL_BY_KEY[key].width);
+  autoSizeColumns();
+  measureSticky();
+}
+
+/* Ziehen am Spaltenrand. Gemessen wird auf dem Schirm, gesetzt wird im
+   eigenen Maßstab der Tabelle – deshalb die Umrechnung über den Zoom. */
+function griffZiehen(event, key) {
+  if (event.button !== 0 || !(event.ctrlKey || event.metaKey)) return;
+  event.preventDefault();
+  event.stopPropagation();
+
+  const th = event.target.closest('th');
+  const start = event.clientX;
+  /* offsetWidth statt getBoundingClientRect: der Wert bleibt vom Zoom
+     unberührt und passt damit zu den gesetzten Pixelwerten. */
+  const breite = th.offsetWidth;
+  document.body.classList.add('spaltenzug');
+
+  const ziehen = ev => {
+    eigeneBreiten()[key] = clampBreite(breite + (ev.clientX - start) / zoomFactor);
+    setColumnWidth(th, breite);
+    measureSticky();
+  };
+  const loslassen = () => {
+    document.removeEventListener('mousemove', ziehen);
+    document.removeEventListener('mouseup', loslassen);
+    document.body.classList.remove('spaltenzug');
+    setSaveState('Spalte ' + COL_BY_KEY[key].label + ': ' + eigeneBreiten()[key] + ' px');
+    saveSettings();
+  };
+  document.addEventListener('mousemove', ziehen);
+  document.addEventListener('mouseup', loslassen);
+}
+
+/* Die Griffe erscheinen nur, solange Strg (auf dem Mac auch die Befehlstaste)
+   gedrückt ist. Verlässt das Fenster den Fokus, während die Taste liegt,
+   käme kein keyup mehr an – deshalb setzt auch blur den Zustand zurück. */
+function spaltenModus(an) {
+  document.body.classList.toggle('spaltenbreite', Boolean(an));
+}
+
+function initSpaltenbreite() {
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Control' || event.key === 'Meta') spaltenModus(true);
+  });
+  document.addEventListener('keyup', event => {
+    if (event.key === 'Control' || event.key === 'Meta') spaltenModus(false);
+  });
+  /* Die Maus führt den Zustand nach: Wurde die Taste außerhalb des Fensters
+     gedrückt oder losgelassen, stimmt er sonst nicht mehr. Während eines
+     Zuges bleibt er, wie er ist – sonst verschwände der Griff unter der
+     Hand, wenn die Taste beim Ziehen losgelassen wird. */
+  document.addEventListener('mousemove', event => {
+    if (document.body.classList.contains('spaltenzug')) return;
+    spaltenModus(event.ctrlKey || event.metaKey);
+  });
+  window.addEventListener('blur', () => spaltenModus(false));
 }
 
 function autoSizeColumns() {

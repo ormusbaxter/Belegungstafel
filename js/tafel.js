@@ -510,6 +510,7 @@ function init() {
   initDragDrop();
   initKeyboardNav();
   initAutoSize();
+  initSpaltenbreite();
   visiteEinpassen();
   initPrivacy();
   initSaver();

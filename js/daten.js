@@ -22,6 +22,9 @@ function grundEinstellungen() {
     namen: { ...DEFAULT_NAMEN },
     beds: copy(DEFAULT_BEDS),
     headers: {},
+    /* Von Hand gezogene Spaltenbreiten in Pixeln, je Spaltenschlüssel.
+       Was hier nicht steht, bemisst die Tafel selbst. */
+    breiten: {},
     options: copy(DEFAULT_OPTIONS),
     /* Ein Stil je Spalte, nicht je Eintrag */
     styles: Object.fromEntries(OPTION_CATEGORIES.filter(hatStil).map(c => [c.key, {}])),
@@ -143,6 +146,12 @@ function mergeSettings(target, source) {
     for (const col of COLUMNS) {
       const text = source.headers[col.key];
       if (typeof text === 'string') target.headers[col.key] = text;
+    }
+  }
+  if (source.breiten && typeof source.breiten === 'object') {
+    for (const col of COLUMNS) {
+      const breite = parseInt(source.breiten[col.key], 10);
+      if (Number.isFinite(breite)) target.breiten[col.key] = clampBreite(breite);
     }
   }
   if (source.privacy && typeof source.privacy === 'object') {
