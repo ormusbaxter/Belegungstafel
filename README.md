@@ -199,6 +199,9 @@ Spalte der Tafel zugeordnet.
   an erster Stelle und meint die *kommende* Schicht: Die Felder beginnen bei jedem Aufruf leer,
   gelten nur für diesen Zettel und ändern die gleichnamigen Angaben unter der Tafel nicht. Sie
   werden nicht gespeichert und sind kein Pflichtfeld.
+  Die **Kopfzeile des Blattes** nennt Datum, Uhrzeit und die Belegung – gemessen an derselben
+  Bezugsgröße wie der Kopf der Tafel: der maximalen Bettenzahl zuzüglich Notbett
+  (`bettenGesamt()`), ersatzweise den eingerichteten Bettplätzen.
   Gedruckt wird ein eigenes Blatt (A4 quer) mit **allen Bettplätzen**, auch den freien, in
   zwölf Spalten: Bettplatz, Patient, **Diagnosen**, dann **Beatmung, Kreislauf, Nierenersatz,
   Isolation, Therapielimitierung** aus der Tafel, dazu Neurologie, Katecholamine und rechts

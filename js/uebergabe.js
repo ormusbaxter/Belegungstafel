@@ -231,9 +231,13 @@ function uebergabeBlattAufbauen() {
 
   const kopf = el('div', 'sheethead');
   kopf.appendChild(el('span', 'sheettitle', 'Übergabe'));
+  /* Gemessen wird an derselben Bezugsgröße wie im Kopf der Tafel: den
+     betreibbaren Plätzen zuzüglich Notbett, ersatzweise den eingerichteten
+     Bettplätzen. Zwei verschiedene Nenner auf einem Blatt wären eine
+     Fehlerquelle in der Übergabe. */
   kopf.appendChild(el('span', 'sheetmeta',
     fullDate(isoToday()) + ' · ' + timeStr(new Date()) + ' Uhr · ' +
-    belegte + ' von ' + BEDS.length + ' Bettplätzen belegt'));
+    belegte + ' von ' + bettenGesamt() + ' Betten belegt'));
   blatt.appendChild(kopf);
 
   const spalten = blattSpalten();

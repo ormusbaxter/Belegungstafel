@@ -271,8 +271,20 @@ gleich('alle Symbole haben eine Glyphe', fehlend.join(', '), '');
 gleich('eine Zeile je Bettplatz', await page.$$eval('.handoversheet tbody tr', rs => rs.length), 13);
 gleich('freie Plätze sind gekennzeichnet',
   await page.$$eval('.handoversheet tbody tr.frei', rs => rs.length), 10);
+/* Nenner ist die maximale Bettenzahl zuzüglich Notbett – dieselbe
+   Bezugsgröße wie im Kopf der Tafel (hier 12 + 1). */
 enthaelt('Kopfzeile nennt die Belegung', await page.textContent('.handoversheet .sheetmeta'),
-  '3 von 13 Bettplätzen belegt');
+  '3 von 13 Betten belegt');
+await page.evaluate(() => { state.station.maxBetten = '6'; uebergabeBlattAufbauen(); });
+await page.waitForTimeout(150);
+enthaelt('Kopfzeile folgt der Bettenzahl', await page.textContent('.handoversheet .sheetmeta'),
+  '3 von 7 Betten belegt');
+await page.evaluate(() => { state.station.maxBetten = ''; uebergabeBlattAufbauen(); });
+await page.waitForTimeout(150);
+enthaelt('ohne Angabe die eingerichteten Bettplätze',
+  await page.textContent('.handoversheet .sheetmeta'), '3 von 13 Betten belegt');
+await page.evaluate(() => { state.station.maxBetten = '12'; uebergabeBlattAufbauen(); });
+await page.waitForTimeout(150);
 enthaelt('Diagnose steht auf dem Blatt', await page.textContent('.handoversheet'), 'Sepsis bei Pneumonie');
 
 /* Angaben aus der Tafel werden übernommen */

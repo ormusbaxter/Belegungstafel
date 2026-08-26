@@ -17,7 +17,12 @@ spürbar geänderte Bedienung. Dritte: Korrekturen und kleine Anpassungen.
   Bettplätze. Ein Bruch mit unsinnigem oder fehlendem Nenner erscheint nicht
 - der Zeiger auf der Kachel nennt die Herkunft des Nenners („… von 9 betreibbaren Plätzen
   belegt – 8 zuzüglich Notbett“ bzw. „… Bettplätzen der Tafel“)
-- `tests/23-kopfbereich.mjs` prüft die neue Bezugsgröße mit (25 statt 17 Prüfungen)
+- **auch der Übergabezettel misst daran**: Seine Kopfzeile nennt jetzt „x von 9 Betten
+  belegt“ statt „x von 13 Bettplätzen belegt“. Zwei verschiedene Nenner auf einem Blatt wären
+  eine Fehlerquelle in der Übergabe; die Zeilen des Blattes bleiben davon unberührt – es
+  führt weiterhin jeden eingerichteten Bettplatz auf
+- `tests/23-kopfbereich.mjs` prüft die neue Bezugsgröße mit (25 statt 17 Prüfungen),
+  `tests/16-uebergabe-norton.mjs` die Kopfzeile des Übergabezettels (83 Prüfungen)
 
 ## 2.32.0
 
